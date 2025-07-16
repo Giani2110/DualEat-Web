@@ -2,9 +2,9 @@ import React from 'react';
 import { Play } from 'lucide-react';
 import Logo from '../assets/images/Logo_DualEat.png'; // Asegúrate de que la ruta sea correcta
 
-const DownloadSection: React.FC = () => {
+const DownloadSectionBG: React.FC = () => {
   return (
-    <section className="bg-gradient-to-br from-red-600 via-red-500 to-red-400 py-16 md:py-24 overflow-hidden relative">
+    <section className="bg-gradient-to-br from-red-600 rounded-3xl via-red-500 to-red-400 py-16 md:py-24 overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
           {/* Contenido Izquierdo */}
           <div className="md:w-1/2 text-center md:text-left mb-12 md:mb-0 z-10">
@@ -110,4 +110,4 @@ const DownloadSection: React.FC = () => {
   );
 };
 
-export default DownloadSection;
+export default DownloadSectionBG;
