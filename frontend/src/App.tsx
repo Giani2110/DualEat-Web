@@ -3,7 +3,8 @@ import './App.css'
 // import Register from './pages/auth/Register'
 // import Login from './pages/auth/Login'
 // import AboutUs from './pages/landing/AboutUs'
-import TermsConditions from './pages/legal/TermsConditions'
+// import TermsConditions from './pages/legal/TermsConditions'
+import ChangeLog from './pages/legal/ChangeLog'
 
 function App() {
   return (
@@ -11,7 +12,8 @@ function App() {
     // <Login />
     // <LandingBusiness />
     // <AboutUs />
-    <TermsConditions />
+    // <TermsConditions />
+    <ChangeLog />
   )
 }
 
