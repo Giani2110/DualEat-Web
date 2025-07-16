@@ -1,0 +1,406 @@
+import { useState } from 'react';
+import { Mail, MessageCircle, Play, Instagram, Twitter } from 'lucide-react';
+import Logo from '../../assets/images/Logo_DualEat.png';
+
+const LandingBusiness = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    businessName: '',
+    businessLocation: '',
+    visitTime: '',
+    message: '',
+    newsletter: false
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 font-sans">
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center group">
+              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                <span className="text-white font-bold text-sm"><img className="w-4 h-4" src={Logo} alt="Logo" /></span>
+              </div>
+              <span className="ml-2 text-xl font-semibold text-gray-900">DualEat</span>
+            </div>
+            <nav className="hidden md:flex space-x-8">
+              <a href="#" className="text-gray-700 hover:text-red-500 transition-colors duration-200">Sobre nosotros</a>
+              <a href="#" className="text-gray-700 hover:text-red-500 transition-colors duration-200">Funcionalidades</a>
+              <a href="#" className="text-gray-700 hover:text-red-500 transition-colors duration-200">Para negocios</a>
+            </nav>
+            <div className="flex items-center space-x-4">
+              <button className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 hidden md:block">
+                Iniciar sesión
+              </button>
+              <button className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                Registrarse
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content - Business Form */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <div className="grid lg:grid-cols-2 gap-12">
+          {/* Left Column - Form Info */}
+          <div className="space-y-8">
+            <div className="transform hover:scale-105 transition-transform duration-300 origin-left">
+              <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
+                Sumá tu negocio<br />
+                a <span className="text-red-500">DualEat</span>
+              </h1>
+              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                Si buscás potenciar tu negocio, llegar a nuevos clientes y aumentar tus ventas, sumate a DualEat.
+                Nuestra app te permite digitalizar tu menú, recibir valoraciones reales, promocionar tus platos y formar parte de una comunidad gastronómica activa.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200">
+                  <Mail className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Por mail</p>
+                  <p className="text-sm text-gray-600">contacto@dualeat.com</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200">
+                  <MessageCircle className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Chatea con nosotros</p>
+                  <p className="text-sm text-gray-600">Lun a Viernes</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Form */}
+          <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    placeholder="Nombre completo"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    Mail
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    placeholder="tu@mail.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Nombre del Local
+                </label>
+                <input
+                  type="text"
+                  id="businessName"
+                  name="businessName"
+                  value={formData.businessName}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  placeholder="Nombre del negocio"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="businessLocation" className="block text-sm font-medium text-gray-700 mb-2">
+                    Lugar del local
+                  </label>
+                  <input
+                    type="text"
+                    id="businessLocation"
+                    name="businessLocation"
+                    value={formData.businessLocation}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    placeholder="Ubicación del negocio"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    placeholder="Teléfono de contacto"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                  Mensaje
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none transition-all duration-200 hover:border-gray-400"
+                  placeholder="Contanos sobre tu negocio..."
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="newsletter"
+                  name="newsletter"
+                  checked={formData.newsletter}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-red-500 border-gray-300 rounded focus:ring-red-500 transition-all duration-200"
+                />
+                <label
+                  htmlFor="newsletter"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Deseo recibir información de DualEat
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-red-500 text-white py-3 px-4 rounded-md font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+              >
+                Enviar
+              </button>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      {/* Sección Inferior */}
+      <section className="bg-gradient-to-br from-red-50 to-white py-16 md:py-24 overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
+
+          {/* Contenido Izquierdo */}
+          <div className="md:w-1/2 text-center md:text-left mb-12 md:mb-0 z-10">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6 animate-fade-in-down">
+              Descargá DualEat y descubrí un mundo lleno de sabores
+            </h1>
+            <p className="text-lg text-gray-700 mb-10 max-w-xl mx-auto md:mx-0 animate-fade-in-up">
+              Descubrí restaurantes, bares y cafeterías que se adaptan a tus gustos. Con
+              DualEat, encontrás espacios únicos y comunidades gastronómicas que
+              reflejan tu estilo y paladar. Explorá, valorá y viví nuevas experiencias en
+              cada salida.
+            </p>
+            <div className="flex justify-center md:justify-start animate-fade-in-up delay-200">
+              <button className="bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center space-x-2">
+                <Play className="w-5 h-5" />
+                <span>Google Play</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Contenido Derecho - Mockup del Móvil */}
+          <div className="md:w-1/2 flex justify-center md:justify-end z-10">
+            <div className="relative w-72 h-[500px] bg-gray-800 rounded-3xl shadow-2xl flex items-center justify-center p-2 transform rotate-3 scale-105 transition-all duration-500 ease-out hover:rotate-0 hover:scale-110">
+
+              {/* Pantalla del teléfono */}
+              <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
+
+                {/* Barra de estado simulada */}
+                <div className="absolute top-0 left-0 right-0 h-10 bg-red-600 flex items-center justify-between px-4 text-white text-xs font-semibold rounded-t-2xl">
+                  <span>9:41</span>
+                  <div className="flex items-center space-x-1">
+                    <div className="flex space-x-1">
+                      <div className="w-1 h-1 bg-white rounded-full"></div>
+                      <div className="w-1 h-1 bg-white rounded-full"></div>
+                      <div className="w-1 h-1 bg-white rounded-full"></div>
+                      <div className="w-1 h-1 bg-white rounded-full"></div>
+                    </div>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Contenido de la App Simulada */}
+                <div className="pt-10 h-full flex flex-col">
+                  {/* Red top section */}
+                  <div className="h-32 bg-gradient-to-b from-red-600 via-red-500 to-red-400 flex-none relative"> 
+                    {/* Watermark Logo */}
+                    <div className="absolute inset-0 flex items-center justify-center z-0">
+                      <img className="object-contain w-24 h-24 opacity-30" src={Logo} alt="DualEat Logo Watermark" /> 
+                    </div>
+                  </div>
+
+                  {/* White section */}
+                  <div className="bg-white px-6 py-10 flex-1 rounded-t-3xl relative -mt-8">
+                    {/* Logo */}
+                    <div className="absolute top-12 left-1/2 -translate-x-1/2 w-36 h-12 sm:w-40 sm:h-12 bg-[#B53325] border-2 border-gray-200 flex items-center justify-center shadow-lg rounded-full"
+                    >
+                      <img className="w-6 h-6" src={Logo} alt="Logo" />
+                    </div>
+
+                    {/* Content below logo */}
+                    <div className="text-center pt-24">
+                      <h2 className="text-gray-800 font-bold text-lg mb-2">Inicia sesión en DualEat</h2>
+                      <p className="text-gray-500 text-sm mb-8 italic">
+                        "Conectate con tu comida, como nunca antes"
+                      </p>
+
+                      {/* Social buttons */}
+                      <div className="flex justify-center space-x-6">
+                        {/* Google */}
+                        <button className="flex items-center justify-center w-12 h-12 border-2 border-gray-200 rounded-full hover:bg-gray-50 transition-colors">
+                          <svg className="w-6 h-6" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                          </svg>
+                        </button>
+
+                        {/* Apple */}
+                        <button className="flex items-center justify-center w-12 h-12 border-2 border-gray-200 rounded-full hover:bg-gray-50 transition-colors">
+                          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Altavoz y cámara */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-2 bg-gray-700 rounded-full"></div>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 mt-3 w-3 h-3 bg-gray-600 rounded-full"></div>
+
+              {/* Botones laterales */}
+              <div className="absolute left-0 top-1/4 w-1 h-10 bg-gray-700 rounded-l-sm"></div>
+              <div className="absolute right-0 top-1/3 w-1 h-14 bg-gray-700 rounded-r-sm"></div>
+              <div className="absolute right-0 top-1/2 w-1 h-14 bg-gray-700 rounded-r-sm"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-black text-white py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Logo and Description */}
+            <div className="md:col-span-1">
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm"><img src={Logo} alt="Logo" /></span>
+                </div>
+                <span className="ml-2 text-xl font-semibold">DualEat</span>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Una nueva forma de descubrir cocinar y compartir
+                experiencias gastronómicas.
+              </p>
+              <div className="mt-6 flex flex-col space-y-3">
+                <a href="#" className="bg-white rounded-lg px-4 py-2 inline-flex items-center space-x-2 hover:bg-gray-100 transition-colors cursor-pointer self-start">
+                  <Play className="w-4 h-4 text-black" />
+                  <span className="text-black text-sm font-medium">Google Play</span>
+                </a>
+              </div>
+              <p className="text-gray-500 text-xs mt-4">
+                © 2025 DualEat LLC. Todos los derechos reservados.
+              </p>
+            </div>
+
+            {/* Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Links</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Inicio</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Login</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Registrarse</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Para negocios</a></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Recursos</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Documentos de ayuda</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Guía de inicio rápido</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Changelog</a></li>
+              </ul>
+            </div>
+
+            {/* Company and Socials */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Compañía</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Sobre nosotros</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Términos y condiciones</a></li>
+              </ul>
+              <div className="flex items-center space-x-3 mt-4">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Twitter className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default LandingBusiness;

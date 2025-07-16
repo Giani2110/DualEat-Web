@@ -1,10 +1,13 @@
 import './App.css'
-import Register from './pages/auth/Register'
-import Login from './pages/auth/Login'
+import LandingBusiness from './pages/landing/LandingBusiness'
+// import Register from './pages/auth/Register'
+// import Login from './pages/auth/Login'
 
 function App() {
   return (
-    <Register />
+    // <Register />
+    // <Login />
+    <LandingBusiness />
   )
 }
 
