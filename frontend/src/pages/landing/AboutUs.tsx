@@ -6,7 +6,7 @@ import DownloadSectionBG from '../../components/DownloadSectionBG';
 const AboutUs: React.FC = () => {
     return (
         <div className="min-h-screen bg-white font-sans">
-            {/* Hero Section - Full Width Red Background */}
+            {/* Hero Section */}
             <div className="rounded-b-3xl bg-gradient-to-br from-red-600 via-red-500 to-red-400 text-white pt-20 pb-20 px-4 relative">
                 <div className="fixed top-0 left-0 w-full z-50">
                     <div className="max-w-screen-2xl mx-auto mt-6 rounded-lg overflow-hidden shadow-lg">
