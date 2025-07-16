@@ -4,7 +4,8 @@ import './App.css'
 // import Login from './pages/auth/Login'
 // import AboutUs from './pages/landing/AboutUs'
 // import TermsConditions from './pages/legal/TermsConditions'
-import ChangeLog from './pages/legal/ChangeLog'
+// import ChangeLog from './pages/legal/ChangeLog'
+import LandingHome from './pages/landing/LandingHome'
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
     // <LandingBusiness />
     // <AboutUs />
     // <TermsConditions />
-    <ChangeLog />
+    // <ChangeLog />
+    <LandingHome />
   )
 }
 
