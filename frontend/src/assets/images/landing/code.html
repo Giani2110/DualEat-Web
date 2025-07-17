@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard DualEat</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f4f5f7;
+            color: #172b4d;
+        }
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 80px;
+            background-color: #ffffff;
+            border-right: 1px solid #dfe1e6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+        .sidebar .icon {
+            margin-bottom: 25px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .sidebar .icon.active {
+            background-color: #e9eaed;
+        }
+        .sidebar .icon img {
+            width: 24px;
+            height: 24px;
+        }
+        .sidebar .bottom-icon {
+            margin-top: auto;
+            margin-bottom: 20px;
+        }
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            height: 70px;
+            background-color: #c83737;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+        }
+        .header .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .header .logo {
+            font-weight: bold;
+            font-size: 24px;
+            margin-right: 20px;
+        }
+        .header .menu-icon {
+            cursor: pointer;
+        }
+        .header .search-bar {
+            flex-grow: 1;
+            margin: 0 150px;
+            position: relative;
+        }
+        .header .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: white;
+        }
+        .header .search-bar .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b778c;
+        }
+        .header .user-actions {
+            display: flex;
+            align-items: center;
+        }
+        .header .user-actions .action-icon {
+            margin-left: 20px;
+            cursor: pointer;
+            position: relative;
+        }
+        .header .user-actions .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #de350b;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header .user-actions .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 20px;
+        }
+        .dashboard-content {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            gap: 30px;
+        }
+        .main-column {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .right-column {
+            width: 300px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .welcome-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .welcome-header p {
+            margin: 5px 0 0;
+            color: #6b778c;
+        }
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stat-card-value {
+            font-size: 32px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        .stat-card-title {
+            color: #6b778c;
+            font-size: 14px;
+        }
+        .stat-card-chart {
+            height: 40px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        .stat-card-chart .bar {
+            background-color: #42526e;
+            width: 5px;
+            border-radius: 2px;
+        }
+        .stat-card-chart .bar.red { background-color: #de350b; }
+        .stat-card-footer { display: flex; align-items: center; font-size: 12px; color: #6b778c; }
+        .stat-card .trend {
+            display: flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .trend.down { background-color: #ffeded; color: #de350b; }
+        .trend.up { background-color: #e3fcef; color: #00875a; }
+        .trend .arrow { margin-right: 4px; }
+        .stat-card .icon-bg { background-color: #e9eaed; padding: 10px; border-radius: 50%; }
+        .graph-card {
+            background-color: #253858;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .graph-header h3 { margin: 0; font-size: 14px; font-weight: normal; color: #b3bac5;}
+        .graph-header .total-value { font-size: 36px; font-weight: 600; margin: 5px 0 10px; }
+        .graph-header .trend-info { display: flex; align-items: center; font-size: 12px; }
+        .graph-header .trend-info .chip { background-color: rgba(0, 135, 90, 0.5); padding: 3px 8px; border-radius: 10px; margin-right: 10px; }
+        .graph-placeholder { flex-grow: 1; position: relative; }
+        .graph-image { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; margin-top: 20px;}
+        .table-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .table-header h2 { margin: 0; font-size: 18px; font-weight: 600; }
+        .table-header .arrows { cursor: pointer; }
+        .dishes-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dishes-table th, .dishes-table td {
+            text-align: left;
+            padding: 15px 10px;
+            border-bottom: 1px solid #dfe1e6;
+            font-size: 14px;
+        }
+        .dishes-table th { color: #6b778c; font-weight: normal; }
+        .dishes-table td { color: #172b4d; }
+        .dish-item { display: flex; align-items: center; }
+        .dish-item img { width: 32px; height: 32px; border-radius: 4px; margin-right: 10px; }
+        .list-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .list-header h2 { margin: 0; font-size: 16px; font-weight: 600; }
+        .list-header a { font-size: 14px; color: #0052cc; text-decoration: none; }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .list-item:last-child { margin-bottom: 0; }
+        .item-details { display: flex; align-items: center; }
+        .item-image { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+        .item-info p { margin: 0; font-size: 14px; }
+        .item-info .item-title { font-weight: 500; }
+        .item-info .item-subtitle { color: #6b778c; font-size: 12px; }
+        .item-right .item-price, .item-right .item-time, .item-right .item-role {
+            font-size: 14px;
+            text-align: right;
+        }
+        .item-right .item-time, .item-right .item-role { color: #6b778c; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="icon active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zM13 4v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"/></svg>
+            </div>
+            <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div>
+            <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
+            <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg></div>
+            <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div>
+            <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+            <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+            <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+            <div class="icon bottom-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
+        </div>
+        <div class="content">
+            <div class="header">
+                <div class="logo-container">
+                    <span class="logo">D DualEat</span>
+                    <div class="menu-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </div>
+                </div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Explorar...">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <div class="action-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </div>
+                    <div class="action-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <div class="notification-badge">1</div>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" alt="Profile Picture" class="profile-pic">
+                </div>
+            </div>
+            <div class="dashboard-content">
+                <div class="main-column">
+                    <div class="welcome-header">
+                        <h1>Dashboard</h1>
+                        <p>Hola Juan, ¡bienvenido de vuelta!</p>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <p class="stat-card-title">Pagos diarios</p>
+                            <p class="stat-card-value">254</p>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <div class="stat-card-chart">
+                                    <div class="bar" style="height: 60%;"></div>
+                                    <div class="bar" style="height: 80%;"></div>
+                                    <div class="bar" style="height: 70%;"></div>
+                                    <div class="bar" style="height: 90%;"></div>
+                                    <div class="bar" style="height: 50%;"></div>
+                                    <div class="bar" style="height: 75%;"></div>
+                                    <div class="bar red" style="height: 40%;"></div>
+                                </div>
+                                <div class="trend down">
+                                    <span class="arrow">▼</span> 0.7
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-card-title">Pagos totales</p>
+                            <p class="stat-card-value">2 mill</p>
+                             <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <div class="stat-card-chart">
+                                    <div class="bar" style="height: 40%;"></div>
+                                    <div class="bar" style="height: 60%;"></div>
+                                    <div class="bar" style="height: 50%;"></div>
+                                </div>
+                                <div class="trend up">
+                                    <span class="arrow">▲</span> 3.7
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                             <div class="stat-card-header">
+                                <p class="stat-card-title">Total recaudado</p>
+                                <div class="icon-bg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c83737" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div>
+                            </div>
+                            <p class="stat-card-value">$439 mill</p>
+                        </div>
+                         <div class="stat-card">
+                             <div class="stat-card-header">
+                                <p class="stat-card-title">Total recaudado de hoy</p>
+                                <div class="icon-bg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c83737" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div>
+                            </div>
+                            <p class="stat-card-value">$400.324</p>
+                        </div>
+                    </div>
+                    <div class="graph-card">
+                        <div class="graph-header">
+                            <h3>Promedio de ventas totales</h3>
+                            <div class="total-value">$20.204.450</div>
+                            <div class="trend-info">
+                                <div class="chip">▲ 20.53</div>
+                                <span>vs el mes anterior</span>
+                            </div>
+                        </div>
+                        <div class="graph-placeholder">
+                           <img src="https://i.imgur.com/8ED1d9j.png" alt="Sales graph" class="graph-image"/>
+                        </div>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-header">
+                            <h2>Platos más llamativos</h2>
+                            <div class="arrows">← →</div>
+                        </div>
+                        <table class="dishes-table">
+                            <thead>
+                                <tr>
+                                    <th>Plato</th>
+                                    <th>Precio</th>
+                                    <th>Tot. vendido</th>
+                                    <th>Listos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="dish-item">
+                                            <img src="https://i.imgur.com/mJ22H4z.png" alt="Hamburguesa">
+                                            <span>Hamburguesa Americana</span>
+                                        </div>
+                                    </td>
+                                    <td>$14.650</td>
+                                    <td>3235</td>
+                                    <td>340</td>
+                                </tr>
+                                 <tr>
+                                    <td>
+                                        <div class="dish-item">
+                                            <img src="https://i.imgur.com/mJ22H4z.png" alt="Hamburguesa">
+                                            <span>Hamburguesa Americana</span>
+                                        </div>
+                                    </td>
+                                    <td>$14.650</td>
+                                    <td>3235</td>
+                                    <td>340</td>
+                                </tr>
+                                 <tr>
+                                    <td>
+                                        <div class="dish-item">
+                                            <img src="https://i.imgur.com/mJ22H4z.png" alt="Hamburguesa">
+                                            <span>Hamburguesa Americana</span>
+                                        </div>
+                                    </td>
+                                    <td>$14.650</td>
+                                    <td>3235</td>
+                                    <td>340</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="list-card">
+                        <div class="list-header">
+                            <h2>Historial de compras</h2>
+                            <a href="#">Ver menú</a>
+                        </div>
+                        <div class="list-item">
+                            <div class="item-details">
+                                <div class="item-info">
+                                    <p class="item-title">Hamburguesa Amer...</p>
+                                    <p class="item-subtitle">SushiBar</p>
+                                </div>
+                            </div>
+                            <div class="item-right">
+                                <p class="item-price">$30.245</p>
+                                <p class="item-time">Hace 4 min</p>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div class="item-details">
+                               <div class="item-info">
+                                    <p class="item-title">Hamburguesa Amer...</p>
+                                    <p class="item-subtitle">SushiBar</p>
+                                </div>
+                            </div>
+                            <div class="item-right">
+                                <p class="item-price">$30.245</p>
+                                <p class="item-time">Hace 4 min</p>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                           <div class="item-details">
+                               <div class="item-info">
+                                    <p class="item-title">Hamburguesa Amer...</p>
+                                    <p class="item-subtitle">SushiBar</p>
+                                </div>
+                            </div>
+                            <div class="item-right">
+                                <p class="item-price">$30.245</p>
+                                <p class="item-time">Hace 4 min</p>
+                            </div>
+                        </div>
+                         <div class="list-item">
+                           <div class="item-details">
+                               <div class="item-info">
+                                    <p class="item-title">Hamburguesa Amer...</p>
+                                    <p class="item-subtitle">SushiBar</p>
+                                </div>
+                            </div>
+                            <div class="item-right">
+                                <p class="item-price">$30.245</p>
+                                <p class="item-time">Hace 4 min</p>
+                            </div>
+                        </div>
+                         <div class="list-item">
+                           <div class="item-details">
+                               <div class="item-info">
+                                    <p class="item-title">Hamburguesa Amer...</p>
+                                    <p class="item-subtitle">SushiBar</p>
+                                </div>
+                            </div>
+                            <div class="item-right">
+                                <p class="item-price">$30.245</p>
+                                <p class="item-time">Hace 4 min</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-card">
+                        <div class="list-header">
+                            <h2>Empleados</h2>
+                            <a href="#">Ver empleados</a>
+                        </div>
+                        <div class="list-item">
+                            <div class="item-details">
+                                <img src="https://i.imgur.com/sVxiGjN.png" alt="Wade Warren" class="item-image">
+                                <div class="item-info">
+                                    <p class="item-title">Wade Warren</p>
+                                    <p class="item-subtitle">Chef</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div class="item-details">
+                                <img src="https://i.imgur.com/sVxiGjN.png" alt="Wade Warren" class="item-image">
+                                <div class="item-info">
+                                    <p class="item-title">Wade Warren</p>
+                                    <p class="item-subtitle">Bartender</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="list-item">
+                            <div class="item-details">
+                                <img src="https://i.imgur.com/sVxiGjN.png" alt="Wade Warren" class="item-image">
+                                <div class="item-info">
+                                    <p class="item-title">Wade Warren</p>
+                                    <p class="item-subtitle">Mesero/a</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="list-item">
+                            <div class="item-details">
+                                <img src="https://i.imgur.com/sVxiGjN.png" alt="Wade Warren" class="item-image">
+                                <div class="item-info">
+                                    <p class="item-title">Wade Warren</p>
+                                    <p class="item-subtitle">Chef ejecutivo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
