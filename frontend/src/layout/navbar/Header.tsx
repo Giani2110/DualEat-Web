@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Logo from "../assets/images/Logo_DualEat.png"; // Ajusta la ruta si es necesario
+import Logo from "../../assets/images/Logo_DualEat.png"; // Ajusta la ruta si es necesario
 import { Link, useLocation } from "react-router-dom";
 
 const Header: React.FC = () => {
@@ -12,23 +12,30 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  if (location.pathname === "/register" || location.pathname === "/login") {
+    return null;
+  }
+
   return (
     <div
-      className={` ${
-        location.pathname === "/sobre-nosotros"
-          ? "bg-white max-w-[70%] py-[15px] rounded-[15px]"
+      className={`fixed top-0 w-full z-50 ${
+        location.pathname === "/sobre-nosotros" ||
+        location.pathname === "/changelog" ||
+        location.pathname === "/terminos-y-condiciones"
+          ? "w-full"
           : scrolled
           ? "bg-white pt-[40px] pb-[25px] border-b border-gray-200"
           : "bg-transparent pt-[40px] pb-[25px]"
-      }  fixed w-full px-4 sm:px-6 lg:px-8 z-50 `}
+      }`}
     >
       <header
-        className={`
-          ${location.pathname === "/sobre-nosotros"
-            ? "max-w-[95%]"
-            : "max-w-[85%]"
-          }  
-           mx-auto w-full flex justify-between items-center'`}
+        className={`flex justify-between items-center px-4 sm:px-6 lg:px-8 ${
+          location.pathname === "/sobre-nosotros" ||
+          location.pathname === "/changelog" ||
+          location.pathname === "/terminos-y-condiciones"
+            ? "bg-white rounded-[15px] py-[11px] max-w-[65%] mx-auto mt-12"
+            : "max-w-[75%] mx-auto"
+        }`}
       >
         {/* Logo and Navigation */}
         <div className="flex items-center cursor-pointer">
