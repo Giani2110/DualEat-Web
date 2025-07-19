@@ -9,7 +9,7 @@ interface Props {
 
 const DownloadSectionBG: React.FC<Props> = ({ background, background2 }) => {
   return (
-    <section className={`${background} h-[400px] overflow-hidden relative`}>
+    <section className={`${background} rounded-3xl h-[400px] overflow-hidden relative`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
         {/* Contenido Izquierdo */}
         <div className="md:w-[60%] text-center md:text-left mb-12 md:mb-0 z-10">
