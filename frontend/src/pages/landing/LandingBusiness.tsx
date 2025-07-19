@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { Mail, MessageCircle } from 'lucide-react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import DownloadSection from '../../components/DownloadSection';
-
+import { useState } from "react";
+import { Mail, MessageCircle } from "lucide-react";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import DownloadSectionBG from "../../components/DownloadSectionBG";
 
 // Define la interfaz para el estado del formulario para un tipado estricto
 interface FormData {
@@ -19,36 +18,38 @@ interface FormData {
 
 const LandingBusiness: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    phone: '',
-    businessName: '',
-    businessLocation: '',
-    visitTime: '',
-    message: '',
-    newsletter: false
+    name: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    businessLocation: "",
+    visitTime: "",
+    message: "",
+    newsletter: false,
   });
 
   // Tipado para el evento de cambio de input
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   // Tipado para el evento de envío del formulario
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    console.log("Form submitted:", formData);
     // Aquí es donde normalmente enviarías formData a una API
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       <Header /> {/* Usa el componente Header */}
-
       {/* Main Content - Business Form */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         <div className="grid lg:grid-cols-2 gap-12">
@@ -56,12 +57,14 @@ const LandingBusiness: React.FC = () => {
           <div className="space-y-8">
             <div className="transform hover:scale-105 transition-transform duration-300 origin-left">
               <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
-                Sumá tu negocio<br />
-                a <span className="text-red-500">DualEat</span>
+                Sumá tu negocio
+                <br />a <span className="text-red-500">DualEat</span>
               </h1>
               <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-                Si buscás potenciar tu negocio, llegar a nuevos clientes y aumentar tus ventas, sumate a DualEat.
-                Nuestra app te permite digitalizar tu menú, recibir valoraciones reales, promocionar tus platos y formar parte de una comunidad gastronómica activa.
+                Si buscás potenciar tu negocio, llegar a nuevos clientes y
+                aumentar tus ventas, sumate a DualEat. Nuestra app te permite
+                digitalizar tu menú, recibir valoraciones reales, promocionar
+                tus platos y formar parte de una comunidad gastronómica activa.
               </p>
             </div>
 
@@ -83,7 +86,9 @@ const LandingBusiness: React.FC = () => {
                   <MessageCircle className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">Chatea con nosotros</p>
+                  <p className="font-semibold text-gray-900">
+                    Chatea con nosotros
+                  </p>
                   <p className="text-sm text-gray-600">Lun a Viernes</p>
                 </div>
               </div>
@@ -95,7 +100,10 @@ const LandingBusiness: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Nombre
                   </label>
                   <input
@@ -110,7 +118,10 @@ const LandingBusiness: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Mail
                   </label>
                   <input
@@ -127,7 +138,10 @@ const LandingBusiness: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="businessName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Nombre del Local
                 </label>
                 <input
@@ -144,7 +158,10 @@ const LandingBusiness: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="businessLocation" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="businessLocation"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Lugar del local
                   </label>
                   <input
@@ -159,7 +176,10 @@ const LandingBusiness: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Teléfono
                   </label>
                   <input
@@ -175,7 +195,10 @@ const LandingBusiness: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="message"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Mensaje
                 </label>
                 <textarea
@@ -216,10 +239,8 @@ const LandingBusiness: React.FC = () => {
           </div>
         </div>
       </main>
-
       {/* Sección Inferior - Parte específica de LandingBusiness */}
-      <DownloadSection />
-
+      <DownloadSectionBG background="bg-white" background2="bg-semi-black"/>
       <Footer /> {/* Usa el componente Footer */}
     </div>
   );
