@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           {/* Logo y descripción */}
           <div className="md:col-span-1">
             <div className="flex items-center mb-4">
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">
                   <img src={Logo} alt="Logo" />
                 </span>
