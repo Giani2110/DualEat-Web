@@ -1,35 +1,47 @@
 .text1 {
-    color: var(--text-1);
+  color: var(--text-1);
 }
 
 .text2 {
-    color: var(--text-2);
+  color: var(--text-2);
 }
 
 .text3 {
-    color: var(--text-3);
+  color: var(--text-3);
 }
 
 .text4 {
-    color: var(--text-4);
+  color: var(--text-4);
 }
 
 .text5 {
-    color: var(--text-5);
+  color: var(--text-5);
 }
 
 .text6 {
-    color: var(--text-6);
+  color: var(--text-6);
+}
+
+.text-hover {
+  color: var(--hover-text);
+}
+
+.bgsemi-black {
+  background-color: var(--bg-semi-black);
+}
+
+.bgsemi-white {
+  background-color: var(--bg-semi-white);
 }
 
 .bg-red {
-    background-color: var(--bg-red);
+  background-color: var(--bg-red);
 }
 
 .bg-yellow {
-    background-color: var(--bg-yellow);
+  background-color: var(--bg-yellow);
 }
 
 .bg-gray {
-    background-color: var(--bg-gray);
+  background-color: var(--bg-gray);
 }
