@@ -1,20 +1,14 @@
 import React from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+
 import DownloadSectionBG from "../../components/DownloadSectionBG";
 
 const AboutUs: React.FC = () => {
   return (
     <div className="min-h-screen bgsemi-white pt-[15px]">
-      {/* Hero Section */}
-      <div className="rounded-[20px] mx-4 bg-gradient-to-r from-[#ED213A]  to-[#93291E] text-white h-[430px] relative">
-        <div className="justify-center flex w-full z-50 mx-auto pt-[35px]">
-          <Header />
-        </div>
-
+      <div className="rounded-[20px] mx-4 bg-gradient-to-r from-[#ED213A] to-[#93291E] text-white h-[400px] relative">
         <div className="max-w-screen-2xl mx-auto text-center pt-[160px]">
           <h1 className="text-[48px] font-extrabold mb-4">Sobre nosotros</h1>
-          <p className="text-[18px] opacity-90 leading-relaxed max-w-3xl mx-auto">
+          <p className="text-[18px] max-w-3xl mx-auto">
             Apasionados por la comida, la tecnología y las experiencias simples
             pero memorables.
           </p>
@@ -22,7 +16,6 @@ const AboutUs: React.FC = () => {
       </div>
 
       {/* Main Content */}
-
       <main className="mx-4 mt-4">
         {/* Principles Section */}
         <div className="bg-gray py-[100px] px-8 rounded-[20px]">
@@ -33,7 +26,7 @@ const AboutUs: React.FC = () => {
               </h2>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-x-20 ">
+            <div className="grid lg:grid-cols-2 gap-x-20">
               <div>
                 <h3 className="text5 font-bold tracking-tight text-[18px] mt-[32px] mb-[12px]">
                   Diseñar con foco en las personas, negocios, foodies y
@@ -108,12 +101,12 @@ const AboutUs: React.FC = () => {
       {/* Download Section */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden mt-10 mb-10">
         <DownloadSectionBG
-          background="bg-gradient-to-b from-[#ED213A] to-[#93291E] rounded-3xl"
+          background="bg-gradient-to-b from-[#ED213A] to-[#93291E]"
           background2="bg-red"
         />
       </div>
 
-      <Footer />
+      
     </div>
   );
 };

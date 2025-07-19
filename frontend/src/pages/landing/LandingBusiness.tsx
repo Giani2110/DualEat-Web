@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail, MessageCircle } from "lucide-react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Header from "../../layout/navbar/Header";
+import Footer from "../../layout/footer/Footer";
 import DownloadSectionBG from "../../components/DownloadSectionBG";
 
 // Define la interfaz para el estado del formulario para un tipado estricto
@@ -240,7 +240,7 @@ const LandingBusiness: React.FC = () => {
         </div>
       </main>
       {/* Sección Inferior - Parte específica de LandingBusiness */}
-      <DownloadSectionBG background="bg-white" background2="bg-semi-black"/>
+      <DownloadSectionBG background="bg-white" background2="bg-semi-black" />
       <Footer /> {/* Usa el componente Footer */}
     </div>
   );

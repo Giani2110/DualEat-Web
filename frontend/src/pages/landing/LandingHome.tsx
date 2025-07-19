@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 import DownloadSectionBG from "../../components/DownloadSectionBG";
 import Restaurante1 from "../../assets/images/login/Restaurante2.avif";
 import Restaurante2 from "../../assets/images/login/Restaurante.avif";
@@ -203,9 +201,6 @@ const LandingHome: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <Header />
-
       <section className="bgLanding pt-[200px] pb-20 px-4">
         {/* Hero Section */}
         <div className="pb-20 px-4 relative max-w-[1500px] mx-auto z-10">
@@ -534,12 +529,10 @@ const LandingHome: React.FC = () => {
       {/* Download Section */}
       <section className="mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden mt-10 mb-10">
         <DownloadSectionBG
-          background="bg-gradient-to-b from-[#232526] rounded-3xl to-[#414345]"
+          background="bg-gradient-to-b from-[#232526] to-[#414345]"
           background2="bg-yellow"
         />
       </section>
-
-      <Footer />
     </div>
   );
 };
