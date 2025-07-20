@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Mail, MessageCircle } from "lucide-react";
-import Header from "../../layout/navbar/Header";
-import Footer from "../../layout/footer/Footer";
+
 import DownloadSectionBG from "../../components/DownloadSectionBG";
 
 // Define la interfaz para el estado del formulario para un tipado estricto
@@ -48,19 +47,16 @@ const LandingBusiness: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      <Header /> {/* Usa el componente Header */}
+    <div className="min-h-screen">
       {/* Main Content - Business Form */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-        <div className="grid lg:grid-cols-2 gap-12">
+      <main className="max-w-[70%] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:pt-[180px] md:pb-[130px] bgLanding grid lg:grid-cols-2 gap-12">
           {/* Left Column - Form Info */}
-          <div className="space-y-8">
-            <div className="transform hover:scale-105 transition-transform duration-300 origin-left">
-              <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
-                Sumá tu negocio
-                <br />a <span className="text-red-500">DualEat</span>
+          <div className="space-y-8 max-w-[90%]">
+            <div className="transform hover:scale-101 transition-transform duration-300 flex flex-col space-y-5">
+              <h1 className="text-[45px] font-bold leading-tight">
+                Sumá tu negocio a <span className="text-[#b53325]">DualEat</span>
               </h1>
-              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+              <p className="text4 text-[15px] leading-loose">
                 Si buscás potenciar tu negocio, llegar a nuevos clientes y
                 aumentar tus ventas, sumate a DualEat. Nuestra app te permite
                 digitalizar tu menú, recibir valoraciones reales, promocionar
@@ -68,41 +64,41 @@ const LandingBusiness: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-white h-[100px] cursor-pointer p-6 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[-2px]">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200">
+                <div className="w-10 h-10 bg-red rounded flex items-center justify-center hover:bg-red-600 transition-colors duration-200">
                   <Mail className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">Por mail</p>
-                  <p className="text-sm text-gray-600">contacto@dualeat.com</p>
+                  <p className="font-semibold text5">Por mail</p>
+                  <p className="text-sm text4">contacto@dualeat.com</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+            <div className="bg-white h-[100px] cursor-pointer p-6 rounded-lg shadow-sm  hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[-2px]">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200">
-                  <MessageCircle className="w-5 h-5 text-gray-600" />
+                <div className="w-10 h-10 bg-yellow rounded flex items-center justify-center hover:bg-gray-200 transition-colors duration-200">
+                  <MessageCircle className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text5">
                     Chatea con nosotros
                   </p>
-                  <p className="text-sm text-gray-600">Lun a Viernes</p>
+                  <p className="text-sm text4">Lun a Viernes</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Column - Form */}
-          <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-white p-8 rounded-lg min-h-[800px] w-full shadow-sm hover:shadow-xl transition-all duration-300">
+            <form onSubmit={handleSubmit} className="space-y-6 h-full flex flex-col justify-evenly">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="name"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-medium mb-2"
                   >
                     Nombre
                   </label>
@@ -112,7 +108,7 @@ const LandingBusiness: React.FC = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     placeholder="Nombre completo"
                     required
                   />
@@ -120,7 +116,7 @@ const LandingBusiness: React.FC = () => {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-medium mb-2"
                   >
                     Mail
                   </label>
@@ -130,7 +126,7 @@ const LandingBusiness: React.FC = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     placeholder="tu@mail.com"
                     required
                   />
@@ -150,7 +146,7 @@ const LandingBusiness: React.FC = () => {
                   name="businessName"
                   value={formData.businessName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Nombre del negocio"
                   required
                 />
@@ -170,7 +166,7 @@ const LandingBusiness: React.FC = () => {
                     name="businessLocation"
                     value={formData.businessLocation}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     placeholder="Ubicación del negocio"
                     required
                   />
@@ -188,7 +184,7 @@ const LandingBusiness: React.FC = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                    className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                     placeholder="Teléfono de contacto"
                   />
                 </div>
@@ -207,7 +203,7 @@ const LandingBusiness: React.FC = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none transition-all duration-200 hover:border-gray-400"
+                  className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
                   placeholder="Contanos sobre tu negocio..."
                 />
               </div>
@@ -231,17 +227,21 @@ const LandingBusiness: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full bg-red-500 text-white py-3 px-4 rounded-md font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+                className="w-full bg-red text-white py-2 cursor-pointer px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-102 hover:shadow-lg"
               >
                 Enviar
               </button>
             </form>
           </div>
-        </div>
       </main>
       {/* Sección Inferior - Parte específica de LandingBusiness */}
-      <DownloadSectionBG background="bg-white" background2="bg-semi-black" />
-      <Footer /> {/* Usa el componente Footer */}
+      <section className="mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden mb-10">
+        <DownloadSectionBG
+          background="bg-gradient-to-b from-[#232526] to-[#414345]"
+          background2="bg-yellow"
+        />
+      </section>
+     
     </div>
   );
 };
