@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:    
+      - POSTGRES_DB=DualEat
+      - POSTGRES_USER=DualEat
+      - POSTGRES_PASSWORD=DualEat21102504
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest 
+    environment:     
+      - PGADMIN_DEFAULT_EMAIL=dualeat@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=1234
+    ports:
+      - 5050:80
+    volumes:
+      - ./pgadmin_data:/var/lib/pgadmin
+
+  backend:
+    build:
+      context: ./backend       
+      dockerfile: Dockerfile   
+    container_name: dualeat_backend
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://DualEat:DualEat21101504@postgres:5432/DualEat?schema=public"
+      PORT: 3000
+    volumes:
+      - ./backend:/app
+    command: npm run dev
