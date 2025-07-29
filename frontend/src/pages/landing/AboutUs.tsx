@@ -21,45 +21,45 @@ const AboutUs: React.FC = () => {
         <div className="bg-gray py-[100px] px-8 rounded-[20px]">
           <div className="max-w-[70%] mx-auto">
             <div className="grid grid-cols-2 justify-center">
-              <h2 className="text-[32px] font-extrabold">
+              <h2 className="text-[29px] font-extrabold">
                 Nuestros principios
               </h2>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-x-20">
               <div>
-                <h3 className="text5 font-bold tracking-tight text-[18px] mt-[32px] mb-[12px]">
+                <h3 className="text5 font-bold tracking-tight text-[17px] mt-[32px] mb-[12px]">
                   Diseñar con foco en las personas, negocios, foodies y
                   cocineros caseros
                 </h3>
-                <p className="text4 tracking-tight text-[18px]">
+                <p className="text4 tracking-tight text-[17px]">
                   Pensamos en cada tipo de usuario: foodies, clientes y
                   cocineros caseros. Cada función está hecha para resolver
                   necesidades reales y mejorar la experiencia.
                 </p>
 
-                <h3 className="text5 font-bold tracking-tight text-[18px] mt-[32px] mb-[12px]">
+                <h3 className="text5 font-bold tracking-tight text-[17px] mt-[32px] mb-[12px]">
                   Ser inclusivos y accesibles
                 </h3>
-                <p className="text4 tracking-tight text-[18px]">
+                <p className="text4 tracking-tight text-[17px]">
                   Diseñamos una plataforma pensada para todos, fácil de usar,
                   adaptable a distintos perfiles, dietas, edades y necesidades.
                 </p>
               </div>
 
               <div>
-                <h3 className="text5 font-bold tracking-tight text-[18px] mt-[32px] mb-[12px]">
+                <h3 className="text5 font-bold tracking-tight text-[17px] mt-[32px] mb-[12px]">
                   Priorizar lo que aporta valor
                 </h3>
-                <p className="text4 tracking-tight text-[18px]">
+                <p className="text4 tracking-tight text-[17px]">
                   Evitamos saturar con funciones innecesarias. Solo
                   implementamos herramientas útiles, simples y relevantes para
                   el día a día.
                 </p>
-                <h3 className="text5 font-bold tracking-tight text-[18px] mt-[32px] mb-[12px]">
+                <h3 className="text5 font-bold tracking-tight text-[17px] mt-[32px] mb-[12px]">
                   Impulsar a los negocios gastronómicos
                 </h3>
-                <p className="text4 tracking-tight text-[18px]">
+                <p className="text4 tracking-tight text-[17px]">
                   Buscamos que los locales crezcan de forma sostenible,
                   brindándoles visibilidad, estadísticas y herramientas simples
                   para fidelizar clientes.
@@ -74,8 +74,8 @@ const AboutUs: React.FC = () => {
           <div className="grid lg:grid-cols-2 gap-10 max-w-[70%] mx-auto">
             {/* Vision */}
             <div>
-              <h2 className="text-[32px] font-extrabold mb-3">Visión</h2>
-              <p className="text4 leading-[28px] text-[18px]">
+              <h2 className="text-[29px] font-extrabold mb-3">Visión</h2>
+              <p className="text4 leading-[28px] tracking-tight text-[17px]">
                 Ser la aplicación gastronómica líder en conectar experiencias
                 culinarias tanto en locales como en el hogar, transformando la
                 forma en que las personas descubren, ordenan y comparten comida
@@ -85,8 +85,8 @@ const AboutUs: React.FC = () => {
 
             {/* Mission */}
             <div className="lg:text-right">
-              <h2 className="text-[32px] font-extrabold  mb-3 ">Misión</h2>
-              <p className="text4 leading-[28px] text-[18px]">
+              <h2 className="text-[29px] font-extrabold  mb-3 ">Misión</h2>
+              <p className="text4 leading-[28px] tracking-tight text-[17px]">
                 Brindar una plataforma integral que permita a los negocios
                 gastronómicos y cocineros a los amantes de la cocina,
                 facilitando la tecnología, comunidad y gamificación para hacer

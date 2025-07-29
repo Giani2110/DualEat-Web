@@ -84,16 +84,20 @@ const AuthSection: React.FC<Props> = ({
     setCurrentImageIndex(index);
   };
 
+  const handleGoogleLogin = () => {
+    window.open('http://localhost:3000/auth/google', '_blank'); 
+};
+
   return (
     <div className={`min-h-screen ${flex} flex bg-gray`}>
-      <div className="lg:w-1/2 flex flex-col justify-center p-8 max-w-[620px] mx-auto w-full">
+      <div className="lg:w-1/2 flex flex-col justify-center px-8 max-w-[620px] mx-auto w-full">
         <Link to={"/"}>
           <div className="ps-5 flex items-center gap-1 text-gray-500 hover:text-black transition cursor-pointer py-2">
             <X className="w-6 h-6" />
             <span className=" text-[14px]">Salir</span>
           </div>
         </Link>
-        <div className="mb-[60px]">
+        <div className="mb-[45px]">
           <div className="flex justify-center mb-6">
             <div
               className={`w-[60px] h-[60px] ${color} rounded-lg flex items-center justify-center`}
@@ -115,7 +119,7 @@ const AuthSection: React.FC<Props> = ({
           <div className="flex w-full items-center justify-around my-6">
             <div className="w-[35%] border-t border-gray-300"></div>
 
-            <span className="px-2 text6">O continúa con</span>
+            <span className="px-2 text-[15px] text6">O continúa con</span>
 
             <div className="w-[35%] border-t border-gray-300"></div>
           </div>
@@ -124,8 +128,8 @@ const AuthSection: React.FC<Props> = ({
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => console.log("Google login")}
-              className="flex text-[15px] items-center cursor-pointer justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              onClick={() => handleGoogleLogin()}
+              className="flex text-[14px] items-center cursor-pointer justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -150,7 +154,7 @@ const AuthSection: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => console.log("iOS login")}
-              className="flex text-[15px] items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              className="flex text-[14px] items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path

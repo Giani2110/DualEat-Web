@@ -29,9 +29,8 @@ services:
       - 3000:3000
     depends_on:
       - postgres
-    environment:
-      DATABASE_URL: "postgresql://DualEat:DualEat21101504@postgres:5432/DualEat?schema=public"
-      PORT: 3000
+    env_file:
+      - ./backend/.env
     volumes:
       - ./backend:/app
     command: npm run dev

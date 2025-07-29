@@ -5,7 +5,8 @@ import AuthSection from "../../components/auth/AuthSection";
 
 import "../../assets/scss/auth/auth.scss";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useRegister } from "../../context/RegisterContext";
 
 const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -15,12 +16,30 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
 
+  const { updateData } = useRegister();
+
+  const navigate = useNavigate();
+
+  const handleNext = () => {
+    if (!email || !password || !confirmPassword) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert("Las contraseñas no coinciden.");
+      return;
+    }
+
+    updateData({ email, password });
+    navigate("/onboarding");
+  };
+
   return (
     <AuthSection
       flex="flex"
       color="bg-yellow"
       title="Crear cuenta"
-      subtitle="Completa tus datos para comenzar tus aventuras culinarias"
+      subtitle="Completa tus datos para comenzar tus artes culinarias"
       children2={
         <div className="text-center text-[15px] flex items-center justify-center mt-6 gap-3">
           <span className="text4">¿Ya tienes cuenta?</span>
@@ -47,7 +66,7 @@ const Register: React.FC = () => {
               setEmail(e.target.value)
             }
             placeholder="tu@email.com"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
           />
         </div>
       </div>
@@ -62,7 +81,7 @@ const Register: React.FC = () => {
               setPassword(e.target.value)
             }
             placeholder="••••••••"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none pr-12"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none pr-12"
           />
           <button
             type="button"
@@ -86,7 +105,7 @@ const Register: React.FC = () => {
               setConfirmPassword(e.target.value)
             }
             placeholder="Repite tu contraseña"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] text-[15px] focus:border-transparent outline-none pr-12"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] text-[15px] focus:border-transparent outline-none pr-12"
           />
           <button
             type="button"
@@ -100,8 +119,8 @@ const Register: React.FC = () => {
       {/* Botón de registro */}
       <button
         type="button"
-        onClick={() => console.log("Register clicked")}
-        className="w-full cursor-pointer bg-yellow text-white py-3 px-4 rounded-lg hover:bg-gray-900 transition-colors text-[16px] font-medium"
+        onClick={handleNext}
+        className="w-full cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors text-[16px] font-medium"
       >
         Registrarse →
       </button>

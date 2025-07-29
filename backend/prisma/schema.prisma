@@ -4,12 +4,461 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum definitions
+enum Role {
+  user
+  admin
+}
+
+enum SubscriptionStatus {
+  inactive
+  trial
+  active
+  cancelled
+}
+
+enum ContentType {
+  food
+  post
+  comment
+}
+
+enum VoteType {
+  up
+  down
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  preparing
+  ready
+  delivered
+  cancelled
+}
+
+enum SubscriptionPlan {
+  user_premium
+  business
+}
+
+enum SubscriptionStateMP {
+  authorized
+  paused
+  cancelled
+  finished
+}
+
+enum Visibility {
+  public
+  restricted
+  private
+}
+
+enum Providers {
+  local
+  google
+  twitter
+}
+
+enum LocalUserRole {
+  admin
+  staff
+}
+
+model User {
+  id                  Int                @id @default(autoincrement())
+  name                String
+  email               String             @unique
+  password_hash       String
+  avatar_url          String?
+  role                Role               @default(user)
+  is_business         Boolean            @default(false)
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+  active              Boolean            @default(true)
+  trial_ends_at       DateTime?
+  subscription_status SubscriptionStatus @default(inactive)
+  provider            Providers          @default(local)
+
+  // Relaciones
+  owned_businesses    Business[]        @relation("BusinessOwner")
+  local_users         LocalUser[]
+  local_reviews       LocalReview[]
+  votes               Vote[]            @relation("UserVotes")
+  created_communities Community[]       @relation("Creator")
+  community_members   CommunityMember[]
+  posts               Post[]
+  comments            PostComment[]
+  orders              Order[]
+  subscriptions       Subscription[]
+  preferences         UserPreference[]
+  userAchievement     UserAchievement[]
+
+  @@index([email])
+}
+
+model UserPreference {
+  id      Int  @id @default(autoincrement())
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int
+
+  // Polimorfismo manual: o apunta a food_category_id o a community_tag_id
+  food_category_id Int?
+  community_tag_id Int?
+
+  foodCategory FoodCategory? @relation(fields: [food_category_id], references: [id])
+  communityTag CommunityTag? @relation(fields: [community_tag_id], references: [id])
+
+  @@unique([user_id, food_category_id])
+  @@unique([user_id, community_tag_id])
+}
+
+model Business {
+  id         Int      @id @default(autoincrement())
+  name       String?
+  owner_id   Int
+  owner      User     @relation("BusinessOwner", fields: [owner_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  active     Boolean  @default(true)
+
+  branches Local[]
+}
+
+model Local {
+  id             Int       @id @default(autoincrement())
+  name           String
+  description    String?
+  address        String?
+  phone          String?
+  email          String?
+  image_url      String
+  opening_time   DateTime?
+  closing_time   DateTime?
+  average_rating Float     @default(0)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  // Relaciones
+  business_id Int
+  business    Business      @relation(fields: [business_id], references: [id])
+  local_users LocalUser[]
+  foods       Food[]
+  orders      Order[]
+  reviews     LocalReview[]
+
+  @@index([business_id])
+}
+
+model LocalUser {
+  id         Int           @id @default(autoincrement())
+  user       User          @relation(fields: [user_id], references: [id])
+  user_id    Int
+  local      Local         @relation(fields: [local_id], references: [id])
+  local_id   Int
+  role       LocalUserRole @default(staff)
+  joined_at  DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+
+  @@unique([user_id, local_id])
+  @@index([local_id])
+}
+
+model FoodCategory {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  icon_url    String?
+
+  // Relations
+  foods            Food[]
+  user_preferences UserPreference[]
+
+  @@index([name])
+}
+
+model Food {
+  id          Int           @id @default(autoincrement())
+  local       Local         @relation(fields: [local_id], references: [id])
+  local_id    Int
+  category    FoodCategory? @relation(fields: [category_id], references: [id])
+  category_id Int?
+  name        String
+  description String?
+  price       Float
+  image_url   String?
+  available   Boolean       @default(true)
+  votes_up    Int           @default(0)
+  votes_down  Int           @default(0)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+
+  // Relations
+  votes       Vote[]      @relation("FoodVotes")
+  order_items OrderItem[]
+
+  @@index([local_id])
+  @@index([name])
+  @@index([price])
+}
+
+model Vote {
+  id           Int         @id @default(autoincrement())
+  user         User        @relation("UserVotes", fields: [user_id], references: [id])
+  user_id      Int
+  content_type ContentType
+  content_id   Int
+  vote_type    VoteType
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+
+  // Optional relation with foods when content_type = "food"
+  food Food? @relation("FoodVotes", fields: [content_id], references: [id])
+
+  @@unique([user_id, content_type, content_id])
+}
+
+model LocalReview {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  local      Local    @relation(fields: [local_id], references: [id])
+  local_id   Int
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, local_id])
+}
+
+model TagCategory {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  icon_url    String?
+
+  // Relations
+  communityTags CommunityTag[]
+}
+
+model CommunityTag {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  category    TagCategory? @relation(fields: [category_id], references: [id])
+  category_id Int?
+
+  active Boolean @default(true)
+
+  // Relations
+  communities      Community[]
+  user_preferences UserPreference[]
+}
+
+model Community {
+  id            Int          @id @default(autoincrement())
+  name          String
+  description   String?
+  tag           CommunityTag @relation(fields: [tag_id], references: [id])
+  tag_id        Int
+  //image_url     String?
+  theme_color   String?
+  visibility    Visibility   @default(public)
+  total_members Int          @default(0)
+  creator       User         @relation("Creator", fields: [creator_id], references: [id])
+  creator_id    Int
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  active        Boolean      @default(true)
+
+  // Relations
+  members CommunityMember[]
+  posts   Post[]
+
+  @@index([name])
+}
+
+model CommunityMember {
+  id           Int       @id @default(autoincrement())
+  user         User      @relation(fields: [user_id], references: [id])
+  user_id      Int
+  community    Community @relation(fields: [community_id], references: [id])
+  community_id Int
+  joined_at    DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  is_moderator Boolean   @default(false)
+
+  @@unique([user_id, community_id])
+  @@index([community_id])
+}
+
+model Post {
+  id             Int       @id @default(autoincrement())
+  user           User      @relation(fields: [user_id], references: [id])
+  user_id        Int
+  community      Community @relation(fields: [community_id], references: [id])
+  community_id   Int
+  title          String
+  content        String
+  image_urls     String[]
+  type           String
+  votes_up       Int       @default(0)
+  votes_down     Int       @default(0)
+  total_comments Int       @default(0)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  edited         Boolean   @default(false)
+  active         Boolean   @default(true)
+
+  // Relations
+  comments           PostComment[]
+  recipe_ingredients RecipeIngredient[]
+  recipe_steps       RecipeStep[]
+}
+
+model PostComment {
+  id                Int          @id @default(autoincrement())
+  user              User         @relation(fields: [user_id], references: [id])
+  user_id           Int
+  post              Post         @relation(fields: [post_id], references: [id])
+  post_id           Int
+  parent_comment    PostComment? @relation("CommentReplies", fields: [parent_comment_id], references: [id])
+  parent_comment_id Int?
+  content           String
+  votes_up          Int          @default(0)
+  votes_down        Int          @default(0)
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  edited            Boolean      @default(false)
+  active            Boolean      @default(true)
+
+  // Relations
+  replies PostComment[] @relation("CommentReplies")
+
+  @@index([post_id])
+  @@index([user_id])
+  @@index([parent_comment_id])
+}
+
+model Ingredient {
+  id              Int     @id @default(autoincrement())
+  name            String  @unique
+  unit_of_measure String?
+
+  // Relations
+  recipe_ingredients RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id            Int        @id @default(autoincrement())
+  post          Post       @relation(fields: [post_id], references: [id])
+  post_id       Int
+  ingredient    Ingredient @relation(fields: [ingredient_id], references: [id])
+  ingredient_id Int
+  quantity      Float
+  notes         String?
+}
+
+model RecipeStep {
+  id             Int     @id @default(autoincrement())
+  post           Post    @relation(fields: [post_id], references: [id])
+  post_id        Int
+  step_number    Int
+  description    String
+  image_url      String?
+  estimated_time Int?
+
+  @@unique([post_id, step_number])
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  user           User        @relation(fields: [user_id], references: [id])
+  user_id        Int
+  local          Local       @relation(fields: [local_id], references: [id])
+  local_id       Int
+  total          Float
+  status         OrderStatus @default(pending)
+  payment_method String?
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  delivery_date  DateTime?
+  notes          String?
+
+  // Relations
+  order_items OrderItem[]
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  order      Order   @relation(fields: [order_id], references: [id])
+  order_id   Int
+  food       Food    @relation(fields: [food_id], references: [id])
+  food_id    Int
+  quantity   Int     @default(1)
+  unit_price Float
+  subtotal   Float
+  notes      String?
+}
+
+model Subscription {
+  id                Int                 @id @default(autoincrement())
+  user              User                @relation(fields: [user_id], references: [id])
+  user_id           Int
+  mp_preapproval_id String
+  plan              SubscriptionPlan
+  amount            Float
+  currency_id       String              @default("ARS")
+  status            SubscriptionStateMP @default(authorized)
+  start_date        DateTime
+  next_payment_date DateTime?
+  end_date          DateTime?
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+
+  @@index([mp_preapproval_id])
+}
+
+model Achievement {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  goal        Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relaciones
+  user_progress UserAchievement[]
+}
+
+model UserAchievement {
+  id             Int         @id @default(autoincrement())
+  user           User        @relation(fields: [user_id], references: [id])
+  user_id        Int
+  achievement    Achievement @relation(fields: [achievement_id], references: [id])
+  achievement_id Int
+
+  progress   Int      @default(0)
+  completed  Boolean  @default(false)
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, achievement_id])
+  @@index([completed])
 }

@@ -44,7 +44,7 @@ const Login: React.FC = () => {
               setEmail(e.target.value)
             }
             placeholder="tu@email.com"
-            className="w-full px-4 py-3 border border-gray-300 rounded-[8px] focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-[8px] focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
           />
         </div>
       </div>
@@ -60,7 +60,7 @@ const Login: React.FC = () => {
               setPassword(e.target.value)
             }
             placeholder="••••••••"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none pr-12"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none pr-12"
           />
           <button
             type="button"
@@ -98,7 +98,7 @@ const Login: React.FC = () => {
       <button
         type="submit"
         onClick={() => console.log("Login clicked")}
-        className="w-full bgsemi-black text-white py-3 px-4 rounded-lg transition-all duration-300 cursor-pointer  font-medium"
+        className="w-full bgsemi-black text-white py-[10px] px-4 rounded-lg transition-all duration-300 cursor-pointer  font-medium"
       >
         Iniciar Sesión →
       </button>

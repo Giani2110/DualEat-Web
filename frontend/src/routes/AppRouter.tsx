@@ -3,16 +3,20 @@ import { routes } from "../constants";
 import ScrollToTop from "../components/ScrollToTop";
 import Layout from "../layout/layout";
 
+import { RegisterProvider } from "../context/RegisterContext";
+
 function AppRouter() {
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Layout>
-        <Routes>
-          {routes.map(({ path, element }, index) => (
-            <Route key={index} path={path} element={element} />
-          ))}
-        </Routes>
+        <RegisterProvider>
+          <Routes>
+            {routes.map(({ path, element }, index) => (
+              <Route key={index} path={path} element={element} />
+            ))}
+          </Routes>
+        </RegisterProvider>
       </Layout>
     </BrowserRouter>
   );
