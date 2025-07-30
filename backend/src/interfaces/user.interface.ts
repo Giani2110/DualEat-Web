@@ -1,12 +1,9 @@
-import { Providers } from "@prisma/client";
-
-
 export interface BasicCreateDTO {
   email: string;
   name?: string;
   password_hash?: string;
   avatar_url?: string | null;
-  provider?: Providers;
+  provider?: string;
   foodPreferences?: number[];
   communityPreferences?: number[];
 }

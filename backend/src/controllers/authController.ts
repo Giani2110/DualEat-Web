@@ -17,7 +17,6 @@ import {
   TokenPayload,
 } from "../utils/jwt";
 
-
 export class AuthController {
   constructor(private userService: UserService) {}
 
@@ -28,17 +27,21 @@ export class AuthController {
       const user = await this.userService.getByEmail(email);
 
       if (!user) {
-        return res.status(401).json({ success: false, message: "Credenciales incorrectas" });
+        return res
+          .status(401)
+          .json({ success: false, message: "Credenciales incorrectas" });
       }
 
       const passwordMatch = await comparePassword(password, user.password_hash);
 
       if (!passwordMatch) {
-        return res.status(401).json({success: false, message: "Credenciales incorrectas" });
+        return res
+          .status(401)
+          .json({ success: false, message: "Credenciales incorrectas" });
       }
 
-      const userPayload = { 
-        id: user.id, 
+      const userPayload = {
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -51,15 +54,23 @@ export class AuthController {
 
       const token = createToken(userPayload);
 
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax", // o "strict" si no necesitas compartir entre subdominios
+        maxAge: 60 * 60 * 2000, // 2 horas
+      });
+
       return res.status(200).json({
         success: true,
         message: "Login exitoso",
-        token,
         user: userPayload,
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ success: false, message: "Error interno del servidor" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Error interno del servidor" });
     }
   }
 
@@ -96,44 +107,47 @@ export class AuthController {
   }
 
   async completeProfile(req: Request, res: Response) {
-    // RegisterStepTwoDto now covers `name`, `foodPreferences`, `communityPreferences`
-    const { name, foodPreferences, communityPreferences }: RegisterStepTwoDto = req.body;
+    const { name, foodPreferences, communityPreferences }: RegisterStepTwoDto =
+      req.body;
     const tempToken = req.headers.authorization?.replace("Bearer ", "");
 
     try {
       if (!tempToken) {
-        return res.status(401).json({ message: "Token temporal no proporcionado" });
+        return res
+          .status(401)
+          .json({ message: "Token temporal no proporcionado" });
       }
 
       const tempData = verifyTempToken(tempToken);
 
-      // Validate the 'step' from the temporary token
+      // Validar el paso del token temporal
       if (
         tempData.step !== "incomplete_registration" &&
         tempData.step !== "incomplete_oauth_registration"
       ) {
-        return res.status(401).json({ message: "Token temporal no válido para completar perfil" });
+        return res.status(401).json({ message: "Token temporal no válido" });
       }
 
-      // Construct data for userService.create using BasicCreateDTO
+      // Construir datos para crear el usuario
       const userDataToCreate: BasicCreateDTO = {
         email: tempData.email,
-        name: tempData.name || name, 
-        password_hash: tempData.password_hash || "", 
-        avatar_url: tempData.avatar_url, // For OAuth users
-        provider: 'local', // Use provider from temp data, default to 'local'
+        name: tempData.name || name,
+        password_hash: tempData.password_hash || "", // Vacío para Google
+        avatar_url: tempData.avatar_url,
+        provider: tempData.provider || "local",
         foodPreferences,
         communityPreferences,
       };
 
+      // Crear usuario
       const user = await this.userService.create(userDataToCreate);
 
       const userPayload = {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role || 'user',
-        provider: user.provider || 'local',
+        role: user.role || "user",
+        provider: user.provider,
         isBusiness: user.is_business || false,
         active: user.active,
         subscription_status: user.subscription_status,
@@ -142,9 +156,16 @@ export class AuthController {
 
       const token = createToken(userPayload);
 
-      return res.status(201).json({ // Use 201 Created for a new resource
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax", // o "strict" si no necesitas compartir entre subdominios
+        maxAge: 60 * 60 * 2000, // 2 horas
+      });
+
+      return res.status(201).json({
+        success: true,
         message: "Perfil completado exitosamente",
-        token,
         user: userPayload,
       });
     } catch (error) {
@@ -154,56 +175,64 @@ export class AuthController {
   }
 
   async googleAuth(req: Request, res: Response) {
-  try {
-    const userData = req.user as any;
-    
-    if (!userData) {
+    try {
+      const userData = req.user as any;
+
+      if (!userData) {
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/login?error=auth_failed`
+        );
+      }
+
+      // Usuario existente
+      if (userData.isExisting) {
+        const userPayload = {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          role: userData.role || "user",
+          provider: userData.provider || "google",
+          isBusiness: userData.is_business || false,
+          active: userData.active,
+          subscription_status: userData.subscription_status,
+          avatar_url: userData.avatar_url,
+        };
+
+        const token = createToken(userPayload);
+
+        res.cookie("accessToken", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax", // o "strict" si no necesitas compartir entre subdominios
+          maxAge: 60 * 60 * 2000, // 2 horas
+        });
+
+        // VER QUE ONDA
+
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/auth/success?token=${token}`
+        );
+      }
+      // Usuario nuevo que requiere completar perfil
+      else {
+        const tempToken = createTempToken({
+          email: userData.email,
+          name: userData.name,
+          avatar_url: userData.avatar_url,
+          provider: "google",
+          step: "incomplete_oauth_registration",
+        });
+
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/complete-profile?temp_token=${tempToken}&provider=google`
+        );
+      }
+      
+    } catch (error) {
+      console.error("Error in googleAuth:", error);
       return res.redirect(
-        `${process.env.FRONTEND_URL || "http://localhost:3000"}/login?error=auth_failed`
+        `${process.env.FRONTEND_URL}/login?error=auth_failed`
       );
     }
-
-    // Verificar si es un usuario existente
-    const isExistingUser = userData.isExisting === true;
-
-    if (isExistingUser) {
-      // Usuario existente en la DB
-      const userPayload = {
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role || "user",
-        provider: userData.provider || "google",
-        isBusiness: userData.is_business || false,
-        active: userData.active,
-        subscription_status: userData.subscription_status,
-        avatar_url: userData.avatar_url,
-      };
-
-      const token = createToken(userPayload);
-
-      return res.redirect(
-        `${process.env.FRONTEND_URL || "http://localhost:3000"}/auth/success?token=${token}&existing=true`
-      );
-    } else {
-      // Usuario nuevo, redirigir para completar perfil
-      const tempToken = createTempToken({
-        email: userData.email,
-        name: userData.name,
-        avatar_url: userData.avatar_url,
-        provider: "google",
-        step: "incomplete_oauth_registration",
-      });
-
-      return res.redirect(
-        `${process.env.FRONTEND_URL || "http://localhost:3000"}/complete-profile?temp_token=${tempToken}&provider=google`
-      );
-    }
-  } catch (error) {
-    console.error("Error in googleAuth:", error);
-    return res.redirect(
-      `${process.env.FRONTEND_URL || "http://localhost:3000"}/login?error=auth_failed`
-    );
   }
-}
 }

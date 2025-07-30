@@ -42,17 +42,17 @@ const LandingHome: React.FC = () => {
         </>
       ),
       description: (
-        <>
-          <p className="text-[15px] text4">
+      
+          <p className="text-[15px] text4 mb-[40px] leading-[30px]">
             DualEat te conecta con{" "}
             <span className="font-bold text5">
               experiencias gastronómicas únicas
             </span>
             , ya sea en tu ciudad o en casa. Comé mejor, cocina distinto,
-            compartí
+            compartí tu pasión.
           </p>
-          tu pasión.
-        </>
+          
+      
       ),
       image: Restaurante1,
       usersText: (
@@ -79,13 +79,11 @@ const LandingHome: React.FC = () => {
         </>
       ),
       description: (
-        <>
           <p className="text-[15px] text4">
             Potencia tu <span className="font-bold text5">restaurante</span> con
             DualEat. Alcanza nuevos clientes, gestiona tu menú y utiliza nuestro
             dashboard para ver todas las estadísticas de tu negocio.
           </p>
-        </>
       ),
       image: Restaurante2,
       usersText: (
@@ -236,9 +234,9 @@ const LandingHome: React.FC = () => {
                 </h1>
 
                 <div className="max-w-lg">
-                  <p className="mb-[40px] leading-[30px]">
+                  
                     {currentSlideContent.description}
-                  </p>
+                  
 
                   {/* User avatars and stars/text */}
                   <div className="flex items-center mb-4">

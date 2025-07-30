@@ -85,7 +85,7 @@ const AuthSection: React.FC<Props> = ({
   };
 
   const handleGoogleLogin = () => {
-    window.open('http://localhost:3000/auth/google', '_blank'); 
+    window.location.href = 'http://localhost:3000/auth/google'; 
 };
 
   return (

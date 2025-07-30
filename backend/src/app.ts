@@ -1,10 +1,13 @@
-// server.ts
 import express from "express";
-import session from "express-session";
+//import session from "express-session";
 import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
+
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+
 import { UserService } from "./services/userService";
 import authRoutes from "./routes/auth.routes";
 
@@ -18,38 +21,44 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// Configuración de CORS más estricta
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
 }));
 
-// Configuración de sesión actualizada
+
+/*
+// Configuración de sesión CORREGIDA
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: false,
+  resave: true, // Cambiado a true para evitar pérdida de sesión
   saveUninitialized: false,
   cookie: {
-    secure: false, // Cambia a true en producción con HTTPS
+    secure: process.env.NODE_ENV === 'production', // true en producción
     httpOnly: true,
-    sameSite: 'none', // Prueba con 'none' si persisten los problemas
-    maxAge: 24 * 60 * 60 * 1000
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Ajuste para dev/prod
+    maxAge: 24 * 60 * 60 * 1000,
+    domain: process.env.NODE_ENV === 'production' ? 'yourdomain.com' : 'localhost'
   }
 }));
+*/
 
 // Inicialización de Passport
 app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.session());
+
+// Middleware de cookies
+app.use(cookieParser());
 
 // Configuración de Google Strategy
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID!,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL!,
+  callbackURL: "http://localhost:3000/auth/google/callback",
   passReqToCallback: true,
-  scope: ['profile', 'email']
+  proxy: true // Necesario si estás detrás de un proxy (como Nginx en producción)
 }, async (req, accessToken, refreshToken, profile, done) => {
   try {
     const userService = new UserService();
@@ -75,25 +84,18 @@ passport.use(new GoogleStrategy({
         await userService.updateAvatar(existingUser.id, googleUser.avatar_url);
       }
       
-      // Marcar como usuario existente
       return done(null, {
-        id: existingUser.id,
-        email: existingUser.email,
-        name: existingUser.name,
-        avatar_url: existingUser.avatar_url,
-        provider: existingUser.provider,
-        role: existingUser.role,
-        is_business: existingUser.is_business,
-        active: existingUser.active,
-        subscription_status: existingUser.subscription_status,
-        isExisting: true
+        ...existingUser,
+        isExisting: true,
       });
     } else {
-      // Usuario nuevo
+      
+      // Usuario nuevo - devolver datos de Google para completar perfil
       return done(null, {
         ...googleUser,
-        isExisting: false
+        isExisting: false,
       });
+     
     }
   } catch (error) {
     console.error('Error in Google Strategy:', error);
@@ -101,8 +103,11 @@ passport.use(new GoogleStrategy({
   }
 }));
 
+/*
 // Serialización y deserialización de usuario
 passport.serializeUser((user: any, done) => {
+  console.log('Serializing user:', user);
+
   if (user.isExisting) {
     done(null, { 
       id: user.id,
@@ -119,10 +124,12 @@ passport.serializeUser((user: any, done) => {
     });
   }
 });
+*/
 
-passport.deserializeUser(async (data: any, done) => {
+/*passport.deserializeUser(async (data: any, done) => {
+  console.log('HOLA MUNNDO', data);
   try {
-    if (data.type === 'local') {
+    if (data.type == 'local') {
       const userService = new UserService();
       const user = await userService.getById(data.id);
       if (!user) {
@@ -132,7 +139,8 @@ passport.deserializeUser(async (data: any, done) => {
         ...user,
         isExisting: true
       });
-    } else if (data.type === 'google') {
+    } else if (data.type == 'google') {
+      console.log('Deserializing Google user:', data);
       done(null, {
         email: data.email,
         name: data.name,
@@ -147,7 +155,7 @@ passport.deserializeUser(async (data: any, done) => {
     done(error, null);
   }
 });
-
+*/
 // Rutas
 app.use('/auth', authRoutes);
 
@@ -161,19 +169,23 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Ruta de prueba
-app.get('/health', (req, res) => {
-  res.json({ 
-    success: true,
-    message: 'API funcionando correctamente',
-    environment: process.env.NODE_ENV || 'development'
-  });
+app.get('/status', (req, res) => {
+  const token = req.cookies?.accessToken;
+
+  if (!token) return res.json({ authenticated: false });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    return res.json({ authenticated: true, user: decoded });
+  } catch (err) {
+    return res.json({ authenticated: false });
+  }
 });
+
 
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`Google Callback URL: ${process.env.GOOGLE_CALLBACK_URL}`);
-  console.log(`Frontend URL: ${process.env.FRONTEND_URL}`);
 });
 
 export default app;
