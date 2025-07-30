@@ -1,5 +1,4 @@
 import express from "express";
-//import session from "express-session";
 import passport from "passport";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
@@ -56,7 +55,7 @@ app.use(cookieParser());
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID!,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  callbackURL: "http://localhost:3000/auth/google/callback",
+  callbackURL: process.env.GOOGLE_CALLBACK_URL!,
   passReqToCallback: true,
   proxy: true // Necesario si estás detrás de un proxy (como Nginx en producción)
 }, async (req, accessToken, refreshToken, profile, done) => {
