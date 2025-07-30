@@ -10,6 +10,8 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import { UserService } from "./services/userService";
 import authRoutes from "./routes/auth.routes";
+import onboardingRoutes from "./routes/onBoarding.routes";
+import foodCategoriesRoutes from "./routes/onBoarding.routes";
 
 dotenv.config();
 
@@ -20,7 +22,6 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
@@ -28,6 +29,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
 }));
 
+app.use('/api/onboarding', onboardingRoutes);
+app.use('/api/food-categories', foodCategoriesRoutes);
 
 /*
 // Configuración de sesión CORREGIDA

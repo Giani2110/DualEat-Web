@@ -6,7 +6,7 @@ import Logo from "../../assets/images/Logo_DualEat.png";
 const Footer: React.FC = () => {
   const location = useLocation();
 
-  if (location.pathname === "/register" || location.pathname === "/login") {
+  if (location.pathname === "/register" || location.pathname === "/login" || location.pathname === "/onboarding") {
     return null;
   }
 

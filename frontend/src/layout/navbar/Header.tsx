@@ -28,7 +28,7 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  if (location.pathname === "/register" || location.pathname === "/login") {
+  if (location.pathname === "/register" || location.pathname === "/login" || location.pathname === "/onboarding") {
     return null;
   }
 
