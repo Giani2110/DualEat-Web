@@ -15,23 +15,51 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null); // Nuevo estado para manejar errores
 
   const { updateData } = useRegister();
 
   const navigate = useNavigate();
 
-  const handleNext = () => {
+  const handleNext = async () => { // Cambiado a async
+    setError(null); // Limpiar errores anteriores
+
     if (!email || !password || !confirmPassword) {
       alert("Por favor, completa todos los campos.");
       return;
     }
     if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden.");
+      alert("Las contraseñas no coinciden.");
       return;
     }
 
-    updateData({ email, password });
-    navigate("/onboarding");
+    try {
+      const response = await fetch("http://localhost:3000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        // Registro exitoso del paso 1
+        // Guardar el email y el temp_token en el contexto
+        updateData({ 
+            email: email, 
+            tempToken: responseData.temp_token // <--- ¡Asegúrate de que esto se esté guardando!
+        }); 
+        navigate(responseData.next_step); // Redirigir a /onboarding (que es lo que devuelve el backend)
+      } else {
+        // Manejar errores del backend (ej. email ya existe - status 409)
+        setError(responseData.message || "Ocurrió un error en el registro.");
+      }
+    } catch (err) {
+      console.error("Error al registrar el paso 1:", err);
+      setError("No se pudo conectar con el servidor. Intenta de nuevo.");
+    }
   };
 
   return (
@@ -116,6 +144,10 @@ const Register: React.FC = () => {
           </button>
         </div>
       </div>
+      {/* Mostrar mensaje de error si existe */}
+      {error && (
+        <div className="text-red-500 text-sm mt-2 text-center">{error}</div>
+      )}
       {/* Botón de registro */}
       <button
         type="button"

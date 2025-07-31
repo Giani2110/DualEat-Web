@@ -24,12 +24,12 @@ export const getOnboardingData = async (req: Request, res: Response) => {
     // Obtener todos los tags de comunidad activos
     const communityTags = await prisma.communityTag.findMany({
       where: {
-        active: true, // Asumiendo que solo quieres tags activos
+        active: true,
       },
       select: {
         id: true,
         name: true,
-        category: { // Puedes incluir la categoría si la necesitas para agrupar en el frontend
+        category: {
             select: {
                 id: true,
                 name: true
@@ -41,7 +41,6 @@ export const getOnboardingData = async (req: Request, res: Response) => {
       }
     });
 
-    // Envía ambos conjuntos de datos en una sola respuesta
     res.status(200).json({
       foodCategories,
       communityTags

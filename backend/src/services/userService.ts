@@ -1,5 +1,5 @@
 import { prisma } from "../providers/prisma";
-import { User } from "@prisma/client";
+import { Providers, User } from "@prisma/client";
 import { BasicCreateDTO } from "../interfaces/user.interface";
 
 export class UserService {
@@ -14,7 +14,7 @@ export class UserService {
             password_hash: userData.password_hash || "",
             name: userData.name || "",
             avatar_url: userData.avatar_url || null,
-            provider: userData.provider,
+            provider: userData.provider as Providers | undefined,
           },
         });
 
@@ -29,21 +29,23 @@ export class UserService {
           });
         }
 
+        // --- CAMBIO AQUÍ: Usar food_category_id para foodPreferences ---
         if (userData.foodPreferences?.length) {
           await tx.userPreference.createMany({
             data: userData.foodPreferences.map((foodId) => ({
               user_id: user.id,
-              preference_id: foodId,
+              food_category_id: foodId, // Correcto: usar food_category_id
             })),
             skipDuplicates: true,
           });
         }
 
+        // --- CAMBIO AQUÍ: Usar community_tag_id para communityPreferences ---
         if (userData.communityPreferences?.length) {
           await tx.userPreference.createMany({
             data: userData.communityPreferences.map((communityId) => ({
               user_id: user.id,
-              preference_id: communityId,
+              community_tag_id: communityId, // Correcto: usar community_tag_id
             })),
             skipDuplicates: true,
           });

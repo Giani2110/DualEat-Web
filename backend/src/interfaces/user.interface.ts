@@ -30,7 +30,3 @@ export interface RegisterStepTwoDto {
   foodPreferences?: number[];
   communityPreferences?: number[];
 }
-
-
-
-

@@ -1,6 +1,7 @@
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Onboarding from "../pages/auth/Onboarding";
+import ProtectedRoute from "../components/ProtectedRoutes";
 
 export const authRoutes = [
   {
@@ -13,6 +14,11 @@ export const authRoutes = [
   },
   {
     path: "/onboarding",
-    element: <Onboarding />,
+    element: (
+      <ProtectedRoute>
+        <Onboarding />
+      </ProtectedRoute>
+    ),
   },
+  
 ];

@@ -4,8 +4,8 @@ import { Request, Response } from "express";
 
 import {
   RegisterStepOneDto,
-  RegisterStepTwoDto, // We will use this DTO for the request body
-  BasicCreateDTO, // For the data passed to userService.create
+  RegisterStepTwoDto,
+  BasicCreateDTO, 
   UserPayload,
 } from "../interfaces/user.interface";
 
@@ -15,7 +15,9 @@ import {
   verifyTempToken,
   createTempToken,
   TokenPayload,
+  TempTokenPayload, // Importar TempTokenPayload
 } from "../utils/jwt";
+import { Providers, Role, SubscriptionStatus } from "@prisma/client"; // Importar Providers, Role, SubscriptionStatus
 
 export class AuthController {
   constructor(private userService: UserService) {}
@@ -32,7 +34,7 @@ export class AuthController {
           .json({ success: false, message: "Credenciales incorrectas" });
       }
 
-      const passwordMatch = await comparePassword(password, user.password_hash);
+      const passwordMatch = await comparePassword(password, user.password_hash || ""); // Asegurarse de que password_hash no sea undefined
 
       if (!passwordMatch) {
         return res
@@ -40,13 +42,14 @@ export class AuthController {
           .json({ success: false, message: "Credenciales incorrectas" });
       }
 
-      const userPayload = {
+      // Generar payload para el token principal
+      const userPayload: TokenPayload = {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
         provider: user.provider,
-        isBusiness: user.is_business,
+        isBusiness: user.is_business, // Usar is_business de Prisma
         active: user.active,
         subscription_status: user.subscription_status,
         avatar_url: user.avatar_url ?? null,
@@ -54,17 +57,11 @@ export class AuthController {
 
       const token = createToken(userPayload);
 
-      res.cookie("accessToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax", // o "strict" si no necesitas compartir entre subdominios
-        maxAge: 60 * 60 * 2000, // 2 horas
-      });
-
       return res.status(200).json({
         success: true,
         message: "Login exitoso",
         user: userPayload,
+        token: token, // Devolver el token para que el frontend lo maneje
       });
     } catch (error) {
       console.error(error);
@@ -88,17 +85,17 @@ export class AuthController {
       const hashedPassword = await hashPassword(password);
 
       // Create temporary token with step 1 data
-      const tempToken = createTempToken({
+      const tempToken: string = createTempToken({ // Especificar tipo para claridad
         email,
         password_hash: hashedPassword,
         step: "incomplete_registration",
-        provider: "local",
+        provider: Providers.local, // Usar el enum Providers
       });
 
       return res.status(200).json({
         message: "Primer paso completado",
         temp_token: tempToken,
-        next_step: "/complete-profile",
+        next_step: "/onboarding",
       });
     } catch (error) {
       console.error(error);
@@ -107,9 +104,9 @@ export class AuthController {
   }
 
   async completeProfile(req: Request, res: Response) {
-    const { name, foodPreferences, communityPreferences }: RegisterStepTwoDto =
-      req.body;
-    const tempToken = req.headers.authorization?.replace("Bearer ", "");
+    // El frontend enviará el tempToken en el cuerpo de la solicitud
+    const { name, foodPreferences, communityPreferences, tempToken }:
+      RegisterStepTwoDto & { tempToken: string } = req.body; // Combinar DTOs para el cuerpo de la solicitud
 
     try {
       if (!tempToken) {
@@ -118,7 +115,12 @@ export class AuthController {
           .json({ message: "Token temporal no proporcionado" });
       }
 
-      const tempData = verifyTempToken(tempToken);
+      let tempData: TempTokenPayload;
+      try {
+        tempData = verifyTempToken(tempToken);
+      } catch (err) {
+        return res.status(401).json({ message: "Token temporal inválido o expirado" });
+      }
 
       // Validar el paso del token temporal
       if (
@@ -131,10 +133,10 @@ export class AuthController {
       // Construir datos para crear el usuario
       const userDataToCreate: BasicCreateDTO = {
         email: tempData.email,
-        name: tempData.name || name,
-        password_hash: tempData.password_hash || "", // Vacío para Google
+        name: tempData.name || name || "", // Usar nombre del token temporal si existe, o del body, o cadena vacía
+        password_hash: tempData.password_hash || undefined, // Asegurarse de que sea undefined si no existe
         avatar_url: tempData.avatar_url,
-        provider: tempData.provider || "local",
+        provider: tempData.provider as Providers || Providers.local, // Castear a Providers o usar 'local' por defecto
         foodPreferences,
         communityPreferences,
       };
@@ -142,13 +144,14 @@ export class AuthController {
       // Crear usuario
       const user = await this.userService.create(userDataToCreate);
 
-      const userPayload = {
+      // Generar token principal para el nuevo usuario
+      const userPayload: TokenPayload = {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role || "user",
+        role: user.role,
         provider: user.provider,
-        isBusiness: user.is_business || false,
+        isBusiness: user.is_business,
         active: user.active,
         subscription_status: user.subscription_status,
         avatar_url: user.avatar_url ?? null,
@@ -156,83 +159,16 @@ export class AuthController {
 
       const token = createToken(userPayload);
 
-      res.cookie("accessToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax", // o "strict" si no necesitas compartir entre subdominios
-        maxAge: 60 * 60 * 2000, // 2 horas
-      });
-
+      // Devolver el token principal para que el frontend lo guarde como cookie
       return res.status(201).json({
         success: true,
         message: "Perfil completado exitosamente",
         user: userPayload,
+        accessToken: token, // Enviar el token principal al frontend
       });
     } catch (error) {
       console.error("Error al completar perfil:", error);
       return res.status(500).json({ message: "Error interno del servidor" });
-    }
-  }
-
-  async googleAuth(req: Request, res: Response) {
-    try {
-      const userData = req.user as any;
-
-      if (!userData) {
-        return res.redirect(
-          `${process.env.FRONTEND_URL}/login?error=auth_failed`
-        );
-      }
-
-      // Usuario existente
-      if (userData.isExisting) {
-        const userPayload = {
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          role: userData.role || "user",
-          provider: userData.provider || "google",
-          isBusiness: userData.is_business || false,
-          active: userData.active,
-          subscription_status: userData.subscription_status,
-          avatar_url: userData.avatar_url,
-        };
-
-        const token = createToken(userPayload);
-
-        res.cookie("accessToken", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax", // o "strict" si no necesitas compartir entre subdominios
-          maxAge: 60 * 60 * 2000, // 2 horas
-        });
-
-        // VER QUE ONDA
-
-        return res.redirect(
-          `${process.env.FRONTEND_URL}/auth/success?token=${token}`
-        );
-      }
-      // Usuario nuevo que requiere completar perfil
-      else {
-        const tempToken = createTempToken({
-          email: userData.email,
-          name: userData.name,
-          avatar_url: userData.avatar_url,
-          provider: "google",
-          step: "incomplete_oauth_registration",
-        });
-
-        return res.redirect(
-          `${process.env.FRONTEND_URL}/complete-profile?temp_token=${tempToken}&provider=google`
-        );
-      }
-      
-    } catch (error) {
-      console.error("Error in googleAuth:", error);
-      return res.redirect(
-        `${process.env.FRONTEND_URL}/login?error=auth_failed`
-      );
     }
   }
 }
