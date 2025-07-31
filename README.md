@@ -86,3 +86,49 @@ El sistema se logra ejecutar funcionalmente con Docker, aunque puede ejecutarse 
 - https://docs.google.com/document/d/1ZKYIp8J-EjEReW8FzHTkHUoyacl-9sUkRrlthAvQhfE/edit?usp=sharing
 ---
 
+# Prisma (Schema)
+## Usuarios y Autenticación
+- User: Representa a un usuario (común o negocio). Guarda datos como nombre, email, contraseña, avatar, rol, proveedor de autenticación y estado de la suscripción.
+- UserPreference: Guarda las preferencias del usuario respecto a categorías de comida o etiquetas de comunidad (polimorfismo manual).
+- LocalUser: Relaciona usuarios con locales específicos (con rol de admin o staff dentro del local).
+
+## Negocios y Locales
+- Business: Representa a una entidad de negocio propiedad de un usuario.
+- Local: Sucursal gastronómica. Tiene info como nombre, horarios, contacto, y un array de categorías propias (categorias_menu) y una relación con categorías definidas (LocalMenuCategory).
+- LocalMenuCategory: Categorías personalizadas de un local, con la posibilidad de relacionarlas a una categoría general (FoodCategory).
+
+## Comida y Categorías
+- FoodCategory: Categorías generales de comidas (ej. “Vegano”, “Italiana”). Tienen un tipo (tipo de comida, estilo o cultura) y pueden asociarse con locales o preferencias.
+- Food: Representa un plato o producto en un local. Tiene info como nombre, precio, imagen, disponibilidad, votos, etc.
+
+## Pedidos
+- Order: Representa una orden hecha por un usuario en un local. Tiene estado (OrderStatus), método de pago, fecha de entrega, etc.
+- OrderItem: Representa un ítem específico dentro de una orden (comida, cantidad, precio unitario).
+
+## Votación y Reseñas
+- Vote: Sistema unificado de votos up/down. Aplica a contenido tipo food, post o comment.
+- LocalReview: Review (reseña) que un usuario deja en un local, con puntuación y comentario.
+
+## Contenido Social (Comunidad)
+- TagCategory: Agrupa etiquetas de comunidad (ej. “Gastronomía internacional”, “Nutrición y bienestar”).
+- CommunityTag: Etiquetas temáticas asociadas a comunidades (ej. “Vegano”, “Barato y rico”).
+- Community: Grupos sociales de usuarios organizados por un tag. Tienen visibilidad (public, restricted, private), un creador y miembros.
+- CommunityMember: Representa a un usuario que forma parte de una comunidad (puede ser moderador).
+- Post: Publicaciones dentro de comunidades. Puede ser receta, recomendación, reseña, etc. Tiene votos y comentarios.
+- PostComment: Comentarios a un post, con soporte para subcomentarios (respuestas) y votos.
+
+## Recetas
+- Ingredient: Ingredientes utilizados en recetas.
+- RecipeIngredient: Cantidad y notas de un ingrediente usado en un post tipo receta.
+- RecipeStep: Pasos detallados de una receta asociada a un post.
+
+## Logros
+- Achievement: Logros que un usuario puede desbloquear (ej. “Visitá 10 locales nuevos”).
+- UserAchievement: Progreso de un usuario en un logro, incluyendo si lo completó.
+
+## Suscripciones
+- Subscription: Suscripciones de usuarios con integración a Mercado Pago (ID, estado, fechas).
+- SubscriptionStatus / SubscriptionStateMP / SubscriptionPlan: Enums que representan estados y planes de suscripción.
+
+### Enums y Otros
+- Role / Providers / VoteType / ContentType / Visibility / OrderStatus / LocalUserRole / TypesCategory: Enums que se usan para diferenciar tipos de roles, contenido, estado, visibilidad, autenticación, etc.
