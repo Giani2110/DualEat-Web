@@ -32,6 +32,7 @@ services:
     build:
       context: ./backend       
       dockerfile: Dockerfile   
+    platform: linux/amd64
     container_name: dualeat_backend
     ports:
       - 3000:3000
@@ -47,12 +48,13 @@ services:
       - /app/node_modules
     networks:
       - dualeat-network
-    command: sh -c "npx prisma db push && npm run dev"
+    command: ["sh", "-c", "npx prisma db push && npm run dev"]
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    platform: linux/amd64
     container_name: dualeat_frontend
     ports:
       - 5173:5173
