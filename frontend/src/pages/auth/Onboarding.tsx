@@ -2,13 +2,15 @@
 import React, { useState, useEffect } from "react";
 import AuthSection from "../../components/auth/AuthSection";
 import "../../assets/scss/auth/auth.scss";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useRegister } from "../../context/RegisterContext"; // Asegúrate de que este contexto tenga el tempToken
+import { useNavigate, useLocation } from "react-router-dom";
+import { useRegister } from "../../context/RegisterContext";
+
+import { ArrowRight, ArrowLeft } from "lucide-react";
 
 interface FoodCategory {
   id: number;
   name: string;
-  tipo: 'Tipos_de_comida' | 'Estilos_o_dietas' | 'Origen_y_cultura';
+  tipo: "Tipos_de_comida" | "Estilos_o_dietas" | "Origen_y_cultura";
 }
 
 interface CommunityTag {
@@ -33,14 +35,17 @@ const Onboarding: React.FC = () => {
   const [errorPreferences, setErrorPreferences] = useState<string | null>(null);
   const [tempToken, setTempToken] = useState<string | null>(null);
 
+  const [index, setIndex] = useState(1);
+
   useEffect(() => {
     // 1. Intentar obtener tempToken de la URL (para flujo de Google OAuth)
     const queryParams = new URLSearchParams(location.search);
-    const tokenFromUrl = queryParams.get('tempToken');
+    const tokenFromUrl = queryParams.get("tempToken");
 
     if (tokenFromUrl) {
       setTempToken(tokenFromUrl);
-    } else if (registerContextData?.tempToken) { // <--- ¡Asegúrate de que esto se esté leyendo!
+    } else if (registerContextData?.tempToken) {
+      // <--- ¡Asegúrate de que esto se esté leyendo!
       // 2. Si no está en la URL, intentar obtenerlo del contexto (para flujo de registro local)
       setTempToken(registerContextData.tempToken);
       // Opcional: Si el nombre también viene del contexto, inicializarlo
@@ -48,7 +53,9 @@ const Onboarding: React.FC = () => {
         setName(registerContextData.name);
       }
     } else {
-      console.warn("No se encontró tempToken en la URL ni en el contexto. El usuario no debería estar aquí directamente.");
+      console.warn(
+        "No se encontró tempToken en la URL ni en el contexto. El usuario no debería estar aquí directamente."
+      );
       // Podrías redirigir al login o registro si no hay token
       // navigate("/login"); // Descomentar si quieres forzar la redirección
     }
@@ -65,7 +72,9 @@ const Onboarding: React.FC = () => {
         setCommunityTags(fetchedData.communityTags || []);
       } catch (error) {
         console.error("Error al obtener datos de onboarding:", error);
-        setErrorPreferences("No se pudieron cargar las preferencias. Intenta de nuevo más tarde.");
+        setErrorPreferences(
+          "No se pudieron cargar las preferencias. Intenta de nuevo más tarde."
+        );
       } finally {
         setLoadingPreferences(false);
       }
@@ -75,31 +84,73 @@ const Onboarding: React.FC = () => {
   }, [location.search, registerContextData, navigate]); // Añadir navigate a las dependencias
 
   const togglePreference = (prefName: string) => {
-    setPreferences((prev) =>
-      prev.includes(prefName) ? prev.filter((p) => p !== prefName) : [...prev, prefName]
-    );
+    setPreferences((prev) => {
+      const isSelected = prev.includes(prefName);
+      let updated = [];
+
+      if (isSelected) {
+        // Quitar la preferencia (y su "equivalente" si existe)
+        updated = prev.filter((p) => p !== prefName);
+      } else {
+        updated = [...prev, prefName];
+        // Chequear si hay una tag o categoría equivalente no seleccionada
+        const existsInBoth =
+          foodCategories.some((c) => c.name === prefName) &&
+          communityTags.some((t) => t.name === prefName);
+
+        if (existsInBoth && !updated.includes(prefName)) {
+          updated.push(prefName);
+        }
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = async () => {
-    if (!name || preferences.length < 3) {
-      alert("Completá tu nombre y elige al menos 3 preferencias (entre comida y comunidades).");
+    if (index === 2 && (!name || preferences.length < 3)) {
+      alert(
+        "Completá tu nombre y elegí al menos 3 preferencias (entre comida y comunidades)."
+      );
       return;
     }
 
+    if (!tempToken) {
+      alert(
+        "Error: Token de registro no encontrado. Por favor, intenta registrarte de nuevo."
+      );
+      navigate("/register");
+      return;
+    }
+
+    
+    
+    
+
+    setIndex((prev) => (prev === 1 ? 2 : 1));
+
+
+
+    /*
+
     // Asegurarse de que tenemos un tempToken antes de enviar
     if (!tempToken) {
-        alert("Error: Token de registro no encontrado. Por favor, intenta registrarte de nuevo.");
-        navigate("/register"); // Redirigir al inicio del registro
-        return;
+      alert(
+        "Error: Token de registro no encontrado. Por favor, intenta registrarte de nuevo."
+      );
+      navigate("/register"); // Redirigir al inicio del registro
+      return;
     }
 
     const foodPreferenceIds = preferences
-      .map(prefName => foodCategories.find(cat => cat.name === prefName)?.id)
-      .filter(id => id !== undefined) as number[];
+      .map(
+        (prefName) => foodCategories.find((cat) => cat.name === prefName)?.id
+      )
+      .filter((id) => id !== undefined) as number[];
 
     const communityPreferenceIds = preferences
-      .map(prefName => communityTags.find(tag => tag.name === prefName)?.id)
-      .filter(id => id !== undefined) as number[];
+      .map((prefName) => communityTags.find((tag) => tag.name === prefName)?.id)
+      .filter((id) => id !== undefined) as number[];
 
     const payload = {
       tempToken: tempToken, // Enviar el token temporal (ahora puede venir del contexto o URL)
@@ -109,13 +160,16 @@ const Onboarding: React.FC = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/auth/complete-profile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "http://localhost:3000/auth/complete-profile",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const responseData = await response.json();
 
@@ -128,21 +182,18 @@ const Onboarding: React.FC = () => {
       if (responseData.accessToken) {
         // Redirigir a la ruta del backend que establece la cookie y luego redirige al dashboard
         // Utilizamos replace para que el usuario no pueda volver a la página de onboarding con el token temporal
-        navigate(`/set-cookie-and-redirect?token=${responseData.accessToken}`, { replace: true });
+        navigate(`/set-cookie-and-redirect?token=${responseData.accessToken}`, {
+          replace: true,
+        });
       } else {
         alert("Registro completado, pero no se recibió un token de sesión.");
         navigate("/login");
       }
-
     } catch (error: any) {
       console.error("Error al enviar datos de completado de perfil:", error);
       alert(`Error: ${error.message}`);
-    }
+    }*/
   };
-
-  const tiposDeComida = foodCategories.filter(cat => cat.tipo === 'Tipos_de_comida');
-  const estilosODietas = foodCategories.filter(cat => cat.tipo === 'Estilos_o_dietas');
-  const origenYCultura = foodCategories.filter(cat => cat.tipo === 'Origen_y_cultura');
 
   return (
     <AuthSection
@@ -156,8 +207,10 @@ const Onboarding: React.FC = () => {
     >
       {/* Campo de nombre de usuario */}
       <div>
-        <div className="font-medium text-[15px] mb-2 text5">Nombre de usuario</div>
-        <div className="relative">
+        <h1 className="font-semibold mt-5 text-[15px] mb-4 text5">
+          Nombre de usuario
+        </h1>
+        <div>
           <input
             type="text"
             value={name}
@@ -165,19 +218,21 @@ const Onboarding: React.FC = () => {
               setName(e.target.value)
             }
             placeholder="Nombre de usuario"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
+            className="w-full px-4 text6 text-[15px] py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
           />
         </div>
       </div>
 
       {/* Sección principal para elegir preferencias (Categorías de comida y Tags de comunidad) */}
-      <div className="mt-6 w-full">
-        <div className="font-medium text-[15px] mb-2 text5">
-          Preferencias
-        </div>
-        <div className="font-normal text-[13px] mb-2 text-gray-600">
-          Elige al menos 3
-          {preferences.length > 0 && ` (${preferences.length}/3)`}
+      <div className="mt-10 w-full">
+        <div className="flex justify-between items-center">
+          <h1 className="font-medium text-[15px] mb-2 text5">Preferencias</h1>
+          <div className="text6 flex gap-5 text-[15px] text-gray-600">
+            <span>Elige al menos 3</span>
+            <span className="font-bold text-yellow">
+              {`${preferences.length} / 3`}
+            </span>
+          </div>
         </div>
 
         {loadingPreferences ? (
@@ -185,52 +240,24 @@ const Onboarding: React.FC = () => {
         ) : errorPreferences ? (
           <p className="text-red-500">{errorPreferences}</p>
         ) : (
-          <div className="flex flex-col gap-6">
-
+          <div className="flex cat-block flex-col gap-6 mt-4">
             {/* Bloque de Categorías de Comida */}
-            <div>
-              <h3 className="font-semibold text-base mb-3 text-gray-800">
-                Categorías de Comida
-              </h3>
-              <div className="h-64 overflow-y-auto pr-2 custom-scrollbar border rounded-lg p-3 bg-white shadow-sm">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {tiposDeComida.map((category) => (
+            {index === 1 && (
+              <div>
+                <h3 className="font-semibold underline text-[14.5px] mb-3 text5">
+                  Categorías de Comida
+                </h3>
+                <div className="scroll grid-cols-2 md:grid-cols-3 gap-2">
+                  {foodCategories.map((category) => (
                     <button
                       key={`food-cat-${category.id}`}
                       type="button"
                       onClick={() => togglePreference(category.name)}
-                      className={`px-3 py-2 rounded-full border text-[13px] text-center transition-colors
-                        ${preferences.includes(category.name)
-                          ? "bg-yellow text-white border-yellow"
-                          : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
-                        }`}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                  {estilosODietas.map((category) => (
-                    <button
-                      key={`food-cat-${category.id}`}
-                      type="button"
-                      onClick={() => togglePreference(category.name)}
-                      className={`px-3 py-2 rounded-full border text-[13px] text-center transition-colors
-                        ${preferences.includes(category.name)
-                          ? "bg-yellow text-white border-yellow"
-                          : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
-                        }`}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                  {origenYCultura.map((category) => (
-                    <button
-                      key={`food-cat-${category.id}`}
-                      type="button"
-                      onClick={() => togglePreference(category.name)}
-                      className={`px-3 py-2 rounded-full border text-[13px] text-center transition-colors
-                        ${preferences.includes(category.name)
-                          ? "bg-yellow text-white border-yellow"
-                          : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                      className={`scrollDiv border transition-colors
+                        ${
+                          preferences.includes(category.name)
+                            ? "text-yellow border-yellow"
+                            : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                         }`}
                     >
                       {category.name}
@@ -238,55 +265,65 @@ const Onboarding: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Bloque de Tags de Comunidad */}
-            {communityTags.length > 0 && (
+
+            {index === 2 && communityTags.length > 0 && (
               <div>
-                <h3 className="font-semibold text-base mb-3 text-gray-800">
+                <h3 className="underline font-semibold text-[14.5px] mb-3 text5">
                   Tags de Comunidad
                 </h3>
-                <div className="h-48 overflow-y-auto pr-2 custom-scrollbar border rounded-lg p-3 bg-white shadow-sm">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {communityTags.map((tag) => (
-                      <button
-                        key={`comm-tag-${tag.id}`}
-                        type="button"
-                        onClick={() => togglePreference(tag.name)}
-                        className={`px-3 py-2 rounded-full border text-[13px] text-center transition-colors
-                          ${preferences.includes(tag.name)
-                            ? "bg-yellow text-white border-yellow"
-                            : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                <div className="scroll grid-cols-2 md:grid-cols-3 gap-2 ">
+                  {communityTags.map((tag) => (
+                    <button
+                      key={`comm-tag-${tag.id}`}
+                      type="button"
+                      onClick={() => togglePreference(tag.name)}
+                      className={`scrollDiv border transition-colors
+                          ${
+                            preferences.includes(tag.name)
+                              ? "text-yellow border-yellow"
+                              : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                           }`}
-                      >
-                        {tag.name}
-                      </button>
-                    ))}
-                  </div>
+                    >
+                      {tag.name}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         )}
+        <div className="flex gap-3 justify-center mt-4">
+          <ArrowLeft
+            type="button"
+            size={26}
+            onClick={() => setIndex(1)}
+            className={`
+              ${index === 1 ? "bg-yellow text-white" : "bg-[#dbdbdb]"}
+              cursor-pointer mt-4 p-[5px] w-[40px]  rounded-[5px] transition-colors`}
+          />
+
+          <ArrowRight
+            type="button"
+            size={26}
+            onClick={() => setIndex(2)}
+            className={`
+              ${index === 2 ? "bg-yellow text-white" : "bg-[#dbdbdb]"}
+              cursor-pointer mt-4 p-[5px]  w-[40px] rounded-[5px]  transition-colors`}
+          />
+        </div>
       </div>
 
       {/* Botón de registro */}
       <button
         type="button"
         onClick={handleSubmit}
-        className="w-full cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors text-[16px] font-medium"
+        className="w-full cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors text-[15px] font-medium"
       >
-        Registrarse →
+        {index === 2 ? "Finalizar" : "Siguiente"}
       </button>
-      <div className="text-center text-[15px] flex items-center justify-center mt-6 gap-3">
-        <span className="text4">¿Ya tienes cuenta?</span>
-        <Link
-          to={"/login"}
-          className="text5 underline cursor-pointer hover:text-red-600 font-bold"
-        >
-          Inicia sesión en DualEat
-        </Link>
-      </div>
     </AuthSection>
   );
 };
