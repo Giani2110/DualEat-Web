@@ -40,6 +40,10 @@ El sistema se logra ejecutar funcionalmente con Docker, aunque puede ejecutarse 
   - ```docker-compose down -v --rmi all```
   - ```docker-compose build --no-cache```
   - ```docker-compose up```
+6. Docker (alternativa rápida)
+  - ```docker-compose down```
+  - ```docker-compose build```
+  - ```docker-compose up -d --build```
 7. Producción
   - Finalizar en ambas carpetas con ```npm run build```
 
@@ -132,3 +136,7 @@ El sistema se logra ejecutar funcionalmente con Docker, aunque puede ejecutarse 
 
 ### Enums y Otros
 - Role / Providers / VoteType / ContentType / Visibility / OrderStatus / LocalUserRole / TypesCategory: Enums que se usan para diferenciar tipos de roles, contenido, estado, visibilidad, autenticación, etc.
+
+---
+## Prisma Studio
+- ```npx prisma studio```
