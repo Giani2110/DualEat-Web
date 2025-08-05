@@ -84,7 +84,7 @@ const Register: React.FC = () => {
       items="items-end text-right"
     >
       {/* Campo de email */}
-      <div>
+      <div className="mt-3">
         <div className="font-medium text-[15px] mb-2 text5">Email</div>
         <div className="relative">
           <input
@@ -94,7 +94,7 @@ const Register: React.FC = () => {
               setEmail(e.target.value)
             }
             placeholder="tu@email.com"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none"
           />
         </div>
       </div>
@@ -109,7 +109,7 @@ const Register: React.FC = () => {
               setPassword(e.target.value)
             }
             placeholder="••••••••"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none pr-12"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none pr-12"
           />
           <button
             type="button"
@@ -133,7 +133,7 @@ const Register: React.FC = () => {
               setConfirmPassword(e.target.value)
             }
             placeholder="Repite tu contraseña"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] text-[15px] focus:border-transparent outline-none pr-12"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#E5A657] text-[15px] outline-none pr-12"
           />
           <button
             type="button"
@@ -152,7 +152,7 @@ const Register: React.FC = () => {
       <button
         type="button"
         onClick={handleNext}
-        className="w-full cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors text-[16px] font-medium"
+        className="w-full  text-[15px] cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors  font-medium"
       >
         Registrarse →
       </button>

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-
 import AuthSection from "../../components/auth/AuthSection";
 
 import { Link } from "react-router-dom";
@@ -34,7 +33,7 @@ const Login: React.FC = () => {
       Dform="Dform"
     >
       {/* Campo de email */}
-      <div>
+      <div className="mt-3">
         <div className="font-medium text-[15px] mb-2 text5">Email</div>
         <div className="relative">
           <input
@@ -44,7 +43,7 @@ const Login: React.FC = () => {
               setEmail(e.target.value)
             }
             placeholder="tu@email.com"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-[8px] focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-[8px] focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none"
           />
         </div>
       </div>
@@ -60,7 +59,7 @@ const Login: React.FC = () => {
               setPassword(e.target.value)
             }
             placeholder="••••••••"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none pr-12"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none pr-12"
           />
           <button
             type="button"
@@ -86,19 +85,19 @@ const Login: React.FC = () => {
           />
           <span className="ml-2 text-[15px]">Recuérdame</span>
         </div>
-        <button
-          type="button"
-          className="text-[#822621] text-[15px] cursor-pointer underline hover:text-red-600"
+        <Link
+          to="/password_reset"
+          className="text-[#822621] text-[15px] cursor-pointer underline hover:scale-101 transition-transform"
         >
           ¿Olvidé mi contraseña?
-        </button>
+        </Link>
       </div>
 
       {/* Botón de inicio de sesión */}
       <button
         type="submit"
         onClick={() => console.log("Login clicked")}
-        className="w-full bgsemi-black text-white py-[10px] px-4 rounded-lg transition-all duration-300 cursor-pointer  font-medium"
+        className="w-full mt-3 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg  cursor-pointer font-medium"
       >
         Iniciar Sesión →
       </button>
