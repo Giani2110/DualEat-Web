@@ -10,17 +10,11 @@ const tagData = [
       icon_url: "🥘",
     },
     tags: [
-      "Fácil y rápido",
-      "3 ingredientes",
       "Cocina con niños",
       "A la parrilla",
-      "Comidas de olla", 
-      "Hecho en 30 minutos",
       "Microondas only",
       "Cocina económica",
       "Sin horno",
-      "Prep domingo",
-      "Recetas de la abuela",
       "Cocina express"
     ],
   },
@@ -42,25 +36,7 @@ const tagData = [
       "Paleo",
       "Raw food",
       "Mediterráneo",
-      "Flexitariano",
-      "Anti-inflamatorio",
       "Detox"
-    ],
-  },
-  {
-    category: {
-      name: "Humor gastronómico",
-      icon_url: "😂",
-    },
-    tags: [
-      "Fails culinarios",
-      "Expectativa vs realidad",
-      "Cocina de soltero",
-      "Platos raros que funcionan",
-      "Improvisaciones épicas",
-      "Cocina de medianoche",
-      "Experimentos locos",
-      "Recetas virales fallidas",
     ],
   },
   {
@@ -78,7 +54,6 @@ const tagData = [
       "Primera cita",
       "Reunión familiar",
       "Graduaciones",
-      "Baby shower",
       "Despedida de soltero",
       "Día del padre"
     ],
@@ -109,15 +84,12 @@ const tagData = [
       icon_url: "📱",
     },
     tags: [
-      "Instagram worthy",
-      "TikTok viral",
-      "Food truck style",
+      "Viral",
       "Street food",
       "Fusion cuisine",
       "Plant based",
       "Comfort food",
-      "Artisanal",
-      "Farm to table",
+      "Artesanal",
       "Zero waste",
       "Superfoods"
     ],
@@ -128,9 +100,6 @@ const tagData = [
       icon_url: "💰",
     },
     tags: [
-      "Menos de $500",
-      "Menos de $1000", 
-      "Presupuesto universitario",
       "Ingredientes baratos",
       "Aprovecha sobras",
       "Compra inteligente",
@@ -146,14 +115,11 @@ const tagData = [
     },
     tags: [
       "Verano refrescante",
-      "Invierno calentito",
       "Día lluvioso",
       "Calor agobiante",
       "Frío polar",
-      "Otoño nostálgico",
       "Primavera renovadora",
       "Día de playa",
-      "Noche de invierno",
       "Picnic perfecto"
     ],
   }

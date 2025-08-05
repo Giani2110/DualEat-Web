@@ -16,7 +16,7 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
@@ -103,6 +103,10 @@ model User {
   subscription_status SubscriptionStatus @default(inactive)
   provider            Providers          @default(local)
 
+  // Campos de recuperación
+  reset_code          String?            // el código enviado por mail
+  reset_expires_at    DateTime?          // hasta cuándo es válido
+
   // Relaciones
   owned_businesses    Business[]        @relation("BusinessOwner")
   local_users         LocalUser[]
@@ -149,50 +153,48 @@ model Business {
 }
 
 model Local {
-  id             Int       @id @default(autoincrement())
-  name           String
-  description    String?
-  address        String?
-  phone          String?
-  email          String?
-  image_url      String
-  opening_time   DateTime?
-  closing_time   DateTime?
-  categorias_menu String[] 
-  average_rating Float     @default(0)
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
-  
+  id              Int       @id @default(autoincrement())
+  name            String
+  description     String?
+  address         String?
+  phone           String?
+  email           String?
+  image_url       String
+  opening_time    DateTime?
+  closing_time    DateTime?
+  categorias_menu String[]
+  average_rating  Float     @default(0)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
 
   // Relaciones
-  business_id Int
-  business    Business      @relation(fields: [business_id], references: [id])
-  local_users LocalUser[]
-  foods       Food[]
-  orders      Order[]
-  reviews     LocalReview[]
+  business_id     Int
+  business        Business            @relation(fields: [business_id], references: [id])
+  local_users     LocalUser[]
+  foods           Food[]
+  orders          Order[]
+  reviews         LocalReview[]
   menu_categories LocalMenuCategory[]
 
   @@index([business_id])
 }
 
 model LocalMenuCategory {
-  id             Int           @id @default(autoincrement())
-  name           String        
-  description    String?
-  icon_url       String?
-  local_id       Int
+  id               Int     @id @default(autoincrement())
+  name             String
+  description      String?
+  icon_url         String?
+  local_id         Int
   food_category_id Int?
 
   // Relaciones
-  local          Local         @relation(fields: [local_id], references: [id])
-  food_category  FoodCategory? @relation(fields: [food_category_id], references: [id])
+  local         Local         @relation(fields: [local_id], references: [id])
+  food_category FoodCategory? @relation(fields: [food_category_id], references: [id])
 
+  @@unique([local_id, name])
   @@index([local_id])
   @@index([food_category_id])
-  @@unique([local_id, name])
 }
-
 
 model LocalUser {
   id         Int           @id @default(autoincrement())
@@ -209,8 +211,8 @@ model LocalUser {
 }
 
 model FoodCategory {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
   description String?
   tipo        TypesCategory
   icon_url    String?
@@ -232,6 +234,7 @@ model Food {
   name        String
   description String?
   price       Float
+  discount    Boolean       @default(false)
   image_url   String?
   available   Boolean       @default(true)
   votes_up    Int           @default(0)
