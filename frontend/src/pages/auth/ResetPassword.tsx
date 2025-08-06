@@ -1,15 +1,16 @@
-import { useState } from "react";
 import axios from "axios";
-import LogoDualEat from "../../assets/images/Logo_DualEat.png";
 import { axiosInterceptor } from "../../interceptor/axios-interceptor";
-import "../../assets/scss/auth/auth.scss";
-import { X } from "lucide-react";
 
+import { useState, useEffect } from "react";
+
+import { X, Eye, EyeOff } from "lucide-react";
 import { withMinimumDelay } from "../../utils/timeUtils";
-
 import Loader from "../../components/Loader";
 
 import { useNavigate } from "react-router-dom";
+import { Fingerprint, Mail, RectangleEllipsis } from "lucide-react";
+
+import "../../assets/scss/auth/auth.scss";
 
 const ResetPassword = () => {
   const [step, setStep] = useState<"email" | "code" | "password">("email");
@@ -18,12 +19,27 @@ const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
   const [success, setSuccess] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const handleBack = () => {
     setCode(""); // Limpiar el código
@@ -56,6 +72,32 @@ const ResetPassword = () => {
     }
   };
 
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await withMinimumDelay(
+        axiosInterceptor.post("/auth/password_reset", { email }),
+        1000
+      );
+      if (!response.data?.success) {
+        setError("No se pudo reenviar el código. Intenta nuevamente.");
+      } else {
+        setResendCooldown(60); // ⏱ inicia cooldown
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Error desconocido");
+      } else {
+        setError("Error al reenviar el código");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleValidateCode = async () => {
     setError("");
     setLoading(true);
@@ -68,7 +110,7 @@ const ResetPassword = () => {
         1000
       );
 
-      if (!response.data?.success) {
+      if (response.data?.success === true) {
         setStep("password");
       } else {
         setError("Código invalido");
@@ -107,7 +149,7 @@ const ResetPassword = () => {
 
         setTimeout(() => {
           navigate("/login");
-        }, 2000);
+        }, 3000);
       } else {
         setError("Error al restablecer la contraseña");
       }
@@ -126,9 +168,27 @@ const ResetPassword = () => {
     <div className="min-h-screen flex items-center justify-center bgAnimation">
       <div className="max-w-[600px] h-[650px] w-full flex flex-col items-center mt-20 bg-black border border-gray-600  rounded-[20px] px-8 py-10">
         <div className="flex items-center mb-6">
-        <X size={22} className="absolute top-5 left-5 text-white cursor-pointer" onClick={() => navigate("/login")} />
-        <img src={LogoDualEat} alt="DualEat Logo" className="w-[33px]" />
-        
+          <X
+            size={22}
+            className="absolute top-5 left-5 text-white cursor-pointer"
+            onClick={() => navigate("/login")}
+          />
+
+          {step === "email" ? (
+            <div className="w-[50px] flex items-center justify-center h-[50px] bg-red rounded-[10px]">
+              <Fingerprint size={25} color="#fff" />
+            </div>
+          ) : step === "code" ? (
+            <div className="w-[50px] flex items-center justify-center h-[50px] bg-yellow rounded-[10px]">
+              <Mail size={25} color="#fff" />
+            </div>
+          ) : (
+            step === "password" && (
+              <div className="w-[50px] flex items-center justify-center h-[50px] bg-red rounded-[10px]">
+                <RectangleEllipsis size={25} color="#fff" />
+              </div>
+            )
+          )}
         </div>
         {step === "email" && (
           <>
@@ -207,6 +267,10 @@ const ResetPassword = () => {
                   <h2 className="text-[31px] text2 font-bold mb-2">
                     Te enviamos un código
                   </h2>
+                  <p className="text4 text-[15px] leading-[21px] my-5">
+                    Enviamos un código de confirmación a
+                    <span className="font-semibold text1 ms-1">{email}</span>.
+                  </p>
                   <p className="text4 text-[15px] leading-[21px]">
                     Consulta tu correo para obtener tu código de confirmación.
                     Si tienes que solicitar un código nuevo, vuelve y realiza la
@@ -234,6 +298,23 @@ const ResetPassword = () => {
                       Introduce tu código
                     </label>
                   </div>
+                  <p className="text4 text-[15px] leading-[21px] text-center mt-5">
+                    ¿No recibiste el correo?
+                    <button
+                      type="button"
+                      onClick={handleResendCode}
+                      className={`font-semibold text2 ms-1 cursor-pointer underline underline-offset-1 ${
+                        resendCooldown > 0
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={resendCooldown > 0 || loading}
+                    >
+                      {resendCooldown > 0
+                        ? `Reenviar disponible en ${resendCooldown}s`
+                        : "Haz clic para reenviarlo."}
+                    </button>
+                  </p>
                 </div>
 
                 {!code ? (
@@ -242,7 +323,7 @@ const ResetPassword = () => {
                     onClick={handleBack}
                     className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full font-bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
                   >
-                    Atrás
+                    {loading ? <Loader color="white" size="4" /> : "Atrás"}
                   </button>
                 ) : (
                   <button
@@ -288,8 +369,8 @@ const ResetPassword = () => {
 
                   <div className="relative mt-8">
                     <input
-                      type="password"
                       id="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Introduce una contraseña nueva"
                       minLength={8}
                       className="peer w-full border text1 px-4 pb-3 pt-7 rounded-[5px] border-gray-700 placeholder-transparent focus:outline-none focus:border-blue-500"
@@ -307,10 +388,17 @@ const ResetPassword = () => {
                     >
                       Introduce una contraseña nueva
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                   <div className="relative mt-4">
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       id="confirmPassword"
                       placeholder="Confirma tu contraseña"
                       minLength={8}
@@ -329,6 +417,19 @@ const ResetPassword = () => {
                     >
                       Confirma tu contraseña
                     </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
                   </div>
                 </div>
 

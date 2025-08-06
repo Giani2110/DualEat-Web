@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-import Restaurant from "../../assets/images/login/Restaurante.avif";
-import Restaurant2 from "../../assets/images/login/Restaurante2.avif";
-import Restaurant3 from "../../assets/images/login/Restaurante3.avif";
+import Restaurant from "../../assets/images/auth/Restaurante.avif";
+import Restaurant2 from "../../assets/images/auth/Restaurante2.avif";
+import Restaurant3 from "../../assets/images/auth/Restaurante3.avif";
 import LogoDualEat from "../../assets/images/Logo_DualEat.png";
 
 interface Props {
@@ -94,12 +94,6 @@ const AuthSection: React.FC<Props> = ({
   return (
     <div className={`min-h-screen ${flex} flex bg-gray`}>
       <div className="lg:w-1/2 flex flex-col justify-center px-8 max-w-[620px] mx-auto w-full">
-        <Link to={"/"}>
-          <div className="ps-5 flex items-center gap-1 text-gray-500 hover:text-black transition cursor-pointer py-2">
-            <X className="w-6 h-6" />
-            <span className=" text-[14px]">Salir</span>
-          </div>
-        </Link>
         <div className="mb-[45px]">
           <div className="flex justify-center mb-6">
             <div
@@ -156,7 +150,9 @@ const AuthSection: React.FC<Props> = ({
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  {location.pathname !== "/login" ? "Registrarse con Google" : "Iniciar sesión con Google"}
+                  {location.pathname !== "/login"
+                    ? "Registrarse con Google"
+                    : "Iniciar sesión con Google"}
                 </button>
               </div>
             </>
@@ -166,6 +162,13 @@ const AuthSection: React.FC<Props> = ({
       </div>
 
       <div className="w-full lg:w-1/2 relative overflow-hidden">
+        <div className="absolute back flex gap-2 px-3 py-1 rounded-[20px] items-center top-10 left-12 z-10 cursor-pointer">
+          <ArrowLeft color="black" className="w-4 h-4" />
+          <Link to={"/"}>
+            <p className="text-black text-[14px]">Volver a Inicio</p>
+          </Link>
+        </div>
+
         {/* Renderizar imagen condicionalmente una vez cargada o mostrar placeholder */}
         {imagesPreloaded ? (
           <div
@@ -181,7 +184,7 @@ const AuthSection: React.FC<Props> = ({
         )}
 
         {/* Logo y texto superpuesto con contenedor en forma D espejada y centrada */}
-        <div className="relative z-10 flex flex-col items-center justify-center h-full">
+        <div className="relative flex flex-col items-center justify-center h-full">
           <div
             className={`${Dform} px-[50px] ${items} py-[70px] flex flex-col`}
           >

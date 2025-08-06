@@ -123,16 +123,8 @@ const Onboarding: React.FC = () => {
       return;
     }
 
-    
-    
-    
-
     setIndex((prev) => (prev === 1 ? 2 : 1));
-
-
-
-    /*
-
+    
     // Asegurarse de que tenemos un tempToken antes de enviar
     if (!tempToken) {
       alert(
@@ -192,7 +184,7 @@ const Onboarding: React.FC = () => {
     } catch (error: any) {
       console.error("Error al enviar datos de completado de perfil:", error);
       alert(`Error: ${error.message}`);
-    }*/
+    }
   };
 
   return (

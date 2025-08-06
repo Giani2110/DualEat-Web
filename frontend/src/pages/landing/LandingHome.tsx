@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DownloadSectionBG from "../../components/DownloadSectionBG";
-import Restaurante1 from "../../assets/images/login/Restaurante2.avif";
-import Restaurante2 from "../../assets/images/login/Restaurante.avif";
+import Restaurante1 from "../../assets/images/auth/Restaurante2.avif";
+import Restaurante2 from "../../assets/images/auth/Restaurante.avif";
 import AR from "../../assets/images/landing/AR.jpg";
 
 import "../../assets/scss/landing/landing.scss"; // Import the custom styles

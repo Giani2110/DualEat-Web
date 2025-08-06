@@ -32,11 +32,13 @@ const Login: React.FC = () => {
       background="left-background"
       Dform="Dform"
     >
+      <form className="flex flex-col gap-6">
       {/* Campo de email */}
       <div className="mt-3">
         <div className="font-medium text-[15px] mb-2 text5">Email</div>
         <div className="relative">
           <input
+            required
             type="email"
             value={email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -53,6 +55,7 @@ const Login: React.FC = () => {
         <div className="font-medium text-[15px] mb-2 text5">Contraseña</div>
         <div className="relative">
           <input
+            required
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -72,7 +75,7 @@ const Login: React.FC = () => {
       </div>
 
       {/* Recordarme y olvidé contraseña */}
-      <div className="flex items-center justify-between mt-[30px]">
+      <div className="flex items-center justify-between mt-[20px]">
         <div className="flex items-center">
           <input
             placeholder="Recuérdame"
@@ -96,11 +99,11 @@ const Login: React.FC = () => {
       {/* Botón de inicio de sesión */}
       <button
         type="submit"
-        onClick={() => console.log("Login clicked")}
-        className="w-full mt-3 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg  cursor-pointer font-medium"
+        className="w-full mt-3 mb-6 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg  cursor-pointer font-medium"
       >
         Iniciar Sesión →
       </button>
+      </form>
     </AuthSection>
   );
 };

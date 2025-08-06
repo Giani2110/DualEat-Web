@@ -21,7 +21,8 @@ const Register: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handleNext = async () => { // Cambiado a async
+  const handleNext = async () => {
+    // Cambiado a async
     setError(null); // Limpiar errores anteriores
 
     if (!email || !password || !confirmPassword) {
@@ -47,10 +48,10 @@ const Register: React.FC = () => {
       if (response.ok) {
         // Registro exitoso del paso 1
         // Guardar el email y el temp_token en el contexto
-        updateData({ 
-            email: email, 
-            tempToken: responseData.temp_token // <--- ¡Asegúrate de que esto se esté guardando!
-        }); 
+        updateData({
+          email: email,
+          tempToken: responseData.temp_token, // <--- ¡Asegúrate de que esto se esté guardando!
+        });
         navigate(responseData.next_step); // Redirigir a /onboarding (que es lo que devuelve el backend)
       } else {
         // Manejar errores del backend (ej. email ya existe - status 409)
@@ -83,79 +84,100 @@ const Register: React.FC = () => {
       Dform="Dform-right"
       items="items-end text-right"
     >
-      {/* Campo de email */}
-      <div className="mt-3">
-        <div className="font-medium text-[15px] mb-2 text5">Email</div>
-        <div className="relative">
-          <input
-            type="email"
-            value={email}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setEmail(e.target.value)
-            }
-            placeholder="tu@email.com"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none"
-          />
+      <form onSubmit={handleNext} className="flex flex-col gap-6">
+        {/* Campo de email */}
+        <div className="mt-3">
+          <p className="font-medium text-[15px] mb-2 text5">Email</p>
+          <div className="relative">
+            <input
+              required
+              type="email"
+              value={email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
+              placeholder="tu@email.com"
+              className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none"
+            />
+          </div>
         </div>
-      </div>
-      {/* Campo de contraseña */}
-      <div>
-        <div className="font-medium text-[15px] mb-2 text5">Contraseña</div>
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setPassword(e.target.value)
-            }
-            placeholder="••••••••"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none pr-12"
-          />
+        {/* Campo de contraseña */}
+        <div>
+          <p className="font-medium text-[15px] mb-2 text5">Contraseña</p>
+          <div className="relative">
+            <input
+              required
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
+              placeholder="••••••••"
+              className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+        </div>
+        {/* Campo de confirmar contraseña */}
+        <div>
+          <p className="font-medium text-[15px] mb-2 text5">
+            Confirmar contraseña
+          </p>
+          <div className="relative">
+            <input
+              required
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setConfirmPassword(e.target.value)
+              }
+              placeholder="Repite tu contraseña"
+              className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#E5A657] text-[15px] outline-none pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mostrar mensaje de error si existe */}
+        {error && (
+          <div className="text-red-500 text-sm mt-2 text-center">{error}</div>
+        )}
+        {/* Botón de registro */}
+        <div className="mb-2">
           <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            type="submit"
+            className="w-full mb-3 text-[15px] cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors  font-medium"
           >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            Registrarse →
           </button>
+          <p className="text-[12px] text4 text-center max-w-[400px] mx-auto mt-2">
+            Al registrarte, aceptas los
+            {" "}<span className="text-[#0a87da] cursor-pointer hover:underline">
+              Términos de servicio
+            </span>{" "}
+            y la{" "}
+            <span className="text-[#0a87da] cursor-pointer hover:underline">
+              Política de privacidad
+            </span>
+            , incluida la política de{" "}
+            <span className="text-[#0a87da] cursor-pointer hover:underline">
+              Uso de Cookies.
+            </span>
+          </p>
         </div>
-      </div>
-      {/* Campo de confirmar contraseña */}
-      <div>
-        <div className="font-medium text-[15px] mb-2 text5">
-          Confirmar contraseña
-        </div>
-        <div className="relative">
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            value={confirmPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setConfirmPassword(e.target.value)
-            }
-            placeholder="Repite tu contraseña"
-            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#E5A657] text-[15px] outline-none pr-12"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
-        </div>
-      </div>
-      {/* Mostrar mensaje de error si existe */}
-      {error && (
-        <div className="text-red-500 text-sm mt-2 text-center">{error}</div>
-      )}
-      {/* Botón de registro */}
-      <button
-        type="button"
-        onClick={handleNext}
-        className="w-full  text-[15px] cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors  font-medium"
-      >
-        Registrarse →
-      </button>
+      </form>
     </AuthSection>
   );
 };
