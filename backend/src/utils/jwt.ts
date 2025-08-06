@@ -12,6 +12,7 @@ export interface TokenPayload {
   isBusiness: boolean;
   active: boolean;
   subscription_status: SubscriptionStatus;
+  trial_ends_at: User["trial_ends_at"];
   avatar_url: string | null;
 }
 export interface TempTokenPayload {
@@ -38,11 +39,7 @@ interface IncompleteOAuthRegistrationPayload {
   avatar_url?: string;
 }
 
-/*export type TempTokenPayload =
-  | IncompleteRegistrationPayload
-  | IncompleteOAuthRegistrationPayload;
 
-*/
 export const createToken = (payload: TokenPayload): string => {
   return jwt.sign(payload, SECRET_KEY, {
     algorithm: "HS256",

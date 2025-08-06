@@ -6,6 +6,8 @@ import { UserService } from "../services/userService";
 import { PasswordService} from '../services/passwordService';
 import { PasswordController } from '../controllers/passwordController';
 
+import { isAuthenticated } from "../middlewares/isAuthenticated";
+
 
 import {
   createTempToken,
@@ -66,6 +68,7 @@ router.get(
         isBusiness: user.isBusiness,
         active: user.active,
         subscription_status: user.subscription_status,
+        trial_ends_at: user.trial_ends_at,
         avatar_url: user.avatar_url,
       };
       const mainToken = createToken(tokenPayload);
@@ -97,6 +100,10 @@ router.post('/password_reset', resetController.requestReset.bind(resetController
 router.post('/password_reset/validate-code', resetController.validateCode.bind(resetController));
 router.post('/password_reset/reset', resetController.reset.bind(resetController));
 
+
+router.get("/me", isAuthenticated, (req, res) => {
+  res.json(req.user); 
+});
 
 // 👉 Ruta de logout: ahora solo limpia la cookie del token
 router.post("/logout", (req, res) => {

@@ -49,9 +49,10 @@ export class AuthController {
         email: user.email,
         role: user.role,
         provider: user.provider,
-        isBusiness: user.is_business, // Usar is_business de Prisma
+        isBusiness: user.is_business, 
         active: user.active,
         subscription_status: user.subscription_status,
+        trial_ends_at: user.trial_ends_at,
         avatar_url: user.avatar_url ?? null,
       };
 
@@ -154,6 +155,7 @@ export class AuthController {
         isBusiness: user.is_business,
         active: user.active,
         subscription_status: user.subscription_status,
+        trial_ends_at: user.trial_ends_at,
         avatar_url: user.avatar_url ?? null,
       };
 
