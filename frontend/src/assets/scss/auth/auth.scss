@@ -1,6 +1,7 @@
+/* Auth Section (login) */
 .left-background {
-  border-bottom-right-radius: 40px;
-  border-top-right-radius: 40px;
+  border-bottom-right-radius: 70px;
+  border-top-right-radius: 70px;
   background-size: cover;
 }
 
@@ -12,6 +13,12 @@
   min-height: 540px;
 }
 
+.back {
+  background-color: #f1f1f1;
+  filter: contrast(0.8);
+}
+
+/* Auth Section (register) */
 .right-background {
   border-bottom-left-radius: 40px;
   border-top-left-radius: 40px;
@@ -26,6 +33,7 @@
   min-height: 540px;
 }
 
+/* Onboarding */
 .bgsemi-black:hover {
   background-color: black;
 }
@@ -51,7 +59,6 @@
 
 .scroll::-webkit-scrollbar {
   width: 6px;
-
 }
 
 .scroll::-webkit-scrollbar-track {
@@ -61,13 +68,12 @@
 .scroll::-webkit-scrollbar-thumb {
   background: #e5a657;
   border-radius: 10px;
-cursor: pointer;
+  cursor: pointer;
 }
 
-
+/* Password Reset */
 .bgAnimation {
-  
-   position: fixed; 
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
@@ -75,21 +81,6 @@ cursor: pointer;
   z-index: 0;
   overflow: hidden;
 }
-
-
-
-/*
-.bgAnimation {
-  position: fixed; 
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 0;
-  overflow: hidden;
-}
-*/
-
 
 .bgAnimation::before {
   content: "";
@@ -98,18 +89,14 @@ cursor: pointer;
   left: 0;
   width: 200%;
   height: 100%;
-  background-image: url(../../images/landing/SHF_home-slide-1.jpg);
+  background-image: url(../../images/auth/PasswordResetBG.jpg);
   filter: brightness(0.6);
   background-repeat: no-repeat;
   opacity: 1;
   z-index: 0;
 }
 
-
-
 .bgAnimation > div {
   position: relative;
-  z-index: 1; 
+  z-index: 1;
 }
-
-
