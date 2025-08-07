@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { ROUTES } from "../../constants/constants";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "react-router-dom";
@@ -115,7 +116,7 @@ const AuthSection: React.FC<Props> = ({
         <div className="space-y-6">
           {children}
 
-          {location.pathname !== "/onboarding" && (
+          {location.pathname !== ROUTES.AUTH.ONBOARDING && (
             <>
               <div className="flex w-full items-center justify-around mb-5 mt-6">
                 <div className="w-[35%] border-t border-gray-300"></div>
@@ -150,7 +151,7 @@ const AuthSection: React.FC<Props> = ({
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  {location.pathname !== "/login"
+                  {location.pathname !== ROUTES.AUTH.LOGIN
                     ? "Registrarse con Google"
                     : "Iniciar sesión con Google"}
                 </button>
@@ -162,12 +163,13 @@ const AuthSection: React.FC<Props> = ({
       </div>
 
       <div className="w-full lg:w-1/2 relative overflow-hidden">
-        <div className="absolute back flex gap-2 px-3 py-1 rounded-[20px] items-center top-10 left-12 z-10 cursor-pointer">
+        <Link
+          to={ROUTES.LANDING.HOME}
+          className="absolute back flex hover:scale-102 transition-all duration-300 gap-2 px-3 py-1 rounded-[20px] items-center top-10 left-12 z-10 cursor-pointer"
+        >
           <ArrowLeft color="black" className="w-4 h-4" />
-          <Link to={"/"}>
-            <p className="text-black text-[14px]">Volver a Inicio</p>
-          </Link>
-        </div>
+          <p className="text4 text-[13px]">Volver a Inicio</p>
+        </Link>
 
         {/* Renderizar imagen condicionalmente una vez cargada o mostrar placeholder */}
         {imagesPreloaded ? (

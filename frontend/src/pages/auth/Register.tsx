@@ -3,10 +3,11 @@ import { Eye, EyeOff } from "lucide-react";
 
 import AuthSection from "../../components/auth/AuthSection";
 
-import "../../assets/scss/auth/auth.scss";
-
+import { ROUTES } from "../../constants/constants";
 import { Link, useNavigate } from "react-router-dom";
 import { useRegister } from "../../context/RegisterContext";
+
+import "../../assets/scss/auth/auth.scss";
 
 const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -73,7 +74,7 @@ const Register: React.FC = () => {
         <div className="text-center text-[15px] flex items-center justify-center mt-6 gap-3">
           <span className="text4">¿Ya tienes cuenta?</span>
           <Link
-            to={"/login"}
+            to={ROUTES.AUTH.LOGIN}
             className="text5 underline cursor-pointer hover:text-red-600 font-bold"
           >
             Inicia sesión en DualEat

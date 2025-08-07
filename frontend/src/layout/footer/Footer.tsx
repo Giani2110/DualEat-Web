@@ -1,81 +1,81 @@
 import React from "react";
-import { Play, Instagram, Twitter } from "lucide-react";
+import { Instagram, Twitter } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/images/Logo_DualEat.png";
+import GooglePlay from "../../assets/images/GooglePlay_Badge_Web.png";
+
+import { OUT_NAVBAR_ROUTES } from "../../constants/navbar-routes";
+import { ROUTES } from "../../constants/constants";
 
 const Footer: React.FC = () => {
   const location = useLocation();
 
-  if (location.pathname === "/register" || location.pathname === "/login" || location.pathname === "/onboarding" || location.pathname === "/password_reset") {
-    return null;
-  }
+  if (Object.values(OUT_NAVBAR_ROUTES).includes(location.pathname)) {
+  return null;
+}
 
   return (
     <footer className="bg-black text-white py-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-[60px]">
           {/* Logo y descripción */}
           <div className="md:col-span-1">
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">
-                  <img src={Logo} alt="Logo" />
-                </span>
+                
+                <img src={Logo} alt="Logo" />
+                
               </div>
-              <span className="ml-2 text-xl font-semibold">DualEat</span>
+              <span className="ml-2 text-[18px] Arvo-Bold">DualEat</span>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text6 text-[14px] leading-[27px] tracking-[-0.4px]">
               Una nueva forma de descubrir, cocinar y compartir experiencias
               gastronómicas.
             </p>
             <div className="mt-6 flex flex-col space-y-3">
               <a
                 href="#"
-                className="bg-white rounded-lg px-4 py-2 inline-flex items-center space-x-2 hover:bg-gray-100 transition-colors cursor-pointer self-start"
               >
-                <Play className="w-4 h-4 text-black" />
-                <span className="text-black text-sm font-medium">
-                  Google Play
-                </span>
+                <img src={GooglePlay} alt="Google Play" className="w-[140px] h-[40px]" />
               </a>
             </div>
-            <p className="text-gray-500 text-xs mt-4">
+            <p className="text6 text-[12px] mt-[40px] leading-[27px] pt-3 border-t border-gray-200">
               © 2025 DualEat LLC. Todos los derechos reservados.
             </p>
           </div>
 
           {/* Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Links</h3>
+            <h3 className="text-white Arvo-Bold mb-3 text-[16px]">Links</h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  to={ROUTES.LANDING.HOME}
+                  className="text6 hover:text-white! transition-colors duration-300 text-[14px]"
                 >
                   Inicio
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/login"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  to={ROUTES.AUTH.LOGIN}
+                  className="text6 hover:text-white! transition-colors duration-300 text-[14px]"
                 >
                   Login
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/register"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  to={ROUTES.AUTH.REGISTER}
+                  className="text6 hover:text-white! transition-colors duration-300 text-[14px]"
                 >
                   Registrarse
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/para-negocios"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  to={ROUTES.LANDING.BUSINESS}
+                  className="text6 hover:text-white! transition-colors duration-300 text-[14px]"
                 >
                   Para negocios
                 </Link>
@@ -85,22 +85,22 @@ const Footer: React.FC = () => {
 
           {/* Recursos */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Recursos</h3>
+            <h3 className="text-white Arvo-Bold mb-3 text-[16px]">Recursos</h3>
             <ul className="space-y-2">
               <li>
-                <span className="text-gray-400 text-sm">
+                <span className="text6 hover:text-white! transition-colors duration-300 text-[14px]">
                   Documentos de ayuda
                 </span>
               </li>
               <li>
-                <span className="text-gray-400 text-sm">
+                <span className="text6 hover:text-white! transition-colors duration-300 text-[14px]">
                   Guía de inicio rápido
                 </span>
               </li>
               <li>
                 <Link
-                  to="/changelog"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  to={ROUTES.LANDING.CHANGELOG}
+                  className="text6 hover:text-white! transition-colors duration-300 text-[14px]"
                 >
                   Changelog
                 </Link>
@@ -110,44 +110,48 @@ const Footer: React.FC = () => {
 
           {/* Compañía y redes */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Compañía</h3>
+            <h3 className="text-white Arvo-Bold mb-3 text-[16px]">Compañía</h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/sobre-nosotros"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  to={ROUTES.LANDING.ABOUT_US}
+                  className="text6 hover:text-white! transition-colors duration-300 text-[14px]"
                 >
                   Sobre nosotros
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/terminos-y-condiciones"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  to={ROUTES.LANDING.TERMS}
+                  className="text6 hover:text-white! transition-colors duration-300 text-[14px]"
                 >
                   Términos y condiciones
                 </Link>
               </li>
             </ul>
-            <div className="flex items-center space-x-3 mt-4">
-              <Instagram className="w-5 h-5" />
+            <div className="flex flex-col space-x-3 mt-3">
+             <div className="flex space-x-3">
               <a
                 href="https://instagram.com/DualEat"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors text-sm"
+                className="text6 hover:text-white! transition-colors text-[14px]"
               >
                 Instagram
               </a>
-              <Twitter className="w-5 h-5" />
+              <Instagram className="w-[18px] h-[18px]" />
+              </div>
+              <div className="flex space-x-3 mt-3">
               <a
                 href="https://twitter.com/DualEat"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors text-sm" 
+                className="text6 hover:text-white! transition-colors text-[14px]" 
               >
                 Twitter
               </a>
+              <Twitter className="w-[18px] h-[18px]" />
+              </div>
             </div>
           </div>
         </div>

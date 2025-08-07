@@ -7,6 +7,7 @@ import { X, Eye, EyeOff } from "lucide-react";
 import { withMinimumDelay } from "../../utils/timeUtils";
 import Loader from "../../components/Loader";
 
+import { ROUTES } from "../../constants/constants";
 import { useNavigate } from "react-router-dom";
 import { Fingerprint, Mail, RectangleEllipsis } from "lucide-react";
 
@@ -148,7 +149,7 @@ const ResetPassword = () => {
         setSuccess(true);
 
         setTimeout(() => {
-          navigate("/login");
+          navigate(ROUTES.AUTH.LOGIN);
         }, 3000);
       } else {
         setError("Error al restablecer la contraseña");
@@ -171,7 +172,7 @@ const ResetPassword = () => {
           <X
             size={22}
             className="absolute top-5 left-5 text-white cursor-pointer"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(ROUTES.AUTH.LOGIN)}
           />
 
           {step === "email" ? (
@@ -201,7 +202,7 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 font-bold mb-2">
+                  <h2 className="text-[31px] text2 Arvo-Bold mb-2">
                     Restablecer contraseña
                   </h2>
                   <p className="text4 text-[15px] leading-[21px]">
@@ -235,7 +236,7 @@ const ResetPassword = () => {
                 <button
                   type="submit"
                   disabled={!email}
-                  className={`w-full font-bold py-3 rounded-[50px] transition
+                  className={`w-full Arvo-Bold py-3 rounded-[50px] transition
                     ${
                       !email
                         ? "bg-red brightness-50 cursor-not-allowed text-white/60"
@@ -264,12 +265,12 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 font-bold mb-2">
+                  <h2 className="text-[31px] text2 Arvo-Bold mb-2">
                     Te enviamos un código
                   </h2>
                   <p className="text4 text-[15px] leading-[21px] my-5">
                     Enviamos un código de confirmación a
-                    <span className="font-semibold text1 ms-1">{email}</span>.
+                    <span className="Arvo-Bold text1 ms-1">{email}</span>.
                   </p>
                   <p className="text4 text-[15px] leading-[21px]">
                     Consulta tu correo para obtener tu código de confirmación.
@@ -303,7 +304,7 @@ const ResetPassword = () => {
                     <button
                       type="button"
                       onClick={handleResendCode}
-                      className={`font-semibold text2 ms-1 cursor-pointer underline underline-offset-1 ${
+                      className={`Arvo-Bold text2 ms-1 cursor-pointer underline underline-offset-1 ${
                         resendCooldown > 0
                           ? "opacity-50 cursor-not-allowed"
                           : ""
@@ -321,14 +322,14 @@ const ResetPassword = () => {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full font-bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
+                    className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full Arvo-Bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
                   >
                     {loading ? <Loader color="white" size="4" /> : "Atrás"}
                   </button>
                 ) : (
                   <button
                     type="submit"
-                    className="bg-red border border-[#888888] text1 hover:brightness-90 w-full font-bold py-3 cursor-pointer rounded-[50px] transition-all duration-300"
+                    className="bg-red border border-[#888888] text1 hover:brightness-90 w-full Arvo-Bold py-3 cursor-pointer rounded-[50px] transition-all duration-300"
                   >
                     {loading ? (
                       <Loader color="white" size="4" />
@@ -353,7 +354,7 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 font-bold mb-2">
+                  <h2 className="text-[31px] text2 Arvo-Bold mb-2">
                     Elige una contraseña nueva
                   </h2>
                   <p className="text4 text-[15px] leading-[21px]">
@@ -435,7 +436,7 @@ const ResetPassword = () => {
 
                 <button
                   type="submit"
-                  className={`w-full bg-red text1 font-bold py-3 cursor-pointer rounded-[50px]`}
+                  className={`w-full bg-red text1 Arvo-Bold py-3 cursor-pointer rounded-[50px]`}
                 >
                   {loading ? (
                     <div className="flex items-center justify-center">

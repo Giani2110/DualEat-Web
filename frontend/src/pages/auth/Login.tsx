@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import AuthSection from "../../components/auth/AuthSection";
 
+import { ROUTES } from "../../constants/constants";
+
 import { Link } from "react-router-dom";
 
 import "../../assets/scss/auth/auth.scss";
@@ -22,7 +24,7 @@ const Login: React.FC = () => {
         <div className="text-center text-[15px] flex items-center justify-center mt-6 gap-3">
           <span className="text4">¿No tienes cuenta? </span>
           <Link
-            to={"/register"}
+            to={ROUTES.AUTH.REGISTER}
             className="text5 underline cursor-pointer hover:text-red-600 font-bold"
           >
             Regístrate en DualEat
@@ -89,7 +91,7 @@ const Login: React.FC = () => {
           <span className="ml-2 text-[15px]">Recuérdame</span>
         </div>
         <Link
-          to="/password_reset"
+          to={ROUTES.AUTH.RESET_PASSWORD}
           className="text-[#822621] text-[15px] cursor-pointer underline hover:scale-101 transition-transform"
         >
           ¿Olvidé mi contraseña?

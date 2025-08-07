@@ -6,19 +6,19 @@ const TermsConditions: React.FC = () => {
     <div className="min-h-screen bg-gray">
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-[200px] pb-[100px]">
-        <div className="bgsemi-white rounded-[20px] shadow-sm border-4 border-white p-8 md:p-12">
+        <div className="bgsemi-white rounded-[20px] shadow-sm border-3 border-white p-8 md:p-12">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl Arvo-Bold mb-4">
               Términos y condiciones
             </h1>
-            <p className="text-gray-600">
+            <p className="text5">
               <strong>Última actualización:</strong> Julio 2025
             </p>
           </div>
 
           {/* Content */}
           <div className="prose prose-lg max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-8">
+            <p className="text4 textTC mb-10!">
               Bienvenido/a a <strong>DualEat</strong>, una plataforma digital
               diseñada para conectar personas con experiencias gastronómicas,
               tanto en locales físicos como desde casa. Al registrarte o
@@ -28,20 +28,20 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 1 */}
             <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="Arvo-Bold text5 titleTC">
                 1. Identificación
               </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p className="text4 textTC">
                 DualEat es un proyecto académico y comercial en desarrollo por
                 parte de Gianfranco Andreacchi y Axel Berger, operando
                 inicialmente dentro del territorio de la República Argentina.
               </p>
-              <ul className="list-disc pl-6 text-gray-700 space-y-2">
+              <ul className="list-disc pl-6 text4 textTC space-y-2">
                 <li>
                   Podés contactarnos a través de{" "}
                   <a
                     href="mailto:contacto@dualeat.app"
-                    className="text-blue-600 hover:underline"
+                    className="text-[#0a87da] cursor-pointer hover:underline"
                   >
                     contacto@dualeat.app
                   </a>
@@ -51,32 +51,32 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 2 */}
             <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="Arvo-Bold text5 titleTC">
                 2. Definiciones
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-4 text4 textTC">
                 <div>
-                  <p className="text-gray-700">
+                  <p>
                     <strong>Usuario:</strong> Persona que utiliza la app para
                     buscar locales gastronómicos, recetas o interactuar con
                     otros usuarios.
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-700">
+                  <p>
                     <strong>Local/Negocio:</strong> Establecimiento gastronómico
                     registrado que utiliza DualEat para mostrar su menú,
                     promociones o gestionar interacciones con clientes.
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-700">
+                  <p>
                     <strong>Plataforma:</strong> Sitio web, app móvil o
                     servicios digitales de DualEat.
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-700">
+                  <p>
                     <strong>Contenido:</strong> Cualquier texto, imagen, receta,
                     menú, comentario o dato subido por los usuarios o el equipo
                     de DualEat.
@@ -87,13 +87,13 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 3 */}
             <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="Arvo-Bold text5 titleTC">
                 3. Condiciones de uso
               </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p className="text4 textTC">
                 El uso de la plataforma implica el cumplimiento de estas reglas:
               </p>
-              <ul className="list-disc pl-6 text-gray-700 space-y-2">
+              <ul className="list-disc pl-6 text4 textTC space-y-2">
                 <li>
                   Debés tener al menos 16 años o usar la app bajo supervisión de
                   un adulto responsable.
@@ -114,15 +114,15 @@ const TermsConditions: React.FC = () => {
             </section>
 
             {/* Section 4 */}
-            <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <section className="mb-10! text4 textTC">
+              <h2 className="Arvo-Bold text5 titleTC">
                 4. Obligaciones de los locales gastronómicos
               </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p>
                 Si sos dueño o administrador de un local que utiliza DualEat,
                 aceptás:
               </p>
-              <ul className="list-disc pl-6 text-gray-700 space-y-2">
+              <ul className="list-disc pl-6 space-y-2">
                 <li>
                   Subir información veraz, actualizada y clara (precios, menús,
                   horarios).
@@ -144,13 +144,13 @@ const TermsConditions: React.FC = () => {
             </section>
 
             {/* Section 5 */}
-            <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <section className="mb-10! text4 textTC">
+              <h2 className="Arvo-Bold text5 titleTC">
                 5. Propiedad intelectual
               </h2>
               <div className="space-y-4">
                 <div>
-                  <p className="text-gray-700">
+                  <p className="">
                     Todo el contenido original de la app (nombre, diseño,
                     código, marca, textos, imágenes, funcionalidades) pertenece
                     a DualEat y está protegido por leyes de propiedad
@@ -169,35 +169,35 @@ const TermsConditions: React.FC = () => {
             </section>
 
             {/* Section 6 */}
-            <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <section className="mb-10! text4 textTC ">
+              <h2 className="Arvo-Bold text5 titleTC">
                 6. Privacidad y datos personales
               </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p>
                 DualEat recopila ciertos datos personales para mejorar tu
                 experiencia. Al usar nuestros servicios aceptás nuestra Política
                 de Privacidad.
               </p>
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p>
                 Usamos tus datos de forma segura para:
               </p>
-              <ul className="list-disc pl-6 text-gray-700 space-y-2">
+              <ul className="list-disc pl-6 space-y-2">
                 <li>Sugerencias personalizadas.</li>
                 <li>Estadísticas de uso.</li>
                 <li>Comunicación y notificaciones.</li>
                 <li>Ofertas y promociones relacionadas.</li>
               </ul>
-              <p className="text-gray-700 leading-relaxed mt-4">
+              <p className="mt-4">
                 No vendemos tus datos a terceros.
               </p>
             </section>
 
             {/* Section 7 */}
-            <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <section className="mb-10! text4 textTC">
+              <h2 className="Arvo-Bold text5 titleTC">
                 7. Limitación de responsabilidad
               </h2>
-              <ul className="list-disc pl-6 text-gray-700 space-y-2">
+              <ul className="list-disc pl-6 space-y-2">
                 <li>
                   DualEat no es responsable por errores en los menús, calidad de
                   los productos ofrecidos, retrasos, alergias alimentarias o
@@ -215,11 +215,11 @@ const TermsConditions: React.FC = () => {
             </section>
 
             {/* Section 8 */}
-            <section className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <section className="mb-10! text4 textTC">
+              <h2 className="Arvo-Bold text5 titleTC">
                 8. Cambios en los términos
               </h2>
-              <ul className="list-disc pl-6 text-gray-700 space-y-2">
+              <ul className="list-disc pl-6 space-y-2">
                 <li>
                   Nos reservamos el derecho de modificar estos Términos en
                   cualquier momento. Notificaremos los cambios de forma visible.

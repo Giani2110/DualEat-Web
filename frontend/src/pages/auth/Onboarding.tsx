@@ -5,6 +5,7 @@ import "../../assets/scss/auth/auth.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useRegister } from "../../context/RegisterContext";
 
+import { ROUTES } from "../../constants/constants";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 
 interface FoodCategory {
@@ -119,7 +120,7 @@ const Onboarding: React.FC = () => {
       alert(
         "Error: Token de registro no encontrado. Por favor, intenta registrarte de nuevo."
       );
-      navigate("/register");
+      navigate(ROUTES.AUTH.REGISTER);
       return;
     }
 
@@ -130,7 +131,7 @@ const Onboarding: React.FC = () => {
       alert(
         "Error: Token de registro no encontrado. Por favor, intenta registrarte de nuevo."
       );
-      navigate("/register"); // Redirigir al inicio del registro
+      navigate(ROUTES.AUTH.REGISTER); // Redirigir al inicio del registro
       return;
     }
 
@@ -179,7 +180,7 @@ const Onboarding: React.FC = () => {
         });
       } else {
         alert("Registro completado, pero no se recibió un token de sesión.");
-        navigate("/login");
+        navigate(ROUTES.AUTH.LOGIN);
       }
     } catch (error: any) {
       console.error("Error al enviar datos de completado de perfil:", error);

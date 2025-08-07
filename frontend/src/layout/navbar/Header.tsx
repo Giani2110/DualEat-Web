@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
-import Logo from "../../assets/images/Logo_DualEat.png";
+
 import { Link, useLocation } from "react-router-dom";
+import {
+  NAVBAR_ROUTES,
+  OUT_NAVBAR_ROUTES,
+} from "../../constants/navbar-routes";
+import { ROUTES } from "../../constants/constants";
+
+import { Triangle } from "lucide-react";
+import Logo from "../../assets/images/Logo_DualEat.png";
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -28,7 +36,7 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  if (location.pathname === "/register" || location.pathname === "/login" || location.pathname === "/onboarding" || location.pathname === "/password_reset") {
+  if (Object.values(OUT_NAVBAR_ROUTES).includes(location.pathname)) {
     return null;
   }
 
@@ -59,39 +67,43 @@ const Header: React.FC = () => {
             : "max-w-[75%] mx-auto"
         }`}
       >
-        <div className="flex items-center cursor-pointer">
+        <Link
+          to={ROUTES.LANDING.HOME}
+          className="flex items-center cursor-pointer"
+        >
           <div className="w-[45px] h-[45px] bg-red rounded-[10px] flex items-center justify-center">
-            <img
-              className="w-4 h-4 text-white font-bold text-sm"
-              src={Logo}
-              alt="Logo"
-            />
+            <img className="w-[20.60px] h-[22px]" src={Logo} alt="Logo" />
           </div>
-          <span className="ml-3 text-[18px] font-bold text3">DualEat</span>
-        </div>
+          <span className="ml-3 text-[18px] Arvo-Bold text3">DualEat</span>
+        </Link>
         <nav className="hidden md:flex items-center space-x-8 text4 text-[15px]">
-          <Link to="/sobre-nosotros" className="hover:text-[#B53325] duration-200">
-            Sobre nosotros
-          </Link>
-          <Link to="/" className="hover:text-[#B53325] duration-200">
-            Funcionalidades
-          </Link>
-          <Link to="/para-negocios" className="hover:text-[#B53325] duration-200">
-            Para negocios
-          </Link>
+          {NAVBAR_ROUTES.map((route) => (
+            <Link
+              key={route.label}
+              to={route.path}
+              className={`text4 hover:text-[#b53325]! transition-all duration-200
+              ${
+                location.pathname === route.path ? "text-[#b53325]!" : "text4"
+              }`}
+            >
+              {route.label}
+            </Link>
+          ))}
         </nav>
         <div className="flex items-center space-x-4 text-[14px] text-white">
           <Link
-            to="/login"
-            className="bgsemi-black px-7 py-2 rounded-[10px] font-medium hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 hidden md:block"
+            to={ROUTES.AUTH.LOGIN}
+            className="flex items-center bgsemi-black px-7 py-2 rounded-[10px] hover:bg-gray-800 transform hover:scale-105 transition-all duration-200 "
           >
-            Iniciar sesión
+            <Triangle className="w-[10px] h-[10px] transform rotate-90 fill-white " />
+            <p className="ml-2">Iniciar sesión</p>
           </Link>
           <Link
-            to="/register"
-            className="bg-red px-6 py-2 rounded-[10px] font-medium hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+            to={ROUTES.AUTH.REGISTER}
+            className="flex items-center space-x-3 bg-red px-6 py-2 rounded-[10px] hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            Registrarse
+            <Triangle className="w-[10px] h-[10px] transform rotate-90 fill-white" />
+            <p className="ml-2">Registrarse</p>
           </Link>
         </div>
       </header>
