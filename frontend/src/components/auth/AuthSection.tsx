@@ -197,8 +197,8 @@ const AuthSection: React.FC<Props> = ({
                 className="w-[50px] h-auto mb-[40px]"
               />
               <h1 className="text-[18px] text2">Bienvenido/a a</h1>
-              <h2 className="text-[36px] text-white font-bold mb-3">DualEat</h2>
-              <p className="text-[16px] text2">
+              <h2 className="text-[36px] text-white Arvo-Bold mb-3">DualEat</h2>
+              <p className="text-[16px] text2 leading-[26px]">
                 {carouselTexts[currentImageIndex]}
               </p>
             </div>
