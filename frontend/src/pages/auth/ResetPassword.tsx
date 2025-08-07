@@ -223,7 +223,7 @@ const ResetPassword = () => {
                     />
                     <label
                       htmlFor="email"
-                      className={`absolute left-4 text-[#707070] transition-all duration-300 ${
+                      className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
                         email
                           ? "top-1 text-sm text-blue-500"
                           : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
@@ -290,7 +290,7 @@ const ResetPassword = () => {
                     />
                     <label
                       htmlFor="code"
-                      className={`absolute left-4 text-[#707070] transition-all duration-300 ${
+                      className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
                         code
                           ? "top-1 text-sm text-blue-500"
                           : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
@@ -381,7 +381,7 @@ const ResetPassword = () => {
                     />
                     <label
                       htmlFor="password"
-                      className={`absolute left-4 text-[#707070] transition-all duration-300 ${
+                      className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
                         newPassword
                           ? "top-1 text-sm text-blue-500"
                           : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"

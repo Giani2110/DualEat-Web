@@ -1,5 +1,5 @@
 import React from "react";
-import { Play } from "lucide-react";
+import GooglePlay from "../assets/images/GooglePlay_Badge_Web.png";
 import Logo from "../assets/images/Logo_DualEat.png";
 
 interface Props {
@@ -12,8 +12,8 @@ const DownloadSectionBG: React.FC<Props> = ({ background, background2 }) => {
     <section className={`${background} rounded-3xl h-[400px] overflow-hidden relative`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
         {/* Contenido Izquierdo */}
-        <div className="md:w-[60%] text-center md:text-left mb-12 md:mb-0 z-10">
-          <h1 className="text-[32px] Arvo-Bold text-white leading-[50px] mb-6">
+        <div className="md:w-[60%] text-center md:text-left mb-12 md:mb-8 z-10">
+          <h1 className="text-[30px] Arvo-Bold text-white leading-[50px] mb-6">
             Descargá DualEat y descubrí un mundo lleno de sabores
           </h1>
           <p className="text-[16px] leading-[27px] tracking-[-0.4px] text-white mb-7 max-w-[700px]">
@@ -23,14 +23,13 @@ const DownloadSectionBG: React.FC<Props> = ({ background, background2 }) => {
             viví nuevas experiencias en cada salida.
           </p>
           <div className="flex justify-center md:justify-start animate-fade-in-up delay-200">
-            <button
-              type="button"
-              title="Descargar en Google Play"
-              className="bg-white text-red-600 h-[50px] px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center space-x-2"
-            >
-              <Play className="w-5 h-5" />
-              <span>Google Play</span>
-            </button>
+            <a href="#">
+                <img
+                  src={GooglePlay}
+                  alt="Google Play"
+                  className="w-[165px] h-[50px]"
+                />
+              </a>
           </div>
         </div>
 

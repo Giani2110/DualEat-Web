@@ -1,3 +1,7 @@
+.bgLanding {
+  position: relative;
+}
+
 .bgLanding::before {
   content: "";
   position: absolute;
@@ -5,19 +9,53 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url("../../images/landing/bgpaper.avif");
+  background-image: url("../../images/landing/BGPaper.avif");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   z-index: -1;
-  opacity: 0.05;
-  min-height: 105vh;
+  opacity: 0.09;
 }
 
+.bgCarousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.bgCarousel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../../images/landing/BGCarrousel.jpg");
+  background-repeat: no-repeat;
+  background-size: cover; 
+  display: block;
+  opacity: 0.1;
+  z-index: -1; 
+}
+
+.human {
+  position: relative;
+  overflow: hidden; 
+  min-height: 400px;
+}
+
+.human::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../../images/landing/Human.avif");
+  background-repeat: no-repeat;
+  background-size: cover; 
+  display: block;
+  filter: brightness(0.5);
+  z-index: 0; 
+}
+
+
 .text-L2 {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 25px;
-    padding-left: 48px;
 }
 
 /* About Us */

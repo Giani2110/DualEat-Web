@@ -74,7 +74,7 @@ const Header: React.FC = () => {
           <div className="w-[45px] h-[45px] bg-red rounded-[10px] flex items-center justify-center">
             <img className="w-[20.60px] h-[22px]" src={Logo} alt="Logo" />
           </div>
-          <span className="ml-3 text-[18px] Arvo-Bold text3">DualEat</span>
+          <span className="ml-3 text-[17px] Arvo-Bold text3">DualEat</span>
         </Link>
         <nav className="hidden md:flex items-center space-x-8 text4 text-[15px]">
           {NAVBAR_ROUTES.map((route) => (
