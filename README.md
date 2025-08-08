@@ -1,4 +1,8 @@
  # DualEat - Apartado Web
+---
+### Update (8/8)
+Hay un nuevo archivo llamado deploy.sh, que puede ejecutarse con ```bash ./deploy.sh```, que se conectará con Github, verificando que rama (frontend o backend) debe actualizar sus contenedores de docker compose.
+
 
 # Introducción 
 Este proyecto forma parte de DualEat, una plataforma gastronómica multiplataforma (web y móvil) que busca integrar la experiencia de comer fuera y cocinar en casa. La API RESTful, desarrollada con Node.js, Express.js y Prisma ORM, actúa como núcleo central del sistema, gestionando usuarios, locales gastronómicos, menús, pedidos, comunidades y preferencias.
