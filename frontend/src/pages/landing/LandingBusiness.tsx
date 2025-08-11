@@ -47,9 +47,9 @@ const LandingBusiness: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bgLanding">
       {/* Main Content - Business Form */}
-      <main className="max-w-[70%] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:pt-[180px] md:pb-[130px] bgLanding grid lg:grid-cols-2 gap-12">
+      <main className="max-w-[70%] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:pt-[180px] md:pb-[130px] grid lg:grid-cols-2 gap-12">
         {/* Left Column - Form Info */}
         <div className="space-y-8 max-w-[90%]">
           <div className="transform hover:scale-101 transition-transform duration-300 flex flex-col space-y-5">

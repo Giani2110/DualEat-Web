@@ -1,0 +1,20 @@
+# frontend/Dockerfile
+FROM node:20
+
+WORKDIR /app
+
+# Copy package.json and package-lock.json (or yarn.lock)
+# to leverage Docker's caching and install dependencies efficiently.
+COPY package*.json ./
+
+# Install all dependencies. This should include @vitejs/plugin-react if it's in your package.json
+RUN npm install
+
+# Copy the rest of your application code
+COPY . .
+
+# Expose port 5173
+EXPOSE 5173
+
+# Command to run the development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

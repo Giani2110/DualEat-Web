@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-
 import AuthSection from "../../components/auth/AuthSection";
+
+import { ROUTES } from "../../constants/constants";
 
 import { Link } from "react-router-dom";
 
@@ -23,7 +24,7 @@ const Login: React.FC = () => {
         <div className="text-center text-[15px] flex items-center justify-center mt-6 gap-3">
           <span className="text4">¿No tienes cuenta? </span>
           <Link
-            to={"/register"}
+            to={ROUTES.AUTH.REGISTER}
             className="text5 underline cursor-pointer hover:text-red-600 font-bold"
           >
             Regístrate en DualEat
@@ -33,18 +34,20 @@ const Login: React.FC = () => {
       background="left-background"
       Dform="Dform"
     >
+      <form className="flex flex-col gap-6">
       {/* Campo de email */}
-      <div>
+      <div className="mt-3">
         <div className="font-medium text-[15px] mb-2 text5">Email</div>
         <div className="relative">
           <input
+            required
             type="email"
             value={email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setEmail(e.target.value)
             }
             placeholder="tu@email.com"
-            className="w-full px-4 py-3 border border-gray-300 rounded-[8px] focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-[8px] focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none"
           />
         </div>
       </div>
@@ -54,13 +57,14 @@ const Login: React.FC = () => {
         <div className="font-medium text-[15px] mb-2 text5">Contraseña</div>
         <div className="relative">
           <input
+            required
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setPassword(e.target.value)
             }
             placeholder="••••••••"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none pr-12"
+            className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none pr-12"
           />
           <button
             type="button"
@@ -73,7 +77,7 @@ const Login: React.FC = () => {
       </div>
 
       {/* Recordarme y olvidé contraseña */}
-      <div className="flex items-center justify-between mt-[30px]">
+      <div className="flex items-center justify-between mt-[20px]">
         <div className="flex items-center">
           <input
             placeholder="Recuérdame"
@@ -86,22 +90,22 @@ const Login: React.FC = () => {
           />
           <span className="ml-2 text-[15px]">Recuérdame</span>
         </div>
-        <button
-          type="button"
-          className="text-[#822621] text-[15px] cursor-pointer underline hover:text-red-600"
+        <Link
+          to={ROUTES.AUTH.RESET_PASSWORD}
+          className="text-[#822621] text-[15px] cursor-pointer underline hover:scale-101 transition-transform"
         >
           ¿Olvidé mi contraseña?
-        </button>
+        </Link>
       </div>
 
       {/* Botón de inicio de sesión */}
       <button
         type="submit"
-        onClick={() => console.log("Login clicked")}
-        className="w-full bgsemi-black text-white py-3 px-4 rounded-lg transition-all duration-300 cursor-pointer  font-medium"
+        className="w-full mt-3 mb-6 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg  cursor-pointer font-medium"
       >
         Iniciar Sesión →
       </button>
+      </form>
     </AuthSection>
   );
 };
