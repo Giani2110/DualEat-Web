@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { X, Eye, EyeOff } from "lucide-react";
 import { withMinimumDelay } from "../../utils/timeUtils";
 import Loader from "../../components/Loader";
+import OtpInput from "../../components/OtpInput";
 
 import { ROUTES } from "../../constants/constants";
 import { useNavigate } from "react-router-dom";
@@ -133,7 +134,7 @@ const ResetPassword = () => {
 
     try {
       if (newPassword !== confirmPassword) {
-        setError("Las contraseñas no coinciden");
+        setError("Las contraseñas no coinciden");
         return;
       }
 
@@ -167,7 +168,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bgAnimation">
-      <div className="max-w-[600px] h-[650px] w-full flex flex-col items-center mt-20 bg-black border border-gray-600  rounded-[20px] px-8 py-10">
+      <div className="max-w-[600px] h-[650px] w-full flex flex-col items-center mt-20 bg-black border border-gray-600 rounded-[20px] px-8 py-10">
         <div className="flex items-center mb-6">
           <X
             size={22}
@@ -277,28 +278,13 @@ const ResetPassword = () => {
                     Si tienes que solicitar un código nuevo, vuelve y realiza la
                     solicitud nuevamente.
                   </p>
-
+                  
+                  {/* OtpInput component */}
                   <div className="relative mt-8">
-                    <input
-                      type="text"
-                      id="code"
-                      placeholder="Introduce tu código"
-                      className="peer w-full border text1 px-4 pb-3 pt-7 rounded-[5px] border-gray-700 placeholder-transparent focus:outline-none focus:border-blue-500"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      required
-                    />
-                    <label
-                      htmlFor="code"
-                      className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
-                        code
-                          ? "top-1 text-sm text-blue-500"
-                          : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
-                      }`}
-                    >
-                      Introduce tu código
-                    </label>
+                      <label className="block text-center text-sm mb-4 text-[#707070]">Introduce el código de 6 dígitos</label>
+                      <OtpInput length={6} value={code} onChange={setCode} />
                   </div>
+
                   <p className="text4 text-[15px] leading-[21px] text-center mt-5">
                     ¿No recibiste el correo?
                     <button
