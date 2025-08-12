@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mail, MessageCircle } from "lucide-react";
+import axios from "axios";
 
 import DownloadSectionBG from "../../components/DownloadSectionBG";
 
@@ -10,7 +11,7 @@ interface FormData {
   phone: string;
   businessName: string;
   businessLocation: string;
-  visitTime: string; // Si este campo no va en el formulario, considera eliminarlo de la interfaz y del estado
+  visitTime: string;
   message: string;
   newsletter: boolean;
 }
@@ -27,6 +28,12 @@ const LandingBusiness: React.FC = () => {
     newsletter: false,
   });
 
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState({
+    message: "",
+    type: "",
+  });
+
   // Tipado para el evento de cambio de input
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -40,10 +47,44 @@ const LandingBusiness: React.FC = () => {
   };
 
   // Tipado para el evento de envío del formulario
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Aquí es donde normalmente enviarías formData a una API
+    setLoading(true);
+    setStatusMessage({ message: "", type: "" });
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/contact/business",
+        formData
+      );
+
+      if (response.status === 200) {
+        setStatusMessage({
+          message: "¡Gracias por contactarnos! Te responderemos pronto.",
+          type: "success",
+        });
+        // Limpiar el formulario después del envío exitoso
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          businessName: "",
+          businessLocation: "",
+          visitTime: "",
+          message: "",
+          newsletter: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error al enviar el formulario:", error);
+      setStatusMessage({
+        message:
+          "Ocurrió un error. Por favor, intenta de nuevo o contáctanos por mail.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -228,10 +269,23 @@ const LandingBusiness: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-red text-white py-2 cursor-pointer px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-102 hover:shadow-lg"
+              disabled={loading}
+              className={`w-full text-white py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-102 hover:shadow-lg
+              ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-red cursor-pointer"}`}
             >
-              Enviar
+              {loading ? "Enviando..." : "Enviar"}
             </button>
+            {statusMessage.message && (
+              <p
+                className={`text-center mt-4 text-sm font-medium ${
+                  statusMessage.type === "success"
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {statusMessage.message}
+              </p>
+            )}
           </form>
         </div>
       </main>

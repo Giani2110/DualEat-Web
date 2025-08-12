@@ -12,6 +12,7 @@ import { configurePassport } from "./config/passport";
 import authRoutes from "./routes/auth.routes";
 import onboardingRoutes from "./routes/onBoarding.routes";
 import foodCategoriesRoutes from "./routes/onBoarding.routes";
+import contactRouter from "./routes/contact.routes";
 
 dotenv.config();
 const app = express();
@@ -73,6 +74,8 @@ app.use("/auth", authRoutes);
 
 app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/food-categories", foodCategoriesRoutes);
+
+app.use('/contact', contactRouter);
 
 // --- 4. MANEJO DE RUTAS DE PRUEBA Y ERRORES ---
 
