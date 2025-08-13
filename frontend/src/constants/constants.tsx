@@ -1,4 +1,4 @@
-import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, AdminBusinessCreation, AdminFoodCategories } from "../pages";
+import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, AdminBusinessCreation, AdminFoodCategories, AdminLocals } from "../pages";
 
 export const ROUTES = {
   LANDING: {
@@ -17,6 +17,7 @@ export const ROUTES = {
   ADMIN: {
     BUSINESS_CREATION: "/admin/business-creation",
     FOOD_CATEGORIES: "/admin/food-categories",
+    LOCALS: "/admin/locals",
   },
 };
 
@@ -45,5 +46,6 @@ export const appRoutes = [
   // Admin
   { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <AdminBusinessCreation /> },
   { path: ROUTES.ADMIN.FOOD_CATEGORIES, element: <AdminFoodCategories /> },
+  { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
 ];
 

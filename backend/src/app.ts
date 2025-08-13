@@ -80,6 +80,7 @@ app.use('/contact', contactRouter);
 
 //Admin
 app.use("/admin", adminRouter);
+app.use("/api/admin", adminRouter);
 
 // --- 4. MANEJO DE RUTAS DE PRUEBA Y ERRORES ---
 

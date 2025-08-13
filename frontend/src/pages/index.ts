@@ -14,6 +14,7 @@ export { default as ResetPassword } from "../pages/auth/ResetPassword";
 // Admin
 export { default as AdminBusinessCreation } from "../pages/admin/AdminBusinessCreation";
 export { default as AdminFoodCategories } from "../pages/admin/AdminFoodCategories";
+export { default as AdminLocals } from "../pages/admin/AdminLocals";
 
 // Components
 export { default as ProtectedRoute } from "../components/ProtectedRoutes";
