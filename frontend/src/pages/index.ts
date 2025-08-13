@@ -18,3 +18,6 @@ export { default as AdminLocals } from "../pages/admin/AdminLocals";
 
 // Components
 export { default as ProtectedRoute } from "../components/ProtectedRoutes";
+
+// Local
+export { default as LocalDashboard } from "../pages/local/Dashboard";
