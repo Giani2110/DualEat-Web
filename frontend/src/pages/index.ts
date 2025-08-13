@@ -11,5 +11,9 @@ export { default as Register } from "../pages/auth/Register";
 export { default as Onboarding } from "../pages/auth/Onboarding";
 export { default as ResetPassword } from "../pages/auth/ResetPassword";
 
+// Admin
+export { default as AdminBusinessCreation } from "../pages/admin/AdminBusinessCreation";
+export { default as AdminFoodCategories } from "../pages/admin/AdminFoodCategories";
+
 // Components
 export { default as ProtectedRoute } from "../components/ProtectedRoutes";

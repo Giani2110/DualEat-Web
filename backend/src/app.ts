@@ -13,6 +13,7 @@ import authRoutes from "./routes/auth.routes";
 import onboardingRoutes from "./routes/onBoarding.routes";
 import foodCategoriesRoutes from "./routes/onBoarding.routes";
 import contactRouter from "./routes/contact.routes";
+import adminRouter from "./routes/admin.routes";
 
 dotenv.config();
 const app = express();
@@ -76,6 +77,9 @@ app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/food-categories", foodCategoriesRoutes);
 
 app.use('/contact', contactRouter);
+
+//Admin
+app.use("/admin", adminRouter);
 
 // --- 4. MANEJO DE RUTAS DE PRUEBA Y ERRORES ---
 
