@@ -1,16 +1,29 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
-export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+import { TokenPayload } from "../utils/jwt";
+
+export const isAuthenticated = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const token = req.cookies?.accessToken;
 
-  if (!token) return res.status(401).json({ message: "Token no encontrado" });
+  if (!token) {
+    console.warn("Acceso denegado: token no presente");
+    return res.status(401).json({ message: "Token no encontrado" });
+  }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Token inválido o expirado" });
+    console.error("Error de autenticación:", err);
+    return res
+      .status(401)
+      .clearCookie("accessToken")
+      .json({ message: "Token inválido o expirado" });
   }
 };
