@@ -4,11 +4,9 @@ import 'dotenv/config';
 
 const client = new ImageAnnotatorClient();
 
-// Definición de interfaces y tipos
 export interface MenuDish {
   name: string;
-  description?: string;
-  price?: number | null;
+  price: number;
   category?: string;
   confidence?: number | null;
 }
@@ -23,35 +21,29 @@ export interface OcrResult {
   };
 }
 
-// Funciones auxiliares
 const parsePrice = (text: string): number | null => {
-  const regex = /[$€]?\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/;
-  const match = text.match(regex);
-  if (!match) return null;
+    const regex = /\$?\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/;
+    const match = text.match(regex);
+    if (!match) return null;
   
-  let num = match[1]
-    .replace(/\./g, '')
-    .replace(',', '.');
+    let num = match[1].replace(/\./g, '').replace(',', '.');
   
-  const price = parseFloat(num);
-  return isNaN(price) ? null : price;
-};
-
-const isCategory = (line: string): boolean => {
-  if (!line || line.length < 2) return false;
-  return line === line.toUpperCase() && 
-         !/[0-9$€]/.test(line) &&
-         line.length < 50;
-};
+    const price = parseFloat(num);
+    // Rango de precios: 100 a 1.000.000 pesos
+    if (isNaN(price) || price < 100 || price > 1000000) {
+      return null;
+    }
+    return price;
+  };
 
 const isPossibleDishName = (line: string): boolean => {
-  return line.length > 2 && 
-         line.split(/\s+/).length <= 7 && 
-         !isCategory(line) &&
-         !parsePrice(line);
+  // Ahora la lógica simplemente verifica si la línea tiene 5 o menos palabras y no es solo un precio
+  return line.length > 2 &&
+         line.split(/\s+/).length <= 5 &&
+         parsePrice(line) === null;
 };
 
-// Función principal
+
 export const processMenuImage = async (filePath: string): Promise<OcrResult> => {
   try {
     const imageBuffer = await fs.readFile(filePath);
@@ -75,54 +67,36 @@ export const processMenuImage = async (filePath: string): Promise<OcrResult> => 
       .map(line => line.trim())
       .filter(line => line.length > 0);
 
-    const categories: string[] = [];
     const dishes: MenuDish[] = [];
-    let currentCategory: string | undefined;
-    let currentDish: MenuDish | null = null;
+    let currentDishName: string | null = null;
     
     for (const line of lines) {
-      const price = parsePrice(line);
-
-      if (isCategory(line)) {
-        if (currentDish) {
-          dishes.push(currentDish);
-        }
-        currentCategory = line;
-        categories.push(currentCategory);
-        currentDish = null;
-        continue;
+      // Si la línea actual es un posible nombre de plato, lo guardamos
+      if (isPossibleDishName(line)) {
+        currentDishName = line;
       }
       
-      if (isPossibleDishName(line)) {
-        if (currentDish) {
-          dishes.push(currentDish);
-        }
-        currentDish = {
-          name: line,
-          category: currentCategory,
+      // Si tenemos un nombre de plato guardado y la línea actual es un precio válido
+      const price = parsePrice(line);
+      if (currentDishName && price !== null) {
+        dishes.push({
+          name: currentDishName,
           price: price,
+          category: undefined,
           confidence: avgConfidence
-        };
-      } else if (currentDish && price !== null) {
-        currentDish.price = price;
-      } else if (currentDish) {
-        currentDish.description = currentDish.description
-          ? `${currentDish.description} ${line}`
-          : line;
+        });
+        // Reiniciamos el nombre del plato para el siguiente ciclo
+        currentDishName = null;
       }
-    }
-    
-    if (currentDish) {
-      dishes.push(currentDish);
     }
 
     const cleanedDishes = dishes.filter(d => 
-      d.name && d.name.length > 2 && d.name.split(/\s+/).length <= 10
+      d.name && d.name.length > 2 && d.name.split(/\s+/).length <= 5
     );
 
     return {
       dishes: cleanedDishes,
-      categories: [...new Set(categories)],
+      categories: [],
       processingInfo: {
         rawText,
         detectedLanguage,

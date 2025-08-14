@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { processMenuImage, MenuDish, OcrResult } from '../services/menu.service';
+import { processMenuImage, MenuDish } from '../services/menu.service';
 import multer from 'multer';
 import path from 'path';
 import { generateQrForLocal } from '../services/qr.service';
@@ -22,8 +22,6 @@ export const generateQrCodeController = async (req: Request, res: Response) => {
   }
 };
 
-
-// Configuración de multer (igual que antes)
 const upload = multer({ 
   dest: 'uploads/',
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -46,12 +44,7 @@ export const uploadMenuController = async (req: Request, res: Response) => {
 
     const result = await processMenuImage(req.file.path);
     
-    // Validación con tipos explícitos
-    const validDishes = result.dishes.filter((dish: MenuDish) => 
-      dish.name && 
-      dish.name.length >= 2 && 
-      !dish.name.match(/^[^a-zA-Z]*$/)
-    );
+    const validDishes = result.dishes;
 
     if (validDishes.length === 0) {
       return res.status(422).json({
@@ -61,25 +54,13 @@ export const uploadMenuController = async (req: Request, res: Response) => {
       });
     }
 
-    // Agrupamiento con tipos explícitos
-    const dishesByCategory: Record<string, MenuDish[]> = {};
-    validDishes.forEach((dish: MenuDish) => {
-      const category = dish.category || 'SIN CATEGORÍA';
-      if (!dishesByCategory[category]) {
-        dishesByCategory[category] = [];
-      }
-      dishesByCategory[category].push(dish);
-    });
-
+    // El controlador ahora retorna la lista de platos sin agrupar por categorías
     res.status(200).json({
       success: true,
       message: 'Imagen del menú procesada exitosamente.',
       data: {
         totalDishes: validDishes.length,
-        dishesWithPrices: validDishes.filter((d: MenuDish) => d.price !== null).length,
-        dishesWithoutPrices: validDishes.filter((d: MenuDish) => d.price === null).length,
-        categories: Object.keys(dishesByCategory),
-        dishesByCategory
+        dishes: validDishes
       },
       processingInfo: {
         ocrConfidence: result.processingInfo.confidence,
