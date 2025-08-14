@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 import AuthSection from "../../components/auth/AuthSection";
 
 import { ROUTES } from "../../constants/constants";
 import { Link, useNavigate } from "react-router-dom";
-import { useRegister } from "../../context/RegisterContext";
+import { useAuth } from "../../hooks/useAuth";
 
 import "../../assets/scss/auth/auth.scss";
 
@@ -16,51 +17,30 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [error, setError] = useState<string | null>(null); // Nuevo estado para manejar errores
 
-  const { updateData } = useRegister();
+  const { register } = useAuth();
 
   const navigate = useNavigate();
 
   const handleNext = async () => {
-    // Cambiado a async
-    setError(null); // Limpiar errores anteriores
-
     if (!email || !password || !confirmPassword) {
-      alert("Por favor, completa todos los campos.");
+      toast.error("Por favor, completa todos los campos.");
       return;
     }
     if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden.");
+      toast.error("Las contraseñas no coinciden.");
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:3000/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const responseData = await register(email, password);
 
-      const responseData = await response.json();
-
-      if (response.ok) {
-        // Registro exitoso del paso 1
-        // Guardar el email y el temp_token en el contexto
-        updateData({
-          email: email,
-          tempToken: responseData.temp_token, // <--- ¡Asegúrate de que esto se esté guardando!
-        });
-        navigate(responseData.next_step); // Redirigir a /onboarding (que es lo que devuelve el backend)
-      } else {
-        // Manejar errores del backend (ej. email ya existe - status 409)
-        setError(responseData.message || "Ocurrió un error en el registro.");
+      if (responseData?.success && responseData.next_step) {
+        navigate(responseData.next_step);
       }
     } catch (err) {
       console.error("Error al registrar el paso 1:", err);
-      setError("No se pudo conectar con el servidor. Intenta de nuevo.");
+      toast.error("No se pudo conectar con el servidor. Intenta de nuevo.");
     }
   };
 
@@ -85,7 +65,13 @@ const Register: React.FC = () => {
       Dform="Dform-right"
       items="items-end text-right"
     >
-      <form onSubmit={handleNext} className="flex flex-col gap-6">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleNext();
+        }}
+        className="flex flex-col gap-6"
+      >
         {/* Campo de email */}
         <div className="mt-3">
           <p className="font-medium text-[15px] mb-2 text5">Email</p>
@@ -152,9 +138,7 @@ const Register: React.FC = () => {
         </div>
 
         {/* Mostrar mensaje de error si existe */}
-        {error && (
-          <div className="text-red-500 text-sm mt-2 text-center">{error}</div>
-        )}
+
         {/* Botón de registro */}
         <div className="mb-2">
           <button
@@ -163,22 +147,23 @@ const Register: React.FC = () => {
           >
             Registrarse →
           </button>
-          <p className="text-[12px] text4 text-center max-w-[400px] mx-auto mt-2">
-            Al registrarte, aceptas los
-            {" "}<span className="text-[#0a87da] cursor-pointer hover:underline">
-              Términos de servicio
-            </span>{" "}
-            y la{" "}
-            <span className="text-[#0a87da] cursor-pointer hover:underline">
-              Política de privacidad
-            </span>
-            , incluida la política de{" "}
-            <span className="text-[#0a87da] cursor-pointer hover:underline">
-              Uso de Cookies.
-            </span>
-          </p>
         </div>
       </form>
+
+      <p className="text-[12px] text4 text-center max-w-[400px] mx-auto mt-2">
+        Al registrarte, aceptas los{" "}
+        <span className="text-[#0a87da] cursor-pointer hover:underline">
+          Términos de servicio
+        </span>{" "}
+        y la{" "}
+        <span className="text-[#0a87da] cursor-pointer hover:underline">
+          Política de privacidad
+        </span>
+        , incluida la política de{" "}
+        <span className="text-[#0a87da] cursor-pointer hover:underline">
+          Uso de Cookies.
+        </span>
+      </p>
     </AuthSection>
   );
 };

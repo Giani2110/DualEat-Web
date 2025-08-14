@@ -5,31 +5,31 @@ import { Toaster } from "react-hot-toast";
 import ScrollToTop from "../components/ScrollToTop";
 import Layout from "../layout/layout";
 
-import { RegisterProvider } from "../context/RegisterContext";
+import { AuthProvider } from "../context/auth/AuthProvider";
 
 function AppRouter() {
   return (
     <BrowserRouter>
-      <ScrollToTop />
-      <Toaster 
-        position="top-center"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: "#333",
-            color: "#fff",
-          },
-        }}
-      />
-      <Layout>
-        <RegisterProvider>
+      <AuthProvider>
+        <ScrollToTop />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "#333",
+              color: "#fff",
+            },
+          }}
+        />
+        <Layout>
           <Routes>
             {appRoutes.map(({ path, element }, index) => (
               <Route key={index} path={path} element={element} />
             ))}
           </Routes>
-        </RegisterProvider>
-      </Layout>
+        </Layout>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

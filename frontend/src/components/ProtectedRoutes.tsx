@@ -1,7 +1,8 @@
-// src/components/ProtectedRoute.tsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useRegister } from '../context/RegisterContext'; // Ajusta la ruta si es necesario
+import { useAuth } from '../hooks/useAuth'; 
+
+import { ROUTES } from '../constants/constants';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,19 +10,24 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
-  const { data: registerContextData } = useRegister();
+  const { user, loading } = useAuth(); 
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
+  if (user) {
+    return <>{children}</>;
+  }
 
   const queryParams = new URLSearchParams(location.search);
   const tokenFromUrl = queryParams.get('tempToken');
-
-  const tokenFromContext = registerContextData?.tempToken;
-
-  // Si no hay token en la URL ni en el contexto, redirigir
-  if (!tokenFromUrl && !tokenFromContext) {
-    return <Navigate to="/register" replace />;
+  
+  if (tokenFromUrl) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
 };
 
 export default ProtectedRoute;
