@@ -8,7 +8,7 @@ import { PasswordController } from "../controllers/passwordController";
 
 import { isAuthenticated } from "../middlewares/isAuthenticated";
 
-import { createTempToken, TempTokenPayload, TokenPayload } from "../utils/jwt";
+import { createTempToken, TempTokenPayload, TokenPayload, createToken } from "../utils/jwt";
 
 const router = Router();
 const userService = new UserService();
@@ -64,14 +64,14 @@ router.get(
         trial_ends_at: user.trial_ends_at,
         avatar_url: user.avatar_url,
       };
-      const mainToken = createToken(tokenPayload);
+      const mainToken = createToken(tokenPayload, false);
 
       // Se establece la cookie directamente y se redirige
       res.cookie("accessToken", mainToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 60 * 60 * 1000, // 1 hora
+        maxAge: 10 * 24 * 60 * 60 * 1000, // 10 días
       });
 
       return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);

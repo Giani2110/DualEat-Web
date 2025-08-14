@@ -33,7 +33,7 @@ export const appRoutes = [
   {
     path: ROUTES.AUTH.ONBOARDING,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute onlyTempToken>
         <Onboarding />
       </ProtectedRoute>
     ),

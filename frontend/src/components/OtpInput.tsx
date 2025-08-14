@@ -51,7 +51,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ length, onChange, value }) => {
           key={index}
           type="text"
           maxLength={1}
-          value={value[index] || ""} // Asignar el valor del array o una cadena vacía
+          value={value[index] || ""}
           onChange={(e) => handleChange(e, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           onPaste={handlePaste}
