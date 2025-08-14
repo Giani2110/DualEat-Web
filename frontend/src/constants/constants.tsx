@@ -1,4 +1,6 @@
-import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute } from "../pages";
+import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions } from "../pages";
+
+import ProtectedRoute from "../components/ProtectedRoutes";
 
 export const ROUTES = {
   LANDING: {
