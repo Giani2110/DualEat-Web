@@ -21,28 +21,75 @@ export interface OcrResult {
   };
 }
 
-const parsePrice = (text: string): number | null => {
-    const regex = /\$?\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/;
-    const match = text.match(regex);
-    if (!match) return null;
-  
-    let num = match[1].replace(/\./g, '').replace(',', '.');
-  
-    const price = parseFloat(num);
-    // Rango de precios: 100 a 1.000.000 pesos
-    if (isNaN(price) || price < 100 || price > 1000000) {
-      return null;
-    }
-    return price;
-  };
+/* ------------------- Utilidades ------------------- */
 
-const isPossibleDishName = (line: string): boolean => {
-  // Ahora la lógica simplemente verifica si la línea tiene 5 o menos palabras y no es solo un precio
-  return line.length > 2 &&
-         line.split(/\s+/).length <= 5 &&
-         parsePrice(line) === null;
+const MIN_PRICE = 500; 
+const MAX_PRICE = 1000000;
+
+const BAD_START = [
+  'y', 'con', 'acompañado', 'acompañada', 'acompañados', 'acompañadas', 'de', 'en', 'o', 'sin','para', 
+  'plato', 'platos', 'postre', 'postres', 'bebida', 'bebidas',
+  'entrada', 'entradas', 'sopa', 'sopas', 'ensalada', 'ensaladas', 'menu', 'menú',
+  'especial', 'especiales', 'oferta', 'ofertas', 'promoción', 'promociones',
+  'combo', 'combos', 'plato del día', 'plato del dia', 'platos del día', 'platos del dia', 'incluye', 'incluyen',
+  'horario', 'horarios', 'lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado', 'domingo', 'abierto', 'cerrado',
+  'precio', 'precios', 'iva incluido', 'iva no incluido', 'impuestos incluidos', 'impuestos no incluidos',
+  'consulte', 'consultan', 'pregunte', 'preguntan', 'gracias', 'bienvenido', 'bienvenida', 'bienvenidos', 'bienvenidas', 
+  'disculpe', 'disculpen', 'favor', 'favor de', 'prohibido', 'no se permite',
+];
+
+const sanitizeName = (s: string) =>
+  s
+    .replace(/[.,;:]+$/g, '')   // saca puntuación final
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+const startsLower = (s: string) => /^[\p{Ll}]/u.test(s);
+const hasDigits = (s: string) => /\d/.test(s);
+
+const isPriceOnlyLine = (s: string) => /^\s*\$?\s*\d[\d.,]*\s*$/.test(s.trim());
+
+const parsePrice = (text: string): number | null => {
+  const match = text.match(/\$?\s*(\d[\d.,]*)/);
+  if (!match) return null;
+
+  let num = match[1].replace(/\./g, '').replace(',', '.');
+  const price = parseFloat(num);
+
+  if (isNaN(price) || price < MIN_PRICE || price > MAX_PRICE) return null;
+  return price;
 };
 
+const extractNameBeforeLastPrice = (line: string): { name: string | null; price: number | null } => {
+  const matches = line.match(/\$?\s*\d[\d.,]*/g);
+  if (!matches) return { name: null, price: null };
+
+  const last = matches[matches.length - 1];
+  const idx = line.lastIndexOf(last);
+  const namePart = sanitizeName(line.slice(0, idx));
+  const pricePart = parsePrice(last);
+  return { name: namePart || null, price: pricePart };
+};
+
+const isPossibleDishName = (line: string): boolean => {
+  const s = sanitizeName(line);
+  if (!s || s.length < 3) return false;
+  if (startsLower(s)) return false;
+  if (hasDigits(s)) return false;
+
+  const lower = s.toLowerCase();
+  if (BAD_START.some(w => lower.startsWith(w + ' '))) return false;
+
+  const words = s.split(/\s+/);
+  if (words.length < 1 || words.length > 6) return false;
+
+  // Evita frases que suelen ser descripciones
+  if (/\b(y|con|de|en|o)\b/i.test(lower) && words.length > 3) return false;
+
+  return true;
+};
+
+/* ------------------- Procesamiento OCR ------------------- */
 
 export const processMenuImage = async (filePath: string): Promise<OcrResult> => {
   try {
@@ -54,45 +101,62 @@ export const processMenuImage = async (filePath: string): Promise<OcrResult> => 
     let totalConfidence = 0;
     let wordCount = 0;
     if (result.textAnnotations) {
-      result.textAnnotations.slice(1).forEach(annotation => {
-        if (annotation.confidence != null) {
-          totalConfidence += annotation.confidence;
+      result.textAnnotations.slice(1).forEach(a => {
+        if (a.confidence != null) {
+          totalConfidence += a.confidence;
           wordCount++;
         }
       });
     }
     const avgConfidence = wordCount > 0 ? totalConfidence / wordCount : null;
 
-    const lines = rawText.split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
+    // Preprocesado de líneas
+    const lines = rawText
+      .split('\n')
+      .map(l => l.replace(/\s{2,}/g, ' ').trim())
+      .filter(l => l.length > 0);
 
     const dishes: MenuDish[] = [];
-    let currentDishName: string | null = null;
-    
-    for (const line of lines) {
-      // Si la línea actual es un posible nombre de plato, lo guardamos
-      if (isPossibleDishName(line)) {
-        currentDishName = line;
-      }
-      
-      // Si tenemos un nombre de plato guardado y la línea actual es un precio válido
-      const price = parsePrice(line);
-      if (currentDishName && price !== null) {
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      const { name: inlineName, price: inlinePrice } = extractNameBeforeLastPrice(line);
+      if (inlineName && inlinePrice !== null && isPossibleDishName(inlineName)) {
         dishes.push({
-          name: currentDishName,
-          price: price,
-          category: undefined,
+          name: inlineName,
+          price: inlinePrice,
           confidence: avgConfidence
         });
-        // Reiniciamos el nombre del plato para el siguiente ciclo
-        currentDishName = null;
+        continue;
+      }
+
+      // Caso: nombre en una línea y precio en la siguiente
+      if (isPossibleDishName(line)) {
+        const next = lines[i + 1] ?? '';
+        if (isPriceOnlyLine(next) && parsePrice(next) !== null) {
+          dishes.push({
+            name: sanitizeName(line),
+            price: parsePrice(next)!,
+            confidence: avgConfidence
+          });
+          i++;
+        }
       }
     }
 
-    const cleanedDishes = dishes.filter(d => 
-      d.name && d.name.length > 2 && d.name.split(/\s+/).length <= 5
-    );
+    // Limpieza final
+    const seen = new Set<string>();
+    const cleanedDishes = dishes
+      .map(d => ({ ...d, name: sanitizeName(d.name) }))
+      .filter(d => {
+        const key = d.name.toLowerCase();
+        if (BAD_START.some(w => key.startsWith(w + ' '))) return false;
+        if (key.endsWith(' con') || key.endsWith(' de') || key.endsWith(' en')) return false;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
     return {
       dishes: cleanedDishes,
@@ -107,10 +171,6 @@ export const processMenuImage = async (filePath: string): Promise<OcrResult> => 
     console.error('Error en procesamiento OCR:', err);
     throw err;
   } finally {
-    try {
-      await fs.unlink(filePath);
-    } catch {
-      // Ignore
-    }
+    try { await fs.unlink(filePath); } catch {}
   }
 };

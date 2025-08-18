@@ -3,6 +3,7 @@ import { processMenuImage, MenuDish } from '../services/menu.service';
 import multer from 'multer';
 import path from 'path';
 import { generateQrForLocal } from '../services/qr.service';
+import { createFoodsFromOcr } from '../services/food.service';
 
 export const generateQrCodeController = async (req: Request, res: Response) => {
   try {
@@ -35,46 +36,30 @@ const upload = multer({
 
 export const uploadMenuController = async (req: Request, res: Response) => {
   try {
+    const localId = parseInt(req.params.localId); // asegúrate que localId venga en la ruta
     if (!req.file) {
-      return res.status(400).json({ 
-        error: 'No se subió ninguna imagen.',
-        details: 'Debe proporcionar un archivo de imagen válido.'
-      });
+      return res.status(400).json({ error: 'No se subió ninguna imagen.' });
     }
 
     const result = await processMenuImage(req.file.path);
-    
     const validDishes = result.dishes;
 
     if (validDishes.length === 0) {
-      return res.status(422).json({
-        error: 'No se pudieron extraer platos válidos del menú.',
-        details: 'Los datos extraídos no cumplen con los criterios de validación.',
-        processingInfo: result.processingInfo
-      });
+      return res.status(422).json({ error: 'No se pudieron extraer platos válidos.' });
     }
 
-    // El controlador ahora retorna la lista de platos sin agrupar por categorías
+    // Guardar en DB
+    const saved = await createFoodsFromOcr(localId, validDishes);
+
     res.status(200).json({
       success: true,
-      message: 'Imagen del menú procesada exitosamente.',
-      data: {
-        totalDishes: validDishes.length,
-        dishes: validDishes
-      },
-      processingInfo: {
-        ocrConfidence: result.processingInfo.confidence,
-        detectedLanguage: result.processingInfo.detectedLanguage,
-        textLength: result.processingInfo.rawText.length
-      }
+      message: 'Menú procesado y guardado.',
+      data: saved
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error en uploadMenuController:', error);
-    res.status(500).json({ 
-      error: 'Error interno del servidor.',
-      details: 'Ocurrió un error inesperado al procesar la imagen.'
-    });
+    res.status(500).json({ error: 'Error interno.' });
   }
 };
 
