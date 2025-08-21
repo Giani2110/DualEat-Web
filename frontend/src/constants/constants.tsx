@@ -1,5 +1,7 @@
 import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, AdminBusinessCreation, AdminFoodCategories, AdminLocals, LocalDashboard } from "../pages";
 
+import ProtectedRoute from "../components/ProtectedRoutes";
+
 export const ROUTES = {
   LANDING: {
     HOME: "/",
@@ -39,7 +41,7 @@ export const appRoutes = [
   {
     path: ROUTES.AUTH.ONBOARDING,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute onlyTempToken>
         <Onboarding />
       </ProtectedRoute>
     ),

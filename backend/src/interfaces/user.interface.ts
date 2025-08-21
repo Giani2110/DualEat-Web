@@ -18,6 +18,7 @@ export interface UserPayload {
   active: boolean;
   subscription_status: string;
   avatar_url: string | null;
+  trial_ends_at?: string | null;
 }
 
 export interface RegisterStepOneDto {
