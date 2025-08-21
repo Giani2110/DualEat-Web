@@ -1,4 +1,4 @@
-import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions } from "../pages";
+import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, AdminBusinessCreation, AdminFoodCategories, AdminLocals, LocalDashboard } from "../pages";
 
 import ProtectedRoute from "../components/ProtectedRoutes";
 
@@ -15,6 +15,14 @@ export const ROUTES = {
     REGISTER: "/register",
     ONBOARDING: "/onboarding",
     RESET_PASSWORD: "/password_reset",
+  },
+  ADMIN: {
+    BUSINESS_CREATION: "/admin/business-creation",
+    FOOD_CATEGORIES: "/admin/food-categories",
+    LOCALS: "/admin/locals",
+  },
+  LOCAL: {
+    DASHBOARD: "/local/dashboard",
   },
 };
 
@@ -39,5 +47,13 @@ export const appRoutes = [
     ),
   },
   { path: ROUTES.AUTH.RESET_PASSWORD, element: <ResetPassword /> },
+
+  // Admin
+  { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <AdminBusinessCreation /> },
+  { path: ROUTES.ADMIN.FOOD_CATEGORIES, element: <AdminFoodCategories /> },
+  { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
+
+  // Local
+  { path: ROUTES.LOCAL.DASHBOARD, element: <LocalDashboard /> },
 ];
 
