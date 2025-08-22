@@ -4,6 +4,7 @@ import {
   login as authLogin,
   register as authRegister,
   completeProfile as authCompleteProfile,
+  logout as authLogout,
 } from "../../services/authService";
 import type { AuthResponse, User } from "../../services/authService";
 import { AuthContext } from "./AuthContext";
@@ -90,11 +91,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("rememberMe");
-    document.cookie =
-      "accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    setUser(null);
+  const logout = async () => {
+    const response = await authLogout();
+    if (response?.success) {
+      localStorage.removeItem("rememberMe");
+      setUser(null);
+    }
   };
 
   useEffect(() => {
