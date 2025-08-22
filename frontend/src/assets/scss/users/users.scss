@@ -1,0 +1,28 @@
+// En tu archivo SCSS
+.dashboard-layout {
+  display: grid;
+  height: 100vh;
+}
+
+.sidebar-open {
+  grid-template-columns: 240px 1fr;
+}
+
+.sidebar-closed {
+  grid-template-columns: 80px 1fr;
+}
+
+.navlis {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar {
+  grid-column: 1;
+}
+
+.main-content {
+  grid-column: 2;
+  overflow-y: auto;
+  padding-left: 200px;
+}

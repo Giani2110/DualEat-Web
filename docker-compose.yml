@@ -40,7 +40,7 @@ services:
       - postgres
     environment:
       - DATABASE_URL=postgresql://DualEat:DualEat21102504@postgres:5432/DualEat
-      - CORS_ORIGIN=http://localhost:5173  # Cambiar a puerto 5173
+      - CORS_ORIGIN=http://localhost:5173 
     env_file:
       - ./backend/.env
     volumes:
@@ -61,7 +61,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://localhost:3000  # Para Vite usa VITE_ prefix
+      - VITE_API_URL=http://localhost:3000 
     volumes:
       - ./frontend:/app
       - /app/node_modules

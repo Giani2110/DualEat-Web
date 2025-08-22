@@ -41,7 +41,7 @@ const Onboarding: React.FC = () => {
   useEffect(() => {
     const fetchOnboardingData = async () => {
       try {
-        const response = await axiosInterceptor.get("/api/onboarding");
+        const response = await axiosInterceptor.get("/onboarding");
 
         const fetchedData = await response.data;
 

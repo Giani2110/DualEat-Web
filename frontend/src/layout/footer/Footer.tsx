@@ -1,7 +1,7 @@
 import React from "react";
 import { Instagram, Twitter } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import Logo from "../../assets/images/Logo_DualEat.png";
+import Logo from "../../assets/images/icon/Logo_DualEat.png";
 import GooglePlay from "../../assets/images/GooglePlay_Badge_Web.png";
 
 import { OUT_NAVBAR_ROUTES } from "../../constants/navbar-routes";
@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
             <ul className="space-y-2 text6 text-[12px] transition-colors duration-300 cursor-pointer">
               <li className="py-1">
                 <Link
-                  to={ROUTES.LANDING.HOME}
+                  to={ROUTES.PUBLIC.HOME}
                   className="hover:text-white!"
                 >
                   Inicio
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="py-1">
                 <Link
-                  to={ROUTES.LANDING.BUSINESS}
+                  to={ROUTES.PUBLIC.BUSINESS}
                   className="hover:text-white!"
                 >
                   Para negocios
@@ -97,7 +97,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="py-1">
                 <Link
-                  to={ROUTES.LANDING.CHANGELOG}
+                  to={ROUTES.PUBLIC.CHANGELOG}
                   className=" hover:text-white!"
                 >
                   Changelog
@@ -112,14 +112,14 @@ const Footer: React.FC = () => {
             <ul className="space-y-2 text6 transition-colors duration-300 text-[12px]">
               <li className="py-1">
                 <Link
-                  to={ROUTES.LANDING.ABOUT_US}
+                  to={ROUTES.PUBLIC.ABOUT_US}
                   className="hover:text-white!"
                 >
                   Sobre nosotros
                 </Link>
               </li>
               <li className="py-1">
-                <Link to={ROUTES.LANDING.TERMS} className="hover:text-white!">
+                <Link to={ROUTES.PUBLIC.TERMS} className="hover:text-white!">
                   Términos y condiciones
                 </Link>
               </li>

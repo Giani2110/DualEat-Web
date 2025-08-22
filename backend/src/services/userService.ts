@@ -1,4 +1,4 @@
-import { prisma } from "../providers/prisma";
+import { prisma } from "../prisma/prisma";
 import { Providers, User } from "@prisma/client";
 import { BasicCreateDTO } from "../interfaces/user.interface";
 
@@ -91,8 +91,8 @@ export class UserService {
       const result = await prisma.user.findUnique({
         where: { id: userId },
         include: {
-          preferences: true
-        }
+          preferences: true,
+        },
       });
       return result;
     } catch (error) {

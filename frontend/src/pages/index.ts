@@ -1,7 +1,7 @@
 // Landing
-export { default as LandingHome } from "../pages/landing/LandingHome";
+export { default as LandingHome } from "../pages/landing/Home";
 export { default as AboutUs } from "../pages/landing/AboutUs";
-export { default as LandingBusiness } from "../pages/landing/LandingBusiness";
+export { default as LandingBusiness } from "../pages/landing/Business";
 export { default as ChangeLog } from "../pages/legal/ChangeLog";
 export { default as TermsConditions } from "../pages/legal/TermsConditions";
 
@@ -13,3 +13,9 @@ export { default as ResetPassword } from "../pages/auth/ResetPassword";
 
 // Components
 export { default as ProtectedRoute } from "../components/ProtectedRoutes";
+
+// Local
+//export { default as LocalDashboard } from "../pages/local/Dashboard";
+
+// User
+export { default as UserDashboard } from "./users/UserDashboard";

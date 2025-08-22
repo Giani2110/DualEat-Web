@@ -1,9 +1,9 @@
 import { ROUTES } from "./constants";
 
 export const NAVBAR_ROUTES = [
-  { path: ROUTES.LANDING.ABOUT_US, label: "Sobre nosotros" },
-  { path: `${ROUTES.LANDING.HOME}#Funcionalidades`, label: "Funcionalidades" },
-  { path: ROUTES.LANDING.BUSINESS, label: "Para negocios" },
+  { path: ROUTES.PUBLIC.ABOUT_US, label: "Sobre nosotros" },
+  { path: `${ROUTES.PUBLIC.HOME}#Funcionalidades`, label: "Funcionalidades" },
+  { path: ROUTES.PUBLIC.BUSINESS, label: "Para negocios" },
 ];
 
 export const OUT_NAVBAR_ROUTES = {

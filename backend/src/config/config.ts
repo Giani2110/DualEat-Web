@@ -8,3 +8,5 @@ export const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY |
 export const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "";
 
 export const SECRET_KEY = process.env.JWT_SECRET || "clavePorDefecto";
+
+export const API_PREFIX = "/api";

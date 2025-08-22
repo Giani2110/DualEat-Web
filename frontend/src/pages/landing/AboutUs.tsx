@@ -7,8 +7,8 @@ const AboutUs: React.FC = () => {
     <div className="min-h-screen bgsemi-white pt-[15px]">
       <div className="rounded-[20px] mx-4 bg-gradient-to-r from-[#ED213A] to-[#93291E] text-white h-[400px] relative">
         <div className="max-w-screen-2xl mx-auto text-center pt-[160px]">
-          <h1 className="text-[48px] Arvo-Bold mb-4">Sobre nosotros</h1>
-          <p className="text-[18px] max-w-2xl mx-auto leading-[32px] tracking-[-0.4px]">
+          <h1 className="text-[45px] Arvo-Bold mb-4">Sobre nosotros</h1>
+          <p className="text-[17px] max-w-2xl mx-auto leading-[32px] tracking-[-0.4px]">
             Apasionados por la comida, la tecnología y las experiencias simples
             pero memorables.
           </p>
@@ -21,7 +21,7 @@ const AboutUs: React.FC = () => {
         <div className="bg-gray py-[100px] px-8 rounded-[20px]">
           <div className="max-w-[70%] mx-auto">
             <div className="grid grid-cols-2 justify-center">
-              <h2 className="text-[29px] Arvo-Bold">
+              <h2 className="text-[26px] Arvo-Bold">
                 Nuestros principios
               </h2>
             </div>

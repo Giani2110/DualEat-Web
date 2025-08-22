@@ -7,8 +7,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { configurePassport } from "./config/passport";
 
-// Routes
+import { API_PREFIX } from "./config/config";
 
+// Routes
 import authRoutes from "./routes/auth.routes";
 import onboardingRoutes from "./routes/onBoarding.routes";
 import foodCategoriesRoutes from "./routes/onBoarding.routes";
@@ -19,8 +20,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- 1. CONFIGURACIÓN DE MIDDLEWARES GLOBALES ---
-
-// El orden de estos middlewares es CRÍTICO.
 
 // Habilitar CORS para permitir peticiones desde el frontend.
 app.use(
@@ -70,24 +69,20 @@ app.use(passport.session());
 
 // --- 3. DEFINICIÓN DE RUTAS API ---
 
-app.use("/auth", authRoutes);
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/onboarding`, onboardingRoutes);
+app.use(`${API_PREFIX}/food-categories`, foodCategoriesRoutes);
+app.use(`${API_PREFIX}/contact`, contactRouter);
 
-app.use("/api/onboarding", onboardingRoutes);
-app.use("/api/food-categories", foodCategoriesRoutes);
-
-app.use('/contact', contactRouter);
 
 // --- 4. MANEJO DE RUTAS DE PRUEBA Y ERRORES ---
 
 // Ruta de prueba para verificar el estado de autenticación.
-
 app.get("/status", (req, res) => {
   const token = req.cookies?.accessToken;
-
   if (!token) return res.json({ authenticated: false });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-
     return res.json({ authenticated: true, user: decoded });
   } catch (err) {
     return res.json({ authenticated: false });
@@ -106,7 +101,6 @@ app.use(
 
     res.status(500).json({
       success: false,
-
       message: "Internal Server Error",
     });
   }
@@ -114,7 +108,7 @@ app.use(
 
 // --- 5. INICIAR SERVIDOR ---
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}${API_PREFIX}`);
 });
 
 export default app;

@@ -8,19 +8,16 @@ import {
 import { ROUTES } from "../../constants/constants";
 
 import { Triangle } from "lucide-react";
-import Logo from "../../assets/images/Logo_DualEat.png";
+import Logo from "../../assets/images/icon/Logo DualEatRed.png";
 
 const Header: React.FC = () => {
   const location = useLocation();
-  const [scrolled, setScrolled] = useState(false);
   const [hideHeader, setHideHeader] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
-      setScrolled(currentScrollY > 50);
 
       // Mostrar header si el usuario scrollea hacia arriba
       if (currentScrollY < lastScrollY || currentScrollY < 10) {
@@ -41,42 +38,42 @@ const Header: React.FC = () => {
   }
 
   const transparentPages = [
-    "/sobre-nosotros",
-    "/changelog",
-    "/terminos-y-condiciones",
+    ROUTES.PUBLIC.ABOUT_US,
+    ROUTES.PUBLIC.CHANGELOG,
+    ROUTES.PUBLIC.TERMS,
   ];
 
   const isTransparentPage = transparentPages.includes(location.pathname);
 
   return (
     <div
-      className={`fixed top-0 w-full z-50 transition-transform duration-300 ease-in-out transform ${
-        hideHeader ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
-      } ${
-        isTransparentPage
-          ? "w-full"
-          : scrolled
-          ? "bg-white pt-[40px] pb-[25px] border-b border-gray-200"
-          : "bg-transparent pt-[40px] pb-[25px]"
+      className={`fixed top-0 w-full z-50 pt-[40px] pb-[25px] ${
+        hideHeader && location.pathname !== "/feed"
+          ? "-translate-y-full opacity-0"
+          : "translate-y-0 opacity-100"
+      } 
+
+      ${location.pathname === "/feed" && "border-b border-gray-200 bg-white" 
+         
       }`}
     >
       <header
-        className={`flex justify-between items-center px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+        className={`flex justify-between items-center px-4 sm:px-6 lg:px-8 ${
           isTransparentPage
             ? "bg-white rounded-[15px] py-[11px] max-w-[65%] mx-auto mt-12"
             : "max-w-[75%] mx-auto"
         }`}
       >
         <Link
-          to={ROUTES.LANDING.HOME}
+          to={ROUTES.PUBLIC.HOME}
           className="flex items-center cursor-pointer"
         >
-          <div className="w-[45px] h-[45px] bg-red rounded-[10px] flex items-center justify-center">
-            <img className="w-[20.60px] h-[22px]" src={Logo} alt="Logo" />
-          </div>
-          <span className="ml-3 text-[17px] Arvo-Bold text3">DualEat</span>
+          <img className="w-[35px] h-[35px]" src={Logo} alt="Logo" />
+          <span className="ml-3 text-[17px] text1 Arvo-Bold text-red tracking-tighter">
+            DualEat
+          </span>
         </Link>
-        <nav className="hidden md:flex items-center space-x-8 text4 text-[15px]">
+        <nav className="hidden md:flex items-center space-x-8 text4 text-[14px]">
           {NAVBAR_ROUTES.map((route) => (
             <Link
               key={route.label}
