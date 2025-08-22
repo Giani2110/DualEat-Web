@@ -71,6 +71,11 @@ enum Visibility {
   private
 }
 
+enum PostType {
+  recipe
+  post
+}
+
 enum Providers {
   local
   google
@@ -104,8 +109,8 @@ model User {
   provider            Providers          @default(local)
 
   // Campos de recuperación
-  reset_code          String?            // el código enviado por mail
-  reset_expires_at    DateTime?          // hasta cuándo es válido
+  reset_code       String? // el código enviado por mail
+  reset_expires_at DateTime? // hasta cuándo es válido
 
   // Relaciones
   owned_businesses    Business[]        @relation("BusinessOwner")
@@ -310,7 +315,7 @@ model Community {
   description   String?
   tag           CommunityTag @relation(fields: [tag_id], references: [id])
   tag_id        Int
-  //image_url     String?
+  image_url     String?
   theme_color   String?
   visibility    Visibility   @default(public)
   total_members Int          @default(0)
@@ -350,7 +355,8 @@ model Post {
   title          String
   content        String
   image_urls     String[]
-  type           String
+  // Urls
+  type           PostType
   votes_up       Int       @default(0)
   votes_down     Int       @default(0)
   total_comments Int       @default(0)
@@ -389,23 +395,30 @@ model PostComment {
   @@index([parent_comment_id])
 }
 
-model Ingredient {
-  id              Int     @id @default(autoincrement())
-  name            String  @unique
-  unit_of_measure String?
+model UnitOfMeasure {
+  id                 Int                @id @default(autoincrement())
+  name               String             @unique
+  abbreviation       String?            @unique
+  recipe_ingredients RecipeIngredient[]
+}
 
-  // Relations
+model Ingredient {
+  id                 Int                @id @default(autoincrement())
+  name               String             @unique
+  description        String?
   recipe_ingredients RecipeIngredient[]
 }
 
 model RecipeIngredient {
-  id            Int        @id @default(autoincrement())
-  post          Post       @relation(fields: [post_id], references: [id])
-  post_id       Int
-  ingredient    Ingredient @relation(fields: [ingredient_id], references: [id])
-  ingredient_id Int
-  quantity      Float
-  notes         String?
+  id                 Int           @id @default(autoincrement())
+  post               Post          @relation(fields: [post_id], references: [id])
+  post_id            Int
+  ingredient         Ingredient    @relation(fields: [ingredient_id], references: [id])
+  ingredient_id      Int
+  quantity           Float
+  unit_of_measure    UnitOfMeasure @relation(fields: [unit_of_measure_id], references: [id])
+  unit_of_measure_id Int
+  notes              String?
 }
 
 model RecipeStep {

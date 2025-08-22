@@ -1,8 +1,26 @@
 import { PrismaClient, TypesCategory } from '@prisma/client';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 const prisma = new PrismaClient();
 
-// DATOS PARA COMUNIDADES Y PREFERENCIAS DE USUARIOS
+// Ruta al archivo de ingredientes
+const ingredientsFilePath = join(__dirname, '../..', 'ingredientes.txt');
+
+// DATOS PARA UNIDADES DE MEDIDA
+const unitsOfMeasure = [
+  { name: 'gramos', abbreviation: 'g' },
+  { name: 'kilogramos', abbreviation: 'kg' },
+  { name: 'mililitros', abbreviation: 'ml' },
+  { name: 'litros', abbreviation: 'l' },
+  { name: 'cucharadita', abbreviation: 'cdita' },
+  { name: 'cucharada', abbreviation: 'cda' },
+  { name: 'taza', abbreviation: 'taza' },
+  { name: 'unidad', abbreviation: 'u' },
+  { name: 'pizca', abbreviation: 'pizca' },
+  { name: 'paquete', abbreviation: 'paquete' },
+];
+// DATOS PARA COMUNIDADES Y PREFERENCIAS DE USUARIOS 
 const tagData = [
   {
     category: {
@@ -162,7 +180,7 @@ const foodCategories = [
     name: "Legumbres",
     description: "Lentejas, garbanzos, porotos y otras legumbres",
     tipo: TypesCategory.Tipos_de_comida,
-    icon_url: "🫘",
+    icon_url: "�",
   },
   {
     name: "Verduras y hortalizas",
@@ -308,64 +326,86 @@ const foodCategories = [
   }
 ];
 
+
 async function main() {
-  // Seed FoodCategory
-  for (const category of foodCategories) {
-    const existingCategory = await prisma.foodCategory.findFirst({
-      where: { name: category.name }
+  try {
+    // ---- 1. Siembra de la tabla UnitOfMeasure ----
+    await prisma.unitOfMeasure.createMany({
+      data: unitsOfMeasure,
+      skipDuplicates: true,
     });
+    console.log(`✅ ${unitsOfMeasure.length} unidades de medida han sido insertadas.`);
 
-    if (!existingCategory) {
-      await prisma.foodCategory.create({
-        data: category,
-      });
-      console.log(`✅ Created FoodCategory: ${category.name}`);
-    } else {
-      console.log(`⏭️  FoodCategory already exists: ${category.name}`);
-    }
-  }
-  console.log('Seed de FoodCategory completado ✅');
+    // ---- 2. Siembra de la tabla Ingredient ----
+    const ingredientsFileContent = readFileSync(ingredientsFilePath, 'utf-8');
+    const ingredientNames = ingredientsFileContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
-  // Seed TagCategory + CommunityTag
-  for (const item of tagData) {
-    let category = await prisma.tagCategory.findFirst({
-      where: { name: item.category.name }
+    const ingredientsToCreate = ingredientNames.map(name => ({
+      name,
+    }));
+
+    await prisma.ingredient.createMany({
+      data: ingredientsToCreate,
+      skipDuplicates: true,
     });
+    console.log(`✅ ${ingredientsToCreate.length} ingredientes han sido insertados.`);
 
-    if (!category) {
-      category = await prisma.tagCategory.create({
-        data: item.category,
-      });
-      console.log(`✅ Created TagCategory: ${item.category.name}`);
-    } else {
-      console.log(`⏭️  TagCategory already exists: ${item.category.name}`);
-    }
-
-    for (const tagName of item.tags) {
-      const existingTag = await prisma.communityTag.findUnique({
-        where: { name: tagName }
+    // ---- 3. Siembra de FoodCategory ----
+    for (const category of foodCategories) {
+      const existingCategory = await prisma.foodCategory.findFirst({
+        where: { name: category.name }
       });
 
-      if (!existingTag) {
-        await prisma.communityTag.create({
-          data: {
-            name: tagName,
-            category_id: category.id,
-            active: true,
-          },
+      if (!existingCategory) {
+        await prisma.foodCategory.create({
+          data: category,
         });
-        console.log(`✅ Created CommunityTag: ${tagName}`);
-      } else {
-        console.log(`⏭️  CommunityTag already exists: ${tagName}`);
       }
     }
+    console.log('Seed de FoodCategory completado ✅');
+
+    // ---- 4. Siembra de TagCategory + CommunityTag ----
+    for (const item of tagData) {
+      let category = await prisma.tagCategory.findFirst({
+        where: { name: item.category.name }
+      });
+
+      if (!category) {
+        category = await prisma.tagCategory.create({
+          data: item.category,
+        });
+      } else {
+      }
+
+      for (const tagName of item.tags) {
+        const existingTag = await prisma.communityTag.findUnique({
+          where: { name: tagName }
+        });
+
+        if (!existingTag) {
+          await prisma.communityTag.create({
+            data: {
+              name: tagName,
+              category_id: category.id,
+              active: true,
+            },
+          });
+        } else {
+          console.log(`⏭️  CommunityTag already exists: ${tagName}`);
+        }
+      }
+    }
+    console.log('Seed de TagCategory y CommunityTag completado ✅');
+
+  } catch (error) {
+    throw error;
+  } finally {
+    await prisma.$disconnect();
   }
-  console.log('Seed de TagCategory y CommunityTag completado ✅');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error en seed:', e);
     throw e;
   })
   .finally(async () => {
