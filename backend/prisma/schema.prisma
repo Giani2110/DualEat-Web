@@ -20,7 +20,7 @@ generator client {
   binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
-// Enum definitions
+// Enums
 enum Role {
   user
   admin
@@ -93,6 +93,8 @@ enum TypesCategory {
   Origen_y_cultura
 }
 
+// MODELS
+
 model User {
   id                  Int                @id @default(autoincrement())
   name                String
@@ -108,9 +110,9 @@ model User {
   subscription_status SubscriptionStatus @default(inactive)
   provider            Providers          @default(local)
 
-  // Campos de recuperación
-  reset_code       String? // el código enviado por mail
-  reset_expires_at DateTime? // hasta cuándo es válido
+  // Recuperación
+  reset_code       String?
+  reset_expires_at DateTime?
 
   // Relaciones
   owned_businesses    Business[]        @relation("BusinessOwner")
@@ -125,6 +127,7 @@ model User {
   subscriptions       Subscription[]
   preferences         UserPreference[]
   userAchievement     UserAchievement[]
+  recipes             Recipe[]         
 
   @@index([email])
 }
@@ -134,7 +137,6 @@ model UserPreference {
   user    User @relation(fields: [user_id], references: [id])
   user_id Int
 
-  // Polimorfismo manual: o apunta a food_category_id o a community_tag_id
   food_category_id Int?
   community_tag_id Int?
 
@@ -172,7 +174,6 @@ model Local {
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
-  // Relaciones
   business_id     Int
   business        Business            @relation(fields: [business_id], references: [id])
   local_users     LocalUser[]
@@ -192,7 +193,6 @@ model LocalMenuCategory {
   local_id         Int
   food_category_id Int?
 
-  // Relaciones
   local         Local         @relation(fields: [local_id], references: [id])
   food_category FoodCategory? @relation(fields: [food_category_id], references: [id])
 
@@ -222,7 +222,6 @@ model FoodCategory {
   tipo        TypesCategory
   icon_url    String?
 
-  // Relations
   foods            Food[]
   user_preferences UserPreference[]
   local_categories LocalMenuCategory[]
@@ -247,7 +246,6 @@ model Food {
   created_at  DateTime      @default(now())
   updated_at  DateTime      @updatedAt
 
-  // Relations
   votes       Vote[]      @relation("FoodVotes")
   order_items OrderItem[]
 
@@ -266,7 +264,6 @@ model Vote {
   created_at   DateTime    @default(now())
   updated_at   DateTime    @updatedAt
 
-  // Optional relation with foods when content_type = "food"
   food Food? @relation("FoodVotes", fields: [content_id], references: [id])
 
   @@unique([user_id, content_type, content_id])
@@ -292,7 +289,6 @@ model TagCategory {
   description String?
   icon_url    String?
 
-  // Relations
   communityTags CommunityTag[]
 }
 
@@ -304,7 +300,6 @@ model CommunityTag {
 
   active Boolean @default(true)
 
-  // Relations
   communities      Community[]
   user_preferences UserPreference[]
 }
@@ -325,7 +320,6 @@ model Community {
   updated_at    DateTime     @updatedAt
   active        Boolean      @default(true)
 
-  // Relations
   members CommunityMember[]
   posts   Post[]
 
@@ -346,6 +340,22 @@ model CommunityMember {
   @@index([community_id])
 }
 
+model Recipe {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [user_id], references: [id])
+  user_id     Int
+  name        String
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  ingredients RecipeIngredient[]
+  steps       RecipeStep[]
+  posts       Post[]     // posts que referencian esta receta
+
+  @@unique([user_id, name])
+}
+
 model Post {
   id             Int       @id @default(autoincrement())
   user           User      @relation(fields: [user_id], references: [id])
@@ -355,7 +365,6 @@ model Post {
   title          String
   content        String
   image_urls     String[]
-  // Urls
   type           PostType
   votes_up       Int       @default(0)
   votes_down     Int       @default(0)
@@ -365,10 +374,9 @@ model Post {
   edited         Boolean   @default(false)
   active         Boolean   @default(true)
 
-  // Relations
-  comments           PostComment[]
-  recipe_ingredients RecipeIngredient[]
-  recipe_steps       RecipeStep[]
+  comments PostComment[]
+  recipe   Recipe?   @relation(fields: [recipe_id], references: [id])
+  recipe_id Int?
 }
 
 model PostComment {
@@ -387,7 +395,6 @@ model PostComment {
   edited            Boolean      @default(false)
   active            Boolean      @default(true)
 
-  // Relations
   replies PostComment[] @relation("CommentReplies")
 
   @@index([post_id])
@@ -411,8 +418,8 @@ model Ingredient {
 
 model RecipeIngredient {
   id                 Int           @id @default(autoincrement())
-  post               Post          @relation(fields: [post_id], references: [id])
-  post_id            Int
+  recipe             Recipe        @relation(fields: [recipe_id], references: [id])
+  recipe_id          Int
   ingredient         Ingredient    @relation(fields: [ingredient_id], references: [id])
   ingredient_id      Int
   quantity           Float
@@ -423,14 +430,14 @@ model RecipeIngredient {
 
 model RecipeStep {
   id             Int     @id @default(autoincrement())
-  post           Post    @relation(fields: [post_id], references: [id])
-  post_id        Int
+  recipe         Recipe  @relation(fields: [recipe_id], references: [id])
+  recipe_id      Int
   step_number    Int
   description    String
   image_url      String?
   estimated_time Int?
 
-  @@unique([post_id, step_number])
+  @@unique([recipe_id, step_number])
 }
 
 model Order {
@@ -447,7 +454,6 @@ model Order {
   delivery_date  DateTime?
   notes          String?
 
-  // Relations
   order_items OrderItem[]
 }
 
@@ -489,7 +495,6 @@ model Achievement {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  // Relaciones
   user_progress UserAchievement[]
 }
 
