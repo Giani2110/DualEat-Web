@@ -11,6 +11,7 @@ import {
 import "../../assets/scss/users/users.scss";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import CommunityModal from "../modal/CommunityModal";
 
 interface Props {
   children: React.ReactNode;
@@ -23,6 +24,9 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
 
   const [communityOpen, setCommunityOpen] = React.useState(true);
   const [following, setFollowing] = React.useState(true);
+
+  const [createCommunityModalOpen, setCreateCommunityModalOpen] =
+    React.useState(false);
 
   const handleMouseEnter = () => {
     if (!isPinned) {
@@ -156,7 +160,7 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log("Acción de crear comunidad");
+                      setCreateCommunityModalOpen(!createCommunityModalOpen);
                     }}
                     type="button"
                     className={`navlis rounded-[5px] cursor-pointer w-full px-2 py-2 ${
@@ -248,6 +252,9 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
           {children}
         </div>
       </section>
+      {createCommunityModalOpen && (
+        <CommunityModal onClose={() => setCreateCommunityModalOpen(false)} />
+      )}
     </div>
   );
 };

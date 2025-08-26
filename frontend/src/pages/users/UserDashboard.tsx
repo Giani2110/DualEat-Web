@@ -8,6 +8,7 @@ import { useAuth } from "../../hooks/useAuth";
 const UserDashboard: React.FC = () => {
   const { user } = useAuth();
 
+
   /*const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState("");
@@ -36,7 +37,7 @@ const UserDashboard: React.FC = () => {
   return (
     <UIDashboard>
       <div className="w-full">
-        {/*}
+        
         <div className="w-[90%] px-2 py-1 mt-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -84,7 +85,7 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        */}
+        
 
       </div>
     </UIDashboard>

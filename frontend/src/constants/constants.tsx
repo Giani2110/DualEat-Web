@@ -1,4 +1,4 @@
-import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, UserDashboard } from "../pages";
+import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, UserDashboard, LoadingScreen } from "../pages";
 
 export const ROUTES = {
   PUBLIC: {
@@ -49,5 +49,10 @@ export const appRoutes = [
     </ProtectedRoute>
     )  
   },
+
+  {
+    path: "/loading",
+    element: <LoadingScreen isVisible={true} />,
+  }
 ];
 
