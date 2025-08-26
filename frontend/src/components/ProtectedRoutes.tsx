@@ -1,7 +1,8 @@
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import { ROUTES } from "../constants/constants";
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import LoadingScreen from '../components/animation/LoadingScreen';
+import { ROUTES } from '../constants/constants';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,27 +16,31 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
   const { user, loading } = useAuth();
 
+  // 1. If loading is true, always display the loading screen.
+  //    This prevents any premature redirection.
   if (loading) {
-    return <div>Cargando...</div>;
+    return <LoadingScreen isVisible={true} />;
   }
 
   const queryParams = new URLSearchParams(location.search);
-  const tokenFromUrl = queryParams.get("tempToken");
+  const tokenFromUrl = queryParams.get('tempToken');
 
+  // 2. Logic for routes that only need a temp token
   if (onlyTempToken) {
-    if (!user && tokenFromUrl) {
+    if (tokenFromUrl) {
       return <>{children}</>;
     }
+    // No temp token found, redirect
     return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
   }
 
-  // Comportamiento normal
+  // 3. Normal behavior for routes that require a user
+  //    The `user` state should be available here because `loading` is false.
   if (user) {
     return <>{children}</>;
   }
-  if (tokenFromUrl) {
-    return <>{children}</>;
-  }
+
+  // No user found, redirect
   return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
 };
 

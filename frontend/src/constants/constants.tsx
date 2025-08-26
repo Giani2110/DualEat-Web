@@ -1,20 +1,22 @@
-import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, AdminBusinessCreation, AdminFoodCategories, AdminLocals, LocalDashboard } from "../pages";
 
-import ProtectedRoute from "../components/ProtectedRoutes";
+import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, UserDashboard, LoadingScreen, AdminBusinessCreation, AdminFoodCategories, AdminLocals, LocalDashboard } from "../pages";
 
 export const ROUTES = {
-  LANDING: {
+  PUBLIC: {
     HOME: "/",
-    ABOUT_US: "/sobre-nosotros",
-    BUSINESS: "/para-negocios",
+    ABOUT_US: "/about-us",
+    BUSINESS: "/business",
     CHANGELOG: "/changelog",
-    TERMS: "/terminos-y-condiciones",
+    TERMS: "/terms",
   },
   AUTH: {
     LOGIN: "/login",
-    REGISTER: "/register",
+    REGISTER: "/signup",
     ONBOARDING: "/onboarding",
-    RESET_PASSWORD: "/password_reset",
+    RESET_PASSWORD: "/password_recovery",
+  },
+  USER: {
+    DASHBOARD: "/feed",
   },
   ADMIN: {
     BUSINESS_CREATION: "/admin/business-creation",
@@ -27,13 +29,14 @@ export const ROUTES = {
 };
 
 
+
 export const appRoutes = [
   // Landing
-  { path: ROUTES.LANDING.HOME, element: <LandingHome /> },
-  { path: ROUTES.LANDING.ABOUT_US, element: <AboutUs /> },
-  { path: ROUTES.LANDING.BUSINESS, element: <LandingBusiness /> },
-  { path: ROUTES.LANDING.CHANGELOG, element: <ChangeLog /> },
-  { path: ROUTES.LANDING.TERMS, element: <TermsConditions /> },
+  { path: ROUTES.PUBLIC.HOME, element: <LandingHome /> },
+  { path: ROUTES.PUBLIC.ABOUT_US, element: <AboutUs /> },
+  { path: ROUTES.PUBLIC.BUSINESS, element: <LandingBusiness /> },
+  { path: ROUTES.PUBLIC.CHANGELOG, element: <ChangeLog /> },
+  { path: ROUTES.PUBLIC.TERMS, element: <TermsConditions /> },
 
   // Auth
   { path: ROUTES.AUTH.LOGIN, element: <Login /> },
@@ -48,6 +51,15 @@ export const appRoutes = [
   },
   { path: ROUTES.AUTH.RESET_PASSWORD, element: <ResetPassword /> },
 
+
+  // User
+  { path: ROUTES.USER.DASHBOARD, element: (
+    <ProtectedRoute>
+      <UserDashboard />
+    </ProtectedRoute>
+    )  
+  }
+
   // Admin
   { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <AdminBusinessCreation /> },
   { path: ROUTES.ADMIN.FOOD_CATEGORIES, element: <AdminFoodCategories /> },
@@ -55,5 +67,6 @@ export const appRoutes = [
 
   // Local
   { path: ROUTES.LOCAL.DASHBOARD, element: <LocalDashboard /> },
+
 ];
 

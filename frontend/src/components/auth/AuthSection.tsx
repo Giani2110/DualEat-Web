@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import Restaurant from "../../assets/images/auth/Restaurante.avif";
 import Restaurant2 from "../../assets/images/auth/Restaurante2.avif";
 import Restaurant3 from "../../assets/images/auth/Restaurante3.avif";
-import LogoDualEat from "../../assets/images/Logo_DualEat.png";
+import LogoDualEat from "../../assets/images/icon/Logo_DualEat.png";
 
 interface Props {
   flex: string;
@@ -89,7 +89,7 @@ const AuthSection: React.FC<Props> = ({
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/auth/google";
+    window.location.href = "http://localhost:3000/api/auth/google";
   };
 
   return (
@@ -164,7 +164,7 @@ const AuthSection: React.FC<Props> = ({
 
       <div className="w-full lg:w-1/2 relative overflow-hidden">
         <Link
-          to={ROUTES.LANDING.HOME}
+          to={ROUTES.PUBLIC.HOME}
           className="absolute back flex hover:scale-102 transition-all duration-300 gap-2 px-3 py-1 rounded-[20px] items-center top-10 left-12 z-10 cursor-pointer"
         >
           <ArrowLeft color="black" className="w-4 h-4" />

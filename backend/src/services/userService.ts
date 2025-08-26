@@ -1,4 +1,4 @@
-import { prisma } from "../providers/prisma";
+import { prisma } from "../prisma/prisma";
 import { Providers, User } from "@prisma/client";
 import { BasicCreateDTO } from "../interfaces/user.interface";
 
@@ -72,7 +72,6 @@ export class UserService {
     }
   }
 
-  // MÉTODO AGREGADO: updateAvatar
   async updateAvatar(userId: number, avatarUrl: string): Promise<User> {
     try {
       const result = await prisma.user.update({
@@ -91,8 +90,8 @@ export class UserService {
       const result = await prisma.user.findUnique({
         where: { id: userId },
         include: {
-          preferences: true
-        }
+          preferences: true,
+        },
       });
       return result;
     } catch (error) {

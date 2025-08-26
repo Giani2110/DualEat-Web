@@ -1,7 +1,7 @@
 // Landing
-export { default as LandingHome } from "../pages/landing/LandingHome";
+export { default as LandingHome } from "../pages/landing/Home";
 export { default as AboutUs } from "../pages/landing/AboutUs";
-export { default as LandingBusiness } from "../pages/landing/LandingBusiness";
+export { default as LandingBusiness } from "../pages/landing/Business";
 export { default as ChangeLog } from "../pages/legal/ChangeLog";
 export { default as TermsConditions } from "../pages/legal/TermsConditions";
 
@@ -19,5 +19,10 @@ export { default as AdminLocals } from "../pages/admin/AdminLocals";
 // Components
 export { default as ProtectedRoute } from "../components/ProtectedRoutes";
 
-// Local
+// User
+export { default as UserDashboard } from "./users/UserDashboard";
+
+export { default as LoadingScreen } from "../components/animation/LoadingScreen";
+
 export { default as LocalDashboard } from "../pages/local/Dashboard";
+

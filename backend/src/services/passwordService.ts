@@ -1,4 +1,4 @@
-import { prisma } from "../providers/prisma";
+import { prisma } from "../prisma/prisma";
 import { sendPasswordResetEmail } from "../services/emailService";
 
 import { hashPassword } from "../utils/hash";
@@ -45,17 +45,13 @@ export class PasswordService {
 
     return true;
   }
- 
+
   /**
    * Cambia la contraseña del usuario si el código es válido
    */
-  async resetPassword(
-    email: string,
-    newPassword: string
-  ): Promise<void> {
-
+  async resetPassword(email: string, newPassword: string): Promise<void> {
     const hashedPassword = await hashPassword(newPassword);
-    
+
     await prisma.user.update({
       where: { email },
       data: {

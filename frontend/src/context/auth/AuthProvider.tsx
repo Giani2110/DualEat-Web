@@ -4,8 +4,10 @@ import {
   login as authLogin,
   register as authRegister,
   completeProfile as authCompleteProfile,
-} from "../../services/authService";
-import type { AuthResponse, User } from "../../services/authService";
+  logout as authLogout,
+} from "../../services/auth.api";
+import type { AuthResponse, User } from "../../services/auth.api";
+import { withMinimumDelay } from "../../utils/timeUtils";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -66,17 +68,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     tempToken: string
   ): Promise<AuthResponse | null> => {
     setLoading(true);
-    try {
-      const responseData = await authCompleteProfile(
-        name,
-        foodPreferences,
-        communityPreferences,
-        tempToken
-      );
 
-      // If the API call was successful and returned a user
+    // Define un retraso mínimo de 1.5 segundos
+    const minimumDelay = new Promise((resolve) => setTimeout(resolve, 1500));
+
+    try {
+      const [responseData] = await Promise.all([
+        authCompleteProfile(
+          name,
+          foodPreferences,
+          communityPreferences,
+          tempToken
+        ),
+        minimumDelay,
+      ]);
+
       if (responseData?.success && responseData.user) {
-        setUser(responseData.user); // Update the user state
+        setUser(responseData.user);
       } else {
         setUser(null);
       }
@@ -90,25 +98,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("rememberMe");
-    document.cookie =
-      "accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    setUser(null);
+  const logout = async () => {
+    const response = await authLogout();
+    if (response?.success) {
+      localStorage.removeItem("rememberMe");
+      setUser(null);
+    }
+  };
+
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      const userData = await withMinimumDelay(getMe(), 1000);
+      setUser(userData);
+    } catch {
+      setUser(null);
+      localStorage.removeItem("rememberMe");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getMe();
-        setUser(userData);
-      } catch {
-        setUser(null);
-        localStorage.removeItem("rememberMe");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUser();
   }, []);
 

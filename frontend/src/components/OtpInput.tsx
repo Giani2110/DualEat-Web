@@ -48,6 +48,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ length, onChange, value }) => {
     <div className="flex justify-between gap-2">
       {Array.from({ length }, (_, index) => (
         <input
+          aria-label={`OTP input ${index + 1}`}
           key={index}
           type="text"
           maxLength={1}

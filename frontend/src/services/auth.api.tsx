@@ -120,6 +120,26 @@ export const completeProfile = async (
   }
 };
 
+export const logout = async () => {
+  try {
+    const response = await toast.promise(
+      axiosInterceptor.post("/auth/logout", {}, { withCredentials: true }),
+      {
+        loading: "Cerrando sesión...",
+        success: "Sesión cerrada exitosamente",
+        error: (err) => err.response?.data?.message || "Error al cerrar sesión",
+      }
+    );
+    return response.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      toast.error(err.response?.data?.message || "Error al cerrar sesión");
+    } else {
+      toast.error("Error desconocido");
+    }
+  }
+};
+
 export const getMe = async () => {
   try {
     const response = await axiosInterceptor.get("/auth/me", {

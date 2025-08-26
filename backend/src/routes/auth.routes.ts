@@ -3,6 +3,7 @@ import passport from "passport";
 
 import { AuthController } from "../controllers/authController";
 import { UserService } from "../services/userService";
+
 import { PasswordService } from "../services/passwordService";
 import { PasswordController } from "../controllers/passwordController";
 
@@ -32,7 +33,6 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: `${process.env.FRONTEND_URL}/login?error=auth_failed`,
-    // Se elimina session: false para usar el middleware de sesión
   }),
   (req, res) => {
     const user = req.user as any;
@@ -74,7 +74,7 @@ router.get(
         maxAge: 10 * 24 * 60 * 60 * 1000, // 10 días
       });
 
-      return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+      return res.redirect(`${process.env.FRONTEND_URL}/feed`);
     } else {
       console.log("⚠️ No se recibió usuario en req.user");
       return res.redirect(
@@ -108,10 +108,15 @@ router.get("/me", isAuthenticated, (req, res) => {
   res.json(req.user);
 });
 
-// 👉 Ruta de logout: ahora solo limpia la cookie del token
+
 router.post("/logout", (req, res) => {
-  res.clearCookie("accessToken");
-  res.status(200).json({ message: "Sesión cerrada exitosamente" });
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+  res.status(200).json({ success: true, message: "Sesión cerrada exitosamente" });
 });
 
 export default router;

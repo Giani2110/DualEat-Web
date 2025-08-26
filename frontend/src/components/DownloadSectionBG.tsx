@@ -1,6 +1,6 @@
 import React from "react";
 import GooglePlay from "../assets/images/GooglePlay_Badge_Web.png";
-import Logo from "../assets/images/Logo_DualEat.png";
+import Logo from "../assets/images/icon/Logo_DualEat.png";
 
 interface Props {
   background: string;
