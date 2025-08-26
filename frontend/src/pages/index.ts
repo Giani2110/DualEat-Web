@@ -19,3 +19,6 @@ export { default as ProtectedRoute } from "../components/ProtectedRoutes";
 
 // User
 export { default as UserDashboard } from "./users/UserDashboard";
+
+
+export { default as LoadingScreen } from "../components/animation/LoadingScreen";
