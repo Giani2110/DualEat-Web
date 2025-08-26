@@ -72,7 +72,6 @@ export class UserService {
     }
   }
 
-  // MÉTODO AGREGADO: updateAvatar
   async updateAvatar(userId: number, avatarUrl: string): Promise<User> {
     try {
       const result = await prisma.user.update({

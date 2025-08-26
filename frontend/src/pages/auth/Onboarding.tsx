@@ -56,7 +56,6 @@ const Onboarding: React.FC = () => {
         setLoadingPreferences(false);
       }
     };
-
     fetchOnboardingData();
   }, []);
 
@@ -92,7 +91,9 @@ const Onboarding: React.FC = () => {
     const tempToken = queryParams.get("tempToken");
 
     if (!tempToken) {
-      toast.error("Token temporal no encontrado. Por favor, vuelve a registrarte.");
+      toast.error(
+        "Token temporal no encontrado. Por favor, vuelve a registrarte."
+      );
       navigate(ROUTES.AUTH.REGISTER);
       return;
     }
@@ -113,22 +114,20 @@ const Onboarding: React.FC = () => {
       .filter((id) => id !== undefined) as number[];
 
     try {
-      const responseData = await completeProfile(
+      const response = await completeProfile(
         name,
         foodPreferenceIds,
         communityPreferenceIds,
         tempToken
       );
-
-      if (responseData?.success) {
-        navigate("/dashboard", { replace: true });
-      } else {
-        toast.error(
-          "Error al completar el perfil. Intenta de nuevo más tarde."
-        );
+      if (response?.success) {
+        
+          navigate("/feed", { replace: true });
+       
       }
     } catch (error: unknown) {
       console.error("Error al enviar datos de completado de perfil:", error);
+      toast.error("Error al completar el perfil. Intenta de nuevo más tarde.");
       alert(
         `Error: ${error instanceof Error ? error.message : "Error desconocido"}`
       );
@@ -136,10 +135,11 @@ const Onboarding: React.FC = () => {
   };
 
   return (
-    <AuthSection
-      flex="flex"
-      color="bg-yellow"
-      title="Personalizar perfil"
+    <>
+      <AuthSection
+        flex="flex"
+        color="bg-yellow"
+        title="Personalizar perfil"
       subtitle="Completa tus datos para comenzar tus artes culinarias"
       background="right-background"
       Dform="Dform-right"
@@ -267,6 +267,7 @@ const Onboarding: React.FC = () => {
         </button>
       </form>
     </AuthSection>
+    </>
   );
 };
 

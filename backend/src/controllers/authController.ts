@@ -100,6 +100,7 @@ export class AuthController {
         .cookie("accessToken", accessToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
+          path: "/",
           sameSite: "lax",
           maxAge: rememberMe
             ? 14 * 24 * 60 * 60 * 1000
@@ -191,12 +192,12 @@ export class AuthController {
       // Construir datos para crear el usuario
       const userDataToCreate: BasicCreateDTO = {
         email: tempData.email,
-        name: name, // Usar nombre del token temporal si existe, o del body, o cadena vacía
-        password_hash: tempData.password_hash || undefined, // Asegurarse de que sea undefined si no existe
+        name: name, 
+        password_hash: tempData.password_hash || undefined, 
         avatar_url:
           tempData.avatar_url ||
           "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/Profile.png",
-        provider: (tempData.provider as Providers) || Providers.local, // Castear a Providers o usar 'local' por defecto
+        provider: (tempData.provider as Providers) || Providers.local, 
         foodPreferences,
         communityPreferences,
       };
@@ -220,10 +221,13 @@ export class AuthController {
 
       const token = createToken(userPayload, false);
 
+    
+
       return res
         .cookie("accessToken", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
+          path: "/",
           sameSite: "lax",
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })

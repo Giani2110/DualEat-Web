@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 import { X, Eye, EyeOff } from "lucide-react";
 import { withMinimumDelay } from "../../utils/timeUtils";
-import Loader from "../../components/Loader";
+import Loader from "../../components/animation/Loader";
 import OtpInput from "../../components/OtpInput";
 
 import { ROUTES } from "../../constants/constants";
@@ -44,8 +44,8 @@ const ResetPassword = () => {
   }, [resendCooldown]);
 
   const handleBack = () => {
-    setCode(""); // Limpiar el código
-    setStep("email"); // Volver al paso anterior
+    setCode(""); 
+    setStep("email"); 
   };
 
   const handleSendCode = async () => {
@@ -278,11 +278,13 @@ const ResetPassword = () => {
                     Si tienes que solicitar un código nuevo, vuelve y realiza la
                     solicitud nuevamente.
                   </p>
-                  
+
                   {/* OtpInput component */}
                   <div className="relative mt-8">
-                      <label className="block text-center text-sm mb-4 text-[#707070]">Introduce el código de 6 dígitos</label>
-                      <OtpInput length={6} value={code} onChange={setCode} />
+                    <label className="block text-center text-sm mb-4 text-[#707070]">
+                      Introduce el código de 6 dígitos
+                    </label>
+                    <OtpInput length={6} value={code} onChange={setCode} />
                   </div>
 
                   <p className="text4 text-[15px] leading-[21px] text-center mt-5">

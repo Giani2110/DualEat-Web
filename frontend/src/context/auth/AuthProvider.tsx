@@ -5,8 +5,9 @@ import {
   register as authRegister,
   completeProfile as authCompleteProfile,
   logout as authLogout,
-} from "../../services/authService";
-import type { AuthResponse, User } from "../../services/authService";
+} from "../../services/auth.api";
+import type { AuthResponse, User } from "../../services/auth.api";
+import { withMinimumDelay } from "../../utils/timeUtils";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -67,17 +68,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     tempToken: string
   ): Promise<AuthResponse | null> => {
     setLoading(true);
-    try {
-      const responseData = await authCompleteProfile(
-        name,
-        foodPreferences,
-        communityPreferences,
-        tempToken
-      );
 
-      // If the API call was successful and returned a user
+    // Define un retraso mínimo de 1.5 segundos
+    const minimumDelay = new Promise((resolve) => setTimeout(resolve, 1500));
+
+    try {
+      const [responseData] = await Promise.all([
+        authCompleteProfile(
+          name,
+          foodPreferences,
+          communityPreferences,
+          tempToken
+        ),
+        minimumDelay,
+      ]);
+
       if (responseData?.success && responseData.user) {
-        setUser(responseData.user); // Update the user state
+        setUser(responseData.user);
       } else {
         setUser(null);
       }
@@ -99,18 +106,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      const userData = await withMinimumDelay(getMe(), 1000);
+      setUser(userData);
+    } catch {
+      setUser(null);
+      localStorage.removeItem("rememberMe");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getMe();
-        setUser(userData);
-      } catch {
-        setUser(null);
-        localStorage.removeItem("rememberMe");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUser();
   }, []);
 

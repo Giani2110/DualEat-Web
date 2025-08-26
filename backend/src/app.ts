@@ -14,8 +14,10 @@ import authRoutes from "./routes/auth.routes";
 import onboardingRoutes from "./routes/onBoarding.routes";
 import foodCategoriesRoutes from "./routes/onBoarding.routes";
 import contactRouter from "./routes/contact.routes";
+
 import communityRoutes from "./routes/community.routes";
 import recipeRoutes from "./routes/recipe.routes";
+import communityTagsRouter from "./routes/community-tag.routes"
 
 // Inicialización de variables de entorno.
 dotenv.config();
@@ -76,6 +78,7 @@ app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/onboarding`, onboardingRoutes);
 app.use(`${API_PREFIX}/food-categories`, foodCategoriesRoutes);
 app.use(`${API_PREFIX}/contact`, contactRouter);
+app.use(`${API_PREFIX}/community-tags`, communityTagsRouter);
 
 // Comunidades
 app.use("/api/communities", communityRoutes);

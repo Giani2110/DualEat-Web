@@ -2,3 +2,4 @@ pgadmin_data
 postgres_data
 node_modules
 ingredientes.txt
+.hintrc

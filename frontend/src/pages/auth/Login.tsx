@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -8,7 +8,9 @@ import AuthSection from "../../components/auth/AuthSection";
 
 import toast from "react-hot-toast";
 
+
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
@@ -32,6 +34,11 @@ const Login: React.FC = () => {
     if (response === null) {
       setRecaptchaToken(null);
       recaptchaRef.current?.reset();
+    }
+
+    if (response?.email) {
+      navigate(ROUTES.USER.DASHBOARD);
+      console.log("Inicio de sesión exitoso:", response);
     }
   };
 
