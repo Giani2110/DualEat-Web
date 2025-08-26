@@ -1,5 +1,20 @@
-
-import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, UserDashboard, LoadingScreen, AdminBusinessCreation, AdminFoodCategories, AdminLocals, LocalDashboard } from "../pages";
+import {
+  Login,
+  Register,
+  Onboarding,
+  ResetPassword,
+  LandingHome,
+  AboutUs,
+  LandingBusiness,
+  ChangeLog,
+  TermsConditions,
+  ProtectedRoute,
+  UserDashboard,
+  AdminBusinessCreation,
+  AdminFoodCategories,
+  AdminLocals,
+  LocalDashboard,
+} from "../pages";
 
 export const ROUTES = {
   PUBLIC: {
@@ -28,8 +43,6 @@ export const ROUTES = {
   },
 };
 
-
-
 export const appRoutes = [
   // Landing
   { path: ROUTES.PUBLIC.HOME, element: <LandingHome /> },
@@ -51,14 +64,15 @@ export const appRoutes = [
   },
   { path: ROUTES.AUTH.RESET_PASSWORD, element: <ResetPassword /> },
 
-
   // User
-  { path: ROUTES.USER.DASHBOARD, element: (
-    <ProtectedRoute>
-      <UserDashboard />
-    </ProtectedRoute>
-    )  
-  }
+  {
+    path: ROUTES.USER.DASHBOARD,
+    element: (
+      <ProtectedRoute>
+        <UserDashboard />
+      </ProtectedRoute>
+    ),
+  },
 
   // Admin
   { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <AdminBusinessCreation /> },
@@ -67,6 +81,4 @@ export const appRoutes = [
 
   // Local
   { path: ROUTES.LOCAL.DASHBOARD, element: <LocalDashboard /> },
-
 ];
-
