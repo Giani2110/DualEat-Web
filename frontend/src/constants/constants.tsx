@@ -1,4 +1,5 @@
-import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, UserDashboard, LoadingScreen } from "../pages";
+
+import { Login, Register, Onboarding, ResetPassword, LandingHome, AboutUs, LandingBusiness, ChangeLog, TermsConditions, ProtectedRoute, UserDashboard, LoadingScreen, AdminBusinessCreation, AdminFoodCategories, AdminLocals, LocalDashboard } from "../pages";
 
 export const ROUTES = {
   PUBLIC: {
@@ -16,6 +17,14 @@ export const ROUTES = {
   },
   USER: {
     DASHBOARD: "/feed",
+  },
+  ADMIN: {
+    BUSINESS_CREATION: "/admin/business-creation",
+    FOOD_CATEGORIES: "/admin/food-categories",
+    LOCALS: "/admin/locals",
+  },
+  LOCAL: {
+    DASHBOARD: "/local/dashboard",
   },
 };
 
@@ -42,17 +51,22 @@ export const appRoutes = [
   },
   { path: ROUTES.AUTH.RESET_PASSWORD, element: <ResetPassword /> },
 
+
   // User
   { path: ROUTES.USER.DASHBOARD, element: (
     <ProtectedRoute>
       <UserDashboard />
     </ProtectedRoute>
     )  
-  },
-
-  {
-    path: "/loading",
-    element: <LoadingScreen isVisible={true} />,
   }
+
+  // Admin
+  { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <AdminBusinessCreation /> },
+  { path: ROUTES.ADMIN.FOOD_CATEGORIES, element: <AdminFoodCategories /> },
+  { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
+
+  // Local
+  { path: ROUTES.LOCAL.DASHBOARD, element: <LocalDashboard /> },
+
 ];
 

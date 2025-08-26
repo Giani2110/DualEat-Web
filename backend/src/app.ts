@@ -14,6 +14,10 @@ import authRoutes from "./routes/auth.routes";
 import onboardingRoutes from "./routes/onBoarding.routes";
 import foodCategoriesRoutes from "./routes/onBoarding.routes";
 import contactRouter from "./routes/contact.routes";
+import adminRouter from "./routes/admin.routes";
+import qrRoutes from "./routes/qr.routes";
+import ocrRoutes from "./routes/ocr.routes";
+import foodRoutes from "./routes/food.routes";
 
 import communityRoutes from "./routes/community.routes";
 import recipeRoutes from "./routes/recipe.routes";
@@ -85,6 +89,16 @@ app.use("/api/communities", communityRoutes);
 
 // Recetas
 app.use("/api/recipes", recipeRoutes);
+
+//Admin
+app.use("/admin", adminRouter);
+app.use("/api/admin", adminRouter);
+
+//Locales
+app.use("/api/qr", qrRoutes);
+app.use('/api', ocrRoutes);
+app.use('/api', foodRoutes);
+
 
 // --- 4. MANEJO DE RUTAS DE PRUEBA Y ERRORES ---
 
