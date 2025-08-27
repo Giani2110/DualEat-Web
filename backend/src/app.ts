@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
 import { configurePassport } from "./config/passport";
+import { redisClient } from './config/redis';
+import { sessionService } from "./services/session.service";
 
 import { API_PREFIX } from "./config/config";
 
@@ -53,8 +55,25 @@ app.use(express.urlencoded({ extended: true }));
 // Cookie parser: para leer cookies del navegador.
 app.use(cookieParser());
 
-// Configuración de la sesión. DEBE ir antes de passport.session.
 
+// Verificar conexión Redis al iniciar
+async function initializeApp() {
+  try {
+    await redisClient.ping();
+    console.log('✅ Redis OK - Aplicación iniciando...');
+    
+    // Tu configuración existente aquí...
+    
+  } catch (error) {
+    console.error('❌ No se pudo conectar a Redis:', error);
+    process.exit(1);
+  }
+}
+
+// Inicializar cuando el proceso arranque
+initializeApp();
+
+// Configuración de la sesión. DEBE ir antes de passport.session.
 app.use(
   session({
     secret: process.env.SESSION_SECRET!,

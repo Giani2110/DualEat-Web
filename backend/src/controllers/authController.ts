@@ -1,24 +1,26 @@
 import { UserService } from "../services/userService";
 import { Request, Response } from "express";
-import { RECAPTCHA_SECRET_KEY } from "../config/config";
+import { RECAPTCHA_SECRET_KEY, SECRET_KEY } from "../config/config";
+
+import jwt from "jsonwebtoken";
 import axios from "axios";
 
 import {
-  RegisterStepOneDto,
   RegisterStepTwoDto,
   BasicCreateDTO,
-  UserPayload,
-} from "../interfaces/user.interface";
+  UserSessionData,
+  TempTokenPayload,
+  SecureTokenPayload,
+} from "../interfaces//user.dto";
 
 import { comparePassword, hashPassword } from "../utils/hash";
+
 import {
-  verifyTempToken,
+  createSecureToken,
   createTempToken,
-  TokenPayload,
-  TempTokenPayload,
-  createToken,
+  verifyTempToken,
 } from "../utils/jwt";
-import { Providers, Role, SubscriptionStatus } from "@prisma/client";
+import { sessionService } from "../services/session.service";
 
 export class AuthController {
   constructor(private userService: UserService) {}
@@ -27,15 +29,16 @@ export class AuthController {
     const { email, password, rememberMe, recaptchaToken } = req.body;
 
     try {
+      // ===== reCAPTCHA (igual que antes) =====
       if (!recaptchaToken) {
-        return res
-          .status(400)
-          .json({ success: false, message: "reCAPTCHA no proporcionado" });
+        return res.status(400).json({
+          success: false,
+          message: "reCAPTCHA no proporcionado",
+        });
       }
 
-      const recaptchaVerificationUrl = `https://www.google.com/recaptcha/api/siteverify`;
       const recaptchaResponse = await axios.post(
-        recaptchaVerificationUrl,
+        "https://www.google.com/recaptcha/api/siteverify",
         null,
         {
           params: {
@@ -45,42 +48,35 @@ export class AuthController {
         }
       );
 
-      const recaptchaData = recaptchaResponse.data;
-
-      if (!recaptchaData.success) {
-        console.error(
-          "reCAPTCHA verification failed:",
-          recaptchaData["error-codes"]
-        );
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Fallo en la verificación reCAPTCHA. Inténtalo de nuevo.",
-          });
+      if (!recaptchaResponse.data.success) {
+        return res.status(403).json({
+          success: false,
+          message: "Fallo en la verificación reCAPTCHA. Inténtalo de nuevo.",
+        });
       }
 
+      // ===== VERIFICACIÓN DE CREDENCIALES =====
       const user = await this.userService.getByEmail(email);
-
       if (!user) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Credenciales incorrectas" });
+        return res.status(401).json({
+          success: false,
+          message: "Credenciales incorrectas",
+        });
       }
 
       const passwordMatch = await comparePassword(
         password,
         user.password_hash || ""
       );
-
       if (!passwordMatch) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Credenciales incorrectas" });
+        return res.status(401).json({
+          success: false,
+          message: "Credenciales incorrectas",
+        });
       }
 
-      // Generar payload para el token principal
-      const userPayload: TokenPayload = {
+      // ===== PREPARAR DATOS PARA SESIÓN =====
+      const userData: UserSessionData = {
         id: user.id,
         name: user.name,
         email: user.email,
@@ -91,40 +87,51 @@ export class AuthController {
         subscription_status: user.subscription_status,
         trial_ends_at: user.trial_ends_at,
         avatar_url: user.avatar_url ?? null,
+        loginAt: new Date(),
+        lastActivity: new Date(),
       };
 
-      // 4. Generar tokens
-      const accessToken = createToken(userPayload, rememberMe);
+      // ===== CREAR TOKEN SEGURO =====
+      const accessToken = await createSecureToken(
+        userData,
+        rememberMe || false
+      );
+
+      // ===== CONFIGURAR COOKIE SEGURA =====
+      const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        sameSite: "strict" as const,
+        maxAge: rememberMe
+          ? 14 * 24 * 60 * 60 * 1000 // 14 días
+          : 7 * 24 * 60 * 60 * 1000, // 7 días
+      };
+
+      console.log(
+        `🔐 Login exitoso para: ${email} (rememberMe: ${rememberMe})`
+      );
 
       return res
-        .cookie("accessToken", accessToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-          sameSite: "lax",
-          maxAge: rememberMe
-            ? 14 * 24 * 60 * 60 * 1000
-            : 7 * 24 * 60 * 60 * 1000,
-        })
+        .cookie("accessToken", accessToken, cookieOptions)
         .status(200)
         .json({
           success: true,
           message: "Login exitoso",
-          user: userPayload,
+          user: userData,
         });
     } catch (error) {
-      console.error(error);
-      return res
-        .status(500)
-        .json({ success: false, message: "Error interno del servidor" });
+      console.error("❌ Login error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error interno del servidor",
+      });
     }
   }
-
   async register(req: Request, res: Response) {
-    const { email, password }: RegisterStepOneDto = req.body;
+    const { email, password } = req.body;
 
     try {
-      // Check if user already exists
       const existingUser = await this.userService.getByEmail(email);
       if (existingUser) {
         return res
@@ -140,7 +147,7 @@ export class AuthController {
         email,
         password_hash: hashedPassword,
         step: "incomplete_registration",
-        provider: Providers.local,
+        provider: "local",
       });
 
       return res.status(200).json({
@@ -157,13 +164,12 @@ export class AuthController {
   }
 
   async completeProfile(req: Request, res: Response) {
-    // El frontend enviará el tempToken en el cuerpo de la solicitud
     const {
       name,
       foodPreferences,
       communityPreferences,
       tempToken,
-    }: RegisterStepTwoDto & { tempToken: string } = req.body; // Combinar DTOs para el cuerpo de la solicitud
+    }: RegisterStepTwoDto & { tempToken: string } = req.body;
 
     try {
       if (!tempToken) {
@@ -181,7 +187,6 @@ export class AuthController {
           .json({ message: "Token temporal inválido o expirado" });
       }
 
-      // Validar el paso del token temporal
       if (
         tempData.step !== "incomplete_registration" &&
         tempData.step !== "incomplete_oauth_registration"
@@ -189,24 +194,23 @@ export class AuthController {
         return res.status(401).json({ message: "Token temporal no válido" });
       }
 
-      // Construir datos para crear el usuario
+      // Crear usuario real en DB
       const userDataToCreate: BasicCreateDTO = {
         email: tempData.email,
-        name: name, 
-        password_hash: tempData.password_hash || undefined, 
+        name,
+        password_hash: tempData.password_hash || undefined,
         avatar_url:
           tempData.avatar_url ||
-          "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/Profile.png",
-        provider: (tempData.provider as Providers) || Providers.local, 
+          "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png",
+        provider: tempData.provider || "local",
         foodPreferences,
         communityPreferences,
       };
 
-      // Crear usuario
       const user = await this.userService.create(userDataToCreate);
 
-      // Generar token principal para el nuevo usuario
-      const userPayload: TokenPayload = {
+      // Datos de sesión para Redis
+      const userSessionData: UserSessionData = {
         id: user.id,
         name: user.name,
         email: user.email,
@@ -217,29 +221,80 @@ export class AuthController {
         subscription_status: user.subscription_status,
         trial_ends_at: user.trial_ends_at,
         avatar_url: user.avatar_url ?? null,
+        loginAt: new Date(),
+        lastActivity: new Date(),
       };
 
-      const token = createToken(userPayload, false);
-
-    
+      const accessToken = await createSecureToken(userSessionData, false);
 
       return res
-        .cookie("accessToken", token, {
+        .cookie("accessToken", accessToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           path: "/",
-          sameSite: "lax",
+          sameSite: "strict",
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         .status(201)
         .json({
           success: true,
           message: "Perfil completado exitosamente",
-          user: userPayload,
+          user: userSessionData,
         });
     } catch (error) {
       console.error("Error al completar perfil:", error);
       return res.status(500).json({ message: "Error interno del servidor" });
+    }
+  }
+
+  async logout(req: Request, res: Response) {
+    try {
+      // Obtener el token de la cookie
+      const token = req.cookies.accessToken;
+
+      if (token) {
+        try {
+          // Decodificar el JWT para obtener el sessionId
+          const decoded = jwt.verify(token, SECRET_KEY) as SecureTokenPayload;
+          const sessionId = decoded.ses;
+
+          // Eliminar sesión de Redis
+          if (sessionId) {
+            await sessionService.deleteSession(sessionId);
+            console.log(`🗑️ Sesión eliminada en logout: ${sessionId}`);
+          }
+        } catch (jwtError) {
+          // Si el JWT es inválido, no importa, solo limpiamos la cookie
+          console.log("Token inválido en logout, solo limpiando cookie");
+        }
+      }
+
+      // Limpiar cookie
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Sesión cerrada exitosamente",
+      });
+    } catch (error) {
+      console.error("❌ Error en logout:", error);
+
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Sesión cerrada",
+      });
     }
   }
 }

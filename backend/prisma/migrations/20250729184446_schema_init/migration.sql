@@ -23,7 +23,7 @@ CREATE TYPE "SubscriptionStateMP" AS ENUM ('authorized', 'paused', 'cancelled', 
 CREATE TYPE "Visibility" AS ENUM ('public', 'restricted', 'private');
 
 -- CreateEnum
-CREATE TYPE "Providers" AS ENUM ('local', 'google', 'twitter');
+CREATE TYPE "Providers" AS ENUM ('local', 'google');
 
 -- CreateEnum
 CREATE TYPE "LocalUserRole" AS ENUM ('admin', 'staff');

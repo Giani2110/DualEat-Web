@@ -1,6 +1,6 @@
 import { prisma } from "../prisma/prisma";
-import { Providers, User } from "@prisma/client";
-import { BasicCreateDTO } from "../interfaces/user.interface";
+import {  User } from "@prisma/client";
+import { BasicCreateDTO } from "../interfaces/user.dto";
 
 export class UserService {
   constructor() {}
@@ -14,7 +14,7 @@ export class UserService {
             password_hash: userData.password_hash || "",
             name: userData.name || "",
             avatar_url: userData.avatar_url || null,
-            provider: userData.provider as Providers | undefined,
+            provider: userData.provider,
           },
         });
 

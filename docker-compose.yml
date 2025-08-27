@@ -28,6 +28,32 @@ services:
     networks:
       - dualeat-network
 
+  # ===== REDIS NUEVO =====
+  redis:
+    image: redis:7-alpine
+    container_name: dualeat_redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis_data:/data
+    networks:
+      - dualeat-network
+    command: redis-server --appendonly yes --maxmemory 256mb
+    restart: unless-stopped
+
+  # OPCIONAL: Redis UI para ver los datos
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: dualeat_redis_ui
+    ports:
+      - 8081:8081
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - dualeat-network
+
   backend:
     build:
       context: ./backend       
@@ -38,9 +64,12 @@ services:
       - 3000:3000
     depends_on:
       - postgres
+      - redis
     environment:
       - DATABASE_URL=postgresql://DualEat:DualEat21102504@postgres:5432/DualEat
       - CORS_ORIGIN=http://localhost:5173 
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     env_file:
       - ./backend/.env
     volumes:

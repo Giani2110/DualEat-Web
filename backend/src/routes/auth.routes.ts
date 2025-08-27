@@ -9,7 +9,8 @@ import { PasswordController } from "../controllers/passwordController";
 
 import { isAuthenticated } from "../middlewares/isAuthenticated";
 
-import { createTempToken, TempTokenPayload, TokenPayload, createToken } from "../utils/jwt";
+import { createTempToken, createSecureToken } from "../utils/jwt";
+import { UserSessionData, TempTokenPayload } from "../interfaces/user.dto";
 
 const router = Router();
 const userService = new UserService();
@@ -34,7 +35,7 @@ router.get(
   passport.authenticate("google", {
     failureRedirect: `${process.env.FRONTEND_URL}/login?error=auth_failed`,
   }),
-  (req, res) => {
+  async (req, res) => {
     const user = req.user as any;
     console.log("✅ Usuario recibido después de Google Strategy:", user); // Para depuración
 
@@ -52,7 +53,7 @@ router.get(
         `${process.env.FRONTEND_URL}/onboarding?tempToken=${tempToken}`
       );
     } else if (user && user.isExisting) {
-      const tokenPayload: TokenPayload = {
+      const userData: UserSessionData = {
         id: user.id,
         name: user.name,
         email: user.email,
@@ -63,15 +64,18 @@ router.get(
         subscription_status: user.subscription_status,
         trial_ends_at: user.trial_ends_at,
         avatar_url: user.avatar_url,
+        loginAt: new Date(),
+        lastActivity: new Date(),
       };
-      const mainToken = createToken(tokenPayload, false);
+
+      const accessToken = await createSecureToken(userData, false);
 
       // Se establece la cookie directamente y se redirige
-      res.cookie("accessToken", mainToken, {
+      res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 10 * 24 * 60 * 60 * 1000, // 10 días
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       });
 
       return res.redirect(`${process.env.FRONTEND_URL}/feed`);
@@ -108,15 +112,6 @@ router.get("/me", isAuthenticated, (req, res) => {
   res.json(req.user);
 });
 
-
-router.post("/logout", (req, res) => {
-  res.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-  res.status(200).json({ success: true, message: "Sesión cerrada exitosamente" });
-});
+router.post("/logout", authController.logout.bind(authController));
 
 export default router;

@@ -76,12 +76,6 @@ enum PostType {
   post
 }
 
-enum Providers {
-  local
-  google
-  twitter
-}
-
 enum LocalUserRole {
   admin
   staff
@@ -108,7 +102,7 @@ model User {
   active              Boolean            @default(true)
   trial_ends_at       DateTime?
   subscription_status SubscriptionStatus @default(inactive)
-  provider            Providers          @default(local)
+  provider            String             @default("local")
 
   // Recuperación
   reset_code       String?
@@ -292,6 +286,7 @@ model TagCategory {
   communityTags CommunityTag[]
 }
 
+
 model CommunityTag {
   id          Int          @id @default(autoincrement())
   name        String       @unique
@@ -300,16 +295,14 @@ model CommunityTag {
 
   active Boolean @default(true)
 
-  communities      Community[]
+  communities Community[] @relation("CommunityTags")
   user_preferences UserPreference[]
 }
 
 model Community {
   id            Int          @id @default(autoincrement())
-  name          String
-  description   String?
-  tag           CommunityTag @relation(fields: [tag_id], references: [id])
-  tag_id        Int
+  name          String       @unique
+  description   String
   image_url     String?
   theme_color   String?
   visibility    Visibility   @default(public)
@@ -322,6 +315,8 @@ model Community {
 
   members CommunityMember[]
   posts   Post[]
+
+  tags CommunityTag[] @relation("CommunityTags")
 
   @@index([name])
 }

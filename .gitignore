@@ -1,5 +1,6 @@
 pgadmin_data
 postgres_data
+redis_data
 node_modules
 ingredientes.txt
 .hintrc

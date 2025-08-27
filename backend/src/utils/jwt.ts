@@ -1,57 +1,76 @@
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../config/config";
-import { Providers, Role, SubscriptionStatus, User } from "@prisma/client";
+import { SecureTokenPayload , UserSessionData, TempTokenPayload } from "../interfaces/user.dto";
 
-// Tipos de payload
-export interface TokenPayload {
-  id: number;
-  name: string;
-  email: string;
-  role: Role;
-  provider: Providers;
-  isBusiness: boolean;
-  active: boolean;
-  subscription_status: SubscriptionStatus;
-  trial_ends_at: User["trial_ends_at"];
-  avatar_url: string | null;
-}
-export interface TempTokenPayload {
-  email: string;
-  password_hash?: string;
-  provider?: string;
-  avatar_url?: string;
-  name?: string;
-  step: "incomplete_registration" | "incomplete_oauth_registration";
-}
+import { Role } from "@prisma/client";
+import crypto from "crypto";
 
+import { sessionService } from "../services/session.service";
 
-// Función genérica para firmar tokens
-function signToken<T extends object>(payload: T, expiresIn: string): string {
+export function createTempToken(payload: TempTokenPayload): string {
   return jwt.sign(payload, SECRET_KEY, {
     algorithm: "HS256",
-    expiresIn,
-  } as SignOptions);
+    expiresIn: "30m",
+    jwtid: crypto.randomUUID(),
+  });
 }
 
-// Función genérica para verificar tokens
-function verifyToken<T>(token: string): T {
-  return jwt.verify(token, SECRET_KEY) as T;
+export function verifyTempToken(token: string): TempTokenPayload {
+  return jwt.verify(token, SECRET_KEY) as TempTokenPayload;
 }
 
-// Funciones específicas usando las genéricas
-export const createToken = (payload: TokenPayload, rememberMe = false): string =>
-  signToken(payload, rememberMe ? "14d" : "7d");
+// Funciones para ofuscar datos
+function hashUserId(userId: number): string {
+  return crypto.createHash('sha256')
+    .update(`${userId}:${SECRET_KEY}`)
+    .digest('hex')
+    .substring(0, 12);
+}
 
-export const createTempToken = (payload: TempTokenPayload): string =>
-  signToken(payload, "30m");
+function encodeRole(role: Role): string {
+  const roleMap: Record<Role, string> = {
+    admin: 'a',
+    user: 'u', 
+  };
+  return roleMap[role] || 'u';
+}
+
+function encodeProvider(provider: string): string {
+  const providerMap: Record<string, string> = {
+    google: 'g',
+    local: 'l',
+  };
+  return providerMap[provider] || 'l';
+}
 
 
-// Verificación
-export const verifyTokenPayload = (token: string): TokenPayload =>
-  verifyToken<TokenPayload>(token);
+export async function createSecureToken(userData: UserSessionData, rememberMe: boolean): Promise<string> {
+  // TTL basado en rememberMe
+  const ttlSeconds = rememberMe ? 14 * 24 * 60 * 60 : 7 * 24 * 60 * 60; // 14 días vs 7 días
+  
+  // Crear sesión en Redis
+  const sessionId = await sessionService.createSession(userData, ttlSeconds);
+  
+  // Payload mínimo para JWT
+  const payload: SecureTokenPayload = {
+    sub: hashUserId(userData.id),
+    rol: encodeRole(userData.role),
+    prv: encodeProvider(userData.provider),
+    rem: rememberMe,
+    ses: sessionId,
+    typ: "access"
+  };
 
-export const verifyTempToken = (token: string): TempTokenPayload =>
-  verifyToken<TempTokenPayload>(token);
+  // JWT con misma duración que la sesión
+  return jwt.sign(payload, SECRET_KEY, {
+    algorithm: "HS256",
+    expiresIn: rememberMe ? "14d" : "7d",
+    jwtid: crypto.randomUUID()
+  });
+}
 
-export const verifyAccessToken = (token: string): { id: number; rememberMe: boolean } =>
-  verifyToken<{ id: number; rememberMe: boolean }>(token);
+// Verificar access token
+export function verifyAccessToken(token: string): SecureTokenPayload {
+  return jwt.verify(token, SECRET_KEY) as SecureTokenPayload;
+}
+
