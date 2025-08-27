@@ -104,8 +104,8 @@ export class AuthController {
         path: "/",
         sameSite: "strict" as const,
         maxAge: rememberMe
-          ? 14 * 24 * 60 * 60 * 1000 // 14 días
-          : 7 * 24 * 60 * 60 * 1000, // 7 días
+          ? 3 * 24 * 60 * 60 // 3 días
+          : 24 * 60 * 60  // 24 horas
       };
 
       console.log(
@@ -225,7 +225,7 @@ export class AuthController {
         lastActivity: new Date(),
       };
 
-      const accessToken = await createSecureToken(userSessionData, false);
+      const accessToken = await createSecureToken(userSessionData, true);
 
       return res
         .cookie("accessToken", accessToken, {
@@ -233,7 +233,7 @@ export class AuthController {
           secure: process.env.NODE_ENV === "production",
           path: "/",
           sameSite: "strict",
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 3 * 24 * 60 * 60,
         })
         .status(201)
         .json({

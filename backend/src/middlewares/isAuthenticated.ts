@@ -49,7 +49,7 @@ export const isAuthenticated = async (
       secure: process.env.NODE_ENV === "production",
       path: "/",
       sameSite: "strict" as const,
-      maxAge: rememberMe ? 14 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000,
+      maxAge: rememberMe ? 3 * 24 * 60 * 60 : 24 * 60 * 60,
     };
 
     // Set the new cookie on the response

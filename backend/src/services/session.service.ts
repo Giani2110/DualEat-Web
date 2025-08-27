@@ -70,23 +70,6 @@ export class SessionService {
     }
   }
 
-  // Renovar TTL de sesión (para rememberMe)
-  async refreshSession(sessionId: string, ttlSeconds: number): Promise<boolean> {
-    try {
-      const key = `session:${sessionId}`;
-      const data = await this.redis.get(key);
-      
-      if (data) {
-        await this.redis.setex(key, ttlSeconds, data);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('❌ Error renovando sesión:', error);
-      return false;
-    }
-  }
-
   // Eliminar todas las sesiones de un usuario (logout all)
   async deleteAllUserSessions(userId: number): Promise<void> {
     try {
@@ -109,5 +92,4 @@ export class SessionService {
   }
 }
 
-// Instancia del servicio
 export const sessionService = new SessionService(redisClient);

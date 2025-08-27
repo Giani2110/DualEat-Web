@@ -46,7 +46,7 @@ function encodeProvider(provider: string): string {
 
 export async function createSecureToken(userData: UserSessionData, rememberMe: boolean): Promise<string> {
   // TTL basado en rememberMe
-  const ttlSeconds = rememberMe ? 14 * 24 * 60 * 60 : 7 * 24 * 60 * 60; // 14 días vs 7 días
+  const ttlSeconds = rememberMe ? 3 * 24 * 60 * 60 :  24 * 60 * 60; // 3 días vs 1 día
   
   // Crear sesión en Redis
   const sessionId = await sessionService.createSession(userData, ttlSeconds);
@@ -64,7 +64,7 @@ export async function createSecureToken(userData: UserSessionData, rememberMe: b
   // JWT con misma duración que la sesión
   return jwt.sign(payload, SECRET_KEY, {
     algorithm: "HS256",
-    expiresIn: rememberMe ? "14d" : "7d",
+    expiresIn: rememberMe ? "3d" : "1d", // 3 días vs 1 día
     jwtid: crypto.randomUUID()
   });
 }

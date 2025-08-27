@@ -68,14 +68,14 @@ router.get(
         lastActivity: new Date(),
       };
 
-      const accessToken = await createSecureToken(userData, false);
+      const accessToken = await createSecureToken(userData, true);
 
       // Se establece la cookie directamente y se redirige
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        maxAge: 3 * 24 * 60 * 60, 
       });
 
       return res.redirect(`${process.env.FRONTEND_URL}/feed`);
