@@ -24,6 +24,7 @@ El objetivo principal de esta API es ofrecer un backend robusto, extensible y mo
 - **PostgreSQL**
 - **React Vite**
 - **Google API / JWT / Passport**
+- **Redis** 
 
 ## Scripts para levantar
 El sistema se logra ejecutar funcionalmente con Docker, aunque puede ejecutarse en modo desarrollo desde la carpeta backend **(cd .\backend\)** y la carpeta frontend **(cd .\frontend\)**, ambas ejecutando npm install seguido de npm run dev. Prima se debe ejecutar con Docker exclusivamente.
