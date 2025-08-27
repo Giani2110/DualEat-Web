@@ -40,6 +40,7 @@ const HeaderUSER: React.FC = () => {
       <Link
         to={ROUTES.PUBLIC.HOME}
         className="flex items-center cursor-pointer"
+        tabIndex={-1}
       >
         <img className="w-[28px] h-[28px]" src={LogoYellow} alt="Logo" />
         <span

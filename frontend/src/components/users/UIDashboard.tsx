@@ -18,7 +18,7 @@ interface Props {
 }
 
 const UIDashboard: React.FC<Props> = ({ children }) => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isSideBarOpen, setIsSideBarOpen] = React.useState(true);
   const [isPinned, setIsPinned] = React.useState(true);
 
@@ -253,7 +253,7 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
         </div>
       </section>
       {createCommunityModalOpen && (
-        <CommunityModal onClose={() => setCreateCommunityModalOpen(false)} />
+        <CommunityModal onClose={() => setCreateCommunityModalOpen(false)} user={user} />
       )}
     </div>
   );

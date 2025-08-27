@@ -33,7 +33,7 @@ export const StepButtons = ({
       type="button"
       className="text-[13px] text1 tracking-tight bg-yellow px-5 py-2 rounded-[40px] brightness-90 opacity-50"
     >
-      Siguiente
+      {step !== 4 ? "Siguiente" : "Crear comunidad"}
     </button>
   </div>
 );

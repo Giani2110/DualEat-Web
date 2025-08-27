@@ -6,13 +6,14 @@ import type { Category, CommunityTag } from "../../interface/global";
 
 import { getCommunityTags } from "../../services/community-tag.api";
 
-import { StepDots, StepButtons } from "./StepNavigation";
+import { StepDots } from "./StepNavigation";
 
 interface Props {
   onClose: () => void;
+  user: { id: number; name: string; email: string };
 }
 
-const CommunityModal: React.FC<Props> = ({ onClose }) => {
+const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -21,8 +22,8 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
   >(null);
   const [tempImage, setTempImage] = useState<string | null>(null);
 
-  const [bannerUrl, setBannerUrl] = useState<string>("#e5a657");
-  const [themeColor, setThemeColor] = useState<string | null>(null);
+  const [themeColor, setThemeColor] = useState<string>("#e5a657"); 
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [communityTags, setCommunityTags] = useState<CommunityTag[]>([]);
@@ -73,6 +74,20 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
       }
     }
   };
+
+  const isButtonDisabled = () => {
+    if (step === "1") {
+      return !name || !description;
+    }
+    if (step === "3") {
+      return selectedTags.length < 3;
+    }
+    return false;
+  };
+
+  const handleSubmit = () => () => {
+    
+  }
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -285,9 +300,9 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
                 }}
                 onComplete={(url) => {
                   if (croppingTarget === "banner") {
-                    setBannerUrl(url);
-                  } else {
                     setThemeColor(url);
+                  } else {
+                    setImageUrl(url);
                   }
                   setCroppingTarget(null);
                   setTempImage(null);
@@ -333,7 +348,7 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
                         }}
                       />
                     </div>
-                    {bannerUrl.startsWith("#") && (
+                    {themeColor.startsWith("#") && (
                       <div className="flex items-center gap-2">
                         <p>ff</p>
                       </div>
@@ -376,10 +391,10 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
                       <div
                         className="w-full h-10"
                         style={
-                          bannerUrl.startsWith("#")
-                            ? { backgroundColor: bannerUrl }
+                          themeColor.startsWith("#")
+                            ? { backgroundColor: themeColor }
                             : {
-                                backgroundImage: `url(${bannerUrl})`,
+                                backgroundImage: `url(${themeColor})`,
                                 backgroundSize: "cover",
                                 backgroundRepeat: "no-repeat",
                                 backgroundPosition: "center",
@@ -389,8 +404,8 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
                       <div className="leading-6 tracking-tight items-center flex flex-wrap gap-4 px-5 pt-5">
                         <img
                           src={
-                            themeColor
-                              ? themeColor
+                            imageUrl
+                              ? imageUrl
                               : "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
                           }
                           alt="Icon"
@@ -543,7 +558,11 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
                 }`}
               >
                 {visibility === "public" ? (
-                  <Globe strokeWidth={1.9} fill="#e5a657" className={`text-[20px] mr-2`} />
+                  <Globe
+                    strokeWidth={1.9}
+                    fill="#e5a657"
+                    className={`text-[20px] mr-2`}
+                  />
                 ) : (
                   <Globe className={`text-[20px] text-[#e5a657] mr-2`} />
                 )}
@@ -569,14 +588,19 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
                 }`}
               >
                 {visibility === "restricted" ? (
-                  <Eye strokeWidth={1.9} fill="#e5a657" className={`text-[#2f2f2f] text-[20px] mr-2`} />
+                  <Eye
+                    strokeWidth={1.9}
+                    fill="#e5a657"
+                    className={`text-[#2f2f2f] text-[20px] mr-2`}
+                  />
                 ) : (
                   <Eye className={`text-[20px] text-[#e5a657] mr-2`} />
                 )}
                 <div className="flex flex-col items-start tracking-tight">
                   <span className="text-[13px] text5">Restringida</span>
                   <span className="text-[12px] text6">
-                    Cualquiera puede ver, pero sólo los usuarios aprobados pueden colaborar
+                    Cualquiera puede ver, pero sólo los usuarios aprobados
+                    pueden colaborar
                   </span>
                 </div>
                 <input
@@ -595,7 +619,11 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
                 }`}
               >
                 {visibility === "private" ? (
-                  <Lock strokeWidth={1.9} fill="#e5a657" className={`text-[#2f2f2f] text-[20px] mr-2`} />
+                  <Lock
+                    strokeWidth={1.9}
+                    fill="#e5a657"
+                    className={`text-[#2f2f2f] text-[20px] mr-2`}
+                  />
                 ) : (
                   <Lock className={`text-[20px] text-[#e5a657] mr-2`} />
                 )}
@@ -625,11 +653,30 @@ const CommunityModal: React.FC<Props> = ({ onClose }) => {
             }`}
           >
             <StepDots step={parseInt(step)} />
-            <StepButtons
-              onPrev={onPrev}
-              onNext={onNext}
-              step={parseInt(step)}
-            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={onPrev}
+                type="button"
+                className="text-[13px] text3 tracking-tight bg-gray px-5 py-2 rounded-[40px] cursor-pointer"
+              >
+                {step === "1" ? "Cerrar" : "Volver"}
+              </button>
+              <button
+                id="next-button"
+                onClick={step === "4" ? handleSubmit() : onNext}
+                type="button"
+                // Apply a disabled class and the disabled attribute
+                className={`text-[13px] text1 tracking-tight bg-yellow px-5 py-2 rounded-[40px] ${
+                  isButtonDisabled()
+                    ? "brightness-90 opacity-50 cursor-not-allowed"
+                    : "brightness-100 opacity-100 cursor-pointer"
+                }`}
+                disabled={isButtonDisabled()}
+              >
+                {step !== "4" ? "Siguiente" : "Crear comunidad"}
+              </button>
+            </div>
           </div>
         )}
       </div>
