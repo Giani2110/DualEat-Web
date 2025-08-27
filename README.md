@@ -38,7 +38,8 @@ El sistema se logra ejecutar funcionalmente con Docker, aunque puede ejecutarse 
 4. Base de datos (en backend)
   - ```npx prisma generate``` & ```npx prisma migrate deploy```
 5. Tablas prueba
-  - ```npx prisma db seed```
+  - ```npx prisma db seed```(old)
+  - ```npm run seed```
 6. Docker
   - ```cd .\DualEat-Web\```
   - ```docker-compose down -v --rmi all```
