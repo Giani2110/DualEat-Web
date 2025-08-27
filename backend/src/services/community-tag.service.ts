@@ -4,7 +4,7 @@ import { CommunityTag } from "@prisma/client";
 export class CommunityTagService {
   constructor() {}
 
-  async createCommunityTag (data: any) {
+  async createCommunityTag (data: CommunityTag) {
      try {
       return await prisma.communityTag.create({
         data,
