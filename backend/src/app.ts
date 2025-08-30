@@ -102,9 +102,7 @@ app.use(`${API_PREFIX}/onboarding`, onboardingRoutes);
 app.use(`${API_PREFIX}/food-categories`, foodCategoriesRoutes);
 app.use(`${API_PREFIX}/contact`, contactRouter);
 app.use(`${API_PREFIX}/community-tags`, communityTagsRouter);
-
-// Comunidades
-app.use("/api/communities", communityRoutes);
+app.use(`${API_PREFIX}/community`, communityRoutes);
 
 // Recetas
 app.use("/api/recipes", recipeRoutes);

@@ -20,7 +20,8 @@ export { default as AdminLocals } from "../pages/admin/AdminLocals";
 export { default as ProtectedRoute } from "../components/ProtectedRoutes";
 
 // User
-export { default as UserDashboard } from "./users/UserDashboard";
+export { default as UserDashboard } from "./users/UDashboard";
+export { default as UPost } from "./users/UPost";
 
 export { default as LoadingScreen } from "../components/animation/LoadingScreen";
 

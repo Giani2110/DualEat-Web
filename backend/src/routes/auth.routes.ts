@@ -1,11 +1,11 @@
 import { Router } from "express";
 import passport from "passport";
 
-import { AuthController } from "../controllers/authController";
-import { UserService } from "../services/userService";
+import { AuthController } from "../controllers/auth.controller";
+import { UserService } from "../services/user.service";
 
-import { PasswordService } from "../services/passwordService";
-import { PasswordController } from "../controllers/passwordController";
+import { PasswordService } from "../services/password.service";
+import { PasswordController } from "../controllers/password.controller";
 
 import { isAuthenticated } from "../middlewares/isAuthenticated";
 
@@ -75,8 +75,10 @@ router.get(
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 3 * 24 * 60 * 60, 
+        maxAge: 3 * 24 * 60 * 60 * 1000, 
       });
+
+      console.log("✅ Cookie establecida con accessToken:", res.cookie);
 
       return res.redirect(`${process.env.FRONTEND_URL}/feed`);
     } else {

@@ -1,12 +1,17 @@
 import { Router } from "express";
 import { CommunityController } from "../controllers/community.controller";
+import { CommunityService } from "../services/community.service";
 
 const router = Router();
-const controller = new CommunityController();
+const service = new CommunityService();
+const controller = new CommunityController(service);
 
-router.post("/join", (req, res) => controller.join(req, res));
-router.post("/leave", (req, res) => controller.leave(req, res));
-router.get("/:communityId/members", (req, res) => controller.listMembers(req, res));
-router.get("/user/:userId", (req, res) => controller.listUserCommunities(req, res));
+router.get("/", controller.get.bind(controller));
+router.get("/all", controller.getAll.bind(controller));
+router.post("/create", controller.create.bind(controller));
+router.post("/join", controller.join.bind(controller));
+router.post("/leave", controller.leave.bind(controller));
+router.get("/:communityId/members", controller.listMembers.bind(controller));
+router.get("/user", controller.listUserCommunities.bind(controller));
 
 export default router;

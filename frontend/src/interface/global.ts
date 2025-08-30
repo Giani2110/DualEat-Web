@@ -1,19 +1,29 @@
-export interface Response {
+export interface Response<T = unknown> {
   success: boolean;
-  message: string;
+  message?: string;
+  data?: T;
 }
-
 export interface Category {
   id: number;
   name: string;
   description?: string | null;
   icon_url?: string;
 }
-
 export interface CommunityTag {
   id: number;
   active: boolean;
   category_id: number;
   name: string;
   category: Category;
+}
+export interface Community {
+  id: number;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  theme_color: string | null;
+  visibility: string | null;
+  creator_id: number;
+  total_members: number;
+  tags: CommunityTag[];
 }

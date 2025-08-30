@@ -1,4 +1,4 @@
-import { UserService } from "../services/userService";
+import { UserService } from "../services/user.service";
 import { Request, Response } from "express";
 import { RECAPTCHA_SECRET_KEY, SECRET_KEY } from "../config/config";
 
@@ -104,8 +104,8 @@ export class AuthController {
         path: "/",
         sameSite: "strict" as const,
         maxAge: rememberMe
-          ? 3 * 24 * 60 * 60 // 3 días
-          : 24 * 60 * 60  // 24 horas
+          ? 3 * 24 * 60 * 60 * 1000 // 3 días
+          : 24 * 60 * 60  * 1000 // 24 horas
       };
 
       console.log(
@@ -233,7 +233,7 @@ export class AuthController {
           secure: process.env.NODE_ENV === "production",
           path: "/",
           sameSite: "strict",
-          maxAge: 3 * 24 * 60 * 60,
+          maxAge: 3 * 24 * 60 * 60 * 1000,
         })
         .status(201)
         .json({

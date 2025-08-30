@@ -111,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setLoading(true);
       const userData = await withMinimumDelay(getMe(), 1000);
       setUser(userData);
+      console.log("Fetched user:", userData);
     } catch {
       setUser(null);
       localStorage.removeItem("rememberMe");

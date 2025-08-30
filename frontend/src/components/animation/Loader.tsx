@@ -1,6 +1,6 @@
 import React from "react";
 interface LoaderProps {
-  color?: "white" | "black" | "gray-500" | "primary"; 
+  color?: "white" | "black" | "gray-500" | "yellow" | "red"; 
   size?:  "4" | "6"; 
 }
 

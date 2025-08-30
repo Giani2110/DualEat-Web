@@ -30,7 +30,7 @@ const HeaderUSER: React.FC = () => {
 
   return (
     <header
-      className={`fixed top-0 w-full grid-cols-3 bg-white border-b border-[#e5a657] h-[60px] px-10 grid items-center justify-between pt-[5px]  pb-[5px] z-50 ${
+      className={`fixed top-0 w-full grid-cols-3 bg-[#fcfcfc] border-b border-[#e5a657] h-[60px] px-10 grid items-center justify-between pt-[5px]  pb-[5px] z-50 ${
         scrolled
           ? "bg-white border-b border-[#e5a657]"
           : ""
@@ -67,11 +67,10 @@ const HeaderUSER: React.FC = () => {
       </div>
 
       <div className="flex items-center justify-end space-x-3 text-[14px] text-white">
-        <div className="flex items-center justify-center px-2 py-2 gap-[3px] cursor-pointer hover:bg-[#E5EBEE] rounded-3xl">
+        <Link to={ROUTES.USER.CREATE_POST} className="flex items-center justify-center px-2 py-2 gap-[3px] cursor-pointer hover:bg-[#E5EBEE] rounded-3xl">
           <Plus color="#4A4947" strokeWidth={1.8} size={24} />
           <span className="text-[13px] Arvo text5 tracking-tighter">Crear</span>
-
-        </div>
+        </Link>
         <div className="px-2 py-2 cursor-pointer hover:bg-[#E5EBEE] rounded-3xl">
           <Bell color="#4A4947" strokeWidth={1.8} size={22}/>
         </div>

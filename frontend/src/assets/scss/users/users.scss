@@ -26,3 +26,22 @@
   overflow-y: auto;
   padding-left: 200px;
 }
+
+.bgFood {
+    position: relative;
+}
+
+.bgFood::before {
+    content: "";
+    position: fixed; 
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("../../images/BGDash.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: repeat;
+    filter: invert(1) opacity(0.1);
+    z-index: -1;
+}

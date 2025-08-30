@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PasswordService } from "../services/passwordService";
+import { PasswordService } from "../services/password.service";
 
 export class PasswordController {
   constructor(private passwordService: PasswordService) {}

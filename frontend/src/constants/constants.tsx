@@ -14,6 +14,7 @@ import {
   AdminFoodCategories,
   AdminLocals,
   LocalDashboard,
+  UPost
 } from "../pages";
 
 export const ROUTES = {
@@ -32,6 +33,7 @@ export const ROUTES = {
   },
   USER: {
     DASHBOARD: "/feed",
+    CREATE_POST: "/post",
   },
   ADMIN: {
     BUSINESS_CREATION: "/admin/business-creation",
@@ -70,6 +72,14 @@ export const appRoutes = [
     element: (
       <ProtectedRoute>
         <UserDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.USER.CREATE_POST,
+    element: (
+      <ProtectedRoute>
+        <UPost />
       </ProtectedRoute>
     ),
   },

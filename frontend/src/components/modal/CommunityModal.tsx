@@ -4,7 +4,9 @@ import RCrop from "../ReactCrop";
 import toast from "react-hot-toast";
 import type { Category, CommunityTag } from "../../interface/global";
 
+import { getCommunity, createCommunity } from "../../services/community.api";
 import { getCommunityTags } from "../../services/community-tag.api";
+import Loader from "../animation/Loader";
 
 import { StepDots } from "./StepNavigation";
 
@@ -22,7 +24,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   >(null);
   const [tempImage, setTempImage] = useState<string | null>(null);
 
-  const [themeColor, setThemeColor] = useState<string>("#e5a657"); 
+  const [themeColor, setThemeColor] = useState<string>("#e5a657");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,6 +39,8 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   >("public");
 
   const [step, setStep] = useState<"1" | "2" | "3" | "4">("1");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +81,12 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
   const isButtonDisabled = () => {
     if (step === "1") {
-      return !name || !description;
+      return (
+        name.length < 3 ||
+        !description ||
+        !!error || 
+        loading
+      ); 
     }
     if (step === "3") {
       return selectedTags.length < 3;
@@ -85,9 +94,23 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
     return false;
   };
 
-  const handleSubmit = () => () => {
-    
-  }
+  const handleSubmit = async () => {
+    if (step === "4") {
+      const response = await createCommunity(
+        name,
+        description,
+        imageUrl,
+        themeColor,
+        visibility,
+        selectedTags,
+        user.id
+      );
+
+      if (response?.success) {
+        onClose();
+      }
+    }
+  };
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -96,7 +119,29 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
     };
   }, []);
 
-  // useEffect mejorado para extraer categorías
+  useEffect(() => {
+    setError("");
+    setLoading(true);
+    const timeout = setTimeout(async () => {
+      try {
+        const community = await getCommunity(name);
+        if (community) {
+          setError("La comunidad ya existe");
+        } else {
+          setError("");
+          setName(name);
+          console.log("Community fetched successfully:", name);
+        }
+      } catch (error) {
+        console.error("Error fetching community:", error);
+      } finally {
+        setLoading(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [name]);
+
   useEffect(() => {
     const fetchCommunityTags = async () => {
       try {
@@ -195,9 +240,9 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                         ? "border-[red]"
                         : "focus:border-[#e5a657]"
                     }`}
+                    onChange={(e) => setName(e.target.value)}
                     value={name}
                     maxLength={21}
-                    onChange={(e) => setName(e.target.value)}
                     required
                   />
                   <label
@@ -212,14 +257,28 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
                   <div
                     className={`flex gap-10 px-3 mt-3 ${
-                      name.length < 3 ? "justify-between" : "justify-end"
+                      name.length < 3 || error || loading
+                        ? "justify-between"
+                        : "justify-end"
                     }`}
                   >
-                    {name.length < 3 && (
+                    {name.length < 3 ? (
                       <span className="text-[12px] text6">
                         El nombre debe tener entre 3 y 21 caracteres.
                       </span>
-                    )}
+                    ) : loading ? (
+                      <div className="flex gap-2 items-center">
+                        <Loader color="yellow" />
+                        <span className="text-[12px] text6">
+                          Verificando disponibilidad...
+                        </span>
+                      </div>
+                    ) : error ? (
+                      <div className="flex gap-2 items-center">
+                        <span className="text-[12px] text6">{error}</span>
+                      </div>
+                    ) : null}
+
                     <span className="text-[11px] text6">
                       {21 - name.length}
                     </span>
@@ -576,6 +635,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                   title="Visibilidad pública"
                   type="radio"
                   name="visibility"
+                  onChange={() => setVisibility("public")}
                   value="public"
                   checked={visibility === "public"}
                   className="ml-auto  cursor-pointer accent-black w-[15px] h-[15px]"
@@ -607,6 +667,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                   title="Visibilidad restringida"
                   type="radio"
                   name="visibility"
+                  onChange={() => setVisibility("restricted")}
                   value="restricted"
                   checked={visibility === "restricted"}
                   className="ml-auto  cursor-pointer accent-black w-[15px] h-[15px]"
@@ -637,6 +698,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                   title="Visibilidad privada"
                   type="radio"
                   name="visibility"
+                  onChange={() => setVisibility("private")}
                   value="private"
                   checked={visibility === "private"}
                   className="ml-auto  cursor-pointer accent-black w-[15px] h-[15px]"
@@ -664,7 +726,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
               </button>
               <button
                 id="next-button"
-                onClick={step === "4" ? handleSubmit() : onNext}
+                onClick={() => (step === "4" ? handleSubmit() : onNext())}
                 type="button"
                 // Apply a disabled class and the disabled attribute
                 className={`text-[13px] text1 tracking-tight bg-yellow px-5 py-2 rounded-[40px] ${
