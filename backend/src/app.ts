@@ -17,9 +17,14 @@ import onboardingRoutes from "./routes/onBoarding.routes";
 import foodCategoriesRoutes from "./routes/onBoarding.routes";
 import contactRouter from "./routes/contact.routes";
 import adminRouter from "./routes/admin.routes";
+
+// Locales
 import qrRoutes from "./routes/qr.routes";
 import ocrRoutes from "./routes/ocr.routes";
 import foodRoutes from "./routes/food.routes";
+import reviewRoutes from "./modules/Locals/route/review.routes";
+import critiqueRoutes from "./modules/Locals/route/critique.routes";
+
 
 import communityRoutes from "./routes/community.routes";
 import recipeRoutes from "./routes/recipe.routes";
@@ -115,7 +120,8 @@ app.use("/api/admin", adminRouter);
 app.use("/api/qr", qrRoutes);
 app.use('/api', ocrRoutes);
 app.use('/api', foodRoutes);
-
+app.use('/api', reviewRoutes);
+app.use('/api', critiqueRoutes);
 
 // --- 4. MANEJO DE RUTAS DE PRUEBA Y ERRORES ---
 

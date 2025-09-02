@@ -286,19 +286,6 @@ model TagCategory {
   communityTags CommunityTag[]
 }
 
-
-model CommunityTag {
-  id          Int          @id @default(autoincrement())
-  name        String       @unique
-  category    TagCategory? @relation(fields: [category_id], references: [id])
-  category_id Int?
-
-  active Boolean @default(true)
-
-  communities Community[] @relation("CommunityTags")
-  user_preferences UserPreference[]
-}
-
 model Community {
   id            Int          @id @default(autoincrement())
   name          String       @unique
@@ -316,9 +303,18 @@ model Community {
   members CommunityMember[]
   posts   Post[]
 
-  tags CommunityTag[] @relation("CommunityTags")
+  tags CommunityTag[] @relation("CommunityTags") // many-to-many
+}
 
-  @@index([name])
+model CommunityTag {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  category    TagCategory? @relation(fields: [category_id], references: [id])
+  category_id Int?
+
+  active       Boolean       @default(true)
+  communities  Community[]   @relation("CommunityTags")
+  user_preferences UserPreference[]
 }
 
 model CommunityMember {

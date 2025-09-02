@@ -23,9 +23,6 @@ CREATE TYPE "SubscriptionStateMP" AS ENUM ('authorized', 'paused', 'cancelled', 
 CREATE TYPE "Visibility" AS ENUM ('public', 'restricted', 'private');
 
 -- CreateEnum
-CREATE TYPE "Providers" AS ENUM ('local', 'google');
-
--- CreateEnum
 CREATE TYPE "LocalUserRole" AS ENUM ('admin', 'staff');
 
 -- CreateTable
@@ -42,7 +39,7 @@ CREATE TABLE "User" (
     "active" BOOLEAN NOT NULL DEFAULT true,
     "trial_ends_at" TIMESTAMP(3),
     "subscription_status" "SubscriptionStatus" NOT NULL DEFAULT 'inactive',
-    "provider" "Providers" NOT NULL DEFAULT 'local',
+    "provider" TEXT NOT NULL DEFAULT 'local',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
