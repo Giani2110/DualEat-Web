@@ -26,6 +26,7 @@ import reviewRoutes from "./modules/Locals/route/review.routes";
 import critiqueRoutes from "./modules/Locals/route/critique.routes";
 import statisticsRoutes from "./modules/Locals/route/statistics.routes";
 import orders from "./modules/Locals/route/order.routes";
+import manualLoadMenu from "./modules/Locals/route/manualLoadMenu.routes";
 
 import communityRoutes from "./routes/community.routes";
 import recipeRoutes from "./routes/recipe.routes";
@@ -118,13 +119,14 @@ app.use("/admin", adminRouter);
 app.use("/api/admin", adminRouter);
 
 //Locales
-app.use("/api/qr", qrRoutes);
+app.use("/api", qrRoutes);
 app.use('/api', ocrRoutes);
 app.use('/api', foodRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', critiqueRoutes);
 app.use('/api', statisticsRoutes);
 app.use('/api', orders);
+app.use('/api', manualLoadMenu);
 
 // --- 4. MANEJO DE RUTAS DE PRUEBA Y ERRORES ---
 

@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { StatisticsService } from "../service/statistics.service";
-import { prisma } from "../../../prisma/prisma";
 
 export class StatisticsController {
   static async getTopFoods(req: Request, res: Response) {
@@ -12,28 +11,23 @@ export class StatisticsController {
         return res.status(400).json({ error: "El ID del local no es válido." });
       }
 
-      const stats = await StatisticsService.getTopFoods(localId, from as string, to as string);
-
-      const enrichedStats = await Promise.all(
-        stats.map(async (stat) => {
-          const food = await prisma.food.findUnique({
-            where: { id: stat.food_id },
-            select: { id: true, name: true, image_url: true },
-          });
-          return {
-            ...food,
-            total_quantity: stat._sum.quantity || 0,
-            total_sales: stat._sum.subtotal || 0,
-          };
-        })
+      // obtener top foods ya enriquecidos desde el service
+      const topFoods = await StatisticsService.getTopFoods(
+        localId,
+        from as string,
+        to as string
       );
 
       // métricas generales del local
-      const metrics = await StatisticsService.getLocalMetrics(localId, from as string, to as string);
+      const metrics = await StatisticsService.getLocalMetrics(
+        localId,
+        from as string,
+        to as string
+      );
 
       return res.json({
         metrics,
-        top_foods: enrichedStats,
+        top_foods: topFoods,
       });
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);

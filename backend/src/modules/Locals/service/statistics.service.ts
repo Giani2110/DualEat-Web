@@ -1,8 +1,11 @@
 import { prisma } from "../../../prisma/prisma";
 
 export class StatisticsService {
+  /**
+   * Platos más vendidos en un local
+   */
   static async getTopFoods(localId: number, from?: string, to?: string) {
-    return await prisma.orderItem.groupBy({
+    const results = await prisma.orderItem.groupBy({
       by: ["food_id"],
       where: {
         order: {
@@ -14,18 +17,28 @@ export class StatisticsService {
           status: "confirmed",
         },
       },
-      _sum: {
-        quantity: true,
-        subtotal: true,
-      },
-      orderBy: {
-        _sum: {
-          quantity: "desc",
-        },
-      },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: "desc" } },
+      take: 7, // top 7
     });
+
+    // Traer nombres de los platos de una sola vez
+    const foods = await prisma.food.findMany({
+      where: { id: { in: results.map(r => r.food_id) } },
+      select: { id: true, name: true },
+    });
+
+    const foodMap = Object.fromEntries(foods.map(f => [f.id, f.name]));
+
+    return results.map(r => ({
+      plato: foodMap[r.food_id] || "Desconocido",
+      cantidad: r._sum.quantity || 0,
+    }));
   }
 
+  /**
+   * Métricas generales de un local (ventas totales y cantidad de pedidos)
+   */
   static async getLocalMetrics(localId: number, from?: string, to?: string) {
     const metrics = await prisma.order.aggregate({
       where: {
@@ -36,12 +49,8 @@ export class StatisticsService {
           lte: to ? new Date(to) : undefined,
         },
       },
-      _sum: {
-        total: true,
-      },
-      _count: {
-        id: true,
-      },
+      _sum: { total: true },
+      _count: { id: true },
     });
 
     return {

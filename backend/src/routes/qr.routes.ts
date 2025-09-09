@@ -3,6 +3,6 @@ import { generateQrCodeController } from '../controllers/localDashboard.controll
 
 const router = Router();
 
-router.get('/:localId', generateQrCodeController);
+router.get('/qr/:localId', generateQrCodeController);
 
 export default router;
