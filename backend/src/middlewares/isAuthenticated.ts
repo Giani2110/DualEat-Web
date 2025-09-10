@@ -1,5 +1,5 @@
 import { verifyAccessToken } from "../utils/jwt";
-import { sessionService } from "../services/session.service";
+import { sessionService } from "../modules/auth/services/session.service";
 
 import { Request, Response, NextFunction } from "express";
 

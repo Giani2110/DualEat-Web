@@ -43,7 +43,7 @@ export const createCommunity = async (
   }
 };
 
-export const getCommunity = async (name: string): Promise<Response | null> => {
+export const getCommunityByName = async (name: string): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/community/", {
       params: { name },
@@ -56,6 +56,22 @@ export const getCommunity = async (name: string): Promise<Response | null> => {
     return null;
   }
 };
+
+
+export const getCommunityByTag = async (tagId: number): Promise<Response | null> => {
+  try { 
+    const response = await axiosInterceptor.get(`/community/communities/tag`, {
+      params: { tagId },
+    });
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener comunidad");
+    }
+    return null;
+  }
+  
+}
 
 export const joinCommunity = async (
   user_id: number,
@@ -96,3 +112,44 @@ export const getUserCommunities = async (
     return null;
   }
 };
+
+
+export const getRecommendedCommunities = async (
+  user_id: number
+): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.get("/community/recommended", {
+      params: { user_id },
+    });
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener comunidad");
+    }
+    return null;
+  }
+};
+
+export const getPopularCommunities = async (): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.get("/community/popular");
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener comunidad");
+    }
+    return null;
+  }
+};
+
+export const getTrendingCommunities = async (): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.get("/community/trending");
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener comunidad");
+    }
+    return null;
+  }
+}

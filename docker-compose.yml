@@ -65,11 +65,13 @@ services:
     depends_on:
       - postgres
       - redis
+      - ollama
     environment:
       - DATABASE_URL=postgresql://DualEat:DualEat21102504@postgres:5432/DualEat
       - CORS_ORIGIN=http://localhost:5173 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - OLLAMA_HOST=http://ollama:11434
     env_file:
       - ./backend/.env
     volumes:
@@ -94,6 +96,17 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    networks:
+      - dualeat-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: dualeat_ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama_data:/root/.ollama
     networks:
       - dualeat-network
 

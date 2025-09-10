@@ -3,19 +3,24 @@ export interface Response<T = unknown> {
   message?: string;
   data?: T;
 }
-export interface Category {
+
+
+
+export interface CategoryTag {
   id: number;
   name: string;
   description?: string | null;
   icon_url?: string;
 }
+
 export interface CommunityTag {
   id: number;
   active: boolean;
   category_id: number;
   name: string;
-  category: Category;
+  category: CategoryTag;
 }
+
 export interface Community {
   id: number;
   name: string;

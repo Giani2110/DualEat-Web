@@ -7,14 +7,18 @@ import {
   logout as authLogout,
 } from "../../services/auth.api";
 import type { AuthResponse, User } from "../../services/auth.api";
-import { withMinimumDelay } from "../../utils/timeUtils";
+
 import { AuthContext } from "./AuthContext";
+import { withMinimumDelay } from "../../utils/timeUtils";
+import { useLocation } from "react-router-dom";
+
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const location = useLocation();
 
   const login = async (
     email: string,
@@ -106,23 +110,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const fetchUser = async () => {
-    try {
+   useEffect(() => {
+    const fetchUser = async () => { 
       setLoading(true);
-      const userData = await withMinimumDelay(getMe(), 1000);
-      setUser(userData);
-      console.log("Fetched user:", userData);
-    } catch {
-      setUser(null);
-      localStorage.removeItem("rememberMe");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
+      try {
+        const userData = await withMinimumDelay(getMe(), 0);
+        setUser(userData);
+        console.log(userData);
+      } catch {
+        setUser(null);
+        localStorage.removeItem("rememberMe");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchUser();
-  }, []);
+  }, [location.pathname]);
 
   const value = { user, loading, login, logout, register, completeProfile };
 

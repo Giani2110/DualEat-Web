@@ -13,13 +13,13 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   useDynamicTitle();
   return (
     <>
-     {user ? <NavbarUI /> : <Navbar />}
+      {user ? <NavbarUI /> : <Navbar />}
       {children}
-      <Footer />
+      {!loading && <Footer />}
     </>
   );
 };

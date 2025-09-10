@@ -22,8 +22,9 @@ export { default as ProtectedRoute } from "../components/ProtectedRoutes";
 // User
 export { default as UserDashboard } from "./users/UDashboard";
 export { default as UPost } from "./users/UPost";
+export { default as UExplore } from "./users/UExplore";
+export { default as URecipes } from "./users/URecipes";
 
 export { default as LoadingScreen } from "../components/animation/LoadingScreen";
 
 export { default as LocalDashboard } from "../pages/local/Dashboard";
-

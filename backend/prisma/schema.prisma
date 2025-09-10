@@ -336,13 +336,16 @@ model Recipe {
   user        User      @relation(fields: [user_id], references: [id])
   user_id     Int
   name        String
-  description String?
+  description String
+  //time
+  main_image  String
+
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 
   ingredients RecipeIngredient[]
   steps       RecipeStep[]
-  posts       Post[]     // posts que referencian esta receta
+  posts       Post[]     
 
   @@unique([user_id, name])
 }

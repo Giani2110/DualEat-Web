@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Image, Search, X, Globe, Eye, Lock } from "lucide-react";
 import RCrop from "../ReactCrop";
 import toast from "react-hot-toast";
-import type { Category, CommunityTag } from "../../interface/global";
+import type { CategoryTag, CommunityTag } from "../../interface/global";
 
-import { getCommunity, createCommunity } from "../../services/community.api";
+import {
+  getCommunityByName,
+  createCommunity,
+} from "../../services/community.api";
 import { getCommunityTags } from "../../services/community-tag.api";
 import Loader from "../animation/Loader";
 
@@ -27,7 +30,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   const [themeColor, setThemeColor] = useState<string>("#e5a657");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryTag[]>([]);
   const [communityTags, setCommunityTags] = useState<CommunityTag[]>([]);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -38,7 +41,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
     "public" | "restricted" | "private"
   >("public");
 
-  const [step, setStep] = useState<"1" | "2" | "3" | "4">("1");
+  const [step, setStep] = useState<"1" | "2" | "3" | "4">("3");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -81,12 +84,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
   const isButtonDisabled = () => {
     if (step === "1") {
-      return (
-        name.length < 3 ||
-        !description ||
-        !!error || 
-        loading
-      ); 
+      return name.length < 3 || !description || !!error || loading;
     }
     if (step === "3") {
       return selectedTags.length < 3;
@@ -96,6 +94,10 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
   const handleSubmit = async () => {
     if (step === "4") {
+
+      const nameFixed = name.replace(/\s+/g, "");
+      setName(nameFixed);
+
       const response = await createCommunity(
         name,
         description,
@@ -122,15 +124,18 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   useEffect(() => {
     setError("");
     setLoading(true);
+
     const timeout = setTimeout(async () => {
       try {
-        const community = await getCommunity(name);
-        if (community) {
-          setError("La comunidad ya existe");
-        } else {
-          setError("");
-          setName(name);
-          console.log("Community fetched successfully:", name);
+        if (name.length >= 3) {
+          const community = await getCommunityByName(name);
+          if (community) {
+            setError("La comunidad ya existe");
+          } else {
+            setError("");
+            setName(name);
+            console.log("Community fetched successfully:", name);
+          }
         }
       } catch (error) {
         console.error("Error fetching community:", error);
@@ -143,14 +148,16 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   }, [name]);
 
   useEffect(() => {
-    const fetchCommunityTags = async () => {
-      try {
-        const tags = await getCommunityTags();
-        if (tags) {
-          setCommunityTags(tags);
-          console.log("Community tags fetched successfully:", tags);
+  const fetchCommunityTags = async () => {
+    try {
+      const response = await getCommunityTags();
 
-          // Extraer categorías únicas de las tags
+      if (response && response.success) {
+        const tags = response.data as CommunityTag[];
+        setCommunityTags(tags);
+
+       
+        if (tags) { 
           const uniqueCategories = tags
             .map((tag) => tag.category)
             .filter(
@@ -169,16 +176,20 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
             console.log("Categories extracted:", uniqueCategories);
           }
         }
-      } catch (error) {
-        console.error("Error fetching community tags:", error);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching community tags:", error);
+    }
+  };
 
-    fetchCommunityTags();
-  }, [searchTerm]);
+  fetchCommunityTags();
+}, [searchTerm]);
 
   // Función para manejar la selección/deselección de tags
   const handleTagToggle = (tagId: number) => {
+    if (selectedTags.length >= 3 && !selectedTags.includes(tagId)) {
+      return;
+    }
     setSelectedTags((prev) =>
       prev.includes(tagId)
         ? prev.filter((id) => id !== tagId)

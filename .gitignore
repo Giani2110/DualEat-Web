@@ -1,6 +1,7 @@
 pgadmin_data
 postgres_data
 redis_data
+ollama_data
 node_modules
 ingredientes.txt
 .hintrc

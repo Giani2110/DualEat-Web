@@ -16,7 +16,7 @@ export class CommunityTagController {
     }
   }
 
-  async getAll(req: Request, res: Response): Promise<void> {
+  async getAll(req: Request, res: Response) {
     try {
       const tags = await this.communityTagService.getAllCommunityTags();
       res.status(200).json({ success: true, data: tags });
@@ -27,10 +27,10 @@ export class CommunityTagController {
     }
   }
 
-  async getById(req: Request, res: Response): Promise<void> {
-    const { id } = req.params;
+  async getByCategoryId(req: Request, res: Response) {
+    const { id } = req.query;
     try {
-      const tag = await this.communityTagService.getByIdCommunityTag(Number(id));
+      const tag = await this.communityTagService.getByIdCategory(Number(id));
       if (tag) {
         res.status(200).json({ success: true, data: tag });
       } else {
@@ -45,7 +45,7 @@ export class CommunityTagController {
     }
   }
 
-  async update(req: Request, res: Response): Promise<void> {
+  async update(req: Request, res: Response) {
     const { id, data } = req.body;
     try {
       const updatedTag = await this.communityTagService.updateCommunityTag(
@@ -66,7 +66,7 @@ export class CommunityTagController {
     }
   }
 
-  async delete(req: Request, res: Response): Promise<void> {
+  async delete(req: Request, res: Response) {
     const { id } = req.body;
     try {
       const deleted = await this.communityTagService.deleteCommunityTag(id);

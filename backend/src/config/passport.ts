@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { UserService } from "../services/user.service";
+import { UserService } from "../modules/auth/services/user.service";
 
 export function configurePassport() {
   const userService = new UserService();

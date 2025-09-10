@@ -1,8 +1,8 @@
-import crypto from 'crypto';
-import Redis from 'ioredis';
-import { UserSessionData } from '../interfaces/user.dto';
+import crypto from "crypto";
+import Redis from "ioredis";
+import { UserSessionData } from "../../../interfaces/user.dto";
 
-import { redisClient } from '../config/redis';
+import { redisClient } from "../../../config/redis";
 
 export class SessionService {
   private redis: Redis;
@@ -13,22 +13,25 @@ export class SessionService {
 
   // Generar session ID único
   private generateSessionId(): string {
-    return crypto.randomBytes(24).toString('hex');
+    return crypto.randomBytes(24).toString("hex");
   }
 
   // Crear nueva sesión y devolver session ID
-  async createSession(userData: Omit<UserSessionData, 'loginAt' | 'lastActivity'>, ttlSeconds: number): Promise<string> {
+  async createSession(
+    userData: Omit<UserSessionData, "loginAt" | "lastActivity">,
+    ttlSeconds: number
+  ): Promise<string> {
     const sessionId = this.generateSessionId();
-    
+
     const sessionData: UserSessionData = {
       ...userData,
       loginAt: new Date(),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
 
     const key = `session:${sessionId}`;
     await this.redis.setex(key, ttlSeconds, JSON.stringify(sessionData));
-    
+
     console.log(`📝 Sesión creada: ${sessionId} (TTL: ${ttlSeconds}s)`);
     return sessionId;
   }
@@ -38,23 +41,23 @@ export class SessionService {
     try {
       const key = `session:${sessionId}`;
       const data = await this.redis.get(key);
-      
+
       if (!data) {
         return null;
       }
 
       const sessionData: UserSessionData = JSON.parse(data);
-      
+
       // Actualizar última actividad
       sessionData.lastActivity = new Date();
       const ttl = await this.redis.ttl(key);
       if (ttl > 0) {
         await this.redis.setex(key, ttl, JSON.stringify(sessionData));
       }
-      
+
       return sessionData;
     } catch (error) {
-      console.error('❌ Error obteniendo sesión:', error);
+      console.error("❌ Error obteniendo sesión:", error);
       return null;
     }
   }
@@ -66,16 +69,16 @@ export class SessionService {
       await this.redis.del(key);
       console.log(`🗑️ Sesión eliminada: ${sessionId}`);
     } catch (error) {
-      console.error('❌ Error eliminando sesión:', error);
+      console.error("❌ Error eliminando sesión:", error);
     }
   }
 
   // Eliminar todas las sesiones de un usuario (logout all)
   async deleteAllUserSessions(userId: number): Promise<void> {
     try {
-      const pattern = 'session:*';
+      const pattern = "session:*";
       const keys = await this.redis.keys(pattern);
-      
+
       for (const key of keys) {
         const data = await this.redis.get(key);
         if (data) {
@@ -87,7 +90,7 @@ export class SessionService {
       }
       console.log(`🗑️ Todas las sesiones del usuario ${userId} eliminadas`);
     } catch (error) {
-      console.error('❌ Error eliminando sesiones del usuario:', error);
+      console.error("❌ Error eliminando sesiones del usuario:", error);
     }
   }
 }

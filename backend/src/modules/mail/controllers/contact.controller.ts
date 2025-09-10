@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { sendBusinessContactEmail } from '../services/contactService';
+import { sendBusinessContactEmail } from '../services/contact.service';
 
 export const handleBusinessContact = async (req: Request, res: Response) => {
   try {

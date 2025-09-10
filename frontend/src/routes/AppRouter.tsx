@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import ScrollToTop from "../components/ScrollToTop";
 import Layout from "../layout/layout";
 
+
 import { AuthProvider } from "../context/auth/AuthProvider";
 
 function AppRouter() {

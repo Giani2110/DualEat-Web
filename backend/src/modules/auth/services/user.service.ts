@@ -1,6 +1,6 @@
-import { prisma } from "../prisma/prisma";
+import { prisma } from "../../../prisma/prisma";
 import { User } from "@prisma/client";
-import { BasicCreateDTO } from "../interfaces/user.dto";
+import { BasicCreateDTO } from "../../../interfaces/user.dto";
 
 export class UserService {
   constructor() {}

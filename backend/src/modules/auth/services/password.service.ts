@@ -1,7 +1,7 @@
-import { prisma } from "../prisma/prisma";
-import { sendPasswordResetEmail } from "../services/email.service";
+import { prisma } from "../../../prisma/prisma";
+import { sendPasswordResetEmail } from "../../mail/services/email.service";
 
-import { hashPassword } from "../utils/hash";
+import { hashPassword } from "../../../utils/hash";
 
 export class PasswordService {
   constructor() {}

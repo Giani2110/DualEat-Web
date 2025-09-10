@@ -7,10 +7,13 @@ import { UserService } from "../services/user.service";
 import { PasswordService } from "../services/password.service";
 import { PasswordController } from "../controllers/password.controller";
 
-import { isAuthenticated } from "../middlewares/isAuthenticated";
+import { isAuthenticated } from "../../../middlewares/isAuthenticated";
 
-import { createTempToken, createSecureToken } from "../utils/jwt";
-import { UserSessionData, TempTokenPayload } from "../interfaces/user.dto";
+import { createTempToken, createSecureToken } from "../../../utils/jwt";
+import {
+  UserSessionData,
+  TempTokenPayload,
+} from "../../../interfaces/user.dto";
 
 const router = Router();
 const userService = new UserService();
@@ -75,7 +78,7 @@ router.get(
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 3 * 24 * 60 * 60 * 1000, 
+        maxAge: 3 * 24 * 60 * 60 * 1000,
       });
 
       console.log("✅ Cookie establecida con accessToken:", res.cookie);

@@ -28,44 +28,19 @@ const UserDashboard: React.FC = () => {
     UserCommunityEntry[]
   >([]);
 
-  /*const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [steps, setSteps] = useState("");
-  const [difficulty, setDifficulty] = useState("");
-  const [image, setImage] = useState<File | null>(null);*/
-
-  /*const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImage(e.target.files[0]);
-    }
-  };
-
-  const handlePost = () => {
-    // 🚀 Aquí mandas el post al backend
-    console.log({
-      title,
-      description,
-      ingredients,
-      steps,
-      difficulty,
-      image,
-    });
-  };
-*/
-
   const handleJoinCommunity = async (communityId: number) => {
-    // ver si el usuario es el dueño de la comunidad
     try {
-      const response = await joinCommunity(user.id, communityId);
+      if (user) {
+        const response = await joinCommunity(user.id, communityId);
 
-      if (response && response.success) {
-        console.log("Community joined successfully");
+        if (response && response.success) {
+          console.log("Community joined successfully");
 
-        const updated = await getUserCommunities(user.id);
-        if (updated && updated.success) {
-          setJoinedCommunities(updated.data as UserCommunityEntry[]);
-          console.log("Joined communities:", updated.data);
+          const updated = await getUserCommunities(user.id);
+          if (updated && updated.success) {
+            setJoinedCommunities(updated.data as UserCommunityEntry[]);
+            console.log("Joined communities:", updated.data);
+          }
         }
       }
     } catch (error) {
@@ -76,7 +51,10 @@ const UserDashboard: React.FC = () => {
   useEffect(() => {
     const fetchAllCommunities = async () => {
       try {
-        const response = await axiosInterceptor.get("/community/all");
+        const take = false;
+        const response = await axiosInterceptor.get("/community/all", {
+          params: { take },
+        });
         setCommunities(response.data.data);
         console.log(response.data.data);
       } catch (error) {
@@ -86,17 +64,18 @@ const UserDashboard: React.FC = () => {
 
     fetchAllCommunities();
 
-    getUserCommunities(user.id).then((response) => {
-      if (response && response.success) {
-        setJoinedCommunities(response.data as UserCommunityEntry[]);
-      }
-    });
-  }, [user.id]);
+    if (user) {
+      getUserCommunities(user.id).then((response) => {
+        if (response && response.success) {
+          setJoinedCommunities(response.data as UserCommunityEntry[]);
+        }
+      });
+    }
+  }, [user]);
 
   return (
     <UIDashboard>
-      <div className="w-full">
-        <div className="w-[90%] px-2 py-1 mt-10">
+        <section className="w-[90%] px-2 py-1 mt-10">
           {communities.map((community: Community) => {
             const joinedEntry = joinedCommunities.find(
               (entry) => entry.community.id === community.id
@@ -198,8 +177,7 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
 */}
-        </div>
-      </div>
+        </section>
     </UIDashboard>
   );
 };

@@ -14,7 +14,9 @@ import {
   AdminFoodCategories,
   AdminLocals,
   LocalDashboard,
-  UPost
+  UPost,
+  UExplore,
+  URecipes,
 } from "../pages";
 
 export const ROUTES = {
@@ -34,6 +36,8 @@ export const ROUTES = {
   USER: {
     DASHBOARD: "/feed",
     CREATE_POST: "/post",
+    EXPLORE: "/explore/",
+    RECIPES: "/recipes/",
   },
   ADMIN: {
     BUSINESS_CREATION: "/admin/business-creation",
@@ -43,6 +47,8 @@ export const ROUTES = {
   LOCAL: {
     DASHBOARD: "/local/dashboard",
   },
+
+  LOADING: "/loading",
 };
 
 export const appRoutes = [
@@ -80,6 +86,30 @@ export const appRoutes = [
     element: (
       <ProtectedRoute>
         <UPost />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.USER.EXPLORE,
+    element: (
+      <ProtectedRoute>
+        <UExplore />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: `${ROUTES.USER.EXPLORE}:categorySlug`,
+    element: (
+      <ProtectedRoute>
+        <UExplore />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.USER.RECIPES,
+    element: (
+      <ProtectedRoute>
+        <URecipes />
       </ProtectedRoute>
     ),
   },

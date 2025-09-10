@@ -1,4 +1,4 @@
-import { prisma } from "../prisma/prisma";
+import { prisma } from "../../../prisma/prisma";
 import { CommunityTag } from "@prisma/client";
 
 export class CommunityTagService {
@@ -14,10 +14,12 @@ export class CommunityTagService {
     }
   }
   
-  async getByIdCommunityTag(id: number) {
+  async getByIdCategory(id: number) {
     try {
-      return await prisma.communityTag.findUnique({
-        where: { id },
+      return await prisma.communityTag.findMany({
+        where: { 
+          category_id: id
+        },
         include: {
           category: true,
         }

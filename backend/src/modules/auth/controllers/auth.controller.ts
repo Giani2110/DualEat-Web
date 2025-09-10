@@ -1,6 +1,6 @@
 import { UserService } from "../services/user.service";
 import { Request, Response } from "express";
-import { RECAPTCHA_SECRET_KEY, SECRET_KEY } from "../config/config";
+import { RECAPTCHA_SECRET_KEY, SECRET_KEY } from "../../../config/config";
 
 import jwt from "jsonwebtoken";
 import axios from "axios";
@@ -11,15 +11,15 @@ import {
   UserSessionData,
   TempTokenPayload,
   SecureTokenPayload,
-} from "../interfaces//user.dto";
+} from "../../../interfaces/user.dto";
 
-import { comparePassword, hashPassword } from "../utils/hash";
+import { comparePassword, hashPassword } from "../../../utils/hash";
 
 import {
   createSecureToken,
   createTempToken,
   verifyTempToken,
-} from "../utils/jwt";
+} from "../../../utils/jwt";
 import { sessionService } from "../services/session.service";
 
 export class AuthController {
@@ -105,7 +105,7 @@ export class AuthController {
         sameSite: "strict" as const,
         maxAge: rememberMe
           ? 3 * 24 * 60 * 60 * 1000 // 3 días
-          : 24 * 60 * 60  * 1000 // 24 horas
+          : 24 * 60 * 60 * 1000, // 24 horas
       };
 
       console.log(

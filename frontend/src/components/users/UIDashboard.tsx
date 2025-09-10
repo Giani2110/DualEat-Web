@@ -11,6 +11,7 @@ import {
 import "../../assets/scss/users/users.scss";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { ROUTES } from "../../constants/constants";
 
 import CommunityModal from "../modal/CommunityModal";
 
@@ -57,19 +58,21 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
   };
 
   useEffect(() => {
-    const fetchCommunities = async () => {
-      try {
-        const response = await getUserCommunities(user.id);
-        if (response && response.success) {
-          setUserCommunities(response.data as UserCommunityEntry[]);
-          console.log("Joined communities:", response.data);
+    if (user) {
+      const fetchCommunities = async () => {
+        try {
+          const response = await getUserCommunities(user.id);
+          if (response && response.success) {
+            setUserCommunities(response.data as UserCommunityEntry[]);
+            console.log("Joined communities:", response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching communities:", error);
         }
-      } catch (error) {
-        console.error("Error fetching communities:", error);
-      }
-    };
-    fetchCommunities();
-  }, [user.id]);
+      };
+      fetchCommunities();
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen bgFood pb-[100px]">
@@ -90,7 +93,9 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
               title={isSideBarOpen ? "Ocultar menú" : "Mostrar menú"}
               onClick={toggleSidebarPin}
               type="button"
-              className={`cursor-pointer py-1 absolute top-2 z-10 bg-white border border-[#e5a657] rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow ${isSideBarOpen ? "-right-[55px]" : "-right-[45px]"}`}
+              className={`cursor-pointer py-1 absolute top-2 z-10 bg-white border border-[#e5a657] rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow ${
+                isSideBarOpen ? "-right-[55px]" : "-right-[45px]"
+              }`}
             >
               <AlignJustify color="#e27434" size={20} />
             </button>
@@ -100,53 +105,40 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                 <div className="flex flex-col">
                   <Link
                     title="Inicio"
-                    to="/feed"
+                    to={ROUTES.USER.DASHBOARD}
                     className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#f6f8f9] py-[10px]`}
                   >
                     <div>
                       <House color="#e5a657" size={22} strokeWidth={1.7} />
                     </div>
-                    <span
-                      className={`ml-3 text4`}
-                    >
-                      Inicio
-                    </span>
+                    <span className={`ml-3 text4`}>Inicio</span>
                   </Link>
                   <Link
                     title="Explorar comunidades"
-                    to="/feed"
-                     className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#f6f8f9] py-[10px]`}
+                    to={ROUTES.USER.EXPLORE}
+                    className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#f6f8f9] py-[10px]`}
                   >
                     <div>
                       <Users color="#e5a657" size={22} strokeWidth={1.7} />
                     </div>
-                    <span
-                      className={`ml-3 text4`}
-                    >
-                      Comunidades
-                    </span>
+                    <span className={`ml-3 text4`}>Explorar</span>
                   </Link>
                   <Link
                     title="Recetas"
-                    to="/feed"
+                    to={ROUTES.USER.RECIPES}
                     className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#f6f8f9] py-[10px]`}
                   >
                     <div>
                       <BookText color="#e5a657" size={22} strokeWidth={1.5} />
                     </div>
-                    <span
-                      className={`ml-3 text4`}
-                    >
-                      Recetas
-                    </span>
+                    <span className={`ml-3 text4`}>Recetas</span>
                   </Link>
 
                   <div className="border-t border-[#e5a657] mt-5"></div>
 
                   {/** Comunidades */}
                   <div
-                    onClick={() => setCommunityOpen(!communityOpen)
-                    }
+                    onClick={() => setCommunityOpen(!communityOpen)}
                     className={` transition-all duration-300 cursor-pointer w-full py-[10px] overflow-hidden ${
                       communityOpen ? "h-fit" : "h-[50px]"
                     }
@@ -201,8 +193,6 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                           </span>
                         </button>
 
-
-
                         {userCommunities.map((community) => (
                           <Link
                             key={community.community.id}
@@ -213,7 +203,11 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                             }`}
                           >
                             <div>
-                              <Users color="#e5a657" size={22} strokeWidth={1.7} />
+                              <Users
+                                color="#e5a657"
+                                size={22}
+                                strokeWidth={1.7}
+                              />
                             </div>
                             <span
                               className={`ml-3 text4 whitespace-nowrap ${
@@ -292,11 +286,9 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
         </div>
 
         {/* Contenido */}
-        <div className="main-content">
-          {children}
-        </div>
+        <div className="main-content">{children}</div>
       </section>
-      {createCommunityModalOpen && (
+      {createCommunityModalOpen && user && (
         <CommunityModal
           onClose={() => setCreateCommunityModalOpen(false)}
           user={user}
