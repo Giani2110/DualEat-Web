@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CommunityService } from "../services/community.service";
 
-import { supabase } from "../../../config/supabase";
+import { supabaseAdmin } from "../../../config/supabase";
 
 export class CommunityController {
   constructor(private communityService: CommunityService) {}
@@ -9,75 +9,72 @@ export class CommunityController {
   async create(req: Request, res: Response) {
     const { name, description, visibility, selectedTags, creatorId } = req.body;
 
-    console.log(req.body);
-
-    let imageUrl = req.body.imageUrl || "";
-    let themeColor = req.body.themeColor || "";
-
-    console.log("imageUrl:", imageUrl);
-    console.log("themeColor:", themeColor);
-
-    console.log(req.files);
+    let themeColor: string | null = null;
+    let imageUrl: string | null = null;
 
     try {
+      const parsedCreatorId = parseInt(creatorId, 10);
+      if (isNaN(parsedCreatorId)) {
+        return res
+          .status(400)
+          .json({ error: "El ID del usuario no es válido." });
+      }
       // Subir banner si existe
       if (req.files && (req.files as any).banner) {
         const bannerFile = (req.files as any).banner[0];
-        const bannerPath = `communities/banner_${Date.now()}_${bannerFile.originalname}`;
+        const bannerPath = `banner_${Date.now()}_${bannerFile.originalname}`;
 
-        console.log("bannerPath:", bannerPath);
-        
-
-        const { error } = await supabase.storage
-          .from("comunidades")
+        const { error } = await supabaseAdmin.storage
+          .from("community")
           .upload(bannerPath, bannerFile.buffer, {
             contentType: bannerFile.mimetype,
             upsert: true,
           });
         if (error) throw error;
 
-        const { data: bannerPublic } = supabase.storage
-          .from("comunidades")
+        const { data: bannerPublic } = supabaseAdmin.storage
+          .from("community")
           .getPublicUrl(bannerPath);
 
         themeColor = bannerPublic.publicUrl;
       }
 
-      // Subir ícono si existe
-      if (req.files && (req.files as any).image) {
-        const iconFile = (req.files as any).image[0];
-        const iconPath = `communities/icon_${Date.now()}_${iconFile.originalname}`;
+      // Subir icono si existe
+      if (req.files && (req.files as any).icon) {
+        const iconFile = (req.files as any).icon[0];
+        const iconPath = `icon_${Date.now()}_${iconFile.originalname}`;
 
-        const { error } = await supabase.storage
-          .from("comunidades")
+        const { error } = await supabaseAdmin.storage
+          .from("community")
           .upload(iconPath, iconFile.buffer, {
             contentType: iconFile.mimetype,
             upsert: true,
           });
         if (error) throw error;
 
-        const { data: iconPublic } = supabase.storage
-          .from("comunidades")
+        const { data: iconPublic } = supabaseAdmin.storage
+          .from("community")
           .getPublicUrl(iconPath);
 
         imageUrl = iconPublic.publicUrl;
       }
 
       // Crear la comunidad en la DB
-      /*const community = await this.communityService.createCommunity({
+      const community = await this.communityService.createCommunity({
         name,
         description,
         image_url:
           imageUrl ||
           "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg",
-        theme_color: themeColor,
+        theme_color: themeColor || "#e5a657",
         visibility,
-        creator_id: creatorId,
-        selectedTags: selectedTags ? JSON.parse(selectedTags) : [],
-      });*/
+        creator_id: parsedCreatorId,
+        selectedTags: Array.isArray(selectedTags) ? selectedTags : [],
+      });
 
-      //return res.status(201).json({ success: true, data: community });
+      return res.status(201).json({ success: true, data: community });
     } catch (error: any) {
+      console.error(error);
       return res.status(400).json({ success: false, message: error.message });
     }
   }

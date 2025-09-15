@@ -32,3 +32,15 @@ export interface Community {
   total_members: number;
   tags: CommunityTag[];
 }
+
+export interface Ingredient {
+  id: number;
+  name: string;
+  description: string | null;
+}
+
+export interface UnitOfMeasure {
+  id: number;
+  name: string;
+  abbreviation: string | null;
+}

@@ -48,32 +48,33 @@ const AuthSection: React.FC<Props> = ({
   const [imagesPreloaded, setImagesPreloaded] = useState<boolean>(false);
 
   useEffect(() => {
-    let loadedCount: number = 0;
-    const totalImages: number = images.length;
-    const imgElements: HTMLImageElement[] = []; // Para mantener referencias de las imágenes
+    let isMounted = true;
 
-    images.forEach((imageSrc: string) => {
-      const img = new Image();
-      img.src = imageSrc;
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === totalImages) {
-          setImagesPreloaded(true);
-        }
-      };
-      img.onerror = () => {
-        console.error("Error al cargar la imagen:", imageSrc);
-      };
-      imgElements.push(img); // Almacenar para evitar que el GC las elimine
+    const promises = images.map((imageSrc) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = imageSrc;
+        img.onload = resolve;
+        img.onerror = reject;
+      });
     });
 
-    return () => {
-      // No se requiere una limpieza específica para este caso, ya que las imágenes
-      // precargadas no se desacoplan activamente del DOM, pero es buena práctica.
-    };
-  }, [images]); // Dependencia images si usas useMemo, o [] si las imágenes son estáticas
+    Promise.all(promises)
+      .then(() => {
+        if (isMounted) {
+          setImagesPreloaded(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al precargar imágenes:", error);
+      });
 
-  useEffect(() => {
+    return () => {
+      isMounted = false;
+    };
+  }, [images]);
+
+   useEffect(() => {
     if (imagesPreloaded) {
       const interval = setInterval(() => {
         setCurrentImageIndex(
@@ -82,7 +83,7 @@ const AuthSection: React.FC<Props> = ({
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [images.length, imagesPreloaded, currentImageIndex]); // Agregado currentImageIndex para el efecto de transición
+  }, [imagesPreloaded, images.length]);
 
   const handleDotClick = (index: number) => {
     setCurrentImageIndex(index);

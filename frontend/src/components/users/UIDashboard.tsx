@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   House,
   Users,
@@ -14,10 +14,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../constants/constants";
 
 import CommunityModal from "../modal/CommunityModal";
-
-import { getUserCommunities } from "../../services/community.api";
-
-import type { Community } from "../../interface/global";
+import { useCommunity } from "../../hooks/useUCommunity";
 
 import "../../assets/scss/users/users.scss";
 
@@ -25,23 +22,14 @@ interface Props {
   children: React.ReactNode;
 }
 
-type UserCommunityEntry = {
-  community: Community;
-  is_moderator: boolean;
-  joined_at: string;
-};
-
 const UIDashboard: React.FC<Props> = ({ children }) => {
   const { logout, user } = useAuth();
+  const { userCommunities } = useCommunity();
   const [isSideBarOpen, setIsSideBarOpen] = React.useState(true);
   const [isPinned, setIsPinned] = React.useState(true);
 
   const [communityOpen, setCommunityOpen] = React.useState(true);
   const [following, setFollowing] = React.useState(true);
-
-  const [userCommunities, setUserCommunities] = useState<UserCommunityEntry[]>(
-    []
-  );
 
   const [createCommunityModalOpen, setCreateCommunityModalOpen] =
     React.useState(false);
@@ -57,27 +45,10 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
     setIsSideBarOpen(newPinned ? true : false);
   };
 
-  useEffect(() => {
-    if (user) {
-      const fetchCommunities = async () => {
-        try {
-          const response = await getUserCommunities(user.id);
-          if (response && response.success) {
-            setUserCommunities(response.data as UserCommunityEntry[]);
-            console.log("Joined communities:", response.data);
-          }
-        } catch (error) {
-          console.error("Error fetching communities:", error);
-        }
-      };
-      fetchCommunities();
-    }
-  }, [user]);
-
   return (
     <div className="min-h-screen bgFood pb-[100px]">
       <section
-        className={` dashboard-layout pt-15 ${
+        className={`dashboard-layout pt-15 ${
           isSideBarOpen ? "sidebar-open" : "sidebar-closed"
         }`}
       >
@@ -286,7 +257,11 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
         </div>
 
         {/* Contenido */}
-        <div className="main-content">{children}</div>
+        <div
+          className={`main-content ${isSideBarOpen ? "ps-[10%]" : "ps-[4%]"}`}
+        >
+          {children}
+        </div>
       </section>
       {createCommunityModalOpen && user && (
         <CommunityModal

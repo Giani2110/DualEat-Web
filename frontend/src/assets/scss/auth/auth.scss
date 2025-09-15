@@ -87,10 +87,11 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 200%;
+  width: 100%;
   height: 100%;
-  background-image: url(../../images/auth/PasswordResetBG.jpg);
-  filter: brightness(0.6);
+  background-image: url(../../images/BGDash.jpg);
+  filter: brightness(0.5);
+  background-size: cover;
   background-repeat: no-repeat;
   opacity: 1;
   z-index: 0;

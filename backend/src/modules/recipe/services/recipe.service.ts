@@ -1,7 +1,53 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "../../../prisma/prisma";
 
 export class RecipeService {
+  constructor() {}
+
+
+  /** GET INGREDIENTS */
+  async getAllIngredients() {
+    try {
+      const result = await prisma.ingredient.findMany();
+      return result;
+    } catch (error) {
+      throw new Error(`Error al obtener ingredientes: ${error}`);
+    }
+  }
+
+  /** GET UNITS */
+  async getAllUnits() {
+    try {
+      const result = await prisma.unitOfMeasure.findMany({
+        orderBy: { name: "asc" },
+      });
+      return result;
+    } catch (error) {
+      throw new Error(`Error al obtener unidades: ${error}`);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     async createRecipe(userId: number, name: string, description?: string) {
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) throw new Error("Usuario no existe");

@@ -337,7 +337,7 @@ model Recipe {
   user_id     Int
   name        String
   description String
-  //time
+  total_time  Int?  
   main_image  String
 
   created_at  DateTime  @default(now())
@@ -349,6 +349,31 @@ model Recipe {
 
   @@unique([user_id, name])
 }
+
+model RecipeIngredient {
+  id                 Int           @id @default(autoincrement())
+  recipe             Recipe        @relation(fields: [recipe_id], references: [id])
+  recipe_id          Int
+  ingredient         Ingredient    @relation(fields: [ingredient_id], references: [id])
+  ingredient_id      Int
+  quantity           String
+  unit_of_measure    UnitOfMeasure @relation(fields: [unit_of_measure_id], references: [id])
+  unit_of_measure_id Int
+  notes              String?
+}
+
+model RecipeStep {
+  id             Int     @id @default(autoincrement())
+  recipe         Recipe  @relation(fields: [recipe_id], references: [id])
+  recipe_id      Int
+  step_number    Int
+  description    String
+  image_url      String?
+  estimated_time Int?
+
+  @@unique([recipe_id, step_number])
+}
+
 
 model Post {
   id             Int       @id @default(autoincrement())
@@ -410,29 +435,6 @@ model Ingredient {
   recipe_ingredients RecipeIngredient[]
 }
 
-model RecipeIngredient {
-  id                 Int           @id @default(autoincrement())
-  recipe             Recipe        @relation(fields: [recipe_id], references: [id])
-  recipe_id          Int
-  ingredient         Ingredient    @relation(fields: [ingredient_id], references: [id])
-  ingredient_id      Int
-  quantity           Float
-  unit_of_measure    UnitOfMeasure @relation(fields: [unit_of_measure_id], references: [id])
-  unit_of_measure_id Int
-  notes              String?
-}
-
-model RecipeStep {
-  id             Int     @id @default(autoincrement())
-  recipe         Recipe  @relation(fields: [recipe_id], references: [id])
-  recipe_id      Int
-  step_number    Int
-  description    String
-  image_url      String?
-  estimated_time Int?
-
-  @@unique([recipe_id, step_number])
-}
 
 model Order {
   id             Int         @id @default(autoincrement())

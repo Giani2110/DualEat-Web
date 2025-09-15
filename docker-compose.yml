@@ -60,6 +60,7 @@ services:
       dockerfile: Dockerfile   
     platform: linux/amd64
     container_name: dualeat_backend
+    restart: no
     ports:
       - 3000:3000
     depends_on:
@@ -87,6 +88,7 @@ services:
       dockerfile: Dockerfile
     platform: linux/amd64
     container_name: dualeat_frontend
+    restart: no
     ports:
       - 5173:5173
     depends_on:
@@ -102,7 +104,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: dualeat_ollama
-    restart: always
+    restart: no
     ports:
       - "11434:11434"
     volumes:

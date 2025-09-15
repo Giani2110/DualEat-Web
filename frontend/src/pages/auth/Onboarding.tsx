@@ -121,9 +121,7 @@ const Onboarding: React.FC = () => {
         tempToken
       );
       if (response?.success) {
-        
-          navigate("/feed", { replace: true });
-       
+        navigate(ROUTES.USER.DASHBOARD, { replace: true });
       }
     } catch (error: unknown) {
       console.error("Error al enviar datos de completado de perfil:", error);

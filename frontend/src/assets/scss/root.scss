@@ -2,6 +2,19 @@ textarea {
   resize: none;
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
 /* Loading Screen */
 .translate {
   animation: translate 1.6s ease-in-out infinite;

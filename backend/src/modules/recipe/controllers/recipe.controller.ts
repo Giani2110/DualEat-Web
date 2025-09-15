@@ -1,9 +1,34 @@
 import { Request, Response } from "express";
 import { RecipeService } from "../services/recipe.service";
 
-const service = new RecipeService();
+
 
 export class RecipeController {
+  constructor(private recipeService: RecipeService) {}
+
+  /** GET INGREDIENTS */
+  async getAllIngredients(req: Request, res: Response) {
+    try {
+      const ingredients = await this.recipeService.getAllIngredients();
+      res.status(200).json({ success: true, data: ingredients });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }
+
+  /** GET UNITS */
+  async getAllUnits(req: Request, res: Response) {
+    try {
+      const units = await this.recipeService.getAllUnits();
+      res.status(200).json({ success: true, data: units });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }
+
+
+
+/*
   async createRecipe(req: Request, res: Response) {
     const { userId, name, description } = req.body;
     try {
@@ -54,4 +79,5 @@ export class RecipeController {
     }
     res.json({ message: "Receta eliminada" });
   }
+    */
 }

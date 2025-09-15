@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { getUserCommunities } from "../../services/community.api";
+import { getAllIngredients } from "../../services/recipes.api";
 import { Search, ChevronDown, Images, Trash2, CircleAlert } from "lucide-react";
 import UIDashboard from "../../components/users/UIDashboard";
+import IngredientsCard from "../../components/users/posts/IngredientsCard";
+import InstructionCard from "../../components/users/posts/InstructionsCard";
 
-import type { Community } from "../../interface/global";
+import type { Community, Ingredient } from "../../interface/global";
 
 import "../../assets/scss/users/users.scss";
 
@@ -15,7 +18,7 @@ type UserCommunityEntry = {
   joined_at: string;
 };
 
-const UPost: React.FC = () => {
+const UPost = () => {
   const { user } = useAuth();
 
   const [title, setTitle] = useState<string>("");
@@ -35,6 +38,8 @@ const UPost: React.FC = () => {
   const [recipeDescription, setRecipeDescription] = useState<string>("");
   const [recipeImage, setRecipeImage] = useState<File[]>([]);
   const [recipeImagePreviews, setRecipeImagePreviews] = useState<string[]>([]);
+
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
 
   const [selected, setSelected] = useState<Community | null>(null);
 
@@ -131,6 +136,21 @@ const UPost: React.FC = () => {
     };
     fetchCommunities();
   }, [user]);
+
+  useEffect(() => {
+   if (step === "2") {
+    const fetchIngredients = async () => {
+      if (!user) return;
+      const ingredients = await getAllIngredients();
+
+      if (ingredients && ingredients.success) {
+        setIngredients(ingredients.data as Ingredient[]);
+        console.log("Ingredients:", ingredients.data);  
+      }
+    }
+     fetchIngredients();
+   }
+  }, [step, user]);
 
   {
     /** Cerrar el dropdown */
@@ -576,14 +596,14 @@ const UPost: React.FC = () => {
 
         {/* Contenido Derecho */}
         {step === "2" && (
-          <div className="w-[95%] justify-between gap-6 flex p-6">
-            <div className="w-[35%]">
+          <div className="w-[95%] flex-wrap justify-between gap-6 flex p-6">
+            <div className="flex-[1] lg:flex-[0.5] h-fit">
               <h1 className="text5 text-[16px] Arvo-Bold mb-3 tracking-tight">
                 Información general de la receta
               </h1>
-              <div className="flex flex-col bg-white h-full rounded-[20px] px-6 py-3 gap-8">
+              <div className="flex flex-col bg-white h-full rounded-[20px] px-6 py-8 gap-8">
                 {recipeImagePreviews.length === 0 ? (
-                  <div className="relative mt-4">
+                  <div className="relative">
                     <div
                       className={`border-2 border-dashed rounded-[20px] p-12 text-center bg-gray-50/50 ${
                         isDragOver
@@ -682,7 +702,7 @@ const UPost: React.FC = () => {
                     placeholder="Ej.: Pollo al Curry Cremoso con Coco"
                     onChange={(e) => setRecipeName(e.target.value)}
                     value={recipeName}
-                    className="outline-none placeholder:text-[#707070] p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[14px] w-full text5"
+                    className="outline-none p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] w-full"
                   />
                 </div>
                 <div className="space-y-2">
@@ -695,7 +715,7 @@ const UPost: React.FC = () => {
                     placeholder="Ej.: Este plato combina la suavidad y el sabor intenso"
                     onChange={(e) => setRecipeDescription(e.target.value)}
                     value={recipeDescription}
-                    className="outline-none placeholder:text-[#707070] p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[14px] w-full text5"
+                    className="outline-none p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] w-full"
                   />
                 </div>
                 <div className="space-y-2">
@@ -706,43 +726,30 @@ const UPost: React.FC = () => {
                     <input
                       aria-label="Nombre de la receta"
                       type="text"
-                      placeholder="Ej.: Pollo al curry"
+                      placeholder="Ej.: 45 minutos"
                       onChange={(e) => setRecipeName(e.target.value)}
                       value={recipeName}
-                      className="outline-none placeholder:text-[#707070] p-[10px] border border-gray-300 rounded-[5px] text-[14px] w-full"
+                      className="outline-none p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] w-full"
                     />
 
-                    <select
-                      title="Tiempo de preparación"
-                      className="p-[10px] border border-gray-300 text5 rounded-[5px] text-[13px]"
-                    >
-                      <option value="minutos">Minutos</option>
-                      <option value="horas">Horas</option>
-                    </select>
+                  
                   </div>
                 </div>
               </div>
             </div>
-            <div className="w-[65%]">
+            <div className="flex-[1] h-fit">
               <h1 className="text5 text-[16px] Arvo-Bold mb-3 tracking-tight">
                 Detalles de la receta
               </h1>
-              <div className="flex flex-col bg-white h-full rounded-[20px] px-6 py-3 gap-8">
-                <div className="space-y-2">
-                  <p className="text-[14px] text5 tracking-tighter Arvo-Bold">
-                    Ingredientes
-                  </p>
-                  <input
-                    aria-label="Nombre de la receta"
-                    type="text"
-                    placeholder="Ej.: Pollo al Curry Cremoso con Coco"
-                    onChange={(e) => setRecipeName(e.target.value)}
-                    value={recipeName}
-                    className="outline-none placeholder:text-[#707070] p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[14px] w-full text5"
-                  />
+              <div className="flex flex-col h-full rounded-[20px]  gap-8">
+                <div className="space-y-2 bg-white px-6 py-4 rounded-[10px]">
+                  <IngredientsCard />
                 </div>
-
+                <div className="space-y-2 bg-white px-6 py-4 rounded-[10px]">
+                  <InstructionCard />
+                </div>
               </div>
+              
             </div>
           </div>
         )}

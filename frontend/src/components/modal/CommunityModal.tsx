@@ -22,13 +22,19 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
+  // --- Files reales para subir ---
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [iconFile, setIconFile] = useState<File | null>(null);
+
+  // --- Previews para mostrar en el modal ---
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [iconPreview, setIconPreview] = useState<string | null>(null);
+
+  // --- Estado para recorte ---
   const [croppingTarget, setCroppingTarget] = useState<
     "banner" | "icon" | null
   >(null);
   const [tempImage, setTempImage] = useState<string | null>(null);
-
-  const [themeColor, setThemeColor] = useState<string>("#e5a657");
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [categories, setCategories] = useState<CategoryTag[]>([]);
   const [communityTags, setCommunityTags] = useState<CommunityTag[]>([]);
@@ -94,15 +100,14 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
   const handleSubmit = async () => {
     if (step === "4") {
-
       const nameFixed = name.replace(/\s+/g, "");
       setName(nameFixed);
 
       const response = await createCommunity(
         name,
         description,
-        imageUrl,
-        themeColor,
+        bannerFile,
+        iconFile,
         visibility,
         selectedTags,
         user.id
@@ -148,42 +153,41 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   }, [name]);
 
   useEffect(() => {
-  const fetchCommunityTags = async () => {
-    try {
-      const response = await getCommunityTags();
+    const fetchCommunityTags = async () => {
+      try {
+        const response = await getCommunityTags();
 
-      if (response && response.success) {
-        const tags = response.data as CommunityTag[];
-        setCommunityTags(tags);
+        if (response && response.success) {
+          const tags = response.data as CommunityTag[];
+          setCommunityTags(tags);
 
-       
-        if (tags) { 
-          const uniqueCategories = tags
-            .map((tag) => tag.category)
-            .filter(
-              (cat, index, self) =>
-                index === self.findIndex((c) => c.id === cat.id)
-            );
+          if (tags) {
+            const uniqueCategories = tags
+              .map((tag) => tag.category)
+              .filter(
+                (cat, index, self) =>
+                  index === self.findIndex((c) => c.id === cat.id)
+              );
 
-          if (searchTerm) {
-            const filteredCategories = uniqueCategories.filter((category) =>
-              category.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            setCategories(filteredCategories);
-            console.log("Filtered categories:", filteredCategories);
-          } else {
-            setCategories(uniqueCategories);
-            console.log("Categories extracted:", uniqueCategories);
+            if (searchTerm) {
+              const filteredCategories = uniqueCategories.filter((category) =>
+                category.name.toLowerCase().includes(searchTerm.toLowerCase())
+              );
+              setCategories(filteredCategories);
+              console.log("Filtered categories:", filteredCategories);
+            } else {
+              setCategories(uniqueCategories);
+              console.log("Categories extracted:", uniqueCategories);
+            }
           }
         }
+      } catch (error) {
+        console.error("Error fetching community tags:", error);
       }
-    } catch (error) {
-      console.error("Error fetching community tags:", error);
-    }
-  };
+    };
 
-  fetchCommunityTags();
-}, [searchTerm]);
+    fetchCommunityTags();
+  }, [searchTerm]);
 
   // Función para manejar la selección/deselección de tags
   const handleTagToggle = (tagId: number) => {
@@ -204,12 +208,15 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   const handleFileSelect = (file: File, target: "banner" | "icon") => {
     const maxSizeMB = 5;
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
     if (file.size > maxSizeBytes) {
       alert(
         `El archivo supera los ${maxSizeMB}MB. Por favor, subí uno más liviano.`
       );
       return;
     }
+
+    // Genero URL temporal y abro RCrop
     const url = URL.createObjectURL(file);
     setTempImage(url);
     setCroppingTarget(target);
@@ -368,16 +375,26 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                   setCroppingTarget(null);
                   setTempImage(null);
                 }}
-                onComplete={(url) => {
+                onComplete={async (blob) => {
+                  const file = new File([blob], `${croppingTarget}.jpeg`, {
+                    type: "image/jpeg",
+                  });
+                  const previewUrl = URL.createObjectURL(file);
+
                   if (croppingTarget === "banner") {
-                    setThemeColor(url);
+                    setBannerFile(file);
+                    console.log(bannerFile);
+                    setBannerPreview(previewUrl);
                   } else {
-                    setImageUrl(url);
+                    setIconFile(file);
+                    console.log(iconFile);
+                    setIconPreview(previewUrl);
                   }
+
                   setCroppingTarget(null);
                   setTempImage(null);
                 }}
-                type={croppingTarget === "banner" ? "banner" : "icon"}
+                type={croppingTarget}
               />
             ) : (
               <>
@@ -418,7 +435,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                         }}
                       />
                     </div>
-                    {themeColor.startsWith("#") && (
+                    {bannerPreview === null && (
                       <div className="flex items-center gap-2">
                         <p>ff</p>
                       </div>
@@ -461,10 +478,10 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                       <div
                         className="w-full h-10"
                         style={
-                          themeColor.startsWith("#")
-                            ? { backgroundColor: themeColor }
+                          bannerPreview === null
+                            ? { backgroundColor: "#e5a657" }
                             : {
-                                backgroundImage: `url(${themeColor})`,
+                                backgroundImage: `url(${bannerPreview})`,
                                 backgroundSize: "cover",
                                 backgroundRepeat: "no-repeat",
                                 backgroundPosition: "center",
@@ -474,8 +491,8 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                       <div className="leading-6 tracking-tight items-center flex flex-wrap gap-4 px-5 pt-5">
                         <img
                           src={
-                            imageUrl
-                              ? imageUrl
+                            iconPreview
+                              ? iconPreview
                               : "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
                           }
                           alt="Icon"

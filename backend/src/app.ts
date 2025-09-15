@@ -24,12 +24,13 @@ import statisticsRoutes from "./modules/Locals/route/statistics.routes";
 import orders from "./modules/Locals/route/order.routes";
 import manualLoadMenu from "./modules/Locals/route/manualLoadMenu.routes";
 
-
 // Módulo de Comunidad
 import communityRoutes from "./modules/community/routes/community.routes";
 import communityTagsRouter from "./modules/community/routes/community-tag.routes";
 import tagCategoryRouter from "./modules/community/routes/tag-category.routes";
 
+// Módulo de Recetas y Posts
+import recipeRoutes from "./modules/recipe/routes/recipe.routes";
 
 // Rutas sin agrupar en módulos (considera agruparlas si el proyecto crece)
 import onboardingRoutes from "./routes/onBoarding.routes";
@@ -38,7 +39,6 @@ import adminRouter from "./routes/admin.routes";
 import qrRoutes from "./routes/qr.routes";
 import ocrRoutes from "./routes/ocr.routes";
 import foodRoutes from "./routes/food.routes";
-import recipeRoutes from "./routes/recipe.routes";
 
 // =========================================================================
 
@@ -122,6 +122,9 @@ app.use(`${API_PREFIX}/community`, communityRoutes);
 app.use(`${API_PREFIX}/tags-categories`, tagCategoryRouter);
 app.use(`${API_PREFIX}/community-tags`, communityTagsRouter);
 
+// Módulo de Recetas y Posts
+app.use(`${API_PREFIX}/recipe`, recipeRoutes);
+
 // Módulo de Locales (si existen, aquí irían)
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/critiques", critiqueRoutes);
@@ -129,8 +132,6 @@ app.use("/api/critiques", critiqueRoutes);
 // Otras rutas (considera agruparlas en módulos también)
 app.use(`${API_PREFIX}/onboarding`, onboardingRoutes);
 app.use(`${API_PREFIX}/food-categories`, foodCategoriesRoutes);
-app.use("/api/recipes", recipeRoutes);
-
 
 //Admin
 app.use("/admin", adminRouter);
@@ -138,18 +139,17 @@ app.use("/api/admin", adminRouter);
 
 //Locales
 app.use("/api", qrRoutes);
-app.use('/api', ocrRoutes);
-app.use('/api', foodRoutes);
-app.use('/api', reviewRoutes);
-app.use('/api', critiqueRoutes);
-app.use('/api', statisticsRoutes);
-app.use('/api', orders);
-app.use('/api', manualLoadMenu);
+app.use("/api", ocrRoutes);
+app.use("/api", foodRoutes);
+app.use("/api", reviewRoutes);
+app.use("/api", critiqueRoutes);
+app.use("/api", statisticsRoutes);
+app.use("/api", orders);
+app.use("/api", manualLoadMenu);
 
 app.use("/api/qr", qrRoutes);
 app.use("/api/ocr", ocrRoutes);
 app.use("/api/food", foodRoutes);
-
 
 // Rutas de administración
 app.use("/admin", adminRouter);

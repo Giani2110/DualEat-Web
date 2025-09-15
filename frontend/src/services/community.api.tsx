@@ -8,22 +8,25 @@ import axios from "axios";
 export const createCommunity = async (
   name: string,
   description: string,
-  imageUrl: string | null,
-  themeColor: string,
+  bannerFile: File | null,
+  iconFile: File | null,
   visibility: string,
   selectedTags: number[],
   creatorId: number
 ): Promise<Response | null> => {
   try {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("visibility", visibility);
+    formData.append("creatorId", JSON.stringify(creatorId));
+    formData.append("selectedTags", JSON.stringify(selectedTags));
+    if (bannerFile) formData.append("banner", bannerFile);
+    if (iconFile) formData.append("icon", iconFile);
+
     const response = await toast.promise(
-      axiosInterceptor.post("/community/create", {
-        name,
-        description,
-        imageUrl,
-        themeColor,
-        visibility,
-        selectedTags,
-        creatorId,
+      axiosInterceptor.post("/community/create", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       }),
       {
         loading: "Creando comunidad...",
@@ -43,7 +46,9 @@ export const createCommunity = async (
   }
 };
 
-export const getCommunityByName = async (name: string): Promise<Response | null> => {
+export const getCommunityByName = async (
+  name: string
+): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/community/", {
       params: { name },
@@ -57,9 +62,10 @@ export const getCommunityByName = async (name: string): Promise<Response | null>
   }
 };
 
-
-export const getCommunityByTag = async (tagId: number): Promise<Response | null> => {
-  try { 
+export const getCommunityByTag = async (
+  tagId: number
+): Promise<Response | null> => {
+  try {
     const response = await axiosInterceptor.get(`/community/communities/tag`, {
       params: { tagId },
     });
@@ -70,8 +76,7 @@ export const getCommunityByTag = async (tagId: number): Promise<Response | null>
     }
     return null;
   }
-  
-}
+};
 
 export const joinCommunity = async (
   user_id: number,
@@ -103,7 +108,7 @@ export const getUserCommunities = async (
     const response = await axiosInterceptor.get("/community/user", {
       params: { user_id },
     });
-    
+
     return response.data as Response;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
@@ -112,7 +117,6 @@ export const getUserCommunities = async (
     return null;
   }
 };
-
 
 export const getRecommendedCommunities = async (
   user_id: number
@@ -152,4 +156,4 @@ export const getTrendingCommunities = async (): Promise<Response | null> => {
     }
     return null;
   }
-}
+};

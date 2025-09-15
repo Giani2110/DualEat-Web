@@ -75,7 +75,7 @@ const HeaderUSER: React.FC = () => {
           <Bell color="#4A4947" strokeWidth={1.8} size={22}/>
         </div>
         <div className="p-1 cursor-pointer hover:bg-[#E5EBEE] rounded-3xl ">
-          {user && <img className="w-[30px] h-[30px] rounded-full" src={user.avatar_url || ""} alt="" />}
+          {user && <img className="w-[30px] h-[30px] rounded-full" src={user?.avatar_url || ""} alt="" />}
           
         </div>
 

@@ -6,7 +6,7 @@ import { Plus, Minus } from "lucide-react";
 
 interface RCropProps {
   src: string;
-  onComplete: (url: string) => void;
+  onComplete: (blob: Blob) => void;
   onCancel: () => void;
   type: string;
 }
@@ -122,8 +122,8 @@ export default function RCrop({ src, onComplete, onCancel, type }: RCropProps) {
     previewCanvasRef.current.toBlob(
       (blob) => {
         if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        onComplete(url);
+        onComplete(blob);
+        console.log(blob);
       },
       "image/jpeg",
       1.0

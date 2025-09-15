@@ -44,8 +44,8 @@ const ResetPassword = () => {
   }, [resendCooldown]);
 
   const handleBack = () => {
-    setCode(""); 
-    setStep("email"); 
+    setCode("");
+    setStep("email");
   };
 
   const handleSendCode = async () => {
@@ -168,7 +168,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bgAnimation">
-      <div className="max-w-[600px] h-[650px] w-full flex flex-col items-center mt-20 bg-black border border-gray-600 rounded-[20px] px-8 py-10">
+      <div className="max-w-[600px] h-[650px] w-full flex flex-col items-center mt-20 bg-black border-2 border-[#878787] rounded-[20px] px-8 py-10">
         <div className="flex items-center mb-6">
           <X
             size={22}
