@@ -58,4 +58,45 @@ export class StatisticsService {
       total_orders: metrics._count.id || 0,
     };
   }
+
+  static async getMonthlyLocalEarnings(localId: number, from: string, to: string) {
+    const orders = await prisma.order.findMany({
+      where: {
+        local_id: localId,
+        status: "confirmed",
+        created_at: {
+          gte: new Date(from),
+          lte: new Date(to),
+        },
+      },
+      select: {
+        total: true,
+        created_at: true,
+      },
+      orderBy: {
+        created_at: "asc",
+      },
+    });
+  
+    // 2. Procesar y agrupar los resultados por mes y año
+    const monthlyEarnings = orders.reduce((acc: { [key: string]: number }, order) => {
+      const monthYear = order.created_at.toISOString().slice(0, 7);
+  
+      // Si el mes no existe, lo inicializa
+      if (!acc[monthYear]) {
+        acc[monthYear] = 0;
+      }
+  
+      // Sumar el total del pedido al mes correspondiente
+      acc[monthYear] += order.total;
+  
+      return acc;
+    }, {});
+  
+    // 3. Convertir el objeto a un array de objetos
+    return Object.entries(monthlyEarnings).map(([month, total]) => ({
+      mes: month,
+      ganancia: total,
+    }));
+  }
 }
