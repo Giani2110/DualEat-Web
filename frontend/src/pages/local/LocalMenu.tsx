@@ -1,9 +1,10 @@
 import { useState, useMemo, useRef, useEffect, useContext } from 'react';
-import { PlusCircle, Edit, Trash2, Tag, Sun, TrendingUp, Search, Upload, FilePlus, ChevronLeft, ChevronRight, CameraOff, TrendingDown, X } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Tag, Sun, TrendingUp, Search, Upload, FilePlus, ChevronLeft, ChevronRight, CameraOff, TrendingDown, X, Sparkles, AlertTriangle, Check } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AuthContext } from '../../context/auth/AuthContext';
 import '../../assets/scss/users/users.scss';
 import EditFoodModal from '../../components/locals/EditFoodModal';
+import UploadMenuSection from '../../components/locals/UploadMenuSection';
 
 // Definición de las interfaces
 interface Food {
@@ -51,14 +52,17 @@ const LocalMenu = () => {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [foodToHide, setFoodToHide] = useState<Food | null>(null);
+  const [showOcrModal, setShowOcrModal] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [showArrows, setShowArrows] = useState(false);
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
-  
+
   const categoriesRef = useRef<HTMLDivElement>(null);
+
+  const [extractedDishes, setExtractedDishes] = useState<any[]>([]);
 
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -125,9 +129,9 @@ const LocalMenu = () => {
     };
     fetchFoods();
   }, [localId, API_BASE]);
-  
+
   useEffect(() => {
-    if (isModalOpen || isConfirmModalOpen) {
+    if (isModalOpen || isConfirmModalOpen || showOcrModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -135,9 +139,8 @@ const LocalMenu = () => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isModalOpen, isConfirmModalOpen]);
+  }, [isModalOpen, isConfirmModalOpen, showOcrModal]);
 
-  // Función para "ocultar" un plato, marcándolo como no disponible
   const handleHideFood = async () => {
     if (!foodToHide) return;
 
@@ -164,31 +167,142 @@ const LocalMenu = () => {
     }
   };
 
+  const handleAddFood = () => {
+    if (!localId) {
+      alert('Error: No se encontró el ID del local.');
+      return;
+    }
+    setSelectedFood({
+      id: 0,
+      local_id: localId,
+      category_id: 0,
+      name: '',
+      price: 0,
+      description: '',
+      image_url: null,
+      available: true,
+      votes_up: 0,
+      votes_down: 0,
+    });
+    setIsModalOpen(true);
+  };
+
   const handleUpdateFood = (food: Food) => {
     setSelectedFood(food);
     setIsModalOpen(true);
   };
 
-  const handleOnSave = (updatedFood: Food) => {
-    setFoods(prevFoods =>
-      prevFoods.map(f => (f.id === updatedFood.id ? updatedFood : f))
-    );
+  const handleOnSave = async (food: Food) => {
+      const isNewFood = food.id === 0;
+    
+      try {
+        const method = isNewFood ? 'POST' : 'PUT';
+    
+        const url = isNewFood
+          ? `${API_BASE}/locals/${food.local_id}/manual-menu`
+          : `${API_BASE}/food/foods/${food.id}`;
+    
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(food),
+        });
+    
+        if (!response.ok) {
+          throw new Error(`Error al ${isNewFood ? 'agregar' : 'actualizar'} el plato.`);
+        }
+    
+        const savedFood = await response.json();
+    
+        setFoods(prevFoods => {
+          if (isNewFood) {
+            return [...prevFoods, savedFood];
+          }
+          return prevFoods.map(f => (f.id === savedFood.id ? savedFood : f));
+        });
+    
+        if (food.id && food.id.toString().startsWith('temp-')) {
+          setExtractedDishes(prevDishes => prevDishes.filter(dish => dish.id !== food.id));
+        }
+    
+      } catch (err) {
+        console.error('Error al guardar el plato:', err);
+        if (err instanceof Error) {
+          alert(`Hubo un error al guardar el plato: ${err.message}.`);
+        } else {
+          alert('Hubo un error al guardar el plato.');
+        }
+      } finally {
+        setIsModalOpen(false);
+        setSelectedFood(null);
+      }
+    };
+
+  // Función para manejar la data del OCR y mostrarla
+  const handleExtractedDishes = (dishes: any[]) => {
+    if (dishes.length === 0) {
+      alert('La IA no pudo extraer platos de la foto. Asegúrate de que siga las recomendaciones.');
+    }
+    setExtractedDishes(dishes);
+    setShowOcrModal(false);
+  };
+
+  const handleSaveAllExtractedDishes = async () => {
+    if (!localId) {
+      alert('Error: ID del local no encontrado.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/locals/${localId}/manual-menu/bulk`, { // La nueva ruta
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dishes: extractedDishes }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al guardar los platos extraídos.');
+      }
+
+      const savedDishes = await response.json();
+      setFoods([...foods, ...savedDishes.data]);
+      setExtractedDishes([]);
+      alert('¡Platos guardados con éxito!');
+
+    } catch (error: any) {
+      console.error("Error al guardar los platos extraídos:", error);
+      setError(error.message);
+    }
+  };
+
+  const handleEditExtractedDish = (dish: any) => {
+    setSelectedFood({
+      id: dish.id || 0,
+      local_id: localId!,
+      category_id: dish.category_id || 0,
+      name: dish.name,
+      price: dish.price,
+      description: dish.description || null,
+      image_url: dish.image_url || null,
+      available: true,
+      votes_up: dish.votes_up || 0,
+      votes_down: dish.votes_down || 0,
+    });
+    setIsModalOpen(true);
   };
 
   const filteredFoods = useMemo(() => {
     return foods.filter(food =>
-      food.available && // <-- Filtrar solo los platos disponibles
+      food.available &&
       (selectedCategory === null || food.category_id === selectedCategory) &&
       (food.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       food.description?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [selectedCategory, searchTerm, foods]);
-
-  const currentCategoryName = useMemo(() => {
-    return selectedCategory
-      ? exampleCategories.find(cat => cat.id === selectedCategory)?.name
-      : 'Todos los Platos';
-  }, [selectedCategory, exampleCategories]);
 
   const scrollCategories = (direction: 'left' | 'right') => {
     if (categoriesRef.current) {
@@ -214,16 +328,28 @@ const LocalMenu = () => {
     if (currentRef) {
       checkScrollable();
       currentRef.addEventListener('scroll', checkScrollable);
-      
+
       const resizeObserver = new ResizeObserver(checkScrollable);
       resizeObserver.observe(currentRef);
-      
+
       return () => {
         currentRef.removeEventListener('scroll', checkScrollable);
         resizeObserver.disconnect();
       };
     }
   }, [exampleCategories]);
+
+  if (loading) {
+    return <div className="text-center text-white p-8">Cargando menú...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-400 p-4 bg-gray-800 rounded-xl"><AlertTriangle className="inline mr-2" />{error}</div>;
+  }
+
+  if (!localId) {
+    return <div className="text-center text-gray-400 p-8">No se encontró un local asociado.</div>;
+  }
 
   return (
     <>
@@ -237,12 +363,12 @@ const LocalMenu = () => {
               </p>
             </div>
           </header>
-          
+
           <section className="mb-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div 
+              <div
                 className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border border-gray-700 hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
-                onClick={() => alert('Función para agregar plato manualmente')}
+                onClick={handleAddFood}
               >
                 <FilePlus className="w-12 h-12 text-blue-400 mb-3" />
                 <h3 className="text-lg font-semibold text-white">Agregar Plato</h3>
@@ -250,9 +376,9 @@ const LocalMenu = () => {
                   Crea un plato nuevo y personalízalo.
                 </p>
               </div>
-              <div 
+              <div
                 className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border border-gray-700 hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
-                onClick={() => alert('Función para subir imagen')}
+                onClick={() => setShowOcrModal(true)} // Cambiamos esto
               >
                 <Upload className="w-12 h-12 text-purple-400 mb-3" />
                 <h3 className="text-lg font-semibold text-white">Subir con Foto</h3>
@@ -260,7 +386,7 @@ const LocalMenu = () => {
                   Sube una imagen de un menú para extraer los datos.
                 </p>
               </div>
-              <div 
+              <div
                 className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border border-gray-700 hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
                 onClick={() => alert("Función para crear una nueva categoría")}
               >
@@ -303,7 +429,7 @@ const LocalMenu = () => {
                 <div
                   ref={categoriesRef}
                   className="overflow-x-auto scrollbar-hide px-3"
-                  style={{ 
+                  style={{
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
                   }}
@@ -311,8 +437,8 @@ const LocalMenu = () => {
                   <div className="flex space-x-3 py-2">
                     <button
                       className={`flex-shrink-0 px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${
-                        selectedCategory === null 
-                          ? 'bg-[#e5a657] text-white shadow-lg' 
+                        selectedCategory === null
+                          ? 'bg-[#e5a657] text-white shadow-lg'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                       onClick={() => setSelectedCategory(null)}
@@ -324,15 +450,15 @@ const LocalMenu = () => {
                       <button
                         key={category.id}
                         className={`flex-shrink-0 px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${
-                          selectedCategory === category.id 
-                            ? 'bg-[#e5a657] text-white shadow-lg' 
+                          selectedCategory === category.id
+                            ? 'bg-[#e5a657] text-white shadow-lg'
                             : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                         }`}
                         onClick={() => setSelectedCategory(category.id)}
                       >
-                        <img 
-                          src={category.icon_url} 
-                          alt={category.name} 
+                        <img
+                          src={category.icon_url}
+                          alt={category.name}
                           className="w-4 h-4"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -355,8 +481,68 @@ const LocalMenu = () => {
             </div>
           </div>
 
-          <section className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700">
-            <h3 className="text-xl md:text-2xl font-bold text-white mb-6">{currentCategoryName}</h3>
+          {/* Muestra esta sección solo si hay platos extraídos para revisar */}
+          {extractedDishes.length > 0 && (
+            <section className="bg-gray-800 p-6 rounded-xl space-y-4 mb-8">
+              <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                <Sparkles className="w-6 h-6 text-purple-400" />
+                <span>Platos Extraídos (OCR)</span>
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Revisa los platos detectados por la IA. Puedes editar los nombres o precios antes de guardarlos.
+              </p>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-700">
+                  <thead className="bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Precio</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-gray-800 divide-y divide-gray-700">
+                    {extractedDishes.map((dish, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{dish.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">${dish.price}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-2">
+                          {/* Botón de Editar */}
+                          <button
+                            onClick={() => handleEditExtractedDish(dish)}
+                            className="text-blue-500 hover:text-blue-700"
+                            title="Editar plato"
+                          >
+                            <Edit size={20} />
+                          </button>
+                          {/* Botón de Eliminar */}
+                          <button
+                            onClick={() => setExtractedDishes(extractedDishes.filter((_, i) => i !== index))}
+                            className="text-red-500 hover:text-red-700"
+                            title="Eliminar de la lista de revisión"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <button
+                onClick={handleSaveAllExtractedDishes}
+                disabled={extractedDishes.length === 0}
+                className="w-full py-3 mt-4 bg-green-600 text-white font-semibold rounded-lg transition-colors hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+              >
+                <Check className="inline w-5 h-5 mr-2" />
+                Guardar Todos los Platos
+              </button>
+            </section>
+          )}
+
+          <section className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700 mt-8">
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-6">Platos del Menú</h3>
             {loading ? (
               <div className="text-center text-gray-400 p-8">Cargando platos... 🍽️</div>
             ) : error ? (
@@ -421,7 +607,7 @@ const LocalMenu = () => {
           </section>
         </div>
       </div>
-      
+
       {isModalOpen && (
         <EditFoodModal
           food={selectedFood}
@@ -431,21 +617,15 @@ const LocalMenu = () => {
         />
       )}
 
-{isConfirmModalOpen && (
+      {isConfirmModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop con desenfoque */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
             onClick={() => setIsConfirmModalOpen(false)}
           />
-
-          {/* Contenedor del Modal */}
           <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in">
-            {/* Elementos decorativos */}
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#B53325] to-[#d94a36]" />
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#B53325]/10 rounded-full blur-3xl" />
-
-            {/* Encabezado */}
             <div className="relative flex items-center justify-between p-6 border-b border-gray-700/50">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-gradient-to-r from-[#B53325] to-[#d94a36] rounded-xl">
@@ -464,20 +644,20 @@ const LocalMenu = () => {
                 <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
               </button>
             </div>
-
-            {/* Contenido del modal */}
             <div className="p-6 text-center">
               <p className="text-gray-300 mb-6">
                 ¿Estás seguro de que quieres ELIMINAR este plato?
               </p>
               <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
                 <button
+                  type="button"
                   onClick={() => setIsConfirmModalOpen(false)}
                   className="px-6 py-3 bg-gray-600/20 hover:bg-gray-600/30 text-gray-300 hover:text-white rounded-xl transition-all duration-200 font-semibold border border-gray-600/30 hover:border-gray-500/50"
                 >
                   Cancelar
                 </button>
                 <button
+                  type="button"
                   onClick={handleHideFood}
                   className="group relative overflow-hidden px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
@@ -488,6 +668,31 @@ const LocalMenu = () => {
                   <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para la subida de foto con OCR */}
+      {showOcrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            onClick={() => setShowOcrModal(false)}
+          />
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in">
+            <button
+              onClick={() => setShowOcrModal(false)}
+              className="absolute top-4 right-4 group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200 z-10"
+            >
+              <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
+            </button>
+            <div className="p-6">
+              <UploadMenuSection
+                localId={localId}
+                onDishesExtracted={handleExtractedDishes}
+                onSuccess={() => setShowOcrModal(false)} // 💡 Línea Modificada
+              />
             </div>
           </div>
         </div>

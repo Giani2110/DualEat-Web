@@ -30,6 +30,8 @@ interface EditFoodModalProps {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps) => {
+  const isNewFood = !food || food.id === 0;
+
   const [formData, setFormData] = useState<Partial<Food> | null>(food);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,9 +46,20 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
+    let typedValue: string | number | null = value;
+    if (name === 'price') {
+      typedValue = parseFloat(value);
+      if (isNaN(typedValue)) typedValue = 0;
+    }
+    
+    if (name === 'category_id') {
+        typedValue = parseInt(value, 10);
+        if (isNaN(typedValue)) typedValue = null;
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: typedValue
     }));
   };
 
@@ -107,34 +120,16 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`${API_BASE}/food/foods/${food.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error desconocido al actualizar el plato.');
-      }
-
-      const updatedFood = await response.json();
-      onSave(updatedFood);
-      onClose();
-    } catch (err: any) {
-      console.error(err);
-      setError(`No se pudo actualizar el plato: ${err.message || 'Error de red.'}`);
-    } finally {
-      setLoading(false);
+    
+    // Validaciones simples para campos requeridos
+    if (!formData?.name || !formData.price || !formData.category_id) {
+        setError('Por favor, completa todos los campos requeridos.');
+        return;
     }
-  };
 
+    onSave(formData as Food);
+  };
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop con desenfoque */}
@@ -158,9 +153,11 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
             </div>
             <div>
               <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Editar Plato
+                {isNewFood ? 'Agregar Plato' : 'Editar Plato'}
               </h2>
-              <p className="text-gray-400 text-sm">Personaliza tu deliciosa creación</p>
+              <p className="text-gray-400 text-sm">
+                {isNewFood ? 'Crea un nuevo plato para tu menú' : 'Personaliza tu deliciosa creación'}
+              </p>
             </div>
           </div>
           <button
@@ -173,7 +170,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
 
         {/* Contenido */}
         <div className="overflow-y-auto max-h-[calc(95vh-140px)] custom-scrollbar">
-          <div className="p-8 space-y-8">
+          <form onSubmit={handleSubmit} className="p-8 space-y-8">
             {/* Sección de carga de imagen */}
             <div className="text-center space-y-6">
               <div
@@ -267,7 +264,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                       type="number"
                       id="price"
                       name="price"
-                      value={formData.price || 0}
+                      value={formData.price || ''}
                       onChange={handleChange}
                       required
                       step="0.01"
@@ -332,8 +329,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                 Cancelar
               </button>
               <button
-                type="button"
-                onClick={handleSubmit}
+                type="submit"
                 disabled={loading}
                 className="group relative overflow-hidden px-8 py-3 bg-gradient-to-r from-[#B53325] to-[#d94a36] hover:from-[#d94a36] hover:to-[#B53325] text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
               >
@@ -346,14 +342,14 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5" />
-                      <span>Guardar Cambios</span>
+                      <span>{isNewFood ? 'Agregar Plato' : 'Guardar Cambios'}</span>
                     </>
                   )}
                 </div>
                 <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
 
