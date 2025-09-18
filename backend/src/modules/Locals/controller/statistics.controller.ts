@@ -7,26 +7,20 @@ export class StatisticsController {
     try {
       const localId = parseInt(req.params.id);
       const { from, to } = req.query;
-
+  
       if (isNaN(localId)) {
         return res.status(400).json({ error: "El ID del local no es válido." });
       }
-
-      const topFoods = await StatisticsService.getTopFoods(
+  
+      // Se corrigió el nombre de la variable para que coincida con el frontend
+      const top_foods = await StatisticsService.getTopFoods(
         localId,
         from as string,
         to as string
       );
-
-      const metrics = await StatisticsService.getLocalMetrics(
-        localId,
-        from as string,
-        to as string
-      );
-
+  
       return res.json({
-        metrics,
-        top_foods: topFoods,
+        top_foods,
       });
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);

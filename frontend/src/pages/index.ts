@@ -27,4 +27,6 @@ export { default as URecipes } from "./users/URecipes";
 
 export { default as LoadingScreen } from "../components/animation/LoadingScreen";
 
+// Locals
 export { default as LocalDashboard } from "../pages/local/Dashboard";
+export { default as LocalMenu } from "../pages/local/LocalMenu";
