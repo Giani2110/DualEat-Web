@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { StatisticsController } from "../controller/statistics.controller";
+import { ReviewController } from "../controller/review.controller";
 
 const router = Router();
 
-router.get("/locals/:id/statistics/top-foods", StatisticsController.getTopFoods);
+// GET reviews de un local
+router.get("/locals/:id/reviews", ReviewController.getReviews);
 
 export default router;

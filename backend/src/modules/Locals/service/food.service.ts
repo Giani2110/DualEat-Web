@@ -18,7 +18,7 @@ export const createFoodsFromOcr = async (localId: number, dishes: { name: string
   );
 };
 
-export const updateFood = async (foodId: number, data: { name?: string; price?: number; description?: string; image_url?: string; available?: boolean }) => {
+export const updateFood = async (foodId: number, data: { name?: string; price?: number; description?: string; image_url?: string; available?: boolean; category_id?: number }) => {
   return await prisma.food.update({
     where: { id: foodId },
     data
@@ -26,7 +26,14 @@ export const updateFood = async (foodId: number, data: { name?: string; price?: 
 };
 
 export const deleteFood = async (foodId: number) => {
-  return await prisma.food.delete({ where: { id: foodId } });
+  return await prisma.food.update({
+    where: {
+      id: foodId,
+    },
+    data: {
+      available: false,
+    },
+  });
 };
 
 export const getFoodsByLocal = async (localId: number) => {

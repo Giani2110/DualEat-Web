@@ -28,4 +28,6 @@ export { default as UCommunity } from "./users/UCommunity";
 
 export { default as LoadingScreen } from "../components/animation/LoadingScreen";
 
+// Locals
 export { default as LocalDashboard } from "../pages/local/Dashboard";
+export { default as LocalMenu } from "../pages/local/LocalMenu";

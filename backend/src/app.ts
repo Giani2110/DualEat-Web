@@ -39,7 +39,8 @@ import foodCategoriesRoutes from "./routes/onBoarding.routes";
 import adminRouter from "./routes/admin.routes";
 import qrRoutes from "./routes/qr.routes";
 import ocrRoutes from "./routes/ocr.routes";
-import foodRoutes from "./routes/food.routes";
+import foodRoutes from "./modules/Locals/route/food.routes";
+import usersRouter from "./routes/users";
 
 // =========================================================================
 
@@ -140,6 +141,7 @@ app.use("/admin", adminRouter);
 app.use("/api/admin", adminRouter);
 
 //Locales
+app.use('/api/users', usersRouter);
 app.use("/api", qrRoutes);
 app.use("/api", ocrRoutes);
 app.use("/api", foodRoutes);

@@ -43,3 +43,23 @@
     filter: invert(1) opacity(0.1);
     z-index: -1;
 }
+
+
+.bgFood2 {
+  position: relative;
+}
+
+.bgFood2::before {
+  content: "";
+  position: fixed; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("../../images/BGDash.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: repeat;
+  filter: brightness(0.2);
+  z-index: -1;
+}

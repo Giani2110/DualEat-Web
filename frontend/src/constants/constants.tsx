@@ -14,6 +14,7 @@ import {
   AdminFoodCategories,
   AdminLocals,
   LocalDashboard,
+  LocalMenu,
   UPost,
   UExplore,
   URecipes,
@@ -47,7 +48,12 @@ export const ROUTES = {
     LOCALS: "/admin/locals",
   },
   LOCAL: {
-    DASHBOARD: "/local/dashboard",
+    DASHBOARD: "/business/dashboard",
+    PERSONAL: "/business/personal",
+    MENU: "/business/menu",
+    QR: "/business/qr",
+    REVIEWS: "/business/reviews",
+    SETTINGS: "/business/settings",
   },
 
   LOADING: "/loading",
@@ -130,5 +136,6 @@ export const appRoutes = [
   { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
 
   // Local
-  { path: ROUTES.LOCAL.DASHBOARD, element: <LocalDashboard /> },
+  { path: ROUTES.LOCAL.DASHBOARD, element: <ProtectedRoute ><LocalDashboard /></ProtectedRoute> },
+  { path: ROUTES.LOCAL.MENU, element: <ProtectedRoute><LocalMenu /></ProtectedRoute> },
 ];
