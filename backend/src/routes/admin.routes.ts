@@ -5,7 +5,7 @@ import {
   handleCreateFoodCategory,
   handleUpdateFoodCategory,
   handleDeleteFoodCategory,
-} from '../controllers/foodCategory.controller';
+} from '../modules/Locals/controller/foodCategory.controller';
 import {
   handleGetLocals,
   handleGetLocalById,

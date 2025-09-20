@@ -24,6 +24,13 @@ interface Category {
   id: number;
   name: string;
   icon_url: string;
+  local_id: number;
+}
+
+interface PredefinedCategory {
+  id: number;
+  name: string;
+  icon_url: string;
 }
 
 interface StatPillProps {
@@ -47,7 +54,6 @@ const LocalMenu = () => {
   const [localId, setLocalId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -62,24 +68,19 @@ const LocalMenu = () => {
 
   const categoriesRef = useRef<HTMLDivElement>(null);
 
+  const [localCategories, setLocalCategories] = useState<Category[]>([]);
+  const [predefinedCategories, setPredefinedCategories] = useState<PredefinedCategory[]>([]);
+  const [selectedPredefinedCategory, setSelectedPredefinedCategory] = useState<string>('');
   const [extractedDishes, setExtractedDishes] = useState<any[]>([]);
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const [showCreateCategoryModal, setShowCreateCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryError, setNewCategoryError] = useState<string | null>(null);
 
-  const exampleCategories: Category[] = useMemo(() => ([
-    { id: 1, name: 'Entradas', icon_url: 'https://cdn-icons-png.flaticon.com/512/3595/3595878.png' },
-    { id: 2, name: 'Platos Principales', icon_url: 'https://cdn-icons-png.flaticon.com/512/414/414972.png' },
-    { id: 3, name: 'Bebidas', icon_url: 'https://cdn-icons-png.flaticon.com/512/2633/2633894.png' },
-    { id: 4, name: 'Postres', icon_url: 'https://cdn-icons-png.flaticon.com/512/3233/3233800.png' },
-    { id: 5, name: 'Promociones', icon_url: 'https://cdn-icons-png.flaticon.com/512/10041/10041183.png' },
-    { id: 6, name: 'Menú del día', icon_url: 'https://cdn-icons-png.flaticon.com/512/815/815599.png' },
-    { id: 7, name: 'Pastas', icon_url: 'https://cdn-icons-png.flaticon.com/512/5772/5772274.png' },
-    { id: 8, name: 'Carnes', icon_url: 'https://cdn-icons-png.flaticon.com/512/3063/3063283.png' },
-    { id: 9, name: 'Sopas y Cremas', icon_url: 'https://cdn-icons-png.flaticon.com/512/219/219816.png' },
-    { id: 10, name: 'Pescados y Mariscos', icon_url: 'https://cdn-icons-png.flaticon.com/512/10074/10074697.png' },
-    { id: 11, name: 'Opciones Veganas', icon_url: 'https://cdn-icons-png.flaticon.com/512/2694/2694726.png' },
-    { id: 12, name: 'Desayunos', icon_url: 'https://cdn-icons-png.flaticon.com/512/3081/3081559.png' },
-  ]), []);
+  const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+  const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
+
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
   useEffect(() => {
     const fetchUserLocal = async () => {
@@ -131,7 +132,42 @@ const LocalMenu = () => {
   }, [localId, API_BASE]);
 
   useEffect(() => {
-    if (isModalOpen || isConfirmModalOpen || showOcrModal) {
+    const fetchLocalCategories = async () => {
+      if (!localId) return;
+      try {
+        const response = await fetch(`${API_BASE}/local-menu-categories/local/${localId}`);
+        if (!response.ok) {
+          throw new Error('Error al cargar las categorías del local.');
+        }
+        const data = await response.json();
+        setLocalCategories(data);
+      } catch (err) {
+        console.error(err);
+        setError('Error al cargar las categorías. Intente de nuevo.');
+      }
+    };
+    fetchLocalCategories();
+  }, [localId, API_BASE]);
+
+  // Nuevo useEffect para obtener las categorías generales
+  useEffect(() => {
+    const fetchPredefinedCategories = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/admin/food-categories`);
+        if (!response.ok) {
+          throw new Error('Error al cargar las categorías preestablecidas.');
+        }
+        const data = await response.json();
+        setPredefinedCategories(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPredefinedCategories();
+  }, [API_BASE]);
+
+  useEffect(() => {
+    if (isModalOpen || isConfirmModalOpen || showOcrModal || showCreateCategoryModal || showDeleteCategoryModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -139,11 +175,10 @@ const LocalMenu = () => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isModalOpen, isConfirmModalOpen, showOcrModal]);
+  }, [isModalOpen, isConfirmModalOpen, showOcrModal, showCreateCategoryModal, showDeleteCategoryModal]);
 
   const handleHideFood = async () => {
     if (!foodToHide) return;
-
     try {
       const response = await fetch(`${API_BASE}/food/foods/${foodToHide.id}`, {
         method: 'PUT',
@@ -193,54 +228,47 @@ const LocalMenu = () => {
   };
 
   const handleOnSave = async (food: Food) => {
-      const isNewFood = food.id === 0;
-    
-      try {
-        const method = isNewFood ? 'POST' : 'PUT';
-    
-        const url = isNewFood
-          ? `${API_BASE}/locals/${food.local_id}/manual-menu`
-          : `${API_BASE}/food/foods/${food.id}`;
-    
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(food),
-        });
-    
-        if (!response.ok) {
-          throw new Error(`Error al ${isNewFood ? 'agregar' : 'actualizar'} el plato.`);
-        }
-    
-        const savedFood = await response.json();
-    
-        setFoods(prevFoods => {
-          if (isNewFood) {
-            return [...prevFoods, savedFood];
-          }
-          return prevFoods.map(f => (f.id === savedFood.id ? savedFood : f));
-        });
-    
-        if (food.id && food.id.toString().startsWith('temp-')) {
-          setExtractedDishes(prevDishes => prevDishes.filter(dish => dish.id !== food.id));
-        }
-    
-      } catch (err) {
-        console.error('Error al guardar el plato:', err);
-        if (err instanceof Error) {
-          alert(`Hubo un error al guardar el plato: ${err.message}.`);
-        } else {
-          alert('Hubo un error al guardar el plato.');
-        }
-      } finally {
-        setIsModalOpen(false);
-        setSelectedFood(null);
-      }
-    };
+    const isNewFood = food.id === 0;
+    try {
+      const method = isNewFood ? 'POST' : 'PUT';
+      const url = isNewFood
+        ? `${API_BASE}/locals/${food.local_id}/manual-menu`
+        : `${API_BASE}/food/foods/${food.id}`;
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(food),
+      });
+      if (!response.ok) {
+        throw new Error(`Error al ${isNewFood ? 'agregar' : 'actualizar'} el plato.`);
+      }
 
-  // Función para manejar la data del OCR y mostrarla
+      const savedFood = await response.json();
+      setFoods(prevFoods => {
+        if (isNewFood) {
+          return [...prevFoods, savedFood];
+        }
+        return prevFoods.map(f => (f.id === savedFood.id ? savedFood : f));
+      });
+      if (food.id && food.id.toString().startsWith('temp-')) {
+        setExtractedDishes(prevDishes => prevDishes.filter(dish => dish.id !== food.id));
+      }
+
+    } catch (err) {
+      console.error('Error al guardar el plato:', err);
+      if (err instanceof Error) {
+        alert(`Hubo un error al guardar el plato: ${err.message}.`);
+      } else {
+        alert('Hubo un error al guardar el plato.');
+      }
+    } finally {
+      setIsModalOpen(false);
+      setSelectedFood(null);
+    }
+  };
+
   const handleExtractedDishes = (dishes: any[]) => {
     if (dishes.length === 0) {
       alert('La IA no pudo extraer platos de la foto. Asegúrate de que siga las recomendaciones.');
@@ -256,14 +284,13 @@ const LocalMenu = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/locals/${localId}/manual-menu/bulk`, { // La nueva ruta
+      const response = await fetch(`${API_BASE}/locals/${localId}/manual-menu/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ dishes: extractedDishes }),
       });
-
       if (!response.ok) {
         throw new Error('Error al guardar los platos extraídos.');
       }
@@ -272,7 +299,6 @@ const LocalMenu = () => {
       setFoods([...foods, ...savedDishes.data]);
       setExtractedDishes([]);
       alert('¡Platos guardados con éxito!');
-
     } catch (error: any) {
       console.error("Error al guardar los platos extraídos:", error);
       setError(error.message);
@@ -293,6 +319,95 @@ const LocalMenu = () => {
       votes_down: dish.votes_down || 0,
     });
     setIsModalOpen(true);
+  };
+
+  const handleCreateLocalCategory = async () => {
+    if (!localId) {
+      setError('Error: No se pudo determinar el local para crear la categoría.');
+      setShowCreateCategoryModal(false);
+      return;
+    }
+
+    let categoryNameToCreate: string;
+    let iconUrl: string | null = null;
+
+    if (selectedPredefinedCategory) {
+      const selectedCat = predefinedCategories.find(cat => cat.id.toString() === selectedPredefinedCategory);
+      if (!selectedCat) {
+        setNewCategoryError('Categoría preestablecida no encontrada.');
+        return;
+      }
+      categoryNameToCreate = selectedCat.name;
+      iconUrl = selectedCat.icon_url;
+    } else if (newCategoryName.trim() !== '') {
+      categoryNameToCreate = newCategoryName.trim();
+    } else {
+      setNewCategoryError('Debe seleccionar una categoría o ingresar un nombre.');
+      return;
+    }
+    
+    const isDuplicate = localCategories.some(cat => cat.name.toLowerCase() === categoryNameToCreate.toLowerCase());
+    if (isDuplicate) {
+      setNewCategoryError('Ya existe una categoría con ese nombre.');
+      return;
+    }
+
+    setNewCategoryError(null);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/local-menu-categories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: categoryNameToCreate,
+          local_id: localId,
+          icon_url: iconUrl,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Error al crear la categoría.');
+      }
+      const createdCategory = await response.json();
+      setLocalCategories(prevCategories => [...prevCategories, createdCategory]);
+      setNewCategoryName('');
+      setSelectedPredefinedCategory('');
+      setShowCreateCategoryModal(false);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setNewCategoryError('Hubo un error al crear la categoría. Por favor, inténtalo de nuevo.');
+      setLoading(false);
+    }
+  };
+
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDeleteId) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/local-menu-categories/${categoryToDeleteId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar la categoría.');
+      }
+      setLocalCategories(prevCategories => prevCategories.filter(cat => cat.id !== categoryToDeleteId));
+      if (selectedCategory === categoryToDeleteId) {
+        setSelectedCategory(null);
+      }
+      setShowDeleteCategoryModal(false);
+      setCategoryToDeleteId(null);
+    } catch (err) {
+      console.error(err);
+      setError('Hubo un error al eliminar la categoría. Por favor, inténtalo de nuevo.');
+      setShowDeleteCategoryModal(false);
+    }
+  };
+
+  const openDeleteCategoryModal = (categoryId: number) => {
+    setCategoryToDeleteId(categoryId);
+    setShowDeleteCategoryModal(true);
   };
 
   const filteredFoods = useMemo(() => {
@@ -337,7 +452,7 @@ const LocalMenu = () => {
         resizeObserver.disconnect();
       };
     }
-  }, [exampleCategories]);
+  }, [localCategories]);
 
   if (loading) {
     return <div className="text-center text-white p-8">Cargando menú...</div>;
@@ -378,7 +493,7 @@ const LocalMenu = () => {
               </div>
               <div
                 className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border border-gray-700 hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
-                onClick={() => setShowOcrModal(true)} // Cambiamos esto
+                onClick={() => setShowOcrModal(true)}
               >
                 <Upload className="w-12 h-12 text-purple-400 mb-3" />
                 <h3 className="text-lg font-semibold text-white">Subir con Foto</h3>
@@ -388,7 +503,7 @@ const LocalMenu = () => {
               </div>
               <div
                 className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border border-gray-700 hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
-                onClick={() => alert("Función para crear una nueva categoría")}
+                onClick={() => setShowCreateCategoryModal(true)}
               >
                 <PlusCircle className="w-12 h-12 text-green-400 mb-3" />
                 <h3 className="text-lg font-semibold text-white">Nueva Categoría</h3>
@@ -446,26 +561,30 @@ const LocalMenu = () => {
                       <Tag className="w-4 h-4" />
                       <span>Todos</span>
                     </button>
-                    {exampleCategories.map(category => (
-                      <button
-                        key={category.id}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${
-                          selectedCategory === category.id
-                            ? 'bg-[#e5a657] text-white shadow-lg'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        }`}
-                        onClick={() => setSelectedCategory(category.id)}
-                      >
-                        <img
-                          src={category.icon_url}
-                          alt={category.name}
-                          className="w-4 h-4"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
+                    {localCategories.map(category => (
+                      <div key={category.id} className="relative flex-shrink-0">
+                        <button
+                          className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${
+                            selectedCategory === category.id
+                              ? 'bg-[#e5a657] text-white shadow-lg'
+                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          }`}
+                          onClick={() => setSelectedCategory(category.id)}
+                        >
+                          <Tag className="w-4 h-4" />
+                          <span>{category.name}</span>
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDeleteCategoryModal(category.id);
                           }}
-                        />
-                        <span>{category.name}</span>
-                      </button>
+                          className="absolute -top-1 -right-1 bg-red-500/80 p-1 rounded-full text-white hover:bg-red-600 transition-colors duration-200 z-30"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -481,7 +600,6 @@ const LocalMenu = () => {
             </div>
           </div>
 
-          {/* Muestra esta sección solo si hay platos extraídos para revisar */}
           {extractedDishes.length > 0 && (
             <section className="bg-gray-800 p-6 rounded-xl space-y-4 mb-8">
               <h3 className="text-xl font-bold text-white flex items-center space-x-2">
@@ -489,7 +607,8 @@ const LocalMenu = () => {
                 <span>Platos Extraídos (OCR)</span>
               </h3>
               <p className="text-gray-400 text-sm">
-                Revisa los platos detectados por la IA. Puedes editar los nombres o precios antes de guardarlos.
+                Revisa los platos detectados por la IA.
+                Puedes editar los nombres o precios antes de guardarlos.
               </p>
 
               <div className="overflow-x-auto">
@@ -507,7 +626,6 @@ const LocalMenu = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{dish.name}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">${dish.price}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-2">
-                          {/* Botón de Editar */}
                           <button
                             onClick={() => handleEditExtractedDish(dish)}
                             className="text-blue-500 hover:text-blue-700"
@@ -515,7 +633,6 @@ const LocalMenu = () => {
                           >
                             <Edit size={20} />
                           </button>
-                          {/* Botón de Eliminar */}
                           <button
                             onClick={() => setExtractedDishes(extractedDishes.filter((_, i) => i !== index))}
                             className="text-red-500 hover:text-red-700"
@@ -543,9 +660,11 @@ const LocalMenu = () => {
 
           <section className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700 mt-8">
             <h3 className="text-xl md:text-2xl font-bold text-white mb-6">Platos del Menú</h3>
-            {loading ? (
+            {loading ?
+            (
               <div className="text-center text-gray-400 p-8">Cargando platos... 🍽️</div>
-            ) : error ? (
+            ) : error ?
+            (
               <div className="text-center text-red-400 p-8">{error}</div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
@@ -611,7 +730,7 @@ const LocalMenu = () => {
       {isModalOpen && (
         <EditFoodModal
           food={selectedFood}
-          categories={exampleCategories}
+          categories={localCategories}
           onClose={() => setIsModalOpen(false)}
           onSave={handleOnSave}
         />
@@ -623,9 +742,8 @@ const LocalMenu = () => {
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
             onClick={() => setIsConfirmModalOpen(false)}
           />
-          <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#B53325] to-[#d94a36]" />
-            <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#B53325]/10 rounded-full blur-3xl" />
+          <div className="relative w-full max-w-sm rounded-3xl bg-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in overflow-hidden">
+            <div className="p-2 bg-gradient-to-r from-[#B53325] to-[#d94a36]" />
             <div className="relative flex items-center justify-between p-6 border-b border-gray-700/50">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-gradient-to-r from-[#B53325] to-[#d94a36] rounded-xl">
@@ -673,7 +791,6 @@ const LocalMenu = () => {
         </div>
       )}
 
-      {/* Modal para la subida de foto con OCR */}
       {showOcrModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -691,8 +808,140 @@ const LocalMenu = () => {
               <UploadMenuSection
                 localId={localId}
                 onDishesExtracted={handleExtractedDishes}
-                onSuccess={() => setShowOcrModal(false)} // 💡 Línea Modificada
+                onSuccess={() => setShowOcrModal(false)}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCreateCategoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            onClick={() => { setShowCreateCategoryModal(false); setNewCategoryName(''); setSelectedPredefinedCategory(''); setNewCategoryError(null); }}
+          />
+          <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in">
+            <div className="relative flex items-center justify-between p-6 border-b border-gray-700/50">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
+                  <PlusCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    Crear Nueva Categoría
+                  </h2>
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowCreateCategoryModal(false); setNewCategoryName(''); setSelectedPredefinedCategory(''); setNewCategoryError(null); }}
+                className="group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200"
+              >
+                <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
+              </button>
+            </div>
+            <div className="p-6">
+              <label htmlFor="predefined-category" className="block text-gray-400 text-sm font-semibold mb-2">
+                Elegir de una lista
+              </label>
+              <select
+                id="predefined-category"
+                value={selectedPredefinedCategory}
+                onChange={(e) => { setSelectedPredefinedCategory(e.target.value); setNewCategoryName(''); }}
+                disabled={!!newCategoryName.trim()}
+                className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e5a657] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+              >
+                <option value="">-- Seleccionar --</option>
+                {predefinedCategories.map(cat => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <div className="flex items-center my-4">
+                <div className="flex-grow border-t border-gray-600"></div>
+                <span className="flex-shrink mx-4 text-gray-500 text-sm">o</span>
+                <div className="flex-grow border-t border-gray-600"></div>
+              </div>
+              <label htmlFor="new-category" className="block text-gray-400 text-sm font-semibold mb-2">
+                Crear una nueva
+              </label>
+              <input
+                type="text"
+                id="new-category"
+                placeholder="Nombre de la categoría"
+                value={newCategoryName}
+                onChange={(e) => { setNewCategoryName(e.target.value); setSelectedPredefinedCategory(''); }}
+                disabled={!!selectedPredefinedCategory}
+                className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e5a657] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+              />
+              {newCategoryError && (
+                <p className="mt-2 text-red-400 text-sm font-semibold">{newCategoryError}</p>
+              )}
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={handleCreateLocalCategory}
+                  disabled={loading || (!selectedPredefinedCategory && !newCategoryName.trim())}
+                  className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg transition-colors hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Creando...' : 'Crear Categoría'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteCategoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            onClick={() => setShowDeleteCategoryModal(false)}
+          />
+          <div className="relative w-full max-w-sm rounded-3xl bg-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in overflow-hidden">
+            <div className="p-2 bg-gradient-to-r from-red-500 to-red-600" />
+            <div className="relative flex items-center justify-between p-6 border-b border-gray-700/50">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-gradient-to-r from-red-500 to-red-600 rounded-xl">
+                  <Trash2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    Confirmar Eliminación
+                  </h2>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDeleteCategoryModal(false)}
+                className="group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200"
+              >
+                <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
+              </button>
+            </div>
+            <div className="p-6 text-center">
+              <p className="text-gray-300 mb-6">
+                ¿Estás seguro de que deseas eliminar esta categoría? Esta acción es irreversible.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteCategoryModal(false)}
+                  className="px-6 py-3 bg-gray-600/20 hover:bg-gray-600/30 text-gray-300 hover:text-white rounded-xl transition-all duration-200 font-semibold border border-gray-600/30 hover:border-gray-500/50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteCategory}
+                  className="group relative overflow-hidden px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <Trash2 className="w-5 h-5" />
+                    <span>Confirmar Eliminación</span>
+                  </div>
+                  <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
