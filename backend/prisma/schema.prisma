@@ -229,6 +229,8 @@ model Food {
   local_id    Int
   category    FoodCategory? @relation(fields: [category_id], references: [id])
   category_id Int?
+
+
   name        String
   description String?
   price       Float
@@ -247,6 +249,8 @@ model Food {
   @@index([name])
   @@index([price])
 }
+
+/* Promoción  (tabla para evitar que solo una comida tenga solo una promo*/
 
 model Vote {
   id           Int         @id @default(autoincrement())
@@ -347,7 +351,7 @@ model Recipe {
   steps       RecipeStep[]
   posts       Post[]     
 
-  @@unique([user_id, name])
+  //@@unique([user_id, name])
 }
 
 model RecipeIngredient {

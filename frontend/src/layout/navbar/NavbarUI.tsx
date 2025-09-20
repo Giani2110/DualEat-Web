@@ -44,7 +44,7 @@ const HeaderUSER: React.FC = () => {
       >
         <img className="w-[28px] h-[28px]" src={LogoYellow} alt="Logo" />
         <span
-          className={`ml-3 text-[17px] Arvo-Bold tracking-[-0.01em] text-yellow`}
+          className={`ml-3 text-[19px] Dosis-Bold tracking-[-0.01em] text-yellow`}
         >
           DualEat
         </span>

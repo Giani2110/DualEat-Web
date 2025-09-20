@@ -14,6 +14,16 @@ router.get("/ingredients", controller.getAllIngredients.bind(controller));
 // =========================================================
 router.get("/units", controller.getAllUnits.bind(controller));
 
+// 3. Obtener receta por name (Validation de receta) // Si el usuario postea la misma receta en la misma comunidad con mismo nombre
+// =========================================================
+router.get("/", controller.getRecipeValidation.bind(controller));
+
+
+// 4. Ask Ollama
+router.post("/ask", controller.askOllama.bind(controller));
+
+
+
 
 
 /*
@@ -21,11 +31,6 @@ router.get("/units", controller.getAllUnits.bind(controller));
 router.post("/create", (req, res) => controller.createRecipe(req, res));
 
 // Ver ingredientes por nombre
-
-
-
-
-
 
 // Agregar ingrediente a receta
 router.post("/ingredient", (req, res) => controller.addIngredient(req, res));

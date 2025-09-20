@@ -46,7 +46,7 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bgFood pb-[100px]">
+    <div className="min-h-screen bgFood">
       <section
         className={`dashboard-layout pt-15 ${
           isSideBarOpen ? "sidebar-open" : "sidebar-closed"
@@ -77,32 +77,32 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                   <Link
                     title="Inicio"
                     to={ROUTES.USER.DASHBOARD}
-                    className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#f6f8f9] py-[10px]`}
+                    className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#e9e9e9] py-[10px]`}
                   >
                     <div>
                       <House color="#e5a657" size={22} strokeWidth={1.7} />
                     </div>
-                    <span className={`ml-3 text4`}>Inicio</span>
+                    <span className={`ml-3 text4 text-[15px]`}>Inicio</span>
                   </Link>
                   <Link
                     title="Explorar comunidades"
                     to={ROUTES.USER.EXPLORE}
-                    className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#f6f8f9] py-[10px]`}
+                    className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#e9e9e9] py-[10px]`}
                   >
                     <div>
                       <Users color="#e5a657" size={22} strokeWidth={1.7} />
                     </div>
-                    <span className={`ml-3 text4`}>Explorar</span>
+                    <span className={`ml-3 text4 text-[15px]`}>Explorar</span>
                   </Link>
                   <Link
                     title="Recetas"
                     to={ROUTES.USER.RECIPES}
-                    className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#f6f8f9] py-[10px]`}
+                    className={`navlis rounded-[8px] cursor-pointer px-4 hover:bg-[#e9e9e9] py-[10px]`}
                   >
                     <div>
                       <BookText color="#e5a657" size={22} strokeWidth={1.5} />
                     </div>
-                    <span className={`ml-3 text4`}>Recetas</span>
+                    <span className={`ml-3 text4 text-[15px]`}>Recetas</span>
                   </Link>
 
                   <div className="border-t border-[#e5a657] mt-5"></div>
@@ -116,12 +116,12 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                   `}
                   >
                     <div
-                      className={`flex justify-between px-1 items-center rounded-[8px] hover:bg-[#f6f8f9] py-[10px]`}
+                      className={`flex justify-between px-1 items-center rounded-[8px] hover:bg-[#e9e9e9] py-[10px]`}
                     >
                       {isSideBarOpen && (
                         <>
                           <span
-                            className={`ml-2 text-left text-[12px] tracking-wider text5`}
+                            className={`ml-2 text-left text-[15px] tracking-wider text5`}
                           >
                             Comunidades
                           </span>
@@ -146,17 +146,17 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                           }}
                           type="button"
                           className={`navlis rounded-[8px] cursor-pointer w-full py-[10px] ${
-                            isSideBarOpen ? "hover:bg-[#f6f8f9] px-5" : "px-2"
+                            isSideBarOpen ? "hover:bg-[#e9e9e9] px-5" : "px-2"
                           }`}
                         >
                           <Plus
                             className="flex-shrink-0"
                             color="#e5a657"
-                            size={22}
+                            size={26}
                             strokeWidth={1.7}
                           />
                           <span
-                            className={`ml-3 text4 whitespace-nowrap ${
+                            className={`ml-2 text4 text-[15px] whitespace-nowrap ${
                               isSideBarOpen ? "block" : "hidden"
                             }`}
                           >
@@ -169,21 +169,16 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                             key={community.community.id}
                             title={community.community.name}
                             to={`/comunidad/${community.community.id}`}
-                            className={`navlis rounded-[8px] cursor-pointer w-full py-[10px] ${
-                              isSideBarOpen ? "hover:bg-[#f6f8f9] px-5" : "px-2"
-                            }`}
+                            className={`navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[7px] hover:bg-[#e9e9e9] px-4`}
                           >
-                            <div>
-                              <Users
-                                color="#e5a657"
-                                size={22}
-                                strokeWidth={1.7}
-                              />
-                            </div>
+                            <img
+                              src={community.community.image_url !== null && community.community.image_url || "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"}
+                              className={`rounded-full h-8 w-8 flex-shrink-0`}
+                              alt="Imagen de la comunidad"
+                            />
+
                             <span
-                              className={`ml-3 text4 whitespace-nowrap ${
-                                isSideBarOpen ? "block" : "hidden"
-                              }`}
+                              className={`ml-[10px] text-[15px] text4 whitespace-nowrap`}
                             >
                               {community.community.name}
                             </span>
@@ -206,11 +201,11 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                   >
                     <div
                       className={`flex justify-between px-1 items-center rounded-[5px] ${
-                        isSideBarOpen && "hover:bg-[#f6f8f9] py-3"
+                        isSideBarOpen && "hover:bg-[#e9e9e9] py-3"
                       } `}
                     >
                       <span
-                        className={`ml-2 text-left text-[12px] tracking-wider text5 ${
+                        className={`ml-2 text-left text-[15px] tracking-wider text5 ${
                           isSideBarOpen ? "block" : "hidden"
                         }`}
                       >
@@ -233,7 +228,7 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                     type="button"
                     onClick={() => handleLogout()}
                     className={`navlis w-full rounded-[5px] cursor-pointer px-2 py-3 ${
-                      isSideBarOpen && "hover:bg-[#f6f8f9]"
+                      isSideBarOpen && "hover:bg-[#e9e9e9]"
                     }`}
                   >
                     <LogOut
@@ -243,7 +238,7 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                       strokeWidth={2.5}
                     />
                     <span
-                      className={`ml-3 text-left text4 whitespace-nowrap ${
+                      className={`ml-3 text-left text-[15px] text4 whitespace-nowrap ${
                         isSideBarOpen ? "block" : "hidden"
                       }`}
                     >

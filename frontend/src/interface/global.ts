@@ -3,9 +3,6 @@ export interface Response<T = unknown> {
   message?: string;
   data?: T;
 }
-
-
-
 export interface CategoryTag {
   id: number;
   name: string;

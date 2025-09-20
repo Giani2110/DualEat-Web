@@ -205,19 +205,20 @@ const SortableInstruction = ({
   );
 };
 
-const InstructionCard = () => {
-  const [formInstructions, setFormInstructions] = useState<FormInstruction[]>([
-    {
-      id: crypto.randomUUID(),
-      step_number: 1,
-      description: "",
-      image_url: "",
-      estimated_time: 0,
-    },
-  ]);
+interface InstructionCardProps {
+  instructions: FormInstruction[];
+  setInstructions: React.Dispatch<React.SetStateAction<FormInstruction[]>>;
+  setInstructionFiles: React.Dispatch<
+    React.SetStateAction<Record<string, File>>
+  >;
+}
 
+const InstructionCard: React.FC<InstructionCardProps> = ({
+  instructions,
+  setInstructions,
+  setInstructionFiles,
+}) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const handleFiles = (files: File[], instructionId: string) => {
     const validFiles = files.filter((file) =>
@@ -233,7 +234,10 @@ const InstructionCard = () => {
       console.log(instructionId, previewUrl);
 
       // (opcional) guardar el file si después lo vas a subir
-      setUploadedFiles((prev) => [...prev, file]);
+      setInstructionFiles((prev) => ({
+        ...prev,
+        [instructionId]: file,
+      }));
     }
   };
   const sensors = useSensors(useSensor(PointerSensor));
@@ -246,7 +250,7 @@ const InstructionCard = () => {
   };
 
   const addInstruction = () => {
-    setFormInstructions((prev) =>
+    setInstructions((prev) =>
       renumberSteps([
         ...prev,
         {
@@ -261,8 +265,8 @@ const InstructionCard = () => {
   };
 
   const removeInstruction = (id: string) => {
-    if (formInstructions.length > 1) {
-      setFormInstructions((prev) =>
+    if (instructions.length > 1) {
+      setInstructions((prev) =>
         renumberSteps(prev.filter((instruction) => instruction.id !== id))
       );
     }
@@ -273,7 +277,7 @@ const InstructionCard = () => {
     field: keyof FormInstruction,
     value: string | number | undefined
   ) => {
-    setFormInstructions((prev) =>
+    setInstructions((prev) =>
       prev.map((instruction) =>
         instruction.id === id ? { ...instruction, [field]: value } : instruction
       )
@@ -283,14 +287,14 @@ const InstructionCard = () => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
-      const oldIndex = formInstructions.findIndex(
+      const oldIndex = instructions.findIndex(
         (instruction) => instruction.id === active.id
       );
-      const newIndex = formInstructions.findIndex(
+      const newIndex = instructions.findIndex(
         (instruction) => instruction.id === over?.id
       );
 
-      setFormInstructions((prev) =>
+      setInstructions((prev) =>
         renumberSteps(arrayMove(prev, oldIndex, newIndex))
       );
     }
@@ -307,10 +311,10 @@ const InstructionCard = () => {
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={formInstructions}
+          items={instructions}
           strategy={verticalListSortingStrategy}
         >
-          {formInstructions.map((formInstruction) => (
+          {instructions.map((formInstruction) => (
             <SortableInstruction
               key={formInstruction.id}
               formInstruction={formInstruction}
@@ -319,7 +323,7 @@ const InstructionCard = () => {
               handleFiles={handleFiles}
               isDragOver={isDragOver}
               setIsDragOver={setIsDragOver}
-              canRemove={formInstructions.length > 1}
+              canRemove={instructions.length > 1}
             />
           ))}
         </SortableContext>

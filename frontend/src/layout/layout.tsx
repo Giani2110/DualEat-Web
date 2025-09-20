@@ -19,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <>
       {user ? <NavbarUI /> : <Navbar />}
       {children}
-      {!loading && <Footer />}
+      {!loading && !user && <Footer />}
     </>
   );
 };

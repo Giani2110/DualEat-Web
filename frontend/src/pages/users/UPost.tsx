@@ -1,14 +1,28 @@
-import  { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { getUserCommunities } from "../../services/community.api";
-import { getAllIngredients } from "../../services/recipes.api";
-import { Search, ChevronDown, Images, Trash2, CircleAlert } from "lucide-react";
+import {
+  Search,
+  ChevronDown,
+  Images,
+  Trash2,
+  CircleAlert,
+  FileImage,
+} from "lucide-react";
 import UIDashboard from "../../components/users/UIDashboard";
 import IngredientsCard from "../../components/users/posts/IngredientsCard";
 import InstructionCard from "../../components/users/posts/InstructionsCard";
 
-import type { Community, Ingredient } from "../../interface/global";
+import { createPost } from "../../services/post.api";
+
+import toast from "react-hot-toast";
+
+import type {
+  CreatePostDTO,
+  CreateRecipeDTO,
+} from "../../interface/global.dto";
+import type { Community } from "../../interface/global";
 
 import "../../assets/scss/users/users.scss";
 
@@ -18,63 +32,134 @@ type UserCommunityEntry = {
   joined_at: string;
 };
 
+interface FormInstruction {
+  id: string;
+  step_number: number;
+  description: string;
+  image_url?: string;
+  estimated_time?: number;
+}
+
+interface FormIngredient {
+  id: string;
+  ingredientId: string;
+  quantity: string;
+  unitId: string;
+  notes?: string;
+  name: string; // nombre del ingrediente para mostrar en el input
+}
+
 const UPost = () => {
+  // ===========================================
+  // HOOKS & AUTH
+  // ===========================================
   const { user } = useAuth();
 
+  // ===========================================
+  // ESTADOS PRINCIPALES
+  // ===========================================
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-
   const [value, setValue] = useState<"Text" | "Image">("Text");
   const [recipe, setRecipe] = useState<boolean>(false);
+  const [step, setStep] = useState<"1" | "2">("1");
 
-  const [step, setStep] = useState<"1" | "2">("2");
-
+  // ===========================================
+  // ESTADOS DE COMUNIDADES
+  // ===========================================
   const [joinedCommunities, setJoinedCommunities] = useState<
     UserCommunityEntry[]
   >([]);
+  const [selected, setSelected] = useState<Community | null>(null);
+  const [button, setButton] = useState<boolean>(false);
 
-  // Recipe
+  // ===========================================
+  // ESTADOS DE RECETA
+  // ===========================================
+  const [instructions, setInstructions] = useState<FormInstruction[]>([
+    {
+      id: crypto.randomUUID(),
+      step_number: 1,
+      description: "",
+      image_url: "",
+      estimated_time: 0,
+    },
+  ]);
+
+  const [formIngredients, setFormIngredients] = useState<FormIngredient[]>([
+    {
+      id: crypto.randomUUID(),
+      ingredientId: "",
+      quantity: "",
+      unitId: "",
+      notes: "",
+      name: "",
+    },
+  ]);
+
+  const [instructionFiles, setInstructionFiles] = useState<
+    Record<string, File>
+  >({});
+
   const [recipeName, setRecipeName] = useState<string>("");
   const [recipeDescription, setRecipeDescription] = useState<string>("");
   const [recipeImage, setRecipeImage] = useState<File[]>([]);
+
   const [recipeImagePreviews, setRecipeImagePreviews] = useState<string[]>([]);
 
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-
-  const [selected, setSelected] = useState<Community | null>(null);
-
-  const [button, setButton] = useState<boolean>(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const additionalInputRef = useRef<HTMLInputElement>(null); // Referencia para el input adicional
-
-  const focusInput = () => {
-    inputRef.current?.focus();
-  };
-
-  // Función para abrir el selector de archivos adicionales
-  const handleAddMoreImages = () => {
-    additionalInputRef.current?.click();
-  };
-
+  // ===========================================
+  // ESTADOS DE ARCHIVOS MULTIMEDIA
+  // ===========================================
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // ===========================================
+  // REFERENCIAS
+  // ===========================================
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const additionalInputRef = useRef<HTMLInputElement>(null);
+
+  // ===========================================
+  // VALORES CALCULADOS
+  // ===========================================
+  const totalEstimatedTime = instructions.reduce(
+    (acc, curr) => acc + (curr.estimated_time || 0),
+    0
+  );
+
+  // ===========================================
+  // FUNCIONES AUXILIARES
+  // ===========================================
+  const focusInput = () => {
+    inputRef.current?.focus();
+  };
+
+  const handleAddMoreImages = () => {
+    additionalInputRef.current?.click();
+  };
+
+  // ===========================================
+  // MANEJO DE ARCHIVOS
+  // ===========================================
   const handleFiles = (files: File[]) => {
     const validFiles = files.filter((file) =>
       ["image/", "video/mp4"].some((type) => file.type.startsWith(type))
     );
 
-    // Crear URLs de preview para las imágenes
-    const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
+    if (filePreviews.length + validFiles.length > 10) {
+      toast.error("No puedes subir más de 10 archivos.");
+      return;
+    } else {
+      const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
 
-    setUploadedFiles((prev) => [...prev, ...validFiles]);
-    setFilePreviews((prev) => [...prev, ...newPreviews]);
+      setUploadedFiles((prev) => [...prev, ...validFiles]);
+      setFilePreviews((prev) => [...prev, ...newPreviews]);
 
-    console.log("Archivos seleccionados:", validFiles);
+      console.log("Archivos seleccionados:", validFiles);
+    }
   };
 
   const handleRecipeImage = (files: File[]) => {
@@ -105,7 +190,9 @@ const UPost = () => {
     }
   };
 
-  // Funciones para navegar en el slider
+  // ===========================================
+  // NAVEGACIÓN DE IMÁGENES
+  // ===========================================
   const nextImage = () => {
     setCurrentImageIndex((prev) =>
       prev === filePreviews.length - 1 ? 0 : prev + 1
@@ -118,12 +205,115 @@ const UPost = () => {
     );
   };
 
+  // ===========================================
+  // MANEJO DEL FORMULARIO
+  // ===========================================
   const handlePost = () => {
+    if (!selected) {
+      toast.error("Debes seleccionar una comunidad");
+      return;
+    }
+
     if (recipe && title && content && selected) {
       setStep("2");
     }
   };
 
+  const handleSubmit = async () => {
+    if (!selected) {
+      toast.error("Debes seleccionar una comunidad");
+      return;
+    }
+
+    if (!value) {
+      toast.error("Debes elegir si es Texto o Imagen");
+      return;
+    }
+
+    try {
+      if (recipe) {
+        // VALIDACIÓN DE RECETA
+        if (!recipeName.trim())
+          throw new Error("El nombre de la receta es obligatorio");
+        if (!recipeDescription.trim())
+          throw new Error("La descripción de la receta es obligatoria");
+        if (recipeImage.length === 0)
+          throw new Error("Debes subir al menos una imagen de la receta");
+        if (
+          instructions.length === 0 ||
+          instructions.some((i) => !i.description.trim())
+        )
+          throw new Error("Cada paso debe tener una descripción");
+        if (
+          formIngredients.length === 0 ||
+          formIngredients.some((i) => !i.name.trim())
+        )
+          throw new Error("Debes agregar al menos un ingrediente con nombre");
+
+        // Crear payloads
+        const postPayload: CreatePostDTO = {
+          title,
+          content,
+          image_urls: uploadedFiles,
+          type: "recipe",
+          user_id: user!.id,
+          community_id: selected.id,
+        };
+
+        const recipePayload: CreateRecipeDTO = {
+          name: recipeName,
+          description: recipeDescription,
+          main_image: recipeImage[0],
+          total_time: totalEstimatedTime,
+          user_id: user!.id,
+
+          ingredients: formIngredients.map((i) => ({
+            ingredient_id: i.ingredientId,
+            quantity: i.quantity,
+            unit_of_measure_id: i.unitId,
+            notes: i.notes,
+          })),
+
+          steps: instructions.map((i) => ({
+            step_number: String(i.step_number),
+            description: i.description,
+            image_url: instructionFiles[i.id] || null,
+            estimated_time: String(i.estimated_time),
+          })),
+        };
+
+        await createPost(postPayload, recipePayload);
+      } else {
+        // VALIDACIÓN DE POST NORMAL
+        if (!title.trim()) throw new Error("El título es obligatorio");
+        if (!content.trim())
+          throw new Error("El contenido o una imagen es obligatorio");
+        if (value === "Image" && uploadedFiles.length === 0)
+          throw new Error("Debes subir al menos una imagen o video");
+
+        const postPayload: CreatePostDTO = {
+          title,
+          content,
+          image_urls: uploadedFiles,
+          type: "post",
+          user_id: user!.id,
+          community_id: selected.id,
+        };
+
+        await createPost(postPayload);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message || "Error creando el post");
+      }
+    }
+  };
+
+  // ===========================================
+  // EFFECTS
+  // ===========================================
+
+  // Fetch comunidades del usuario
   useEffect(() => {
     const fetchCommunities = async () => {
       if (!user) return;
@@ -137,24 +327,7 @@ const UPost = () => {
     fetchCommunities();
   }, [user]);
 
-  useEffect(() => {
-   if (step === "2") {
-    const fetchIngredients = async () => {
-      if (!user) return;
-      const ingredients = await getAllIngredients();
-
-      if (ingredients && ingredients.success) {
-        setIngredients(ingredients.data as Ingredient[]);
-        console.log("Ingredients:", ingredients.data);  
-      }
-    }
-     fetchIngredients();
-   }
-  }, [step, user]);
-
-  {
-    /** Cerrar el dropdown */
-  }
+  // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -174,24 +347,29 @@ const UPost = () => {
     };
   }, [button]);
 
+  // ===========================================
+  // RENDER
+  // ===========================================
   return (
     <UIDashboard>
       <section className="flex w-full gap-[50px] mt-8">
-        {/** Contenido Izquierdo */}
+        {/* ===========================================
+            PASO 1 - CONTENIDO IZQUIERDO
+            =========================================== */}
         {step === "1" && (
           <div className="w-[50%]">
             <h2 className="text-[24px] text5 tracking-tight Arvo-Bold mb-4">
               Crear post
             </h2>
 
+            {/* SELECTOR DE COMUNIDADES */}
             <div ref={dropdownRef} className="relative inline-block">
-              {/** Seleccionar comunidad  (switch & input)*/}
               {button ? (
                 <div
                   onClick={focusInput}
                   className="flex items-center gap-3 bg-[#f3f3f3] border-2 border-[#0078D7] focus:outline-none px-5 py-2 rounded-[40px] cursor-text w-[300px]"
                 >
-                  <Search size={20} className="  text-[#0078D7]" />
+                  <Search size={20} className="text-[#0078D7]" />
                   <input
                     ref={inputRef}
                     className="tracking-tight placeholder:text-[14px] placeholder:text4 outline-none"
@@ -232,7 +410,7 @@ const UPost = () => {
                 </button>
               )}
 
-              {/** Listado de comunidades */}
+              {/* LISTADO DE COMUNIDADES */}
               {button && (
                 <div className="absolute bg-white shadow-xl/20 rounded-[10px] top-full mt-3 ms-8 w-[300px] z-10">
                   {joinedCommunities.map((entry) => (
@@ -251,7 +429,6 @@ const UPost = () => {
                           alt="Imagen de la comunidad"
                           className="w-8 h-8 rounded-full"
                         />
-
                         <div>
                           {entry.community.name}
                           <p className="text-[11px] text4">
@@ -265,7 +442,7 @@ const UPost = () => {
               )}
             </div>
 
-            {/** Seleccionar tipo de post */}
+            {/* SELECTOR DE TIPO DE POST */}
             <div className="mt-10 flex items-start gap-5 text-[14px] Arvo-Bold text5 tracking-tight">
               <button
                 onClick={() => setValue("Text")}
@@ -287,7 +464,7 @@ const UPost = () => {
                 <span>Imágenes y video</span>
                 <span
                   className={`h-[4px] ${
-                    value === "Image" && "rounded-full w-[90%]  bg-[#e5a657]"
+                    value === "Image" && "rounded-full w-[90%] bg-[#e5a657]"
                   }`}
                 />
               </button>
@@ -303,15 +480,25 @@ const UPost = () => {
               </button>
             </div>
 
-            {/** Formulario */}
-            <form className="flex flex-col">
-              {/** Título */}
+            {/* FORMULARIO PRINCIPAL */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (recipe) {
+                  handlePost();
+                } else {
+                  handleSubmit();
+                }
+              }}
+              className="flex flex-col"
+            >
+              {/* INPUT TÍTULO */}
               <div className="relative mt-8">
                 <input
                   type="text"
                   id="title"
                   placeholder="Correo electrónico"
-                  className="peer w-full border text-[14px] text5 px-4 pb-3 pt-7 rounded-[20px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
+                  className="peer w-full border text-[14px] text5 px-4 pb-2 pt-6 rounded-[8px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
                   onChange={(e) => setTitle(e.target.value)}
                   maxLength={300}
                   required
@@ -321,7 +508,7 @@ const UPost = () => {
                   className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
                     title
                       ? "top-2 text-[12px] peer-focus:top-2 peer-focus:text-[12px]"
-                      : "top-5 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
+                      : "top-4 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
                   }`}
                 >
                   Título
@@ -333,7 +520,7 @@ const UPost = () => {
                 {title.length}/300
               </div>
 
-              {/** Div de subida de imágenes */}
+              {/* ÁREA DE SUBIDA DE IMÁGENES */}
               {value === "Image" && filePreviews.length === 0 && (
                 <>
                   <div className="relative mt-8">
@@ -407,7 +594,7 @@ const UPost = () => {
                   </div>
                   {uploadedFiles.length === 0 && (
                     <div className="flex gap-2 items-center mt-3 ms-4">
-                      <CircleAlert size={20} className=" text-[#b53325]" />
+                      <CircleAlert size={20} className="text-[#b53325]" />
                       <p className="text-[12px] text-gray-500">
                         Añade un archivo multimedia.
                       </p>
@@ -416,7 +603,7 @@ const UPost = () => {
                 </>
               )}
 
-              {/* Preview de imágenes subidas con slider */}
+              {/* PREVIEW DE IMÁGENES CON SLIDER */}
               {filePreviews.length > 0 && (
                 <div className="mt-6">
                   <div className="w-full aspect-[6/3] mt-3 overflow-hidden rounded-[20px] relative">
@@ -435,52 +622,51 @@ const UPost = () => {
                       src={filePreviews[currentImageIndex]}
                     />
 
-                    {/* Flecha izquierda */}
+                    {/* Flechas de navegación */}
                     {filePreviews.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={prevImage}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center cursor-pointer justify-center transition-colors duration-200"
-                        title="Imagen anterior"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      <>
+                        <button
+                          type="button"
+                          onClick={prevImage}
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center cursor-pointer justify-center transition-colors duration-200"
+                          title="Imagen anterior"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 19l-7-7 7-7"
-                          />
-                        </svg>
-                      </button>
-                    )}
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                        </button>
 
-                    {/* Flecha derecha */}
-                    {filePreviews.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={nextImage}
-                        className="absolute cursor-pointer right-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors duration-200"
-                        title="Siguiente imagen"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                        <button
+                          type="button"
+                          onClick={nextImage}
+                          className="absolute cursor-pointer right-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors duration-200"
+                          title="Siguiente imagen"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </button>
+                      </>
                     )}
 
                     {/* Botón para añadir más imágenes */}
@@ -495,7 +681,7 @@ const UPost = () => {
                       </button>
                     </div>
 
-                    {/* Input oculto para seleccionar archivos adicionales */}
+                    {/* Input oculto para archivos adicionales */}
                     <input
                       aria-label="file-input"
                       ref={additionalInputRef}
@@ -552,11 +738,13 @@ const UPost = () => {
                   </div>
                 </div>
               )}
+
+              {/* INPUT CONTENIDO */}
               <div className="relative mt-8">
                 <textarea
                   id="content"
                   placeholder="Cuerpo de texto..."
-                  className="peer w-full border text-[14px] text5 px-4 pb-3 pt-7 rounded-[20px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
+                  className="peer w-full border text-[14px] text5 px-4 pb-2 pt-6 rounded-[8px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
                   onChange={(e) => setContent(e.target.value)}
                   maxLength={3000}
                   required
@@ -574,12 +762,11 @@ const UPost = () => {
                 </label>
               </div>
 
-              {/* Botón de publicación */}
+              {/* BOTÓN DE PUBLICACIÓN */}
               <div className="mt-5 flex justify-end">
                 <button
-                  onClick={handlePost}
-                  type={`${recipe ? "button" : "submit"}`}
-                  className={`flex items-center px-5 py-2 rounded-[40px]   text-white text-[14px] ${
+                  type="submit"
+                  className={`flex items-center px-5 py-2 rounded-[40px] text-white text-[14px] ${
                     !content ||
                     !title ||
                     (value === "Image" && uploadedFiles.length === 0)
@@ -594,14 +781,23 @@ const UPost = () => {
           </div>
         )}
 
-        {/* Contenido Derecho */}
+        {/* ===========================================
+            PASO 2 - CONTENIDO DERECHO 
+            =========================================== */}
         {step === "2" && (
-          <div className="w-[95%] flex-wrap justify-between gap-6 flex p-6">
+          <form
+            action={() => {
+              handleSubmit();
+            }}
+            className="w-[95%] flex-wrap justify-between gap-6 flex p-6"
+          >
+            {/* INFORMACIÓN GENERAL DE LA RECETA */}
             <div className="flex-[1] lg:flex-[0.5] h-fit">
               <h1 className="text5 text-[16px] Arvo-Bold mb-3 tracking-tight">
                 Información general de la receta
               </h1>
               <div className="flex flex-col bg-white h-full rounded-[20px] px-6 py-8 gap-8">
+                {/* SUBIDA DE IMAGEN DE RECETA */}
                 {recipeImagePreviews.length === 0 ? (
                   <div className="relative">
                     <div
@@ -624,19 +820,7 @@ const UPost = () => {
                     >
                       <div className="flex flex-col items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                          <svg
-                            className="w-6 h-6 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.5}
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"
-                            />
-                          </svg>
+                          <FileImage size={24} className="text-gray-400" />
                         </div>
                         <div>
                           <p className="text-[14px] text-gray-600 font-medium">
@@ -692,6 +876,7 @@ const UPost = () => {
                   </div>
                 )}
 
+                {/* INPUTS DE INFORMACIÓN DE RECETA */}
                 <div className="space-y-2">
                   <p className="text-[14px] text5 tracking-[-0.4px] Arvo-Bold">
                     Nombre de la receta
@@ -699,59 +884,94 @@ const UPost = () => {
                   <input
                     aria-label="Nombre de la receta"
                     type="text"
+                    required
                     placeholder="Ej.: Pollo al Curry Cremoso con Coco"
                     onChange={(e) => setRecipeName(e.target.value)}
                     value={recipeName}
                     className="outline-none p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] w-full"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <p className="text-[14px] text5 tracking-[-0.4px] Arvo-Bold">
                     Descripción de la receta
                   </p>
-                  <input
+                  <textarea
                     aria-label="Descripción de la receta"
-                    type="text"
                     placeholder="Ej.: Este plato combina la suavidad y el sabor intenso"
+                    required
                     onChange={(e) => setRecipeDescription(e.target.value)}
                     value={recipeDescription}
-                    className="outline-none p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] w-full"
+                    className="outline-none p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] min-h-[150px] w-full"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <p className="text-[14px] text5 tracking-[-0.4px] Arvo-Bold">
+                  <p className="text-[14px] text4 tracking-[-0.4px] Arvo-Bold">
                     Tiempo de preparación
                   </p>
                   <div className="flex justify-between gap-4">
                     <input
-                      aria-label="Nombre de la receta"
-                      type="text"
+                      aria-label="Tiempo de preparación"
+                      disabled
                       placeholder="Ej.: 45 minutos"
-                      onChange={(e) => setRecipeName(e.target.value)}
-                      value={recipeName}
-                      className="outline-none p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] w-full"
+                      value={
+                        totalEstimatedTime +
+                        " minutos" +
+                        (totalEstimatedTime >= 60
+                          ? " / " +
+                            (totalEstimatedTime / 60).toFixed(1) +
+                            " horas"
+                          : "")
+                      }
+                      className="outline-none cursor-not-allowed opacity-50 p-[10px] border border-gray-300 rounded-[5px] text-[14px] placeholder:text-[13px] w-full"
                     />
-
-                  
                   </div>
+                </div>
+
+                <div className="flex justify-between mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep("1")}
+                    className="rounded-[10px] cursor-pointer px-4 py-2  text-[14px] text1 tracking-tight bg-red"
+                  >
+                    Volver
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-[10px] cursor-pointer text-[14px] text1 tracking-tight px-4 bg-blue"
+                  >
+                    Publicar Post + Receta
+                  </button>
                 </div>
               </div>
             </div>
+
+            {/* DETALLES DE LA RECETA */}
             <div className="flex-[1] h-fit">
               <h1 className="text5 text-[16px] Arvo-Bold mb-3 tracking-tight">
                 Detalles de la receta
               </h1>
-              <div className="flex flex-col h-full rounded-[20px]  gap-8">
+              <div className="flex flex-col h-full rounded-[20px] gap-8">
+                {/* INGREDIENTES */}
                 <div className="space-y-2 bg-white px-6 py-4 rounded-[10px]">
-                  <IngredientsCard />
+                  <IngredientsCard
+                    formIngredients={formIngredients}
+                    setFormIngredients={setFormIngredients}
+                  />
                 </div>
+
+                {/* INSTRUCCIONES */}
                 <div className="space-y-2 bg-white px-6 py-4 rounded-[10px]">
-                  <InstructionCard />
+                  <InstructionCard
+                    instructions={instructions}
+                    setInstructions={setInstructions}
+                    setInstructionFiles={setInstructionFiles}
+                  />
                 </div>
               </div>
-              
             </div>
-          </div>
+          </form>
         )}
       </section>
     </UIDashboard>
@@ -759,30 +979,3 @@ const UPost = () => {
 };
 
 export default UPost;
-
-/*<div className="w-[75%] flex flex-col">
-              <div className="relative">
-                <img
-                  className="object-cover w-full h-[400px] z-10 brightness-75 rounded-[20px]"
-                  src="https://hips.hearstapps.com/hmg-prod/images/chicken-stir-fry-lead-6513039282dd4.jpg?crop=1xw:1xh;center,top"
-                  alt="Chicken stir fry"
-                />
-                <div className="absolute bottom-5 left-0 bg-gray ms-4 py-3 px-4 rounded-[10px] max-w-[400px] max-h-[400px]">
-                  <input
-                    aria-label="Nombre de la receta"
-                    type="text"
-                    placeholder="Nombre de la receta"
-                    onChange={(e) => setRecipeName(e.target.value)}
-                    className="text5 text-[20px] w-full Arvo-Bold  outline-none"
-                  />
-
-                  <textarea
-                    aria-label="Descripción de la receta"
-                    placeholder="Descripción de la receta"
-                    onChange={(e) => setRecipeDescription(e.target.value)}
-                    className="text5 pt-3 w-full text-[13px] outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="w-[25%] bg-gray-100">fd</div> */
