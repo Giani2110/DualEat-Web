@@ -24,8 +24,6 @@ export class CommunityService {
           include: { tags: true },
         });
 
-        console.log(community);
-
         await tx.communityMember.create({
           data: {
             user_id: data.creator_id,

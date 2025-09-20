@@ -18,6 +18,7 @@ import {
   UPost,
   UExplore,
   URecipes,
+  UCommunity,
 } from "../pages";
 
 export const ROUTES = {
@@ -39,6 +40,7 @@ export const ROUTES = {
     CREATE_POST: "/post",
     EXPLORE: "/explore/",
     RECIPES: "/recipes/",
+    COMMUNITY: "/c/",
   },
   ADMIN: {
     BUSINESS_CREATION: "/admin/business-creation",
@@ -116,6 +118,14 @@ export const appRoutes = [
     element: (
       <ProtectedRoute>
         <URecipes />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: `${ROUTES.USER.COMMUNITY}:communitySlug/`,
+    element: (
+      <ProtectedRoute>
+        <UCommunity />
       </ProtectedRoute>
     ),
   },

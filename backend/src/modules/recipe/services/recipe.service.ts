@@ -3,7 +3,6 @@ import { prisma } from "../../../prisma/prisma";
 export class RecipeService {
   constructor() {}
 
-
   /** GET INGREDIENTS */
   async getAllIngredients() {
     try {
@@ -26,6 +25,67 @@ export class RecipeService {
     }
   }
 
+  /** GET RECIPE BY NAME (Validation) */
+  async getRecipeValidation(name: string, userId: number, communityId: number) {
+    try {
+      const result = await prisma.recipe.findFirst({
+        where: {
+          user_id: userId,
+          name: name,
+          posts: {
+            some: {
+              community_id: communityId,
+            },
+          },
+        },
+      });
+      return result;
+    } catch (error) {
+      throw new Error(`Error al obtener receta: ${error}`);
+    }
+  }
+
+   async ask(type: string, question: string) {
+    // Recipe, Ingredient, Ask
+    if (type === "recipe") {
+      const result = await prisma.recipe.findMany({
+        where: {
+          name: {
+            contains: question,
+            mode: "insensitive",
+          },
+        },
+        include: {
+          ingredients: true,
+          steps: true,
+        },
+      });
+      return result;
+    }
+
+    if (type === "ingredient") {
+      const result = await prisma.recipe.findMany({
+        where: {
+          ingredients: {
+            some: {
+              ingredient: {
+                name: {
+                  contains: question,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+        },
+        include: {
+          ingredients: true,
+          steps: true,
+        },
+      });
+      return result;
+    }
+  }
+}
 
 
 
@@ -47,6 +107,18 @@ export class RecipeService {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/*
 
     async createRecipe(userId: number, name: string, description?: string) {
         const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -112,3 +184,4 @@ export class RecipeService {
     });
   }
 }
+*/

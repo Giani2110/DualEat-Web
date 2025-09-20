@@ -49,11 +49,24 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
         scrolled ? `${scrolledBgColor} ${headerBorderColor} shadow-md` : ""
       }`}
     >
+      <Link
+        to={ROUTES.PUBLIC.HOME}
+        className="flex items-center cursor-pointer"
+        tabIndex={-1}
+      >
+        <img className="w-[28px] h-[28px]" src={LogoYellow} alt="Logo" />
+        <span
+          className={`ml-3 text-[19px] Dosis-Bold tracking-[-0.01em] text-yellow`}
+        >
+          DualEat
+        </span>
+      </Link>
       {/* Logo y botón hamburguesa - lado izquierdo */}
       <div className="flex items-center">
         {/* Botón hamburguesa para business */}
         {isBusiness && onToggleSidebar && (
           <button
+            title="Menu"
             onClick={onToggleSidebar}
             className="mr-4 p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200"
           >

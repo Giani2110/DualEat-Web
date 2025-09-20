@@ -21,3 +21,53 @@ export const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KE
     persistSession: false, // Opcional, pero recomendado para el backend
   },
 });
+
+export async function uploadAndGetUrl(file: Express.Multer.File, bucket: string, pathPrefix: string, retries?: number): Promise<string>;
+export async function uploadAndGetUrl(files: Express.Multer.File[], bucket: string, pathPrefix: string, retries?: number): Promise<string[]>;
+
+export async function uploadAndGetUrl(
+  fileOrFiles: Express.Multer.File | Express.Multer.File[],
+  bucket: string,
+  pathPrefix: string,
+  retries = 3
+): Promise<string | string[]> {
+  const filesArray = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+
+  const uploadPromises = filesArray.map(async (file) => {
+    const path = `${pathPrefix}/${Date.now()}_${file.originalname}`;
+    let attempts = 0;
+    let lastError: any = null;
+
+    while (attempts < retries) {
+      try {
+        const { error } = await supabaseAdmin.storage
+          .from(bucket)
+          .upload(path, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true,
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        const { data } = supabaseAdmin.storage.from(bucket).getPublicUrl(path);
+        return data.publicUrl;
+      } catch (err: any) {
+        lastError = err;
+        if (err.__isStorageError && err.originalError?.code === 'ECONNRESET' && attempts < retries) {
+          attempts++;
+          console.warn(`Connection reset for file ${file.originalname}. Retrying upload... (Attempt ${attempts}/${retries})`);
+          await new Promise(res => setTimeout(res, 1000 * attempts));
+        } else {
+          throw err;
+        }
+      }
+    }
+    throw lastError;
+  });
+
+  const urls = await Promise.all(uploadPromises);
+
+  return Array.isArray(fileOrFiles) ? urls : urls[0];
+}

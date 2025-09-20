@@ -31,6 +31,7 @@ import tagCategoryRouter from "./modules/community/routes/tag-category.routes";
 
 // Módulo de Recetas y Posts
 import recipeRoutes from "./modules/recipe/routes/recipe.routes";
+import postRoutes from "./modules/post/routes/post.routes";
 
 // Rutas sin agrupar en módulos (considera agruparlas si el proyecto crece)
 import onboardingRoutes from "./routes/onBoarding.routes";
@@ -126,6 +127,7 @@ app.use(`${API_PREFIX}/community-tags`, communityTagsRouter);
 
 // Módulo de Recetas y Posts
 app.use(`${API_PREFIX}/recipe`, recipeRoutes);
+app.use(`${API_PREFIX}/post`, postRoutes);
 
 // Módulo de Locales (si existen, aquí irían)
 app.use("/api/reviews", reviewRoutes);
