@@ -63,3 +63,19 @@
   filter: brightness(0.2);
   z-index: -1;
 }
+
+
+
+.scroll2::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll2::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scroll2::-webkit-scrollbar-thumb {
+  background: #b53325;
+  border-radius: 10px;
+  cursor: pointer;
+}

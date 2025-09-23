@@ -49,18 +49,6 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
         scrolled ? `${scrolledBgColor} ${headerBorderColor} shadow-md` : ""
       }`}
     >
-      <Link
-        to={ROUTES.PUBLIC.HOME}
-        className="flex items-center cursor-pointer"
-        tabIndex={-1}
-      >
-        <img className="w-[28px] h-[28px]" src={LogoYellow} alt="Logo" />
-        <span
-          className={`ml-3 text-[19px] Dosis-Bold tracking-[-0.01em] text-yellow`}
-        >
-          DualEat
-        </span>
-      </Link>
       {/* Logo y botón hamburguesa - lado izquierdo */}
       <div className="flex items-center">
         {/* Botón hamburguesa para business */}
@@ -96,7 +84,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
       {!isBusiness && (
         <div
           onClick={focusInput}
-          className="py-2 px-4 rounded-full cursor-text focus-within:ring-inset focus-within:ring-2 ring-[#e5a657] focus-within:bg-[#faf5f0] bg-[#E5EBEE] hover:bg-[#ebe9df]"
+          className="py-2 px-4 rounded-full flex-[0.3] cursor-text focus-within:ring-inset focus-within:ring-2 ring-[#e5a657] focus-within:bg-[#faf5f0] bg-[#E5EBEE] hover:bg-[#ebe9df]"
         >
           <form action="" className="flex items-center gap-2">
             <Search className="w-[16px] h-[16px]" />

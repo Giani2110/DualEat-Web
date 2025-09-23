@@ -10,7 +10,7 @@ import type { AuthResponse, User } from "../../services/auth.api";
 
 import { AuthContext } from "./AuthContext";
 import { withMinimumDelay } from "../../utils/timeUtils";
-import { useLocation } from "react-router-dom";
+//import { useLocation } from "react-router-dom";
 
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const location = useLocation();
+  //const location = useLocation();
 
   const login = async (
     email: string,
@@ -124,8 +124,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
       }
     };
-    fetchUser();
-  }, [location.pathname]);
+    if (!user) {
+      fetchUser();
+    }
+    
+  }, [user]);
 
   const value = { user, loading, login, logout, register, completeProfile };
 

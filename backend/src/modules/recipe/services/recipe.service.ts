@@ -1,5 +1,7 @@
 import { prisma } from "../../../prisma/prisma";
 
+import { AskAI, PaginatedResponse } from "../../../interfaces/recipe.dto";
+
 export class RecipeService {
   constructor() {}
 
@@ -31,7 +33,10 @@ export class RecipeService {
       const result = await prisma.recipe.findFirst({
         where: {
           user_id: userId,
-          name: name,
+          name: {
+            equals: name,
+            mode: "insensitive",
+          },
           posts: {
             some: {
               community_id: communityId,
@@ -45,34 +50,128 @@ export class RecipeService {
     }
   }
 
-   async ask(type: string, question: string) {
-    // Recipe, Ingredient, Ask
-    if (type === "recipe") {
+  /** GET RECIPE BY ID */
+  async getRecipeById(id: number) {
+    try {
+      const result = await prisma.recipe.findUnique({
+        where: { id },
+        include: {
+          ingredients: {
+            include: {
+              unit_of_measure: true,
+              ingredient: true,
+            },
+          },
+          steps: true,
+        },
+      });
+      return result;
+    } catch (error) {
+      throw new Error(`Error al obtener receta: ${error}`);
+    }
+  }
+
+  /** GET USER RECIPES */
+  async getUserRecipes(user_id: number) {
+    try {
+      const result = await prisma.recipe.findMany({
+        where: { user_id },
+        include: {
+          ingredients: {
+            include: {
+              unit_of_measure: true,
+              ingredient: true,
+            },
+          },
+          steps: true,
+        },
+      });
+      return result;
+    } catch (error) {
+      throw new Error(`Error al obtener recetas: ${error}`);
+    }
+  }
+
+  /** ASK OLLAMA */
+  async ask(data: AskAI): Promise<PaginatedResponse<any>> {
+    const page = data.page || 1;
+    const limit = data.limit || 20;
+    const skip = (page - 1) * limit;
+
+    if (data.type === "recipe") {
+      // Contar total de resultados
+      const total = await prisma.recipe.count({
+        where: {
+          name: {
+            contains: data.question,
+            mode: "insensitive",
+          },
+        },
+      });
+
+      // Obtener resultados paginados
       const result = await prisma.recipe.findMany({
         where: {
           name: {
-            contains: question,
+            contains: data.question,
             mode: "insensitive",
           },
         },
         include: {
           ingredients: true,
           steps: true,
+          posts: {
+            select: {
+              votes_up: true,
+            },
+            orderBy: {
+              votes_up: "desc",
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          posts: {
+            _count: "desc",
+          },
         },
       });
-      return result;
+
+      return {
+        data: result,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasNext: page < Math.ceil(total / limit),
+          hasPrev: page > 1,
+        },
+      };
     }
 
-    if (type === "ingredient") {
+    if (data.type === "ingredient") {
+      // Contar total de resultados
+      const total = await prisma.recipe.count({
+        where: {
+          ingredients: {
+            some: {
+              ingredient: {
+                id: { in: data.ingredients },
+              },
+            },
+          },
+        },
+      });
+
+      // Obtener resultados paginados
       const result = await prisma.recipe.findMany({
         where: {
           ingredients: {
             some: {
               ingredient: {
-                name: {
-                  contains: question,
-                  mode: "insensitive",
-                },
+                id: { in: data.ingredients },
               },
             },
           },
@@ -81,42 +180,39 @@ export class RecipeService {
           ingredients: true,
           steps: true,
         },
+        skip,
+        take: limit,
+        orderBy: {
+          created_at: "desc",
+        },
       });
-      return result;
+
+      return {
+        data: result,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasNext: page < Math.ceil(total / limit),
+          hasPrev: page > 1,
+        },
+      };
     }
+
+    return {
+      data: [],
+      pagination: {
+        page: 1,
+        limit,
+        total: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+      },
+    };
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 

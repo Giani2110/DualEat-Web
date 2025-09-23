@@ -2,6 +2,9 @@ import { Router } from "express";
 import { CommunityTagService } from "../services/community-tag.service";
 import { CommunityTagController } from "../controllers/community-tag.controller";
 
+import { isAuthenticated } from "../../../middlewares/isAuthenticated";
+import { generalLimiter } from "../../../middlewares/rateLimiter";
+
 const router = Router();
 const communityTagService = new CommunityTagService();
 const communityTagController = new CommunityTagController(communityTagService);
@@ -17,14 +20,14 @@ router.get("/tags/by-category", communityTagController.getByCategoryId.bind(comm
 
 // 3. Crear una nueva etiqueta
 // =========================================================
-router.post("/tag", communityTagController.create.bind(communityTagController));
+router.post("/tag", generalLimiter, isAuthenticated, communityTagController.create.bind(communityTagController));
 
 // 4. Actualizar una etiqueta
 // =========================================================
-router.put("/tag/:id", communityTagController.update.bind(communityTagController));
+router.put("/tag/:id", generalLimiter, isAuthenticated, communityTagController.update.bind(communityTagController));
 
 // 5. Eliminar una etiqueta
 // =========================================================
-router.delete("/tag/:id", communityTagController.delete.bind(communityTagController));
+router.delete("/tag/:id", generalLimiter, isAuthenticated, communityTagController.delete.bind(communityTagController));
 
 export default router;

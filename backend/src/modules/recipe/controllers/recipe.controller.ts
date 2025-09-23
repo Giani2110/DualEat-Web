@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { RecipeService } from "../services/recipe.service";
 
+import { ollamaConfig } from "../../../config/config";
+
 import axios from "axios";
 
 export class RecipeController {
@@ -28,14 +30,47 @@ export class RecipeController {
 
   /** GET RECIPE BY NAME */
   async getRecipeValidation(req: Request, res: Response) {
-   const { name, user_id, community_id } = req.query;
+    const { name, user_id, community_id } = req.query;
     try {
       const recipe = await this.recipeService.getRecipeValidation(
         name as string,
         Number(user_id),
         Number(community_id)
       );
-      res.status(200).json({ success: true, data: recipe });
+
+      if (recipe) {
+        return res.status(200).json({ success: true, data: recipe });
+      }
+      return res
+        .status(404)
+        .json({ success: false, error: "Receta no encontrada" });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }
+
+  /** GET RECIPE BY ID */
+  async getRecipeById(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+      const recipe = await this.recipeService.getRecipeById(Number(id));
+      if (recipe) {
+        return res.status(200).json({ success: true, data: recipe });
+      }
+      return res
+        .status(404)
+        .json({ success: false, message: "Receta no encontrada" });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  /** GET USER RECIPES */
+  async getUserRecipes(req: Request, res: Response) {
+    const { user_id } = req.params;
+    try {
+      const recipes = await this.recipeService.getUserRecipes(Number(user_id));
+      res.status(200).json({ success: true, data: recipes });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
@@ -43,97 +78,129 @@ export class RecipeController {
 
   /** ASK OLLAMA */
   async askOllama(req: Request, res: Response) {
-  const { question, type } = req.body;
+    const { question, type, ingredients, page } = req.body;
 
-  try {
-    const ollamaHost = process.env.OLLAMA_HOST;
+    try {
+      const model = "llama3.2:1b";
+      // Para preguntas generales (sin cambios)
+      if (type === "ask") {
+        const response = await axios.post(`${ollamaConfig.host}/api/chat`, {
+          model,
+          messages: [{ role: "user", content: question }],
+          stream: false,
+        });
 
-    if (type === "ask") {
-      const response = await axios.post(
-        `${ollamaHost}/api/chat`,
-        {
-          model: "llama3",
-          messages: [
-            { role: "system", content: "Responde siempre en español." },
-            { role: "user", content: question }],
-          stream: true,
-        },
-        { responseType: "stream" }
-      );
+        return res.json({
+          success: true,
+          comment: response.data.message?.content || "",
+        });
+      }
 
-      let fullResponse = "";
+      // Para recetas o ingredientes con paginación
+      if (type === "recipe" || type === "ingredient") {
+        const result = await this.recipeService.ask({
+          type,
+          question,
+          ingredients: Array.isArray(ingredients) ? ingredients : [],
+          page: parseInt(page),
+          limit: 20,
+        });
 
-      response.data.on("data", (chunk: Buffer) => {
-        const lines = chunk.toString().split("\n").filter(line => line.trim() !== "");
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line);
-            fullResponse += parsed.message?.content || "";
-          } catch {}
+        if (!result.data || result.data.length === 0) {
+          return res.status(200).json({
+            success: true,
+            data: [],
+            pagination: result.pagination,
+            comment:
+              page === 1
+                ? "Perdón, no encontré ninguna receta con dicho nombre."
+                : "No hay más recetas disponibles.",
+          });
         }
-      });
 
-      response.data.on("end", () => {
-        res.json({ success: true, answer: fullResponse });
-      });
+        // Generar comentario solo para la primera página
+        let comentario = "";
+        if (page === 1) {
+          const nombres = result.data
+            .slice(0, 5)
+            .map((r: any) => `- ${r.name}`)
+            .join("\n");
 
-      response.data.on("error", (err: any) => {
-        res.status(500).json({ success: false, error: err.message });
+          if (nombres) {
+            const prompt = `¿Qué opinas de estas recetas:\n${nombres}`;
+
+            const response = await axios.post(`${ollamaConfig.host}/api/chat`, {
+              model,
+              messages: [{ role: "user", content: prompt }],
+              stream: false,
+            });
+
+            comentario = response.data.message?.content || "";
+          }
+        } else {
+          comentario = `Mostrando ${result.data.length} recetas adicionales (página ${page} de ${result.pagination.totalPages})`;
+        }
+
+        return res.status(200).json({
+          success: true,
+          data: result.data,
+          pagination: result.pagination,
+          comment: comentario,
+        });
+      }
+
+      return res.status(400).json({
+        success: false,
+        error: "Tipo de solicitud no válido.",
       });
+    } catch (error: any) {
+      if (!res.headersSent) {
+        res.status(500).json({ success: false, error: error.message });
+      }
     }
-
-    if (type === "recipe" || type === "ingredient") {
-      const data = await this.recipeService.ask(type, question);
-
-      const nombres = data?.map((r: any) => `- ${r.name}`).join("\n");
-      const prompt = `Estas son las recetas encontradas:\n${nombres}\n\nHaz una breve descripción de cada una y sugiere cuál podría gustarle al usuario. RESPONDE EN ESPAÑOL.`;
-
-      const response = await axios.post(`${ollamaHost}/api/chat`, {
-        model: "llama3",
-        messages: [{ role: "user", content: prompt }],
-        stream: false
-      });
-
-      const comentario = response.data.message?.content || "";
-
-      res.status(200).json({
-        success: true,
-        data,
-        comment: comentario
-      });
-    }
-
-    else {
-      res.status(400).json({ success: false, error: "Tipo de solicitud no válido." });
-    }
-  } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
   }
-}
 
+  async askRecipe(req: Request, res: Response) {
+    const { question, recipe_id } = req.body;
 
+    try {
+      if (!recipe_id || typeof question !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, error: "Datos inválidos." });
+      }
 
+      const model = "llama3.2:1b";
+      const recipe = await this.recipeService.getRecipeById(Number(recipe_id));
+      if (!recipe) {
+        return res
+          .status(404)
+          .json({ success: false, comment: "Receta no encontrada" });
+      }
 
+      const prompt = [
+        `El usuario pregunta: "${question}"`,
+        `Aquí está la receta completa para que la analices:`,
+        `Nombre: ${recipe.name}`,
+        `Descripción: ${recipe.description || "Sin descripción"}`,
+        `Ingredientes y cantidades:\n${recipe.ingredients.map((ing) => `- ${ing.ingredient.name} - ${ing.quantity} ${ing.unit_of_measure.name}`).join("\n")}`,
+        `Pasos:\n${recipe.steps.map((step, i) => `${i + 1}. ${step.description}`).join("\n")}`,
+      ].join("\n\n");
 
+      const response = await axios.post(`${ollamaConfig.host}/api/chat`, {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        stream: false,
+      });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      return res.status(200).json({
+        success: true,
+        comment: response.data.message?.content || "Sin respuesta",
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
 
   /*
   async createRecipe(req: Request, res: Response) {
