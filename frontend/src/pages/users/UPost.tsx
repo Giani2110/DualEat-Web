@@ -10,7 +10,6 @@ import {
   CircleAlert,
   FileImage,
 } from "lucide-react";
-import UIDashboard from "../../components/users/UIDashboard";
 import IngredientsCard from "../../components/users/posts/IngredientsCard";
 import InstructionCard from "../../components/users/posts/InstructionsCard";
 
@@ -351,7 +350,6 @@ const UPost = () => {
   // RENDER
   // ===========================================
   return (
-    <UIDashboard>
       <section className="flex w-full gap-[50px] mt-8">
         {/* ===========================================
             PASO 1 - CONTENIDO IZQUIERDO
@@ -974,7 +972,6 @@ const UPost = () => {
           </form>
         )}
       </section>
-    </UIDashboard>
   );
 };
 

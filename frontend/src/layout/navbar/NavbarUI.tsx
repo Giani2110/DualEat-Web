@@ -45,25 +45,34 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
 
   return (
     <header
-      className={`fixed top-0 w-full ${headerBgColor} border-b ${headerBorderColor} h-[60px] px-10 flex items-center justify-between pt-[5px] pb-[5px] z-50 ${
+      className={`fixed top-0 w-full ${headerBgColor} border-b ${headerBorderColor} h-[60px] px-4 md:px-10 flex items-center justify-between pt-[5px] pb-[5px] z-50 ${
         scrolled ? `${scrolledBgColor} ${headerBorderColor} shadow-md` : ""
       }`}
     >
       {/* Logo y botón hamburguesa - lado izquierdo */}
       <div className="flex items-center">
         {/* Botón hamburguesa para business */}
-        {isBusiness && onToggleSidebar && (
+        {onToggleSidebar && (
           <button
+            type="button"
             title="Menu"
             onClick={onToggleSidebar}
-            className="mr-4 p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200"
+            className={`mr-4 p-2 cursor-pointer rounded-lg transition-colors duration-200 ${
+              isBusiness ? "hover:bg-gray-800" : "hover:bg-gray-200 md:hidden"
+            }`}
           >
-            <Menu className="w-[20px] h-[20px] text-gray-400 group-hover:text-white" />
+            <Menu
+              className={`w-[20px] h-[20px] ${
+                isBusiness
+                  ? "text-gray-400 group-hover:text-white"
+                  : "text-black group-hover:text-white"
+              }`}
+            />
           </button>
         )}
 
         <Link
-          to={isBusiness ? ROUTES.LOCAL.DASHBOARD : ROUTES.PUBLIC.HOME}
+          to={isBusiness ? ROUTES.LOCAL.DASHBOARD : ROUTES.USER.DASHBOARD}
           className="flex items-center cursor-pointer"
           tabIndex={-1}
         >
@@ -73,7 +82,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
             alt="Logo"
           />
           <span
-            className={`ml-3 text-[17px] Arvo-Bold tracking-[-0.01em] ${textColor}`}
+            className={`ml-3 hidden md:block text-[18px] Dosis-Bold tracking-[-0.01em] ${textColor}`}
           >
             DualEat
           </span>
@@ -84,7 +93,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
       {!isBusiness && (
         <div
           onClick={focusInput}
-          className="py-2 px-4 rounded-full flex-[0.3] cursor-text focus-within:ring-inset focus-within:ring-2 ring-[#e5a657] focus-within:bg-[#faf5f0] bg-[#E5EBEE] hover:bg-[#ebe9df]"
+          className="py-2 px-4 rounded-full flex-[0.7] md:flex-[0.3] cursor-text focus-within:ring-inset focus-within:ring-2 ring-[#e5a657] focus-within:bg-[#faf5f0] bg-[#E5EBEE] hover:bg-[#ebe9df]"
         >
           <form action="" className="flex items-center gap-2">
             <Search className="w-[16px] h-[16px]" />
@@ -100,7 +109,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
       )}
 
       {/* Iconos del lado derecho */}
-      <div className="flex items-center justify-end space-x-3 text-[14px]">
+      <div className="flex items-center justify-end space-x-1 md:space-x-3 text-[14px]">
         {isBusiness ? (
           <>
             {/* Icono de notificaciones con badge */}
@@ -128,13 +137,21 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
               to={ROUTES.USER.CREATE_POST}
               className="flex items-center justify-center px-2 py-2 gap-[3px] cursor-pointer hover:bg-[#E5EBEE] rounded-3xl"
             >
-              <Plus color="#4A4947" strokeWidth={1.8} size={24} />
-              <span className="text-[13px] Arvo text5 tracking-tighter">
+              <Plus
+                color="#4A4947"
+                className="w-[24px] h-[24px] md:w-[28px] md:h-[28px]"
+                strokeWidth={1.8}
+              />
+              <span className="text-[15px] text5 tracking-tighter">
                 Crear
               </span>
             </Link>
             <div className="px-2 py-2 cursor-pointer hover:bg-[#E5EBEE] rounded-3xl">
-              <Bell color="#4A4947" strokeWidth={1.8} size={22} />
+              <Bell
+                color="#4A4947"
+                className="w-[22px] h-[22px] md:w-[23px] md:h-[23px]"
+                strokeWidth={1.8}
+              />
             </div>
             <div className="p-1 cursor-pointer hover:bg-[#E5EBEE] rounded-3xl ">
               {user && (

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Navbar from "../layout/navbar/Navbar";
 import HeaderUSER from "../layout/navbar/NavbarUI";
 import BusinessSidebar from "../components/locals/UISidebarLocal";
+import UIDashboard from "../components/users/UIDashboard";
 import Footer from "../layout/footer/Footer";
 
 import { useAuth } from "../hooks/useAuth";
@@ -15,8 +16,36 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, loading } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   useDynamicTitle();
+
+  const renderContent = () => {
+    if (!user) {
+      return <>{children}</>;
+    }
+
+    if (user.isBusiness === false) {
+      return (
+        <UIDashboard
+          isSideBarOpen={sidebarCollapsed}
+          toggleSidebar={toggleSidebar}
+        >
+          {children}
+        </UIDashboard>
+      );
+    }
+
+    if (user.isBusiness === true) {
+      return (
+        <BusinessSidebar
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+        >
+          {children}
+        </BusinessSidebar>
+      );
+    }
+  };
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -24,31 +53,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <>
-      {/* Navbar */}
       {user ? (
-        <HeaderUSER 
-          isBusiness={user.isBusiness} 
-          onToggleSidebar={user.isBusiness ? toggleSidebar : undefined}
+        <HeaderUSER
+          isBusiness={user.isBusiness}
+          onToggleSidebar={toggleSidebar}
         />
       ) : (
         <Navbar />
       )}
       
-      {/* Sidebar para business */}
-      {user?.isBusiness && (
-        <BusinessSidebar 
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={toggleSidebar}
-        />
-      )}
-      
-      {/* Contenido con transición suave */}
-      <div className={user?.isBusiness ? 
-        `transition-all duration-300 pt-[60px] ${sidebarCollapsed ? 'ml-16' : 'ml-64'}` : 
-        ''
-      }>
-        {children}
-      </div>
+      {renderContent()}
+
       {!loading && !user && <Footer />}
     </>
   );

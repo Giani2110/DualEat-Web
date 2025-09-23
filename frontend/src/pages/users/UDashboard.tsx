@@ -10,8 +10,6 @@ import {
 
 import type { Community } from "../../interface/global";
 
-import UIDashboard from "../../components/users/UIDashboard";
-
 import "../../assets/scss/users/users.scss";
 
 type UserCommunityEntry = {
@@ -88,60 +86,59 @@ const UserDashboard = () => {
   }, [user]);
 
   return (
-    <UIDashboard>
-      <section className="w-[90%] flex flex-col gap-3 px-2 py-1 mt-10">
-        {communities.map((community: Community) => {
-          const joinedEntry = joinedCommunities.find(
-            (entry) => entry.community.id === community.id
-          );
+    <section className="w-[80%] flex flex-col gap-3 px-2 py-1 mt-10 mx-auto">
+      {communities.map((community: Community) => {
+        const joinedEntry = joinedCommunities.find(
+          (entry) => entry.community.id === community.id
+        );
 
-          const isJoined = !!joinedEntry;
-          const isModerator = joinedEntry?.is_moderator === true;
+        const isJoined = !!joinedEntry;
+        const isModerator = joinedEntry?.is_moderator === true;
 
-          return (
-            <div
-              key={community.id}
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => handleSelectCommunity(community.name)}
-            >
-              <div className="flex items-center">
-                <img
-                  className="w-[25px] h-[25px] rounded-full"
-                  src={community.image_url || undefined}
-                  alt=""
-                />
-                <h1 className="text-[12px] text5 Arvo-Bold tracking-wide ml-2">
-                  {community.name}
-                </h1>
-                <span className="text-[11px] text4 Arvo-Bold mx-2">•</span>
-                <span className="text-[11px] text4">hace 14 hs</span>
-                <span className="text-[11px] text4 Arvo-Bold mx-2">•</span>
-                <span className="text-[11px] text4">123k seguidores</span>
-              </div>
-
-              <div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    !isModerator && handleJoinCommunity(community.id)
-                  }
-                  disabled={isModerator}
-                  className={`text-[13px] tracking-tight px-4 py-1 rounded-full transition-colors duration-200 ${
-                    isModerator
-                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                      : isJoined
-                      ? "bg-[#4A4947] text-white hover:bg-transparent hover:ring-2 hover:ring-[#e5a657] hover:text-[#4A4947]"
-                      : "bg-[#e5a657] text-white hover:bg-transparent hover:ring-2 hover:ring-[#e5a657] hover:text-[#4A4947]"
-                  }`}
-                >
-                  {isModerator ? "Moderador" : isJoined ? "Se unió" : "Unirse"}
-                </button>
-              </div>
+        return (
+          <div
+            key={community.id}
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => handleSelectCommunity(community.name)}
+          >
+            <div className="flex items-center">
+              <img
+                className="w-[25px] h-[25px] rounded-full"
+                src={community.image_url || undefined}
+                alt=""
+              />
+              <h1 className="text-[12px] text5 Arvo-Bold tracking-wide ml-2">
+                {community.name}
+              </h1>
+              <span className="text-[11px] text4 Arvo-Bold mx-2">•</span>
+              <span className="text-[11px] text4">hace 14 hs</span>
+              <span className="text-[11px] text4 Arvo-Bold mx-2">•</span>
+              <span className="text-[11px] text4">123k seguidores</span>
             </div>
-          );
-        })}
 
-        {/* Post 
+            <div>
+              <button
+                type="button"
+                onClick={() =>
+                  !isModerator && handleJoinCommunity(community.id)
+                }
+                disabled={isModerator}
+                className={`text-[13px] tracking-tight px-4 py-1 rounded-full transition-colors duration-200 ${
+                  isModerator
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : isJoined
+                    ? "bg-[#4A4947] text-white hover:bg-transparent hover:ring-2 hover:ring-[#e5a657] hover:text-[#4A4947]"
+                    : "bg-[#e5a657] text-white hover:bg-transparent hover:ring-2 hover:ring-[#e5a657] hover:text-[#4A4947]"
+                }`}
+              >
+                {isModerator ? "Moderador" : isJoined ? "Se unió" : "Unirse"}
+              </button>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Post 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
             <img
@@ -188,8 +185,7 @@ const UserDashboard = () => {
             </div>
           </div>
 */}
-      </section>
-    </UIDashboard>
+    </section>
   );
 };
 

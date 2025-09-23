@@ -380,7 +380,7 @@ const Dashboard = () => {
   );
 
   if (error) return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-red-700 text-red-400">
         <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
         <p className="font-semibold text-lg mb-2">Error al cargar el panel de control</p>
@@ -418,6 +418,7 @@ const Dashboard = () => {
                 <h3 className="text-lg font-semibold text-white">Histórico de ingresos</h3>
                 <div className="flex items-center space-x-2">
                   <button
+                    type='button'
                     title='Anterior'
                     onClick={() => setEarningsPage(prev => Math.max(0, prev - 1))}
                     disabled={earningsPage === 0}
@@ -426,6 +427,7 @@ const Dashboard = () => {
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
+                    type='button'
                     title='Siguiente'
                     onClick={() => setEarningsPage(prev => Math.min(paginationData.earnings.totalPages - 1, prev + 1))}
                     disabled={earningsPage >= paginationData.earnings.totalPages - 1}
@@ -570,6 +572,7 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold text-white">Pedidos recientes</h3>
               <div className="flex items-center space-x-2">
                 <button
+                  type='button'
                   title='Anterior'
                   onClick={() => setOrdersPage(prev => Math.max(0, prev - 1))}
                   disabled={ordersPage === 0}
@@ -578,6 +581,7 @@ const Dashboard = () => {
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
+                  type='button'
                   title='Siguiente'
                   onClick={() => setOrdersPage(prev => Math.min(paginationData.orders.totalPages - 1, prev + 1))}
                   disabled={ordersPage >= paginationData.orders.totalPages - 1}

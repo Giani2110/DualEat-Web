@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import UIDashboard from "../../components/users/UIDashboard";
 import { getAllIngredients } from "../../services/recipes.api";
 import { useAuth } from "../../hooks/useAuth";
 import { capitalize } from "../../utils/capitalize";
@@ -314,7 +313,6 @@ const URecipes = () => {
 
   // RENDER PRINCIPAL
   return (
-    <UIDashboard>
       <div className="flex flex-row w-full gap-10">
         {/* SECCIÓN PRINCIPAL - CHAT Y BÚSQUEDA */}
         <section
@@ -701,7 +699,6 @@ const URecipes = () => {
 
         <div>Tus recetas</div>
       </div>
-    </UIDashboard>
   );
 };
 

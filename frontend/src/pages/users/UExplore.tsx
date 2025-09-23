@@ -15,7 +15,6 @@ import type {
   Community,
   CommunityTag,
 } from "../../interface/global";
-import UIDashboard from "../../components/users/UIDashboard";
 import { useNavigate, useParams } from "react-router-dom";
 
 import CommunityCard from "../../components/users/CommunityCard";
@@ -128,14 +127,13 @@ const UExplore = () => {
   };
 
   return (
-    <UIDashboard>
-      <section className="mt-10 ps-[50px]">
-        <h2 className="text-[30px] Arvo-Bold text-black mb-4">
+      <section className="mt-10 ps-[50px] w-[80%] flex flex-col mx-auto">
+        <h2 className="text-[30px] Dosis-Bold text-black mb-4">
           Explorar comunidades
         </h2>
 
         {/* Category Tags */}
-        <div className="flex gap-3 items-center overflow-hidden mt-10">
+        <div className="flex gap-3 items-center overflow-hidden mt-3">
           <div>
             <button
               type="button"
@@ -285,7 +283,6 @@ const UExplore = () => {
           </div>
         )}
       </section>
-    </UIDashboard>
   );
 };
 

@@ -5,3 +5,4 @@ ollama_data
 node_modules
 ingredientes.txt
 .hintrc
+ollama_models/Modelfile

@@ -45,6 +45,7 @@
 }
 
 
+
 .bgFood2 {
   position: relative;
 }
@@ -78,4 +79,11 @@
   background: #b53325;
   border-radius: 10px;
   cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .dashboard-layout {
+    grid-template-columns: 0fr;
+  }
+  
 }

@@ -544,6 +544,8 @@ const LocalMenu = () => {
             <div className="relative">
               {showArrows && !isAtStart && (
                 <button
+                  type="button"
+                  title='Anterior'
                   onClick={() => scrollCategories('left')}
                   className="absolute -left-3 top-1/2 -translate-y-1/2 bg-gray-900/90 hover:bg-gray-900 p-2 rounded-full shadow-lg z-20 transition-all duration-200"
                 >
@@ -580,6 +582,7 @@ const LocalMenu = () => {
                     {localCategories.map(category => (
                       <div key={category.id} className="relative flex-shrink-0">
                         <button
+                          type="button"
                           className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${
                             selectedCategory === category.id
                               ? 'bg-[#e5a657] text-white shadow-lg'
@@ -592,6 +595,8 @@ const LocalMenu = () => {
                         </button>
 
                         <button
+                          type="button"
+                          title="Eliminar categoría"
                           onClick={(e) => {
                             e.stopPropagation();
                             openDeleteCategoryModal(category.id);
@@ -607,6 +612,8 @@ const LocalMenu = () => {
               </div>
               {showArrows && !isAtEnd && (
                 <button
+                  type='button'
+                  title='Ir a la derecha'
                   onClick={() => scrollCategories('right')}
                   className="absolute -right-3 top-1/2 -translate-y-1/2 bg-gray-900/90 hover:bg-gray-900 p-2 rounded-full shadow-lg z-20 transition-all duration-200"
                 >
@@ -650,6 +657,7 @@ const LocalMenu = () => {
                             <Edit size={20} />
                           </button>
                           <button
+                            type='button'
                             onClick={() => setExtractedDishes(extractedDishes.filter((_, i) => i !== index))}
                             className="text-red-500 hover:text-red-700"
                             title="Eliminar de la lista de revisión"
@@ -699,12 +707,16 @@ const LocalMenu = () => {
                         )}
                         <div className="absolute top-2 right-2 flex space-x-2 transition-opacity">
                           <button
+                            type="button"
+                            title="Editar Plato"
                             className="bg-gray-900/70 backdrop-blur-sm p-2 rounded-full text-blue-400 hover:text-blue-200 transition-colors"
                             onClick={() => handleUpdateFood(food)}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
+                            type="button"
+                            title="Eliminar Plato"
                             className="bg-gray-900/70 backdrop-blur-sm p-2 rounded-full text-red-400 hover:text-red-200 transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -772,6 +784,8 @@ const LocalMenu = () => {
                 </div>
               </div>
               <button
+                type="button"
+                aria-label="Close"
                 onClick={() => setIsConfirmModalOpen(false)}
                 className="group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200"
               >
@@ -815,6 +829,8 @@ const LocalMenu = () => {
           />
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in">
             <button
+              type="button"
+              aria-label="Cerrar modal"
               onClick={() => setShowOcrModal(false)}
               className="absolute top-4 right-4 group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200 z-10"
             >
@@ -850,6 +866,8 @@ const LocalMenu = () => {
                 </div>
               </div>
               <button
+                type="button"
+                title='Cerrar'
                 onClick={() => { setShowCreateCategoryModal(false); setNewCategoryName(''); setSelectedPredefinedCategory(''); setNewCategoryError(null); }}
                 className="group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200"
               >
