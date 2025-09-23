@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { Star, DollarSign, ShoppingBag, Clock, Sun, Package, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, TrendingUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -145,6 +146,7 @@ const Dashboard = () => {
           fetch(`${API_BASE}/locals/${localId}/reviews`),
         ]);
 
+        // eslint-disable-next-line prefer-const
         let newStats = { ...stats };
         // let allOrders: Order[] = [];
 
@@ -416,6 +418,7 @@ const Dashboard = () => {
                 <h3 className="text-lg font-semibold text-white">Histórico de ingresos</h3>
                 <div className="flex items-center space-x-2">
                   <button
+                    title='Anterior'
                     onClick={() => setEarningsPage(prev => Math.max(0, prev - 1))}
                     disabled={earningsPage === 0}
                     className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
@@ -423,6 +426,7 @@ const Dashboard = () => {
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
+                    title='Siguiente'
                     onClick={() => setEarningsPage(prev => Math.min(paginationData.earnings.totalPages - 1, prev + 1))}
                     disabled={earningsPage >= paginationData.earnings.totalPages - 1}
                     className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
@@ -458,6 +462,7 @@ const Dashboard = () => {
                 <h3 className="text-lg font-semibold text-white">Platos más vendidos</h3>
                 <div className="flex items-center space-x-2">
                   <button
+                    title='Anterior'
                     onClick={() => setTopFoodsPage(prev => Math.max(0, prev - 1))}
                     disabled={topFoodsPage === 0}
                     className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
@@ -465,6 +470,7 @@ const Dashboard = () => {
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
+                    title='Siguiente'
                     onClick={() => setTopFoodsPage(prev => Math.min(paginationData.topFoods.totalPages - 1, prev + 1))}
                     disabled={topFoodsPage >= paginationData.topFoods.totalPages - 1}
                     className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
@@ -505,6 +511,7 @@ const Dashboard = () => {
                 <h3 className="text-lg font-semibold text-white">Reseñas recientes</h3>
                 <div className="flex items-center space-x-2">
                   <button
+                    title='Anterior'
                     onClick={() => setReviewsPage(prev => Math.max(0, prev - 1))}
                     disabled={reviewsPage === 0}
                     className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
@@ -512,6 +519,7 @@ const Dashboard = () => {
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
+                    title='Siguiente'
                     onClick={() => setReviewsPage(prev => Math.min(paginationData.reviews.totalPages - 1, prev + 1))}
                     disabled={reviewsPage >= paginationData.reviews.totalPages - 1}
                     className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
@@ -562,6 +570,7 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold text-white">Pedidos recientes</h3>
               <div className="flex items-center space-x-2">
                 <button
+                  title='Anterior'
                   onClick={() => setOrdersPage(prev => Math.max(0, prev - 1))}
                   disabled={ordersPage === 0}
                   className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
@@ -569,6 +578,7 @@ const Dashboard = () => {
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
+                  title='Siguiente'
                   onClick={() => setOrdersPage(prev => Math.min(paginationData.orders.totalPages - 1, prev + 1))}
                   disabled={ordersPage >= paginationData.orders.totalPages - 1}
                   className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"

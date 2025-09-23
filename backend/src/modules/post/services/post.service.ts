@@ -34,31 +34,33 @@ export class PostService {
     try {
       if (recipeData) {
         const result = await prisma.$transaction(async (tx) => {
-          const post = await tx.post.create({
+          const recipe = await tx.recipe.create({
             data: {
-                title: postData.title,
-                content: postData.content,
-                image_urls: postData.image_urls,
-                type: postData.type,
-                user_id: postData.user_id,
-                community_id: postData.community_id,
+              name: recipeData.name,
+              description: recipeData.description,
+              main_image: recipeData.main_image,
+              total_time: recipeData.total_time,
+              user_id: recipeData.user_id,
+              ingredients: {
+                create: recipeData.ingredients,
+              },
+              steps: {
+                create: recipeData.steps,
+              },
             },
           });
-            const recipe = await tx.recipe.create({
-              data: {
-                name: recipeData.name,
-                description: recipeData.description,
-                main_image: recipeData.main_image,
-                total_time: recipeData.total_time,
-                user_id: recipeData.user_id,
-                ingredients: {
-                  create: recipeData.ingredients,
-                },
-                steps: {
-                  create: recipeData.steps,
-                },
-              },
-            });
+          const post = await tx.post.create({
+            data: {
+              title: postData.title,
+              content: postData.content,
+              image_urls: postData.image_urls,
+              type: postData.type,
+              user_id: postData.user_id,
+              community_id: postData.community_id,
+              recipe_id: recipe.id,
+            },
+          });
+
           return { post, recipe };
         });
         return result;

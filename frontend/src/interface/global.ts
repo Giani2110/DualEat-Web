@@ -41,3 +41,50 @@ export interface UnitOfMeasure {
   name: string;
   abbreviation: string | null;
 }
+
+export interface Recipe {
+  id: number;
+  user_id: number;
+  name: string;
+  description: string;
+  total_time: number;
+  main_image: string;
+  created_at: string;
+  updated_at: string;
+  ingredients: RecipeIngredient[];
+  steps: RecipeStep[];
+}
+
+export interface RecipeIngredient {
+  id: number;
+  recipe_id: number;
+  ingredient_id: number;
+  quantity: string;
+  unit_of_measure_id: number;
+  notes: string;
+}
+
+export interface RecipeStep {
+  id: number;
+  recipe_id: number;
+  step_number: number;
+  description: string;
+  image_url: string | null;
+  estimated_time: number;
+}
+
+export interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface SearchResponse {
+  success: boolean;
+  data: Recipe[];
+  pagination: PaginationInfo;
+  comment: string;
+}

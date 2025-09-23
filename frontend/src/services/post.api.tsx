@@ -24,7 +24,7 @@ export const createPost = async (
         postData.community_id
       );
 
-      if (existingRecipe) {
+      if (existingRecipe && existingRecipe.success === true) {
         toast.error(
           "Ya tienes una receta con ese nombre, en esta misma comunidad"
         );
@@ -32,6 +32,7 @@ export const createPost = async (
       }
     }
 
+    
     // ===========================
     // Campos del post
     // ===========================

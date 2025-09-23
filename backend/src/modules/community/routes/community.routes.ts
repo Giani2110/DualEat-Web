@@ -2,6 +2,9 @@ import { Router } from "express";
 import { CommunityController } from "../controllers/community.controller";
 import { CommunityService } from "../services/community.service";
 
+import { isAuthenticated } from "../../../middlewares/isAuthenticated";
+import { generalLimiter } from "../../../middlewares/rateLimiter";
+
 import multer from "multer";
 
 const upload = multer();
@@ -26,6 +29,8 @@ router.get("/communities/tag", controller.getByTag.bind(controller));
 // =========================================================
 router.post(
   "/create",
+  generalLimiter,
+  isAuthenticated,
   upload.fields([
     { name: "banner", maxCount: 1 },
     { name: "icon", maxCount: 1 },

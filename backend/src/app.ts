@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
+import { generalLimiter } from "./middlewares/rateLimiter";
 
 // 1. IMPORTACIONES
 // =========================================================================

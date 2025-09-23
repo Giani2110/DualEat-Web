@@ -1,8 +1,15 @@
 import { axiosInterceptor } from "../interceptor/axios-interceptor";
 
-import type { Response } from "../interface/global";
+import type { Response, PaginationInfo } from "../interface/global";
 
 import axios from "axios";
+
+interface ResponseAI<T = unknown> {
+  success: boolean;
+  comment: string;
+  pagination?: PaginationInfo;
+  data?: T;
+}
 
 export const getAllIngredients = async (): Promise<Response | null> => {
   try {
@@ -32,7 +39,6 @@ export const getRecipeByName = async (
   name: string,
   user_id: number,
   community_id: number
-
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/recipe/", {
@@ -42,6 +48,74 @@ export const getRecipeByName = async (
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       console.log(err.response?.data?.message || "Error al obtener recetas");
+    }
+    return null;
+  }
+};
+
+export const getUserRecipes = async (
+  user_id: number
+): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.get("/recipe/user", {
+      params: { user_id },
+    });
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener recetas");
+    }
+    return null;
+  }
+};
+
+export const askOllama = async (
+  question: string,
+  type: string,
+  ingredients: number[],
+  page: number,
+  recipe_id?: number
+): Promise<ResponseAI | null> => {
+  try {
+    console.log("ingredients", ingredients);
+    const { data } = await axiosInterceptor.post<ResponseAI>("/recipe/ask", {
+      question,
+      type,
+      ingredients,
+      page,
+      recipe_id,
+    });
+
+    return data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(
+        err.response?.data?.error || "Error al obtener respuesta de la IA"
+      );
+    }
+    return null;
+  }
+};
+
+export const askRecipe = async (
+  question: string,
+  recipe_id: number
+): Promise<ResponseAI | null> => {
+  try {
+    const { data } = await axiosInterceptor.post<ResponseAI>(
+      "/recipe/ask-recipe",
+      {
+        question,
+        recipe_id,
+      }
+    );
+
+    return data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(
+        err.response?.data?.error || "Error al obtener respuesta de la IA"
+      );
     }
     return null;
   }

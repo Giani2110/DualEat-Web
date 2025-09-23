@@ -1,5 +1,6 @@
 pgadmin_data
 postgres_data
+ollama_models
 redis_data
 ollama_data
 node_modules
