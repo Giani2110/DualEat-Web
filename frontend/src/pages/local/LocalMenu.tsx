@@ -11,6 +11,7 @@ interface Food {
   id: number;
   local_id: number;
   category_id: number;
+  local_menu_category_id?: number;
   name: string;
   price: number;
   description: string | null;
@@ -207,10 +208,12 @@ const LocalMenu = () => {
       alert('Error: No se encontró el ID del local.');
       return;
     }
+    
     setSelectedFood({
       id: 0,
       local_id: localId,
       category_id: 0,
+      local_menu_category_id: selectedCategory || undefined, // Usar la categoría local seleccionada
       name: '',
       price: 0,
       description: '',
@@ -229,22 +232,32 @@ const LocalMenu = () => {
 
   const handleOnSave = async (food: Food) => {
     const isNewFood = food.id === 0;
+    
+    const foodData = {
+      ...food,
+      // Si tiene local_menu_category_id, no enviar category_id
+      category_id: food.local_menu_category_id ? undefined : food.category_id,
+      local_menu_category_id: food.local_menu_category_id
+    };
+    
     try {
       const method = isNewFood ? 'POST' : 'PUT';
       const url = isNewFood
         ? `${API_BASE}/locals/${food.local_id}/manual-menu`
         : `${API_BASE}/food/foods/${food.id}`;
+        
       const response = await fetch(url, {
         method: method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(food),
+        body: JSON.stringify(foodData),
       });
+      
       if (!response.ok) {
         throw new Error(`Error al ${isNewFood ? 'agregar' : 'actualizar'} el plato.`);
       }
-
+  
       const savedFood = await response.json();
       setFoods(prevFoods => {
         if (isNewFood) {
@@ -252,10 +265,11 @@ const LocalMenu = () => {
         }
         return prevFoods.map(f => (f.id === savedFood.id ? savedFood : f));
       });
+      
       if (food.id && food.id.toString().startsWith('temp-')) {
         setExtractedDishes(prevDishes => prevDishes.filter(dish => dish.id !== food.id));
       }
-
+  
     } catch (err) {
       console.error('Error al guardar el plato:', err);
       if (err instanceof Error) {
@@ -413,9 +427,11 @@ const LocalMenu = () => {
   const filteredFoods = useMemo(() => {
     return foods.filter(food =>
       food.available &&
-      (selectedCategory === null || food.category_id === selectedCategory) &&
+      (selectedCategory === null || 
+       food.category_id === selectedCategory || 
+       food.local_menu_category_id === selectedCategory) &&
       (food.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      food.description?.toLowerCase().includes(searchTerm.toLowerCase()))
+       food.description?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [selectedCategory, searchTerm, foods]);
 
@@ -708,8 +724,8 @@ const LocalMenu = () => {
                         <div className="mt-auto">
                           <span className="font-bold text-lg md:text-xl text-green-400 block mb-2">${(food.price || 0).toLocaleString('es-AR')}</span>
                           <div className="flex flex-wrap gap-1">
-                            <StatPill text={`${food.votes_up || 0} Likes`} color="bg-green-500/20 text-green-400" icon={TrendingUp} />
-                            <StatPill text={`${food.votes_down || 0} Dislikes`} color="bg-red-500/20 text-red-400" icon={TrendingDown} />
+                            <StatPill text={`${food.votes_up} Likes`} color="bg-green-500/20 text-green-400" icon={TrendingUp} />
+                            <StatPill text={`${food.votes_down} Dislikes`} color="bg-red-500/20 text-red-400" icon={TrendingDown} />
                             <StatPill text={food.available ? "Disponible" : "No disponible"} color={food.available ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"} icon={Sun} />
                           </div>
                         </div>

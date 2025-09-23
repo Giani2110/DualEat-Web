@@ -5,6 +5,7 @@ interface Food {
   id: number;
   local_id: number;
   category_id: number;
+  local_menu_category_id?: number;
   name: string;
   price: number;
   description: string | null;
@@ -52,9 +53,23 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
       if (isNaN(typedValue)) typedValue = 0;
     }
     
+    // Actualizar para manejar category_id como local_menu_category_id
     if (name === 'category_id') {
-        typedValue = parseInt(value, 10);
-        if (isNaN(typedValue)) typedValue = null;
+      const categoryId = parseInt(value, 10);
+      if (isNaN(categoryId)) {
+        setFormData(prev => ({
+          ...prev,
+          category_id: 0,
+          local_menu_category_id: undefined
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          category_id: 0, // Limpiar category_id
+          local_menu_category_id: categoryId
+        }));
+      }
+      return;
     }
     
     setFormData(prev => ({
@@ -121,12 +136,11 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validaciones simples para campos requeridos
-    if (!formData?.name || !formData.price || !formData.category_id) {
-        setError('Por favor, completa todos los campos requeridos.');
-        return;
+    if (!formData?.name || !formData.price || !formData.local_menu_category_id) {
+      setError('Por favor, completa todos los campos requeridos.');
+      return;
     }
-
+  
     onSave(formData as Food);
   };
   
@@ -281,7 +295,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                   <select
                     id="category_id"
                     name="category_id"
-                    value={formData.category_id || ''}
+                    value={formData.local_menu_category_id || ''}
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white focus:ring-2 focus:ring-[#B53325]/50 focus:border-[#B53325]/50 transition-all duration-200 backdrop-blur-sm"

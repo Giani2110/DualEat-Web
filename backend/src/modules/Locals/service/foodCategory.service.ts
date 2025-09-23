@@ -47,6 +47,11 @@ export const createLocalMenuCategory = async (name: string, localId: number) => 
 };
 
 export const deleteLocalMenuCategory = async (id: number) => {
+  await prisma.food.updateMany({
+    where: { local_menu_category_id: id },
+    data: { local_menu_category_id: null }
+  });
+  
   return prisma.localMenuCategory.delete({
     where: { id },
   });

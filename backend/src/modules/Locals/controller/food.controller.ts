@@ -1,10 +1,21 @@
 import { Request, Response } from 'express';
 import { createFoodsFromOcr, updateFood, deleteFood, getFoodsByLocal, getFoodById } from '../service/food.service';
+import { ManualLoadMenuService } from '../service/manualLoadMenu.service';
 
 export const listFoodsController = async (req: Request, res: Response) => {
-  const localId = parseInt(req.params.localId);
-  const foods = await getFoodsByLocal(localId);
-  res.json(foods);
+  try {
+    const localId = parseInt(req.params.localId);
+    if (isNaN(localId)) {
+      return res.status(400).json({ error: "Invalid local ID" });
+    }
+
+    const foods = await ManualLoadMenuService.getFoodsByLocalWithVotes(localId);
+    
+    return res.status(200).json(foods);
+  } catch (error: any) {
+    console.error('Error fetching foods:', error);
+    return res.status(500).json({ error: error.message });
+  }
 };
 
 export const getFoodController = async (req: Request, res: Response) => {

@@ -18,7 +18,15 @@ export const createFoodsFromOcr = async (localId: number, dishes: { name: string
   );
 };
 
-export const updateFood = async (foodId: number, data: { name?: string; price?: number; description?: string; image_url?: string; available?: boolean; category_id?: number }) => {
+export const updateFood = async (foodId: number, data: { 
+  name?: string; 
+  price?: number; 
+  description?: string; 
+  image_url?: string; 
+  available?: boolean; 
+  category_id?: number;
+  local_menu_category_id?: number;
+}) => {
   return await prisma.food.update({
     where: { id: foodId },
     data

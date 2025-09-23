@@ -180,7 +180,7 @@ model Local {
 }
 
 model LocalMenuCategory {
-  id               Int     @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   name             String
   description      String?
   icon_url         String?
@@ -189,6 +189,8 @@ model LocalMenuCategory {
 
   local         Local         @relation(fields: [local_id], references: [id])
   food_category FoodCategory? @relation(fields: [food_category_id], references: [id])
+
+  foods Food[]
 
   @@unique([local_id, name])
   @@index([local_id])
@@ -224,30 +226,33 @@ model FoodCategory {
 }
 
 model Food {
-  id          Int           @id @default(autoincrement())
-  local       Local         @relation(fields: [local_id], references: [id])
-  local_id    Int
-  category    FoodCategory? @relation(fields: [category_id], references: [id])
-  category_id Int?
+  id          Int           @id @default(autoincrement())
+  local       Local         @relation(fields: [local_id], references: [id])
+  local_id    Int
+  category    FoodCategory? @relation(fields: [category_id], references: [id])
+  category_id Int?
+  local_menu_category_id Int?
+  name        String
+  description String?
+  price       Float
+  discount    Boolean       @default(false)
+  image_url   String?
+  available   Boolean       @default(true)
+  votes_up    Int           @default(0)
+  votes_down  Int           @default(0)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
 
+  votes       Vote[]      @relation("FoodVotes")
+  order_items OrderItem[]
 
-  name        String
-  description String?
-  price       Float
-  discount    Boolean       @default(false)
-  image_url   String?
-  available   Boolean       @default(true)
-  votes_up    Int           @default(0)
-  votes_down  Int           @default(0)
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
+  local_menu_category LocalMenuCategory? @relation(fields: [local_menu_category_id], references: [id])
 
-  votes       Vote[]      @relation("FoodVotes")
-  order_items OrderItem[]
-
-  @@index([local_id])
-  @@index([name])
-  @@index([price])
+  @@index([local_id])
+  @@index([name])
+  @@index([price])
+  @@index([category_id])
+  @@index([local_menu_category_id])
 }
 
 /* Promoción  (tabla para evitar que solo una comida tenga solo una promo*/
@@ -350,8 +355,6 @@ model Recipe {
   ingredients RecipeIngredient[]
   steps       RecipeStep[]
   posts       Post[]     
-
-  //@@unique([user_id, name])
 }
 
 model RecipeIngredient {
