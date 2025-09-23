@@ -46,12 +46,12 @@ El sistema se logra ejecutar funcionalmente con Docker, aunque puede ejecutarse 
   - ```docker-compose down -v --rmi all```
   - ```docker-compose build --no-cache```
   - ```docker-compose up```
-  - ```bash setup-ollama.sh```
+  - ```.\setup-ollama.ps1```
 6. Docker (alternativa rápida)
   - ```docker-compose down```
   - ```docker-compose build```
   - ```docker-compose up -d --build```
-  - ```bash setup-ollama.sh```
+  - ```.\setup-ollama.ps1```
 7. Producción
   - Finalizar en ambas carpetas con ```npm run build```
 
