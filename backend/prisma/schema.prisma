@@ -192,8 +192,6 @@ model LocalMenuCategory {
 
   foods Food[]
 
-  foods Food[]
-
   @@unique([local_id, name])
   @@index([local_id])
   @@index([food_category_id])

@@ -31,3 +31,5 @@ export { default as LoadingScreen } from "../components/animation/LoadingScreen"
 // Locals
 export { default as LocalDashboard } from "../pages/local/Dashboard";
 export { default as LocalMenu } from "../pages/local/LocalMenu";
+export { default as LocalQR } from "../pages/local/LocalQR";
+export { default as LocalReviews } from "../pages/local/LocalReviews";

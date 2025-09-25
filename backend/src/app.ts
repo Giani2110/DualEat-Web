@@ -37,7 +37,7 @@ import postRoutes from "./modules/post/routes/post.routes";
 import onboardingRoutes from "./routes/onBoarding.routes";
 import foodCategoriesRoutes from "./routes/onBoarding.routes";
 import adminRouter from "./routes/admin.routes";
-import qrRoutes from "./routes/qr.routes";
+import qrRoutes from "./modules/Locals/route/qr.routes";
 import ocrRoutes from "./routes/ocr.routes";
 import foodRoutes from "./modules/Locals/route/food.routes";
 import usersRouter from "./routes/users";

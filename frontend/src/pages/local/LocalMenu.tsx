@@ -488,7 +488,7 @@ const LocalMenu = () => {
         <div className="max-w-7xl mx-auto">
           <header className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Gestión de Menú</h1>
+              <h1 className="text-3xl font-bold pt-12 text-white mb-2">Gestión de Menú</h1>
               <p className="text-gray-400">
                 Crea, edita y organiza los platos de tu restaurante.
               </p>

@@ -15,6 +15,8 @@ import {
   AdminLocals,
   LocalDashboard,
   LocalMenu,
+  LocalQR,
+  LocalReviews,
   UPost,
   UExplore,
   URecipes,
@@ -138,4 +140,6 @@ export const appRoutes = [
   // Local
   { path: ROUTES.LOCAL.DASHBOARD, element: <ProtectedRoute ><LocalDashboard /></ProtectedRoute> },
   { path: ROUTES.LOCAL.MENU, element: <ProtectedRoute><LocalMenu /></ProtectedRoute> },
+  { path: ROUTES.LOCAL.QR, element: <ProtectedRoute><LocalQR /></ProtectedRoute> },
+  { path: ROUTES.LOCAL.REVIEWS, element: <ProtectedRoute><LocalReviews /></ProtectedRoute> },
 ];
