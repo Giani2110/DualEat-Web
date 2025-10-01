@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { processMenuImage, MenuDish } from '../services/menu.service';
+import { processMenuImage, MenuDish } from '../../../services/menu.service';
 import multer from 'multer';
 import path from 'path';
-import { generateQrForLocal } from '../services/qr.service';
-import { createFoodsFromOcr } from '../modules/Locals/service/food.service';
+import { generateQrForLocal } from '../service/qr.service';
+import { createFoodsFromOcr } from '../service/food.service';
 
 export const generateQrCodeController = async (req: Request, res: Response) => {
   try {

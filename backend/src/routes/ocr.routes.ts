@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
-import { uploadMenuController } from "../controllers/localDashboard.controller";
-import { bulkSaveFoodsController } from "../controllers/localDashboard.controller";
+import { uploadMenuController } from "../modules/Locals/controller/localDashboard.controller";
+import { bulkSaveFoodsController } from "../modules/Locals/controller/localDashboard.controller";
 
 import { generalLimiter } from "../middlewares/rateLimiter";
 
