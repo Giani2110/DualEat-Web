@@ -4,14 +4,14 @@ import { ManualLoadMenuService } from "../service/manualLoadMenu.service";
 export class ManualLoadMenuController {
   static async createFood(req: Request, res: Response) {
     try {
-      const localId = parseInt(req.params.localId);
-      if (isNaN(localId)) {
+      const localId = req.params.localId;
+      if (typeof localId !== "string" || !localId) {
         return res.status(400).json({ error: "Invalid localId" });
       }
 
       const { 
         category_id, 
-        local_menu_category_id, // Agregar este campo
+        local_menu_category_id,
         name, 
         description, 
         price, 
@@ -44,8 +44,8 @@ export class ManualLoadMenuController {
   // Agregar método para actualizar comida
   static async updateFood(req: Request, res: Response) {
     try {
-      const foodId = parseInt(req.params.id);
-      if (isNaN(foodId)) {
+      const foodId = req.params.id;
+      if ( typeof foodId !== "string" || !foodId ) {
         return res.status(400).json({ error: "Invalid food ID" });
       }
 
@@ -80,8 +80,8 @@ export class ManualLoadMenuController {
   // Agregar método para crear múltiples comidas
   static async createFoodsBulk(req: Request, res: Response) {
     try {
-      const localId = parseInt(req.params.localId);
-      if (isNaN(localId)) {
+      const localId = req.params.localId;
+      if (typeof localId !== "string" || !localId) {
         return res.status(400).json({ error: "Invalid localId" });
       }
 

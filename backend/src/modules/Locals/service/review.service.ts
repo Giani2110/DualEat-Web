@@ -1,7 +1,7 @@
 import { prisma } from "../../../prisma/prisma";
 
 export class ReviewService {
-  static async getReviews(localId: number) {
+  static async getReviews(localId: string) {
     return await prisma.localReview.findMany({
       where: { local_id: localId },
       include: {

@@ -3,7 +3,7 @@ import { OrderStatus } from "@prisma/client";
 
 export class OrderService {
   static async getOrders(
-    localId: number,
+    localId: string,
     status?: string,
     from?: string,
     to?: string
@@ -17,7 +17,7 @@ export class OrderService {
     return await prisma.order.findMany({
       where: {
         local_id: localId,
-        status: statusEnum, // solo si es un valor válido
+        status: statusEnum,
         created_at: {
           gte: from ? new Date(from) : undefined,
           lte: to ? new Date(to) : undefined,
@@ -29,7 +29,7 @@ export class OrderService {
       include: {
         order_items: {
           include: {
-            food: true, // trae info del plato
+            food: true, 
           },
         },
       },

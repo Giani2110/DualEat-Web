@@ -3,7 +3,7 @@ import { PrismaClient, TypesCategory } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Obtener todas las categorías de comida asociadas a un local específico
-export const getLocalMenuCategories = async (localId: number) => {
+export const getLocalMenuCategories = async (localId: string) => {
   return prisma.localMenuCategory.findMany({
     where: { local_id: localId },
     orderBy: { name: 'asc' },
@@ -37,7 +37,7 @@ export const deleteFoodCategory = async (id: number) => {
   });
 };
 
-export const createLocalMenuCategory = async (name: string, localId: number) => {
+export const createLocalMenuCategory = async (name: string, localId: string) => {
   return prisma.localMenuCategory.create({
     data: {
       name,

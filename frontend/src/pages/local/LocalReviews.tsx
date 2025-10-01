@@ -45,7 +45,8 @@ const StarRatingDistribution = ({ data, totalReviews }: StarRatingDistributionPr
               <div key={index} className="flex items-center space-x-3">
                 <div className="flex items-center w-24 flex-shrink-0">
                   <span className="text-sm font-medium text-gray-300">{item.label.split(' ')[0]}</span>
-                  <Star className="w-4 h-4 text-amber-300 fill-current ml-1" />
+                  <div className="w-4 h-4 text-amber-300 fill-current ml-1" /> 
+                  <span className="text-sm font-medium text-gray-300">{item.label.split(' ')[1]}</span>
                 </div>
                 <div className="flex-1">
                   <div className="h-2.5 bg-gray-600 rounded-full overflow-hidden">

@@ -22,7 +22,6 @@ import {
   UExplore,
   URecipes,
   UCommunity,
-  UComment,
 } from "../pages";
 
 export const ROUTES = {
@@ -165,14 +164,6 @@ export const appRoutes = [
     element: (
       <ProtectedRoute>
         <UCommunity />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: `${ROUTES.USER.COMMUNITY}:communitySlug/post/:userSlug/:postSlug`,
-    element: (
-      <ProtectedRoute>
-        <UComment />
       </ProtectedRoute>
     ),
   },

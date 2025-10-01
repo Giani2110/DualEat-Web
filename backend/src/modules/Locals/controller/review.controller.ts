@@ -4,9 +4,9 @@ import { ReviewService } from "../service/review.service";
 export class ReviewController {
   static async getReviews(req: Request, res: Response) {
     try {
-      const localId = parseInt(req.params.id);
+      const localId = req.params.id;
 
-      if (isNaN(localId)) {
+      if (typeof localId !== "string" || !localId) {
         return res.status(400).json({ error: "El ID del local no es válido." });
       }
 

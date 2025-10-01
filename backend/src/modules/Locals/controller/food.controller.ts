@@ -4,8 +4,8 @@ import { ManualLoadMenuService } from '../service/manualLoadMenu.service';
 
 export const listFoodsController = async (req: Request, res: Response) => {
   try {
-    const localId = parseInt(req.params.localId);
-    if (isNaN(localId)) {
+    const localId = req.params.localId;
+    if (typeof localId !== 'string' || !localId) {
       return res.status(400).json({ error: "Invalid local ID" });
     }
 
@@ -19,7 +19,7 @@ export const listFoodsController = async (req: Request, res: Response) => {
 };
 
 export const getFoodController = async (req: Request, res: Response) => {
-  const foodId = parseInt(req.params.foodId);
+  const foodId = req.params.foodId;
   const food = await getFoodById(foodId);
   if (!food) return res.status(404).json({ error: 'Plato no encontrado' });
   res.json(food);
@@ -27,7 +27,7 @@ export const getFoodController = async (req: Request, res: Response) => {
 
 export const updateFoodController = async (req: Request, res: Response) => {
   try {
-    const foodId = parseInt(req.params.foodId);
+    const foodId = req.params.foodId;
     const dataToUpdate = req.body;
 
     // Convertir el category_id a número si existe
@@ -42,7 +42,7 @@ export const updateFoodController = async (req: Request, res: Response) => {
     
     console.log('Datos recibidos después de parsear:', dataToUpdate);
 
-    const updatedFood = await updateFood(foodId, dataToUpdate);
+    const updatedFood = await updateFood(String(foodId), dataToUpdate);
     return res.json(updatedFood);
   } catch (error) {
     console.error('Error al actualizar el plato:', error);
@@ -51,7 +51,7 @@ export const updateFoodController = async (req: Request, res: Response) => {
 };
 
 export const deleteFoodController = async (req: Request, res: Response) => {
-  const foodId = parseInt(req.params.foodId);
+  const foodId = req.params.foodId;
   await deleteFood(foodId);
   res.json({ success: true });
 };

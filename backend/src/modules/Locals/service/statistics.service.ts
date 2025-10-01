@@ -1,10 +1,8 @@
 import { prisma } from "../../../prisma/prisma";
 
 export class StatisticsService {
-  /**
-   * Platos más vendidos en un local
-   */
-  static async getTopFoods(localId: number, from?: string, to?: string) {
+
+  static async getTopFoods(localId: string, from?: string, to?: string) {
     const results = await prisma.orderItem.groupBy({
       by: ["food_id"],
       where: {
@@ -51,7 +49,7 @@ export class StatisticsService {
   /**
    * Métricas generales de un local (ventas totales y cantidad de pedidos)
    */
-  static async getLocalMetrics(localId: number, from?: string, to?: string) {
+  static async getLocalMetrics(localId: string, from?: string, to?: string) {
     const metrics = await prisma.order.aggregate({
       where: {
         local_id: localId,
@@ -71,7 +69,7 @@ export class StatisticsService {
     };
   }
 
-  static async getMonthlyLocalEarnings(localId: number, from: string, to: string) {
+  static async getMonthlyLocalEarnings(localId: string, from: string, to: string) {
     const orders = await prisma.order.findMany({
       where: {
         local_id: localId,
@@ -90,7 +88,7 @@ export class StatisticsService {
       },
     });
   
-    // Corregido: Objeto para agrupar tanto ganancias como pedidos
+    // Agrupar los pedidos por mes y calcular totales
     const monthlySummary: { [key: string]: { total_earnings: number; total_orders: number } } = {};
   
     orders.forEach(order => {
@@ -101,14 +99,14 @@ export class StatisticsService {
       }
   
       monthlySummary[monthYear].total_earnings += order.total;
-      monthlySummary[monthYear].total_orders += 1; // Contar cada pedido
+      monthlySummary[monthYear].total_orders += 1; 
     });
   
     // Corregido: Mapear a la estructura final
     return Object.entries(monthlySummary).map(([month, data]) => ({
       mes: month,
       ganancia: data.total_earnings,
-      pedidos: data.total_orders, // Se incluye el conteo de pedidos
+      pedidos: data.total_orders, 
     }));
   }
 }

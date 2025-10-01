@@ -1,7 +1,7 @@
 import { prisma } from "../../../prisma/prisma";
 
 export class CritiqueService {
-  static async createReview(localId: number, userId: number, rating: number, comment?: string) {
+  static async createReview(localId: string, userId: string, rating: number, comment?: string) {
     return await prisma.localReview.create({
       data: {
         local_id: localId,

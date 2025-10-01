@@ -4,7 +4,7 @@ import { QrResponse } from '../../../interfaces/qr.interfaces';
 
 const prisma = new PrismaClient();
 
-export const generateQrForLocal = async (localId: number): Promise<QrResponse> => {
+export const generateQrForLocal = async (localId: string): Promise<QrResponse> => {
   // 1. Buscar el local en la base de datos para validar su existencia y obtener su nombre.
   const local = await prisma.local.findUnique({
     where: { id: localId },

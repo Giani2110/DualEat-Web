@@ -13,7 +13,7 @@ export const handleGetLocals = async (_req: Request, res: Response) => {
 export const handleGetLocalById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const local = await getLocalById(Number(id));
+    const local = await getLocalById(String(id));
     if (local) {
       res.status(200).json(local);
     } else {
@@ -27,7 +27,7 @@ export const handleGetLocalById = async (req: Request, res: Response) => {
 export const handleUpdateLocal = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const updatedLocal = await updateLocal(Number(id), req.body);
+    const updatedLocal = await updateLocal(String(id), req.body);
     res.status(200).json(updatedLocal);
   } catch (error: any) {
     res.status(404).json({ message: error.message || 'Local no encontrado para actualizar.' });
@@ -37,7 +37,7 @@ export const handleUpdateLocal = async (req: Request, res: Response) => {
 export const handleDeleteLocal = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    await deleteLocal(Number(id));
+    await deleteLocal(String(id));
     res.status(200).json({ message: 'Local eliminado exitosamente.' });
   } catch (error: any) {
     res.status(404).json({ message: error.message || 'Local no encontrado para eliminar.' });

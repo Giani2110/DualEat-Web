@@ -4,10 +4,10 @@ import { CritiqueService } from "../service/critique.service";
 export class CritiqueController {
   static async createReview(req: Request, res: Response) {
     try {
-      const localId = parseInt(req.params.id);
+      const localId = req.params.id;
       const { userId, rating, comment } = req.body;
 
-      if (isNaN(localId)) {
+      if (typeof localId !== "string" || !localId) {
         return res.status(400).json({ error: "El ID del local no es válido." });
       }
 

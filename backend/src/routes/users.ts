@@ -9,7 +9,7 @@ router.get('/:userId/local', async (req, res) => {
   
     try {
       const localUser = await prisma.localUser.findFirst({
-        where: { user_id: Number(userId) },
+        where: { user_id: userId },
         include: {
           local: {
             include: {

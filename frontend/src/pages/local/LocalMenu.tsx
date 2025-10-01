@@ -398,26 +398,35 @@ const LocalMenu = () => {
 
   const confirmDeleteCategory = async () => {
     if (!categoryToDeleteId) return;
-
     try {
-      const response = await fetch(`${API_BASE}/local-menu-categories/${categoryToDeleteId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Error al eliminar la categoría.');
-      }
-      setLocalCategories(prevCategories => prevCategories.filter(cat => cat.id !== categoryToDeleteId));
-      if (selectedCategory === categoryToDeleteId) {
-        setSelectedCategory(null);
-      }
-      setShowDeleteCategoryModal(false);
-      setCategoryToDeleteId(null);
+        const response = await fetch(`${API_BASE}/local-menu-categories/${categoryToDeleteId}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error('Error al eliminar la categoría.');
+        }
+
+        setLocalCategories(prevCategories => prevCategories.filter(cat => cat.id !== categoryToDeleteId));
+
+        setFoods(prevFoods =>
+            prevFoods.map(food => {
+                if (food.local_menu_category_id === categoryToDeleteId) {
+                    return { ...food, local_menu_category_id: undefined };
+                }
+                return food;
+            })
+        );
+
+        if (selectedCategory === categoryToDeleteId) {
+            setSelectedCategory(null);
+        }
+
+        setShowDeleteCategoryModal(false);
+        setCategoryToDeleteId(null);
     } catch (err) {
-      console.error(err);
-      setError('Hubo un error al eliminar la categoría. Por favor, inténtalo de nuevo.');
-      setShowDeleteCategoryModal(false);
+        console.error(err);
     }
-  };
+};
 
   const openDeleteCategoryModal = (categoryId: number) => {
     setCategoryToDeleteId(categoryId);

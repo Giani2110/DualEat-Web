@@ -4,10 +4,10 @@ import { OrderService } from "../service/order.service";
 export class OrderController {
   static async getOrders(req: Request, res: Response) {
     try {
-      const localId = parseInt(req.params.id);
+      const localId = req.params.id;
       const { status, from, to } = req.query;
 
-      if (isNaN(localId)) {
+      if (typeof localId !== "string" || !localId) {
         return res.status(400).json({ error: "El ID del local no es válido." });
       }
 

@@ -186,9 +186,9 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
                       className={`p-4 flex items-center justify-between gap-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0`}
                       onClick={() => setOpenNotifications(false)}
                     >
-                      {notif.metadata.postURLs.length > 0 && (
+                      {notif.metadata?.postURLs?.length > 0 && (
                         <img
-                          src={notif.metadata.postURLs[0]}
+                          src={notif.metadata?.postURLs[0]}
                           alt=""
                           className="w-[40px] h-[40px] rounded-full"
                         />

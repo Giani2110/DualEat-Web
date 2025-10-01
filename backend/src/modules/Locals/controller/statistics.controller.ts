@@ -5,14 +5,13 @@ export class StatisticsController {
   // Mantén este método sin cambios para su propósito original
   static async getTopFoods(req: Request, res: Response) {
     try {
-      const localId = parseInt(req.params.id);
+      const localId = req.params.id;
       const { from, to } = req.query;
   
-      if (isNaN(localId)) {
+      if (typeof localId !== "string" || !localId) {
         return res.status(400).json({ error: "El ID del local no es válido." });
       }
   
-      // Se corrigió el nombre de la variable para que coincida con el frontend
       const top_foods = await StatisticsService.getTopFoods(
         localId,
         from as string,
@@ -31,11 +30,11 @@ export class StatisticsController {
   // Nuevo método para manejar las ganancias mensuales
   static async getMonthlyEarnings(req: Request, res: Response) {
     try {
-      const localId = parseInt(req.params.id);
+      const localId = req.params.id;
       const { from, to } = req.query;
 
       // Se requieren las fechas de inicio y fin para este cálculo
-      if (!from || !to || isNaN(localId)) {
+      if (!from || !to || typeof localId !== "string" || !localId) {
         return res.status(400).json({ error: "Parámetros inválidos. Se requiere el ID del local, 'from' y 'to'." });
       }
 

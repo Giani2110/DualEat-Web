@@ -56,10 +56,10 @@ export const handleDeleteFoodCategory = async (req: Request, res: Response) => {
 
 export const handleGetLocalMenuCategories = async (req: Request, res: Response) => {
   // 1. Obtiene el ID del local de la URL
-  const localId = Number(req.params.localId);
+  const localId = req.params.localId;
 
   // 2. Valida que el ID sea un número válido
-  if (isNaN(localId)) {
+  if (typeof localId !== 'string' || !localId) {
     return res.status(400).json({ message: 'El ID del local debe ser un número válido.' });
   }
 
@@ -81,7 +81,7 @@ export const handleCreateLocalMenuCategory = async (req: Request, res: Response)
     return res.status(400).json({ message: 'El nombre y el ID del local son obligatorios.' });
   }
   try {
-    const newCategory = await createLocalMenuCategory(name, Number(local_id));
+    const newCategory = await createLocalMenuCategory(name, local_id);
     res.status(201).json(newCategory);
   } catch (error) {
     console.error('Error al crear la categoría de menú de local:', error);

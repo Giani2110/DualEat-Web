@@ -2,7 +2,7 @@ import { VoteType } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 
 export class ManualLoadMenuService {
-  static async createFood(localId: number, data: {
+  static async createFood(localId: string, data: {
     category_id?: number;
     local_menu_category_id?: number; // Agregar este campo
     name: string;
@@ -55,7 +55,7 @@ export class ManualLoadMenuService {
   }
 
   // Agregar método para actualizar comida
-  static async updateFood(foodId: number, data: {
+  static async updateFood(foodId: string, data: {
     category_id?: number;
     local_menu_category_id?: number;
     name?: string;
@@ -108,7 +108,7 @@ export class ManualLoadMenuService {
   }
 
   // Agregar método para creación en lote
-  static async createFoodsBulk(localId: number, dishes: Array<{
+  static async createFoodsBulk(localId: string, dishes: Array<{
     category_id?: number;
     local_menu_category_id?: number;
     name: string;
@@ -164,18 +164,23 @@ export class ManualLoadMenuService {
     return foods;
   }
 
-  static async getFoodsByLocalWithVotes(localId: number) {
+  static async getFoodsByLocalWithVotes(localId: string) {
     const foods = await prisma.food.findMany({ 
       where: { local_id: localId },
-      include: {
-        votes: true
+    });
+
+    const votes = await prisma.vote.findMany({
+      where: {
+        content_type: "food",
+        content_id: {
+          in: foods.map((food) => food.id)
+        }
       }
     });
 
     return foods.map(food => {
-      // Importar VoteType desde @prisma/client y usar el enum correcto
-      const upVotes = food.votes.filter(vote => vote.vote_type === VoteType.up).length;
-      const downVotes = food.votes.filter(vote => vote.vote_type === VoteType.down).length;
+      const upVotes = votes.filter(vote => vote.content_id === food.id && vote.vote_type === VoteType.up).length;
+      const downVotes = votes.filter(vote => vote.content_id === food.id && vote.vote_type === VoteType.down).length;
       
       return {
         ...food,

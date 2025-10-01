@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-export const createFoodsFromOcr = async (localId: number, dishes: { name: string; price: number }[]) => {
+export const createFoodsFromOcr = async (localId: string, dishes: { name: string; price: number }[]) => {
   return await Promise.all(
     dishes.map(dish =>
       prisma.food.create({
@@ -18,7 +18,7 @@ export const createFoodsFromOcr = async (localId: number, dishes: { name: string
   );
 };
 
-export const updateFood = async (foodId: number, data: { 
+export const updateFood = async (foodId: string, data: { 
   name?: string; 
   price?: number; 
   description?: string; 
@@ -33,7 +33,7 @@ export const updateFood = async (foodId: number, data: {
   });
 };
 
-export const deleteFood = async (foodId: number) => {
+export const deleteFood = async (foodId: string) => {
   return await prisma.food.update({
     where: {
       id: foodId,
@@ -44,10 +44,10 @@ export const deleteFood = async (foodId: number) => {
   });
 };
 
-export const getFoodsByLocal = async (localId: number) => {
+export const getFoodsByLocal = async (localId: string) => {
   return await prisma.food.findMany({ where: { local_id: localId } });
 };
 
-export const getFoodById = async (foodId: number) => {
+export const getFoodById = async (foodId: string) => {
   return await prisma.food.findUnique({ where: { id: foodId } });
 };

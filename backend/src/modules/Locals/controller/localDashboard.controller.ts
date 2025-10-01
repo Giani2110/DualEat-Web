@@ -7,9 +7,9 @@ import { createFoodsFromOcr } from '../service/food.service';
 
 export const generateQrCodeController = async (req: Request, res: Response) => {
   try {
-    const localId = parseInt(req.params.localId);
+    const localId = req.params.localId;
     
-    if (isNaN(localId)) {
+    if (typeof localId !== 'string' || !localId) {
         return res.status(400).json({ error: 'ID de local no válido.' });
     }
 
@@ -36,7 +36,7 @@ const upload = multer({
 
 export const uploadMenuController = async (req: Request, res: Response) => {
   try {
-    const localId = parseInt(req.params.localId);
+    const localId = req.params.localId;
     if (!req.file) {
       return res.status(400).json({ error: 'No se subió ninguna imagen.' });
     }
@@ -62,7 +62,7 @@ export const uploadMenuController = async (req: Request, res: Response) => {
 
 export const bulkSaveFoodsController = async (req: Request, res: Response) => {
     try {
-        const localId = parseInt(req.params.localId);
+        const localId = req.params.localId;
         const dishesToSave: MenuDish[] = req.body.dishes;
 
         if (!Array.isArray(dishesToSave) || dishesToSave.length === 0) {
