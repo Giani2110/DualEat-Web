@@ -320,7 +320,7 @@ const IngredientsCard: React.FC<IngredientsCardProps> = ({
 
   return (
     <div className="w-full">
-      <h2 className="text-[14px] Arvo-Bold tracking-tight">Ingredientes</h2>
+      <h2 className="text-[16px] Dosis-Bold tracking-tight">Ingredientes</h2>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -349,7 +349,7 @@ const IngredientsCard: React.FC<IngredientsCardProps> = ({
       <button
         type="button"
         onClick={addIngredient}
-        className="mt-5 text-[13px] items-center flex gap-2 justify-center w-full cursor-pointer text-yellow hover:text-blue-800 border border-[#dbdbdb] hover:border-[#e5a657] rounded-[5px] px-3 py-2 transition-colors"
+        className="mt-5 text-[15px] items-center flex gap-2 justify-center w-full cursor-pointer text-yellow hover:text-blue-800 border border-[#dbdbdb] hover:border-[#e5a657] rounded-[5px] px-3 py-2 transition-colors"
       >
         <Plus size={18} /> Agregar ingrediente
       </button>

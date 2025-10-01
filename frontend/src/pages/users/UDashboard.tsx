@@ -28,15 +28,15 @@ const UserDashboard = () => {
     UserCommunityEntry[]
   >([]);
 
-  const handleJoinCommunity = async (communityId: number) => {
+  const handleJoinCommunity = async (communityId: string) => {
     try {
       if (user) {
-        const response = await joinCommunity(user.id, communityId);
+        const response = await joinCommunity(communityId);
 
         if (response && response.success) {
           console.log("Community joined successfully");
 
-          const updated = await getUserCommunities(user.id);
+          const updated = await getUserCommunities();
           if (updated && updated.success) {
             setJoinedCommunities(updated.data as UserCommunityEntry[]);
             console.log("Joined communities:", updated.data);
@@ -48,15 +48,9 @@ const UserDashboard = () => {
     }
   };
 
-  const handleSelectCommunity = (communityName: string) => {
-    console.log("Selected community:", communityName);
-    const slug = communityName
-      .toLowerCase()
-      .split(/\s+/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join("");
-    navigate(`/c/${slug}/`, {
-      state: { communityName },
+  const handleSelectCommunity = (communitySlug: string) => {
+    navigate(`/c/${communitySlug}/`, {
+      state: { communitySlug },
     });
   };
 
@@ -77,7 +71,7 @@ const UserDashboard = () => {
     fetchAllCommunities();
 
     if (user) {
-      getUserCommunities(user.id).then((response) => {
+      getUserCommunities().then((response) => {
         if (response && response.success) {
           setJoinedCommunities(response.data as UserCommunityEntry[]);
         }
@@ -99,7 +93,7 @@ const UserDashboard = () => {
           <div
             key={community.id}
             className="flex items-center justify-between cursor-pointer"
-            onClick={() => handleSelectCommunity(community.name)}
+            onClick={() => handleSelectCommunity(community.slug)}
           >
             <div className="flex items-center">
               <img

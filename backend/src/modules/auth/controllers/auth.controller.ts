@@ -2,6 +2,8 @@ import { UserService } from "../services/user.service";
 import { Request, Response } from "express";
 import { RECAPTCHA_SECRET_KEY, SECRET_KEY } from "../../../config/config";
 
+import { prisma } from "../../../prisma/prisma";
+
 import jwt from "jsonwebtoken";
 import axios from "axios";
 
@@ -21,6 +23,7 @@ import {
   verifyTempToken,
 } from "../../../utils/jwt";
 import { sessionService } from "../services/session.service";
+import { generateUniqueSlug } from "../../../utils/sluglify";
 
 export class AuthController {
   constructor(private userService: UserService) {}
@@ -80,6 +83,7 @@ export class AuthController {
         id: user.id,
         name: user.name,
         email: user.email,
+        slug: user.slug,
         role: user.role,
         provider: user.provider,
         isBusiness: user.is_business,
@@ -128,6 +132,7 @@ export class AuthController {
       });
     }
   }
+
   async register(req: Request, res: Response) {
     const { email, password } = req.body;
 
@@ -172,6 +177,7 @@ export class AuthController {
     }: RegisterStepTwoDto & { tempToken: string } = req.body;
 
     try {
+      const model = prisma.user;
       if (!tempToken) {
         return res
           .status(401)
@@ -194,10 +200,14 @@ export class AuthController {
         return res.status(401).json({ message: "Token temporal no válido" });
       }
 
+      const userSlug = await generateUniqueSlug(name.trim(), model);
+      
+
       // Crear usuario real en DB
       const userDataToCreate: BasicCreateDTO = {
         email: tempData.email,
         name,
+        slug: String(userSlug),
         password_hash: tempData.password_hash || undefined,
         avatar_url:
           tempData.avatar_url ||
@@ -214,6 +224,7 @@ export class AuthController {
         id: user.id,
         name: user.name,
         email: user.email,
+        slug: user.slug,
         role: user.role,
         provider: user.provider,
         isBusiness: user.is_business,

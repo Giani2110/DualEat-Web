@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 
 import Navbar from "../layout/navbar/Navbar";
 import HeaderUSER from "../layout/navbar/NavbarUI";
 import BusinessSidebar from "../components/locals/UISidebarLocal";
-import UIDashboard from "../components/users/UIDashboard";
+import UIDashboard from "../components/users/dashboard/UIDashboard";
 import Footer from "../layout/footer/Footer";
 
 import { useAuth } from "../hooks/useAuth";
@@ -27,8 +27,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (user.isBusiness === false) {
       return (
         <UIDashboard
-          isSideBarOpen={sidebarCollapsed}
           toggleSidebar={toggleSidebar}
+          isSidebarOpen={!sidebarCollapsed}
         >
           {children}
         </UIDashboard>
@@ -48,8 +48,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem("sidebarOpen", sidebarCollapsed ? "true" : "false");
   };
+
+  useEffect(() => {
+    const stored = localStorage.getItem("sidebarOpen");
+    setSidebarCollapsed(stored === "false");
+  }, []);
 
   return (
     <>

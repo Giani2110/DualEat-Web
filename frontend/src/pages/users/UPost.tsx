@@ -10,8 +10,8 @@ import {
   CircleAlert,
   FileImage,
 } from "lucide-react";
-import IngredientsCard from "../../components/users/posts/IngredientsCard";
-import InstructionCard from "../../components/users/posts/InstructionsCard";
+import IngredientsCard from "../../components/users/cards/IngredientsCard";
+import InstructionCard from "../../components/users/cards/InstructionsCard";
 
 import { createPost } from "../../services/post.api";
 
@@ -350,13 +350,13 @@ const UPost = () => {
   // RENDER
   // ===========================================
   return (
-      <section className="flex w-full gap-[50px] mt-8">
+      <section className="flex gap-[50px] mt-8 w-[80%] mx-auto">
         {/* ===========================================
             PASO 1 - CONTENIDO IZQUIERDO
             =========================================== */}
         {step === "1" && (
           <div className="w-[50%]">
-            <h2 className="text-[24px] text5 tracking-tight Arvo-Bold mb-4">
+            <h2 className="text-[24px] text5 tracking-tight Dosis-Bold mb-4">
               Crear post
             </h2>
 
@@ -370,7 +370,7 @@ const UPost = () => {
                   <Search size={20} className="text-[#0078D7]" />
                   <input
                     ref={inputRef}
-                    className="tracking-tight placeholder:text-[14px] placeholder:text4 outline-none"
+                    className="tracking-tight placeholder:text-[15px] placeholder:text4 outline-none"
                     type="search"
                     placeholder="Seleccionar comunidad"
                   />
@@ -388,7 +388,7 @@ const UPost = () => {
                         alt=""
                         className="w-6 h-6 rounded-full"
                       />
-                      <span className="text-[14px] text5 tracking-tight">
+                      <span className="text-[15px] text5 tracking-tight">
                         {selected.name}
                       </span>
                     </div>
@@ -397,12 +397,12 @@ const UPost = () => {
                       <img
                         src="https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
                         alt="Imagen de la comunidad default"
-                        className="w-6 h-6 rounded-full"
+                        className="w-7 h-7 rounded-full"
                       />
-                      <span className="text-[14px] text4 tracking-tight">
+                      <span className="text-[15px] text4 tracking-tight">
                         Seleccionar comunidad
                       </span>
-                      <ChevronDown size={20} className="text-[#333333]" />
+                      <ChevronDown size={18} className="text-[#333333]" />
                     </div>
                   )}
                 </button>
@@ -419,7 +419,7 @@ const UPost = () => {
                         setSelected(entry.community);
                       }}
                       key={entry.community.id}
-                      className="px-4 py-2 text-[13px] text5 tracking-tight cursor-pointer text-left w-full hover:bg-gray-100"
+                      className="px-4 py-2 text-[15px] text5 tracking-tight cursor-pointer text-left w-full hover:bg-gray-100"
                     >
                       <div className="flex items-center gap-5">
                         <img
@@ -429,7 +429,7 @@ const UPost = () => {
                         />
                         <div>
                           {entry.community.name}
-                          <p className="text-[11px] text4">
+                          <p className="text-[13px] text4">
                             {entry.community.total_members} miembros
                           </p>
                         </div>
@@ -441,13 +441,13 @@ const UPost = () => {
             </div>
 
             {/* SELECTOR DE TIPO DE POST */}
-            <div className="mt-10 flex items-start gap-5 text-[14px] Arvo-Bold text5 tracking-tight">
+            <div className="mt-10 flex items-start gap-5 text-[16px] Arvo-Bold text5 tracking-tight">
               <button
                 onClick={() => setValue("Text")}
                 className="flex flex-col hover:bg-[#dbdbdb] cursor-pointer px-4 pt-2 rounded-[5px] items-center gap-2"
                 type="button"
               >
-                <span>Texto</span>
+                <span className={`${value === "Text" && "Dosis-Bold" }`}>Texto</span>
                 <span
                   className={`h-[4px] ${
                     value === "Text" && "rounded-full w-[90%] bg-[#e5a657]"
@@ -459,7 +459,7 @@ const UPost = () => {
                 className="flex hover:bg-[#dbdbdb] cursor-pointer px-4 pt-2 flex-col rounded-[5px] items-center gap-2"
                 type="button"
               >
-                <span>Imágenes y video</span>
+                <span className={`${value === "Image" && "Dosis-Bold" }`}>Imágenes y video</span>
                 <span
                   className={`h-[4px] ${
                     value === "Image" && "rounded-full w-[90%] bg-[#e5a657]"
@@ -474,7 +474,7 @@ const UPost = () => {
                 }`}
                 type="button"
               >
-                <span>¿Receta?</span>
+                <span className={`${recipe && "Dosis-Bold" }`}>¿Receta?</span>
               </button>
             </div>
 
@@ -496,7 +496,7 @@ const UPost = () => {
                   type="text"
                   id="title"
                   placeholder="Correo electrónico"
-                  className="peer w-full border text-[14px] text5 px-4 pb-2 pt-6 rounded-[8px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
+                  className="peer w-full border text-[15px] text5 px-4 pb-2 pt-6 rounded-[8px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
                   onChange={(e) => setTitle(e.target.value)}
                   maxLength={300}
                   required
@@ -505,8 +505,8 @@ const UPost = () => {
                   htmlFor="title"
                   className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
                     title
-                      ? "top-2 text-[12px] peer-focus:top-2 peer-focus:text-[12px]"
-                      : "top-4 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
+                      ? "top-2 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
+                      : "top-4 text-[15px] peer-focus:top-2 peer-focus:text-[12px]"
                   }`}
                 >
                   Título
@@ -751,8 +751,8 @@ const UPost = () => {
                   htmlFor="content"
                   className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
                     content
-                      ? "top-2 text-[12px] peer-focus:top-2 peer-focus:text-[12px]"
-                      : "top-5 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
+                      ? "top-2 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
+                      : "top-5 text-[15px] peer-focus:top-2 peer-focus:text-[12px]"
                   }`}
                 >
                   Cuerpo de texto
@@ -791,7 +791,7 @@ const UPost = () => {
           >
             {/* INFORMACIÓN GENERAL DE LA RECETA */}
             <div className="flex-[1] lg:flex-[0.5] h-fit">
-              <h1 className="text5 text-[16px] Arvo-Bold mb-3 tracking-tight">
+              <h1 className="text5 text-[18px] Dosis-Bold mb-3 tracking-tight">
                 Información general de la receta
               </h1>
               <div className="flex flex-col bg-white h-full rounded-[20px] px-6 py-8 gap-8">
@@ -876,7 +876,7 @@ const UPost = () => {
 
                 {/* INPUTS DE INFORMACIÓN DE RECETA */}
                 <div className="space-y-2">
-                  <p className="text-[14px] text5 tracking-[-0.4px] Arvo-Bold">
+                  <p className="text-[16px] text5 tracking-[-0.4px] Dosis-Bold">
                     Nombre de la receta
                   </p>
                   <input
@@ -891,7 +891,7 @@ const UPost = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[14px] text5 tracking-[-0.4px] Arvo-Bold">
+                  <p className="text-[16px] text5 tracking-[-0.4px] Dosis-Bold">
                     Descripción de la receta
                   </p>
                   <textarea
@@ -905,7 +905,7 @@ const UPost = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[14px] text4 tracking-[-0.4px] Arvo-Bold">
+                  <p className="text-[16px] text4 tracking-[-0.4px] Dosis-Bold">
                     Tiempo de preparación
                   </p>
                   <div className="flex justify-between gap-4">
@@ -931,13 +931,13 @@ const UPost = () => {
                   <button
                     type="button"
                     onClick={() => setStep("1")}
-                    className="rounded-[10px] cursor-pointer px-4 py-2  text-[14px] text1 tracking-tight bg-red"
+                    className="rounded-[10px] cursor-pointer Dosis-Bold px-4 py-2 text-[15px] text1 tracking-tight bg-red"
                   >
                     Volver
                   </button>
                   <button
                     type="submit"
-                    className="rounded-[10px] cursor-pointer text-[14px] text1 tracking-tight px-4 bg-blue"
+                    className="rounded-[10px] Dosis-Bold cursor-pointer text-[15px] text1 tracking-tight px-4 bg-blue"
                   >
                     Publicar Post + Receta
                   </button>
@@ -947,7 +947,7 @@ const UPost = () => {
 
             {/* DETALLES DE LA RECETA */}
             <div className="flex-[1] h-fit">
-              <h1 className="text5 text-[16px] Arvo-Bold mb-3 tracking-tight">
+              <h1 className="text5 text-[18px] Dosis-Bold mb-3 tracking-tight">
                 Detalles de la receta
               </h1>
               <div className="flex flex-col h-full rounded-[20px] gap-8">

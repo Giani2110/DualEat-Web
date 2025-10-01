@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import DownloadSectionBG from "../../components/DownloadSectionBG";
+import DownloadSectionBG from "../../components/shared/DownloadSectionBG";
 import Restaurante1 from "../../assets/images/auth/Restaurante2.avif";
 import Restaurante2 from "../../assets/images/auth/Restaurante.avif";
 
@@ -437,7 +437,7 @@ const LandingHome: React.FC = () => {
                   height="48"
                   src="https://img.icons8.com/color/48/argentina.png"
                   alt="argentina"
-                /> 
+                />
                 <span className="text4">Disponible en todo el país</span>
               </div>
               <div className="flex items-center space-x-4">
@@ -545,9 +545,7 @@ const LandingHome: React.FC = () => {
                     ></path>
                   </svg>
                 </div>
-                <span className="text4">
-                  Funciona en Android y Web
-                </span>
+                <span className="text4">Funciona en Android y Web</span>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center justify-center">

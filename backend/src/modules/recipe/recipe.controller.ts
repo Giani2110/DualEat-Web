@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { RecipeService } from "../services/recipe.service";
+import { RecipeService } from "./recipe.service";
 
-import { ollamaConfig } from "../../../config/config";
+import { ollamaConfig } from "../../config/config";
 
 import axios from "axios";
 
@@ -34,8 +34,8 @@ export class RecipeController {
     try {
       const recipe = await this.recipeService.getRecipeValidation(
         name as string,
-        Number(user_id),
-        Number(community_id)
+        user_id as string,
+        community_id as string
       );
 
       if (recipe) {
@@ -53,7 +53,7 @@ export class RecipeController {
   async getRecipeById(req: Request, res: Response) {
     const { id } = req.params;
     try {
-      const recipe = await this.recipeService.getRecipeById(Number(id));
+      const recipe = await this.recipeService.getRecipeById(id);
       if (recipe) {
         return res.status(200).json({ success: true, data: recipe });
       }
@@ -69,7 +69,7 @@ export class RecipeController {
   async getUserRecipes(req: Request, res: Response) {
     const { user_id } = req.params;
     try {
-      const recipes = await this.recipeService.getUserRecipes(Number(user_id));
+      const recipes = await this.recipeService.getUserRecipes(user_id);
       res.status(200).json({ success: true, data: recipes });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
@@ -78,15 +78,20 @@ export class RecipeController {
 
   /** ASK OLLAMA */
   async askOllama(req: Request, res: Response) {
-    const { question, type, ingredients, page } = req.body;
+    const { question, type, ingredients, page, conversation } = req.body;
 
     try {
       const model = "llama3.2:1b";
-      // Para preguntas generales (sin cambios)
+
+      const messages = [
+        ...(Array.isArray(conversation) ? conversation : []),
+        { role: "user", content: question },
+      ];
+
       if (type === "ask") {
         const response = await axios.post(`${ollamaConfig.host}/api/chat`, {
           model,
-          messages: [{ role: "user", content: question }],
+          messages,
           stream: false,
         });
 
@@ -96,7 +101,6 @@ export class RecipeController {
         });
       }
 
-      // Para recetas o ingredientes con paginación
       if (type === "recipe" || type === "ingredient") {
         const result = await this.recipeService.ask({
           type,
@@ -118,7 +122,6 @@ export class RecipeController {
           });
         }
 
-        // Generar comentario solo para la primera página
         let comentario = "";
         if (page === 1) {
           const nombres = result.data
@@ -131,7 +134,10 @@ export class RecipeController {
 
             const response = await axios.post(`${ollamaConfig.host}/api/chat`, {
               model,
-              messages: [{ role: "user", content: prompt }],
+              messages: [
+                ...(Array.isArray(conversation) ? conversation : []),
+                { role: "user", content: prompt },
+              ],
               stream: false,
             });
 
@@ -161,7 +167,7 @@ export class RecipeController {
   }
 
   async askRecipe(req: Request, res: Response) {
-    const { question, recipe_id } = req.body;
+    const { question, recipe_id, conversation } = req.body;
 
     try {
       if (!recipe_id || typeof question !== "string") {
@@ -171,7 +177,7 @@ export class RecipeController {
       }
 
       const model = "llama3.2:1b";
-      const recipe = await this.recipeService.getRecipeById(Number(recipe_id));
+      const recipe = await this.recipeService.getRecipeById(recipe_id);
       if (!recipe) {
         return res
           .status(404)
@@ -183,13 +189,16 @@ export class RecipeController {
         `Aquí está la receta completa para que la analices:`,
         `Nombre: ${recipe.name}`,
         `Descripción: ${recipe.description || "Sin descripción"}`,
-        `Ingredientes y cantidades:\n${recipe.ingredients.map((ing) => `- ${ing.ingredient.name} - ${ing.quantity} ${ing.unit_of_measure.name}`).join("\n")}`,
-        `Pasos:\n${recipe.steps.map((step, i) => `${i + 1}. ${step.description}`).join("\n")}`,
+        `Ingredientes y cantidades:\n${recipe.ingredients.map((ing: any) => `- ${ing.ingredient.name} - ${ing.quantity} ${ing.unit_of_measure.name}`).join("\n")}`,
+        `Pasos:\n${recipe.steps.map((step: any, i: number) => `${i + 1}. ${step.description}`).join("\n")}`,
       ].join("\n\n");
 
       const response = await axios.post(`${ollamaConfig.host}/api/chat`, {
         model,
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          ...(Array.isArray(conversation) ? conversation : []),
+          { role: "user", content: prompt },
+        ],
         stream: false,
       });
 

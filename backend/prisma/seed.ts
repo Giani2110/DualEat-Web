@@ -15,11 +15,20 @@ import {
 } from "@prisma/client";
 import { readFileSync } from "fs";
 import { join } from "path";
+import slugify from 'slugify'; // Importa la librería
 
 const prisma = new PrismaClient();
 
-// Ruta al archivo de ingredientes
+// Ruta al archivo de ingredientes (asumiendo que está en el mismo nivel que el directorio de prisma o ajusta la ruta)
 const ingredientsFilePath = join(__dirname, "../..", "ingredientes.txt");
+
+// =================================================================
+// FUNCIÓN DE AYUDA PARA SLUG
+// Función de slug simple (suficiente para el seed de prueba)
+function generateSlug(text: string): string {
+    return slugify(text, { lower: true, strict: true, locale: 'es' });
+}
+// =================================================================
 
 // DATOS PARA UNIDADES DE MEDIDA
 const unitsOfMeasure = [
@@ -39,6 +48,7 @@ const tagData = [
   {
     category: {
       name: "Recetas y cocina",
+      description: "Recetas para el día a día o momentos especiales.",
       icon_url: "🥘",
     },
     tags: [
@@ -53,6 +63,7 @@ const tagData = [
   {
     category: {
       name: "Estilos de vida",
+      description: "Tags relacionados con dietas y estilos alimenticios.",
       icon_url: "🌿",
     },
     tags: [
@@ -74,6 +85,7 @@ const tagData = [
   {
     category: {
       name: "Momentos especiales",
+      description: "Platillos para celebrar o compartir.",
       icon_url: "🎉",
     },
     tags: [
@@ -90,9 +102,11 @@ const tagData = [
       "Día del padre",
     ],
   },
+  // ... (El resto de tus datos de tagData) ...
   {
     category: {
       name: "Técnicas culinarias",
+      description: "Conoce y practica técnicas de chef.",
       icon_url: "👨‍🍳",
     },
     tags: [
@@ -113,6 +127,7 @@ const tagData = [
   {
     category: {
       name: "Tendencias foodie",
+      description: "Lo último que se habla en el mundo gastronómico.",
       icon_url: "📱",
     },
     tags: [
@@ -129,6 +144,7 @@ const tagData = [
   {
     category: {
       name: "Presupuesto",
+      description: "Consejos y recetas para ahorrar.",
       icon_url: "💰",
     },
     tags: [
@@ -143,6 +159,7 @@ const tagData = [
   {
     category: {
       name: "Clima y estación",
+      description: "Recetas apropiadas para cada época del año.",
       icon_url: "🌤️",
     },
     tags: [
@@ -158,6 +175,7 @@ const tagData = [
   {
     category: {
       name: "Salud y Bienestar",
+      description: "Comida que cuida de tu cuerpo y mente.",
       icon_url: "🧘‍♀️",
     },
     tags: [
@@ -170,7 +188,8 @@ const tagData = [
   },
 ];
 
-// CATEGORÍAS GLOBALES DE COMIDA PARA CLASIFICAR PRODUCTOS
+// CATEGORÍAS GLOBALES DE COMIDA
+// ... (Tus datos de foodCategories se mantienen igual) ...
 const foodCategories = [
   // TIPOS DE COMIDA
   {
@@ -351,6 +370,7 @@ const foodCategories = [
   },
 ];
 
+
 async function main() {
   try {
     // ---- 1. Siembra de la tabla UnitOfMeasure ----
@@ -360,8 +380,10 @@ async function main() {
     });
     console.log(
       `✅ ${unitsOfMeasure.length} unidades de medida han sido insertadas.`
-    ); // ---- 2. Siembra de la tabla Ingredient ----
+    );
+    // ---------------------------------------------
 
+    // ---- 2. Siembra de la tabla Ingredient ----
     const ingredientsFileContent = readFileSync(ingredientsFilePath, "utf-8");
     const ingredientNames = ingredientsFileContent
       .split("\n")
@@ -378,8 +400,10 @@ async function main() {
     });
     console.log(
       `✅ ${ingredientsToCreate.length} ingredientes han sido insertados.`
-    ); // ---- 3. Siembra de FoodCategory ----
+    );
+    // ---------------------------------------------
 
+    // ---- 3. Siembra de FoodCategory ----
     for (const category of foodCategories) {
       const existingCategory = await prisma.foodCategory.findFirst({
         where: { name: category.name },
@@ -391,17 +415,32 @@ async function main() {
         });
       }
     }
-    console.log("Seed de FoodCategory completado ✅"); // ---- 4. Siembra de TagCategory + CommunityTag ----
+    console.log("Seed de FoodCategory completado ✅");
+    // ---------------------------------------------
 
+    // ---- 4. Siembra de TagCategory + CommunityTag (Añadir Slug a TagCategory) ----
     for (const item of tagData) {
+      const categoryData = {
+          ...item.category,
+          slug: generateSlug(item.category.name) // Generar slug para TagCategory
+      }
+
       let category = await prisma.tagCategory.findFirst({
         where: { name: item.category.name },
       });
 
       if (!category) {
         category = await prisma.tagCategory.create({
-          data: item.category,
+          data: categoryData,
         });
+      } else {
+         // Si ya existe, nos aseguramos de que tenga slug si lo hicimos requerido
+         if (!category.slug) {
+            await prisma.tagCategory.update({
+                where: { id: category.id },
+                data: { slug: categoryData.slug }
+            });
+         }
       }
 
       for (const tagName of item.tags) {
@@ -421,8 +460,9 @@ async function main() {
       }
     }
     console.log("Seed de TagCategory y CommunityTag completado ✅");
+    // ---------------------------------------------
 
-    // ---- 5. SEED DE USUARIOS ----
+    // ---- 5. SEED DE USUARIOS (Añadir Slug) ----
     const usersData = [
       {
         name: "Carlos Gomez",
@@ -461,8 +501,14 @@ async function main() {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
         });
+
+        const userDataWithSlug = {
+          ...user,
+          slug: generateSlug(user.name), // Generar slug
+        };
+
         if (!existingUser) {
-          return prisma.user.create({ data: user });
+          return prisma.user.create({ data: userDataWithSlug });
         }
         return existingUser;
       })
@@ -470,6 +516,7 @@ async function main() {
     console.log(
       `✅ ${users.length} usuarios han sido insertados o ya existen.`
     );
+    // ---------------------------------------------
 
     // ---- 6. SEED DE NEGOCIOS (BUSINESS) ----
     const businessesData = [
@@ -494,8 +541,9 @@ async function main() {
     console.log(
       `✅ ${businesses.length} negocios han sido insertados o ya existen.`
     );
+    // ---------------------------------------------
 
-    // ---- 7. SEED DE LOCALES ----
+    // ---- 7. SEED DE LOCALES (Añadir Slug) ----
     const localsData = [
       {
         name: "Local El Fogon Centro",
@@ -539,8 +587,14 @@ async function main() {
         const existingLocal = await prisma.local.findFirst({
           where: { name: local.name },
         });
+
+        const localDataWithSlug = {
+            ...local,
+            slug: generateSlug(local.name) // Generar slug
+        }
+
         if (!existingLocal) {
-          return prisma.local.create({ data: local });
+          return prisma.local.create({ data: localDataWithSlug });
         }
         return existingLocal;
       })
@@ -548,6 +602,7 @@ async function main() {
     console.log(
       `✅ ${locals.length} locales han sido insertados o ya existen.`
     );
+    // ---------------------------------------------
 
     // ---- 8. SEED DE LOCALUSERS ----
     const localUsersData = [
@@ -583,8 +638,9 @@ async function main() {
       skipDuplicates: true,
     });
     console.log(`✅ ${localUsersData.length} LocalUsers han sido insertados.`);
+    // ---------------------------------------------
 
-    // ---- 9. SEED DE FOODS ----
+    // ---- 9. SEED DE FOODS (Añadir Slug) ----
     const foodsData = [
       {
         local_id: locals[0].id,
@@ -628,8 +684,15 @@ async function main() {
         const existingFood = await prisma.food.findFirst({
           where: { name: food.name, local_id: food.local_id },
         });
+
+        const foodDataWithSlug = {
+            ...food,
+            // Generamos un slug compuesto: nombre + local_id (solo los primeros 4 caracteres)
+            slug: generateSlug(`${food.name}-${food.local_id.substring(0, 4)}`) 
+        }
+
         if (!existingFood) {
-          return prisma.food.create({ data: food });
+          return prisma.food.create({ data: foodDataWithSlug });
         }
         return existingFood;
       })
@@ -637,8 +700,9 @@ async function main() {
     console.log(
       `✅ ${foods.length} alimentos han sido insertados o ya existen.`
     );
+    // ---------------------------------------------
 
-    // ---- 10. SEED DE RECIPES ----
+    // ---- 10. SEED DE RECIPES (Añadir Slug) ----
     const recipesData = [
       {
         user_id: users[0].id,
@@ -677,590 +741,124 @@ async function main() {
         const existingRecipe = await prisma.recipe.findFirst({
           where: { name: recipe.name, user_id: recipe.user_id },
         });
+
+        const recipeDataWithSlug = {
+            ...recipe,
+            slug: generateSlug(recipe.name) // Generar slug
+        }
+
         if (!existingRecipe) {
-          return prisma.recipe.create({ data: recipe });
+          return prisma.recipe.create({ data: recipeDataWithSlug });
         }
         return existingRecipe;
       })
     );
     console.log(
-      `✅ ${recipes.length} recetas han sido insertadas o ya existen.`
+        `✅ ${recipes.length} recetas han sido insertadas o ya existen.`
     );
+    // ---------------------------------------------
 
-    // ---- 11. SEED DE RECIPEINGREDIENT ----
-    const recipeIngredientsData = [
-      {
-        recipe_id: recipes[0].id,
-        ingredient_id: 1,
-        quantity: "500",
-        unit_of_measure_id: 1,
-      },
-      {
-        recipe_id: recipes[0].id,
-        ingredient_id: 2,
-        quantity: "200",
-        unit_of_measure_id: 2,
-      },
-      {
-        recipe_id: recipes[1].id,
-        ingredient_id: 3,
-        quantity: "2",
-        unit_of_measure_id: 8,
-      },
-      {
-        recipe_id: recipes[2].id,
-        ingredient_id: 4,
-        quantity: "100",
-        unit_of_measure_id: 1,
-      },
-      {
-        recipe_id: recipes[3].id,
-        ingredient_id: 5,
-        quantity: "500",
-        unit_of_measure_id: 1,
-      },
-    ];
-    await prisma.recipeIngredient.createMany({
-      data: recipeIngredientsData,
-      skipDuplicates: true,
-    });
-    console.log(
-      `✅ ${recipeIngredientsData.length} ingredientes de receta han sido insertados.`
-    );
-
-    // ---- 12. SEED DE RECIPESTEP ----
-    const recipeStepsData = [
-      {
-        recipe_id: recipes[0].id,
-        step_number: 1,
-        description: "Cocer el pollo y desmenuzarlo.",
-        estimated_time: 15,
-      },
-      {
-        recipe_id: recipes[1].id,
-        step_number: 1,
-        description: "Triturar el aguacate.",
-        estimated_time: 5,
-      },
-      {
-        recipe_id: recipes[2].id,
-        step_number: 1,
-        description: "Derretir el chocolate.",
-        estimated_time: 10,
-      },
-      {
-        recipe_id: recipes[3].id,
-        step_number: 1,
-        description: "Mezclar la carne picada con especias.",
-        estimated_time: 5,
-      },
-      {
-        recipe_id: recipes[4].id,
-        step_number: 1,
-        description: "Cocer la pasta al dente.",
-        estimated_time: 12,
-      },
-    ];
-    await prisma.recipeStep.createMany({
-      data: recipeStepsData,
-      skipDuplicates: true,
-    });
-    console.log(
-      `✅ ${recipeStepsData.length} pasos de receta han sido insertados.`
-    );
-
-    // ---- 13. SEED DE COMMUNITIES ----
-    // ---- 13. SEED DE COMMUNITIES ----
-    const communitiesData = [
-      {
-        name: "Comunidad de Veganos",
-        description: "Para todos los que aman la cocina vegana.",
-        image_url: "url_comunidad_vegana",
-        theme_color: "#4CAF50",
-        visibility: Visibility.public,
-        creatorEmail: "maria.lopez@example.com",
-        tagIds: [1, 2], // IDs existentes de CommunityTag
-      },
-      {
-        name: "Amantes del Asado",
-        description: "Recetas y tips para la parrilla.",
-        image_url: "url_comunidad_asado",
-        theme_color: "#FF5722",
-        visibility: Visibility.public,
-        creatorEmail: "carlos.gomez@example.com",
-        tagIds: [3, 4],
-      },
-      {
-        name: "Keto-Fans",
-        description: "Compartiendo recetas bajas en carbohidratos.",
-        image_url: "url_comunidad_keto",
-        theme_color: "#9C27B0",
-        visibility: Visibility.public,
-        creatorEmail: "juan.perez@example.com",
-        tagIds: [5, 6],
-      },
-      {
-        name: "Postres para principiantes",
-        description: "El lugar para los que se inician en la repostería.",
-        image_url: "url_comunidad_postres",
-        theme_color: "#FFCDD2",
-        visibility: Visibility.public,
-        creatorEmail: "laura.rodriguez@example.com",
-        tagIds: [7, 8],
-      },
-      {
-        name: "Cocina Económica",
-        description: "Recetas ricas y baratas para todos.",
-        image_url: "url_comunidad_economica",
-        theme_color: "#4CAF50",
-        visibility: Visibility.public,
-        creatorEmail: "pedro.martinez@example.com",
-        tagIds: [9, 10],
-      },
-    ];
-
-    const communities: any[] = [];
-
-    for (const community of communitiesData) {
-      // Buscar al creador
-      const creator = await prisma.user.findUnique({
-        where: { email: community.creatorEmail },
-      });
-      if (!creator)
-        throw new Error(
-          `No se encontró el usuario con email ${community.creatorEmail}`
-        );
-
-      // Verificar si la comunidad ya existe
-      const existingCommunity = await prisma.community.findFirst({
-        where: { name: community.name },
-      });
-
-      if (!existingCommunity) {
-        // Crear comunidad primero sin tags
-        const newCommunity = await prisma.community.create({
-          data: {
-            name: community.name,
-            description: community.description,
-            image_url: community.image_url,
-            theme_color: community.theme_color,
-            visibility: community.visibility,
-            creator_id: creator.id,
-          },
-        });
-
-        // Conectar tags después
-        if (community.tagIds && community.tagIds.length > 0) {
-          await prisma.community.update({
-            where: { id: newCommunity.id },
-            data: {
-              tags: {
-                connect: community.tagIds.map((id) => ({ id })),
-              },
-            },
-          });
+    // ---- 11. SEED DE COMMUNITIES (Añadir Slug) ----
+    const communityTags = await prisma.communityTag.findMany({ select: { id: true } });
+    const communityData = [
+        {
+            name: "Comunidad Vegana Argentina",
+            description: "Recetas y tips para un estilo de vida vegano en Argentina.",
+            creator_id: users[1].id,
+            total_members: 10,
+            image_url: "url_vegana",
+            tags: [communityTags.find(t => t.id === 15)?.id, communityTags.find(t => t.id === 1)?.id] // Asumiendo IDs por orden
+        },
+        {
+            name: "Los Amantes de la Parrilla",
+            description: "Todo sobre asados, cortes y técnicas de parrilla.",
+            creator_id: users[0].id,
+            total_members: 50,
+            image_url: "url_parrilla",
+            tags: [communityTags.find(t => t.id === 2)?.id, communityTags.find(t => t.id === 1)?.id]
         }
-
-        communities.push(newCommunity);
-        console.log(`✅ Comunidad creada: ${community.name}`);
-      } else {
-        communities.push(existingCommunity);
-        console.log(`ℹ️ Comunidad ya existe: ${community.name}`);
-      }
-    }
-
-    // ---- 14. SEED DE COMMUNITYMEMBER ----
-    const communityMembersData = [
-      {
-        user_id: users[0].id,
-        community_id: communities[1].id,
-        is_moderator: true,
-      },
-      {
-        user_id: users[1].id,
-        community_id: communities[0].id,
-        is_moderator: true,
-      },
-      { user_id: users[2].id, community_id: communities[2].id },
-      { user_id: users[3].id, community_id: communities[3].id },
-      { user_id: users[4].id, community_id: communities[4].id },
     ];
 
-    await prisma.communityMember.createMany({
-      data: communityMembersData,
-      skipDuplicates: true,
-    });
-    console.log(
-      `✅ ${communityMembersData.length} miembros de comunidad han sido insertados.`
-    );
-
-    // ---- 15. SEED DE POSTS ----
-    const postsData = [
-      {
-        user_id: users[1].id,
-        community_id: communities[0].id,
-        title: "Mi receta de lentejas veganas!",
-        content: "Una receta simple y rica para todos.",
-        type: PostType.recipe,
-        image_urls: ["url_lentejas"],
-      },
-      {
-        user_id: users[0].id,
-        community_id: communities[1].id,
-        title: "Tips para el mejor asado",
-        content: "Consejos para que la carne quede perfecta.",
-        type: PostType.post,
-        image_urls: ["url_tips_asado"],
-      },
-      {
-        user_id: users[2].id,
-        community_id: communities[2].id,
-        title: "Tarta de calabaza keto",
-        content: "Receta para una tarta baja en carbohidratos.",
-        type: PostType.recipe,
-        image_urls: ["url_tarta_keto"],
-      },
-      {
-        user_id: users[3].id,
-        community_id: communities[3].id,
-        title: "Mis primeros muffins!",
-        content: "Estoy orgulloso de mi primer intento.",
-        type: PostType.post,
-        image_urls: ["url_muffins"],
-      },
-      {
-        user_id: users[4].id,
-        community_id: communities[4].id,
-        title: "Cena por menos de $1000",
-        content: "Un plato super rendidor.",
-        type: PostType.post,
-        image_urls: ["url_cena_barata"],
-      },
-    ];
-
-    const posts = await Promise.all(
-      postsData.map(async (post) => {
-        const existingPost = await prisma.post.findFirst({
-          where: {
-            title: post.title,
-            user_id: post.user_id,
-            community_id: post.community_id,
-          },
-        });
-        if (!existingPost) {
-          return prisma.post.create({ data: post });
-        }
-        return existingPost;
-      })
-    );
-    console.log(`✅ ${posts.length} posts han sido insertados o ya existen.`);
-
-    // ---- 16. SEED DE POSTCOMMENTS ----
-    const postCommentsData = [
-      {
-        user_id: users[2].id,
-        post_id: posts[0].id,
-        content: "Se ve deliciosa! La voy a probar.",
-      },
-      {
-        user_id: users[3].id,
-        post_id: posts[0].id,
-        content: "Excelente idea, muy nutritiva.",
-      },
-      {
-        user_id: users[4].id,
-        post_id: posts[1].id,
-        content: "Gracias por los tips! Me sirvieron mucho.",
-      },
-      {
-        user_id: users[0].id,
-        post_id: posts[2].id,
-        content: "Increíble, me encanta!",
-      },
-      {
-        user_id: users[1].id,
-        post_id: posts[3].id,
-        content: "Te quedaron hermosos, felicitaciones!",
-      },
-    ];
-
-    const postComments = await Promise.all(
-      postCommentsData.map(async (comment) => {
-        const existingComment = await prisma.postComment.findFirst({
-          where: { user_id: comment.user_id, post_id: comment.post_id },
-        });
-        if (!existingComment) {
-          return prisma.postComment.create({ data: comment });
-        }
-        return existingComment;
-      })
-    );
-    console.log(`✅ ${postComments.length} comentarios han sido insertados.`);
-
-    // ---- 17. SEED DE LOCALREVIEW ----
-    const localReviewsData = [
-      {
-        user_id: users[0].id,
-        local_id: locals[0].id,
-        rating: 5,
-        comment: "Excelente atencion y la carne perfecta.",
-      },
-      {
-        user_id: users[1].id,
-        local_id: locals[1].id,
-        rating: 4,
-        comment: "Buena pizza, el lugar es un poco chico.",
-      },
-      {
-        user_id: users[2].id,
-        local_id: locals[2].id,
-        rating: 5,
-        comment: "El mejor sushi de la ciudad, fresco y sabroso.",
-      },
-      {
-        user_id: users[3].id,
-        local_id: locals[3].id,
-        rating: 3,
-        comment: "Buen cafe, pero tardaron mucho en atender.",
-      },
-      {
-        user_id: users[4].id,
-        local_id: locals[4].id,
-        rating: 5,
-        comment: "Helados unicos! sabores muy creativos.",
-      },
-    ];
-    await prisma.localReview.createMany({
-      data: localReviewsData,
-      skipDuplicates: true,
-    });
-    console.log(`✅ ${localReviewsData.length} reviews han sido insertados.`);
-
-    // ---- 18. SEED DE ORDERS ----
-    const ordersData = [
-      {
-        user_id: users[0].id,
-        local_id: locals[0].id,
-        total: 11500.0,
-        status: OrderStatus.confirmed,
-      },
-      {
-        user_id: users[1].id,
-        local_id: locals[1].id,
-        total: 3800.0,
-        status: OrderStatus.preparing,
-      },
-      {
-        user_id: users[2].id,
-        local_id: locals[2].id,
-        total: 9000.0,
-        status: OrderStatus.pending,
-      },
-      {
-        user_id: users[3].id,
-        local_id: locals[3].id,
-        total: 1500.0,
-        status: OrderStatus.ready,
-      },
-      {
-        user_id: users[4].id,
-        local_id: locals[4].id,
-        total: 2500.0,
-        status: OrderStatus.delivered,
-      },
-    ];
-
-    const orders = await Promise.all(
-      ordersData.map(async (order) => {
-        const existingOrder = await prisma.order.findFirst({
-          where: {
-            user_id: order.user_id,
-            local_id: order.local_id,
-            total: order.total,
-          },
-        });
-        if (!existingOrder) {
-          return prisma.order.create({ data: order });
-        }
-        return existingOrder;
-      })
-    );
-    console.log(
-      `✅ ${orders.length} pedidos han sido insertados o ya existen.`
-    );
-
-    // ---- 19. SEED DE ORDERITEMS ----
-    const orderItemsData = [
-      {
-        order_id: orders[0].id,
-        food_id: foods[0].id,
-        quantity: 1,
-        unit_price: 5500,
-        subtotal: 5500,
-      },
-      {
-        order_id: orders[0].id,
-        food_id: foods[1].id,
-        quantity: 1,
-        unit_price: 6000,
-        subtotal: 6000,
-      },
-      {
-        order_id: orders[1].id,
-        food_id: foods[3].id,
-        quantity: 1,
-        unit_price: 3800,
-        subtotal: 3800,
-      },
-      {
-        order_id: orders[2].id,
-        food_id: foods[4].id,
-        quantity: 2,
-        unit_price: 4500,
-        subtotal: 9000,
-      },
-      {
-        order_id: orders[3].id,
-        food_id: foods[2].id,
-        quantity: 1,
-        unit_price: 1500,
-        subtotal: 1500,
-      },
-    ];
-    await prisma.orderItem.createMany({
-      data: orderItemsData,
-      skipDuplicates: true,
-    });
-    console.log(
-      `✅ ${orderItemsData.length} items de pedido han sido insertados.`
-    );
-
-    // ---- 20. SEED DE VOTES ----
-    const votesData = [
-      {
-        user_id: users[0].id,
-        content_type: ContentType.food,
-        content_id: foods[1].id,
-        vote_type: VoteType.up,
-      },
-      {
-        user_id: users[1].id,
-        content_type: ContentType.food,
-        content_id: foods[4].id,
-        vote_type: VoteType.up,
-      },
-      {
-        user_id: users[2].id,
-        content_type: ContentType.post,
-        content_id: posts[1].id,
-        vote_type: VoteType.up,
-      },
-      {
-        user_id: users[3].id,
-        content_type: ContentType.comment,
-        content_id: postComments[1].id,
-        vote_type: VoteType.up,
-      },
-      {
-        user_id: users[4].id,
-        content_type: ContentType.food,
-        content_id: foods[3].id,
-        vote_type: VoteType.down,
-      },
-    ];
-    await Promise.all(
-      votesData.map(async (vote) => {
-        try {
-          const existingVote = await prisma.vote.findFirst({
-            where: {
-              user_id: vote.user_id,
-              content_id: vote.content_id,
-              content_type: vote.content_type,
-            },
-          });
-          if (!existingVote) {
-            return await prisma.vote.create({
-              data: {
-                user_id: vote.user_id,
-                content_id: vote.content_id,
-                content_type: vote.content_type,
-                vote_type: vote.vote_type,
-              },
+    const communities = await Promise.all(
+        communityData.map(async (comm) => {
+            const existingCommunity = await prisma.community.findFirst({
+                where: { name: comm.name },
             });
-          }
-          return existingVote;
-        } catch (e) {
-          console.error(
-            `Error al insertar voto para el usuario ${vote.user_id} y contenido ${vote.content_id}:`,
-            e
-          );
-          return null;
-        }
-      })
-    );
-    console.log(`✅ ${votesData.length} votos han sido procesados.`);
+            
+            // Separar las tags del objeto principal para la creación
+            const tagsToConnect = comm.tags.filter(id => id !== undefined).map(id => ({ id: id! }));
 
-    // ---- 21. SEED DE SUBSCRIPTIONS ----
-    const subscriptionsData = [
-      {
-        user_id: users[0].id,
-        mp_preapproval_id: "mp_preapproval_1",
-        plan: SubscriptionPlan.business,
-        amount: 2000.0,
-        start_date: new Date(),
-        status: SubscriptionStateMP.authorized,
-      },
-      {
-        user_id: users[1].id,
-        mp_preapproval_id: "mp_preapproval_2",
-        plan: SubscriptionPlan.user_premium,
-        amount: 999.0,
-        start_date: new Date(),
-        status: SubscriptionStateMP.authorized,
-      },
-      {
-        user_id: users[2].id,
-        mp_preapproval_id: "mp_preapproval_3",
-        plan: SubscriptionPlan.user_premium,
-        amount: 999.0,
-        start_date: new Date(),
-        status: SubscriptionStateMP.paused,
-      },
-      {
-        user_id: users[3].id,
-        mp_preapproval_id: "mp_preapproval_4",
-        plan: SubscriptionPlan.business,
-        amount: 2000.0,
-        start_date: new Date(),
-        status: SubscriptionStateMP.authorized,
-      },
-      {
-        user_id: users[4].id,
-        mp_preapproval_id: "mp_preapproval_5",
-        plan: SubscriptionPlan.user_premium,
-        amount: 999.0,
-        start_date: new Date(),
-        status: SubscriptionStateMP.finished,
-      },
-    ];
-    await prisma.subscription.createMany({
-      data: subscriptionsData,
-      skipDuplicates: true,
-    });
-    console.log(
-      `✅ ${subscriptionsData.length} suscripciones han sido insertadas.`
+            const communityDataWithSlug = {
+                ...comm,
+                slug: generateSlug(comm.name)
+            }
+            
+            // Eliminar 'tags' del objeto de datos antes de la creación
+            const { tags, ...dataToCreate } = communityDataWithSlug; 
+
+            if (!existingCommunity) {
+                return prisma.community.create({
+                    data: {
+                        ...dataToCreate,
+                        tags: {
+                            connect: tagsToConnect,
+                        },
+                    },
+                });
+            }
+            return existingCommunity;
+        })
     );
+    console.log(`✅ ${communities.length} comunidades han sido insertadas o ya existen.`);
+    // ---------------------------------------------
+
+    // ---- 12. SEED DE POSTS (Añadir Slug) ----
+    const postsData = [
+        {
+            title: "Mi primera tarta de pollo",
+            content: "¡Sigan la receta y me cuentan!",
+            user_id: users[0].id,
+            community_id: communities[0].id,
+            type: PostType.recipe,
+            recipe_id: recipes[0].id
+        },
+        {
+            title: "¿Que corte de carne recomiendan para un asado?",
+            content: "Quiero hacer un asado el fin de semana y necesito consejos.",
+            user_id: users[2].id,
+            community_id: communities[1].id,
+            type: PostType.post
+        }
+    ];
+
+    await Promise.all(
+        postsData.map(async (post) => {
+            const existingPost = await prisma.post.findFirst({
+                where: { title: post.title, community_id: post.community_id },
+            });
+            
+            // Generar slug
+            const postDataWithSlug = {
+                ...post,
+                slug: generateSlug(post.title)
+            }
+
+            if (!existingPost) {
+                return prisma.post.create({ data: postDataWithSlug });
+            }
+            return existingPost;
+        })
+    );
+    console.log(`✅ ${postsData.length} posts han sido insertados o ya existen.`);
+    // ---------------------------------------------
+
+
   } catch (error) {
-    throw error;
+    console.error("❌ Error durante el seeding:", error);
+    process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-main()
-  .catch((e) => {
-    throw e;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main();

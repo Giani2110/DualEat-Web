@@ -3,3 +3,4 @@ node_modules
 package-lock.json
 /src/generated/prisma
 gcloud-key.json
+dist

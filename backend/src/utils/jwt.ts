@@ -24,7 +24,7 @@ export function verifyTempToken(token: string): TempTokenPayload {
 }
 
 // Funciones para ofuscar datos
-function hashUserId(userId: number): string {
+function hashUserId(userId: string): string {
   return crypto
     .createHash("sha256")
     .update(`${userId}:${SECRET_KEY}`)

@@ -61,6 +61,7 @@ router.get(
         id: user.id,
         name: user.name,
         email: user.email,
+        slug: user.slug,
         role: user.role,
         provider: user.provider,
         isBusiness: user.isBusiness,

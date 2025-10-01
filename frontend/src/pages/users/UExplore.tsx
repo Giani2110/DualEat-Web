@@ -17,7 +17,7 @@ import type {
 } from "../../interface/global";
 import { useNavigate, useParams } from "react-router-dom";
 
-import CommunityCard from "../../components/users/CommunityCard";
+import CommunityCard from "../../components/users/cards/CommunityCard";
 
 const UExplore = () => {
   const [tags, setTags] = useState<CategoryTag[]>([]);

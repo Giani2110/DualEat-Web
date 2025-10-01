@@ -6,12 +6,12 @@ import {
   completeProfile as authCompleteProfile,
   logout as authLogout,
 } from "../../services/auth.api";
-import type { AuthResponse, User } from "../../services/auth.api";
+import type { AuthResponse } from "../../services/auth.api";
+import type { User } from "../../interface/global";
 
 import { AuthContext } from "./AuthContext";
 import { withMinimumDelay } from "../../utils/timeUtils";
-//import { useLocation } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   //const location = useLocation();
+  const navigate = useNavigate();
 
   const login = async (
     email: string,
@@ -128,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       fetchUser();
     }
     
-  }, [user]);
+  }, [user, navigate]);
 
   const value = { user, loading, login, logout, register, completeProfile };
 

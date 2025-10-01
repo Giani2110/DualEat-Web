@@ -27,7 +27,7 @@ export const CommunityProvider = ({
     const fetchCommunities = async () => {
       if (user && !hasFetchedRef.current) {
         try {
-          const response = await getUserCommunities(user.id);
+          const response = await getUserCommunities();
           if (response?.success) {
             setUserCommunities(response.data as UserCommunityEntry[]);
             hasFetchedRef.current = true;
@@ -47,9 +47,9 @@ export const CommunityProvider = ({
         refreshCommunities: async () => {
           if (user) {
             try {
-              const response = await getUserCommunities(user.id);
+              const response = await getUserCommunities();
               if (response?.success) {
-                setUserCommunities(response.data as UserCommunityEntry[]);
+                setUserCommunities([...response.data as UserCommunityEntry[]]);
               }
             } catch (error) {
               console.error("Error refreshing communities:", error);

@@ -1,6 +1,6 @@
-import { prisma } from "../../../prisma/prisma";
+import { prisma } from "../../prisma/prisma";
 
-import { AskAI, PaginatedResponse } from "../../../interfaces/recipe.dto";
+import { AskAI, PaginatedResponse } from "../../interfaces/recipe.dto";
 
 export class RecipeService {
   constructor() {}
@@ -28,7 +28,7 @@ export class RecipeService {
   }
 
   /** GET RECIPE BY NAME (Validation) */
-  async getRecipeValidation(name: string, userId: number, communityId: number) {
+  async getRecipeValidation(name: string, userId: string, communityId: string) {
     try {
       const result = await prisma.recipe.findFirst({
         where: {
@@ -51,7 +51,7 @@ export class RecipeService {
   }
 
   /** GET RECIPE BY ID */
-  async getRecipeById(id: number) {
+  async getRecipeById(id: string) {
     try {
       const result = await prisma.recipe.findUnique({
         where: { id },
@@ -72,7 +72,7 @@ export class RecipeService {
   }
 
   /** GET USER RECIPES */
-  async getUserRecipes(user_id: number) {
+  async getUserRecipes(user_id: string) {
     try {
       const result = await prisma.recipe.findMany({
         where: { user_id },

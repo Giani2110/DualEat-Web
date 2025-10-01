@@ -1,4 +1,4 @@
-import type { Community } from "../../interface/global";
+import type { Community } from "../../../interface/global";
 
 const CommunityCard = ( { community }: { community: Community }) => (
   <div

@@ -17,7 +17,8 @@ export { default as AdminFoodCategories } from "../pages/admin/AdminFoodCategori
 export { default as AdminLocals } from "../pages/admin/AdminLocals";
 
 // Components
-export { default as ProtectedRoute } from "../components/ProtectedRoutes";
+export { default as ProtectedRoute } from "../components/auth/ProtectedRoutes";
+export { default as PublicRoute } from "../components/auth/PublicRoutes";
 
 // User
 export { default as UserDashboard } from "./users/UDashboard";
@@ -25,6 +26,7 @@ export { default as UPost } from "./users/UPost";
 export { default as UExplore } from "./users/UExplore";
 export { default as URecipes } from "./users/URecipes";
 export { default as UCommunity } from "./users/UCommunity";
+export { default as UComment } from "./users/UComment";
 
 export { default as LoadingScreen } from "../components/animation/LoadingScreen";
 

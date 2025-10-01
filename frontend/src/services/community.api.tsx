@@ -1,10 +1,17 @@
 import { axiosInterceptor } from "../interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
-import type { Response } from "../interface/global";
+import type { Response, PaginationInfo } from "../interface/global";
 
 import axios from "axios";
 
+interface ResponseWithPagination<T = unknown> {
+  success: boolean;
+  pagination: PaginationInfo;
+  data?: T;
+}
+
+/** CREATE COMMUNITY */
 export const createCommunity = async (
   name: string,
   description: string,
@@ -12,14 +19,14 @@ export const createCommunity = async (
   iconFile: File | null,
   visibility: string,
   selectedTags: number[],
-  creatorId: number
+  creatorId: string
 ): Promise<Response | null> => {
   try {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
     formData.append("visibility", visibility);
-    formData.append("creatorId", JSON.stringify(creatorId));
+    formData.append("creatorId", creatorId);
     formData.append("selectedTags", JSON.stringify(selectedTags));
     if (bannerFile) formData.append("banner", bannerFile);
     if (iconFile) formData.append("icon", iconFile);
@@ -46,13 +53,16 @@ export const createCommunity = async (
   }
 };
 
-export const getCommunityByName = async (
-  name: string
+/** GET COMMUNITY (by slug) */
+export const getCommunityBySlug = async (
+  slug: string
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/community/", {
-      params: { name },
+      params: { slug },
     });
+
+    console.log(response.data);
     return response.data as Response;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
@@ -62,6 +72,7 @@ export const getCommunityByName = async (
   }
 };
 
+/** GET COMMUNITY (by tag_url) */
 export const getCommunityByTag = async (
   tagId: number
 ): Promise<Response | null> => {
@@ -78,13 +89,12 @@ export const getCommunityByTag = async (
   }
 };
 
+/** JOIN COMMUNITY */
 export const joinCommunity = async (
-  user_id: number,
-  community_id: number
+  community_id: string
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.post("/community/join", {
-      user_id,
       community_id,
     });
 
@@ -101,16 +111,53 @@ export const joinCommunity = async (
   }
 };
 
-export const getUserCommunities = async (
-  user_id: number
+/** LEAVE COMMUNITY */
+export const leaveCommunity = async (
+  community_id: string
 ): Promise<Response | null> => {
   try {
-    const response = await axiosInterceptor.get("/community/user", {
-      params: { user_id },
+    const response = await axiosInterceptor.post("/community/leave", {
+      community_id,
     });
+
+    if (response.data.success === true) {
+      toast.success(response.data.message);
+    }
 
     return response.data as Response;
   } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener comunidad");
+    }
+    return null;
+  }
+};
+
+/** GET USER COMMUNITIES */
+export const getUserCommunities = async (): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.get("/community/user");
+
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener comunidad");
+    }
+    return null;
+  }
+};
+
+/** GET COMMUNITY POSTS */
+export const getCommunityPosts = async (
+  communityId: string,
+  page: number
+): Promise<ResponseWithPagination | null> => {
+  try {
+    const { data } = await axiosInterceptor.get("/community/posts", {
+      params: { communityId, page },
+    });
+    return data;
+  } catch (err) {
     if (axios.isAxiosError(err)) {
       console.log(err.response?.data?.message || "Error al obtener comunidad");
     }

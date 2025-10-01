@@ -9,6 +9,7 @@ import {
   ChangeLog,
   TermsConditions,
   ProtectedRoute,
+  PublicRoute,
   UserDashboard,
   AdminBusinessCreation,
   AdminFoodCategories,
@@ -19,6 +20,7 @@ import {
   UExplore,
   URecipes,
   UCommunity,
+  UComment,
 } from "../pages";
 
 export const ROUTES = {
@@ -61,11 +63,46 @@ export const ROUTES = {
 
 export const appRoutes = [
   // Landing
-  { path: ROUTES.PUBLIC.HOME, element: <LandingHome /> },
-  { path: ROUTES.PUBLIC.ABOUT_US, element: <AboutUs /> },
-  { path: ROUTES.PUBLIC.BUSINESS, element: <LandingBusiness /> },
-  { path: ROUTES.PUBLIC.CHANGELOG, element: <ChangeLog /> },
-  { path: ROUTES.PUBLIC.TERMS, element: <TermsConditions /> },
+  {
+    path: ROUTES.PUBLIC.HOME,
+    element: (
+      <PublicRoute>
+        <LandingHome />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: ROUTES.PUBLIC.ABOUT_US,
+    element: (
+      <PublicRoute>
+        <AboutUs />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: ROUTES.PUBLIC.BUSINESS,
+    element: (
+      <PublicRoute>
+        <LandingBusiness />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: ROUTES.PUBLIC.CHANGELOG,
+    element: (
+      <PublicRoute>
+        <ChangeLog />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: ROUTES.PUBLIC.TERMS,
+    element: (
+      <PublicRoute>
+        <TermsConditions />
+      </PublicRoute>
+    ),
+  },
 
   // Auth
   { path: ROUTES.AUTH.LOGIN, element: <Login /> },
@@ -129,6 +166,14 @@ export const appRoutes = [
       </ProtectedRoute>
     ),
   },
+  {
+    path: `${ROUTES.USER.COMMUNITY}:communitySlug/post/:userSlug/:postSlug`,
+    element: (
+      <ProtectedRoute>
+        <UComment />
+      </ProtectedRoute>
+    ),
+  },
 
   // Admin
   { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <AdminBusinessCreation /> },
@@ -136,6 +181,20 @@ export const appRoutes = [
   { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
 
   // Local
-  { path: ROUTES.LOCAL.DASHBOARD, element: <ProtectedRoute ><LocalDashboard /></ProtectedRoute> },
-  { path: ROUTES.LOCAL.MENU, element: <ProtectedRoute><LocalMenu /></ProtectedRoute> },
+  {
+    path: ROUTES.LOCAL.DASHBOARD,
+    element: (
+      <ProtectedRoute>
+        <LocalDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.MENU,
+    element: (
+      <ProtectedRoute>
+        <LocalMenu />
+      </ProtectedRoute>
+    ),
+  },
 ];

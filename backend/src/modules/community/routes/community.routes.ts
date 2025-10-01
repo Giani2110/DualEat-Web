@@ -13,9 +13,9 @@ const router = Router();
 const service = new CommunityService();
 const controller = new CommunityController(service);
 
-// 1. Obtener comunidad por name (name de la comunidad)
+// 1. Obtener comunidad por slug (slug de la comunidad)
 // =========================================================
-router.get("/", controller.get.bind(controller));
+router.get("/", isAuthenticated, controller.get.bind(controller));
 
 // 2. Obtener todas las comunidades
 // =========================================================
@@ -38,14 +38,28 @@ router.post(
   controller.create.bind(controller)
 );
 
+// 5. Unirse a comunidad
+// =========================================================
+router.post("/join", generalLimiter, isAuthenticated, controller.join.bind(controller));
+
+// 6. Salir de comunidad
+// =========================================================
+router.post("/leave", generalLimiter, isAuthenticated, controller.leave.bind(controller));
+
+// 7.Obtener las comunidades de un usuario
+// =========================================================
+router.get("/user", isAuthenticated, controller.getUserCommunities.bind(controller));
+
+// 8. Obtener posts de una comunidad
+// =========================================================
+router.get("/posts", isAuthenticated, controller.getPosts.bind(controller));
+
+
+
 router.get("/recommended", controller.getRecommended.bind(controller));
 router.get("/popular", controller.getPopular.bind(controller));
 router.get("/trending", controller.getTrending.bind(controller));
 
 
-router.post("/join", controller.join.bind(controller));
-router.post("/leave", controller.leave.bind(controller));
-router.get("/:communityId/members", controller.listMembers.bind(controller));
-router.get("/user", controller.listUserCommunities.bind(controller));
 
 export default router;

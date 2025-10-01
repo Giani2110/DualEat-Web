@@ -12,6 +12,7 @@ export class UserService {
           data: {
             email: userData.email,
             password_hash: userData.password_hash || "",
+            slug: userData.slug,
             name: userData.name || "",
             avatar_url: userData.avatar_url || null,
             provider: userData.provider,
@@ -72,7 +73,7 @@ export class UserService {
     }
   }
 
-  async updateAvatar(userId: number, avatarUrl: string): Promise<User> {
+  async updateAvatar(userId: string, avatarUrl: string): Promise<User> {
     try {
       const result = await prisma.user.update({
         where: { id: userId },
@@ -85,7 +86,7 @@ export class UserService {
     }
   }
 
-  async getById(userId: number): Promise<User | null> {
+  async getById(userId: string): Promise<User | null> {
     try {
       const result = await prisma.user.findUnique({
         where: { id: userId },
@@ -100,7 +101,7 @@ export class UserService {
     }
   }
 
-  async update(userId: number, data: any) {
+  async update(userId: string, data: any) {
     try {
       const result = await prisma.user.update({
         where: { id: userId },

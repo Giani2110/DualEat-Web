@@ -1,6 +1,6 @@
 import React from "react";
 import { Clock, Beef, ChefHat } from "lucide-react";
-import type { Recipe } from "../../interface/global";
+import type { Recipe } from "../../../interface/global";
 import toast from "react-hot-toast";
 
 interface RecipeCardProps {

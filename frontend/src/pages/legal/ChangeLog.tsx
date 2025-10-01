@@ -1,5 +1,5 @@
 import React from "react";
-import DownloadSectionBG from "../../components/DownloadSectionBG";
+import DownloadSectionBG from "../../components/shared/DownloadSectionBG";
 
 const ChangeLog: React.FC = () => {
   return (
@@ -80,9 +80,7 @@ const ChangeLog: React.FC = () => {
                 </div>
               </div>
             </div>
-            <h3 className="titleCL Arvo-Bold mb-1 mt-3">
-              Otras mejoras
-            </h3>
+            <h3 className="titleCL Arvo-Bold mb-1 mt-3">Otras mejoras</h3>
             <ul className="list-disc pl-6 space-y-2 text6 textCL">
               <li>
                 Las recetas pueden compartirse fácilmente por WhatsApp o redes

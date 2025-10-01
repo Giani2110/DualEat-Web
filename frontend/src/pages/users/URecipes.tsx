@@ -10,7 +10,7 @@ import {
 } from "../../services/recipes.api";
 
 import toast from "react-hot-toast";
-import RecipeCard from "../../components/users/RecipeCard";
+import RecipeCard from "../../components/users/cards/RecipeCard";
 
 import {
   Beef,
@@ -104,20 +104,23 @@ const URecipes = () => {
       setLoadingMore(true);
     } else {
       setIsLoading(true);
-      setPagination(null);
+      
     }
 
     // Marca que la conversación ha comenzado y añade mensaje del usuario
     setStarted(true);
     setConversation((prev) => [...prev, { text: search, role: "user" }]);
-    setRecipes([]);
+    
 
     try {
       // Llama al servicio de IA con los parámetros de búsqueda
       if (type === "ingredient") {
         setSearch("");
       }
-      const response = await askOllama(search, type, includedIngredients, page);
+      const response = await askOllama(search, type, includedIngredients, page, conversation);
+
+      setPagination(null);
+      setRecipes([]);
 
       if (response?.success && response.comment) {
         // Procesa la respuesta de la IA (puede ser string o array)
@@ -161,7 +164,7 @@ const URecipes = () => {
 
     try {
       // Llama al servicio específico para analizar recetas
-      const response = await askRecipe(search, recipeSelected.id);
+      const response = await askRecipe(search, recipeSelected.id, conversation);
       if (response?.success && response.comment) {
         // Procesa respuesta de IA similar a searchRecipes
         const aiResponses: Comment[] = Array.isArray(response.comment)
@@ -313,25 +316,25 @@ const URecipes = () => {
 
   // RENDER PRINCIPAL
   return (
-      <div className="flex flex-row w-full gap-10">
+      <div className={`flex ${!started ? "" : "flex-col-reverse"} h-full pb-20 lg:pb-0 lg:flex-row w-[90%] gap-10 mx-auto justify-center`}>
         {/* SECCIÓN PRINCIPAL - CHAT Y BÚSQUEDA */}
         <section
           className={`mt-10 ${
-            recipes?.length > 0 ? " flex-[0.6]" : "flex-[0.8]"
+            recipes?.length > 0 ? "lg:flex-[1]" : "flex-[1]"
           } flex flex-col ${
             !started ? "justify-center h-[70vh]" : "justify-end h-[80vh]"
           }   items-center w-full`}
         >
           {/* PANTALLA INICIAL - Solo se muestra antes de comenzar */}
           {!started && (
-            <div className="mb-1 w-full max-w-[800px] leading-11">
+            <div className="mb-1 w-full max-w-[900px] leading-11">
               <h1 className="text-[32px] text5 font-bold">
                 Hola, {capitalize(user?.name || "Usuario")}
               </h1>
               <h1 className="text-[32px]  text5 font-bold">
                 ¿En qué puedo ayudarte?
               </h1>
-              <p className="pt-2 text5 text-[17px] Dosis-Light tracking-tight">
+              <p className="pt-2 text5 text-[18px] Dosis-Light tracking-tight">
                 Elija una de las sugerencias a continuación o escriba la suya
                 para comenzar a chatear con DualIAT.
               </p>
@@ -340,7 +343,7 @@ const URecipes = () => {
 
           {/* ÁREA DE CONVERSACIÓN - Se muestra después de comenzar */}
           {started && (
-            <div className="w-full max-w-[1100px] pe-3 max-h-[60vh] scroll2 h-full overflow-y-auto mt-4 flex flex-col gap-4">
+            <div className="w-full max-w-[1100px] pe-3 max-h-[60vh] scroll2 h-full overflow-y-auto mt-4 flex flex-col gap-6">
               {/* Mapea todos los mensajes de la conversación */}
               {conversation.map((msg, index) => {
                 const isExpanded = expandedIndex === index;
@@ -354,7 +357,7 @@ const URecipes = () => {
                   >
                     {/* Burbuja de mensaje con estilos diferentes para usuario y IA */}
                     <div
-                      className={`p-2 rounded-lg max-w-[70%] shadow text5 text-[15px] ${
+                      className={`p-2 rounded-lg max-w-[60%] shadow text5 text-[15px] ${
                         msg.role === "user"
                           ? "bg-[#f5f5f5] border-2 border-[#e5a657] text-right"
                           : "bg-[#f0f0f0] border-2 border-[#b53325] text-left"
@@ -473,8 +476,8 @@ const URecipes = () => {
             className={`w-full mt-7 relative flex gap-2 px-4 py-2 border border-gray-300 rounded-[10px] hover:shadow-md cursor-text
           ${
             !started
-              ? "max-w-[800px] flex-col"
-              : "max-w-[1100px] flex-row justify-between items-center"
+              ? "max-w-[900px] flex-col"
+              : "max-w-[1200px] flex-row justify-between items-center"
           }
             flex-wrap`}
           >
@@ -621,7 +624,7 @@ const URecipes = () => {
 
         {/* SECCIÓN DE RESULTADOS - RECETAS ENCONTRADAS */}
         {recipes?.length > 0 ? (
-          <section className="flex-[0.3] mt-10 overflow-y-auto scroll2 max-h-[60vh] h-full">
+          <section className="lg:flex-[0.6] mt-10 overflow-y-auto scroll2 max-h-fit md:max-h-[60vh] h-full">
             {/* Información de paginación y botón limpiar */}
             {pagination && (
               <div className="flex justify-between">
@@ -680,7 +683,7 @@ const URecipes = () => {
         ) : (
           recipes?.length === 0 ||
           (started && (
-            <section className="flex-[0.3] mt-15 overflow-y-auto scroll2 max-h-[60vh] flex-col h-full gap-2 flex items-center justify-center">
+            <section className="flex-[0.3] mt-15 overflow-y-auto scroll2 max-h-fit md:max-h-[30vh] flex-col h-full gap-2 flex items-center justify-center">
               <div className="p-2 rounded-full bg-gray-100 border-2 border-[#e6e6e6]">
                 <Search size={22} color="#2F2F2F" />
               </div>
@@ -696,8 +699,6 @@ const URecipes = () => {
             </section>
           ))
         )}
-
-        <div>Tus recetas</div>
       </div>
   );
 };

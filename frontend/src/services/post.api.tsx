@@ -32,7 +32,6 @@ export const createPost = async (
       }
     }
 
-    
     // ===========================
     // Campos del post
     // ===========================
@@ -98,6 +97,33 @@ export const createPost = async (
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       toast.error(err.response?.data?.message || "Error al crear post");
+    } else {
+      toast.error("Error inesperado");
+    }
+    return null;
+  }
+};
+
+export const getBySlug = async (
+  communitySlug: string,
+  postSlug: string,
+  userSlug: string,
+): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.get("/post/", {
+      params: {
+        communitySlug,
+        postSlug,
+        userSlug
+      },
+    });
+    if (response.data.success === false) {
+      toast.error(response.data.error || "Error al obtener post");
+    }
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      toast.error(err.response?.data?.message || "Error al obtener post");
     } else {
       toast.error("Error inesperado");
     }

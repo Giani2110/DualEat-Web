@@ -24,10 +24,10 @@ router.post("/tag", generalLimiter, isAuthenticated, communityTagController.crea
 
 // 4. Actualizar una etiqueta
 // =========================================================
-router.put("/tag/:id", generalLimiter, isAuthenticated, communityTagController.update.bind(communityTagController));
+router.put("/tag/update", generalLimiter, isAuthenticated, communityTagController.update.bind(communityTagController));
 
 // 5. Eliminar una etiqueta
 // =========================================================
-router.delete("/tag/:id", generalLimiter, isAuthenticated, communityTagController.delete.bind(communityTagController));
+router.delete("/tag/update", generalLimiter, isAuthenticated, communityTagController.delete.bind(communityTagController));
 
 export default router;

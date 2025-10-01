@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
+import http from "http";
 
 // 1. IMPORTACIONES
 // =========================================================================
@@ -13,6 +14,7 @@ import dotenv from "dotenv";
 import { configurePassport } from "./config/passport";
 import { redisClient } from "./config/redis";
 import { API_PREFIX } from "./config/config";
+import { initializeSocket } from "./config/socket.config";
 
 // Módulos principales y sus rutas
 import authRoutes from "./modules/auth/routes/auth.routes";
@@ -30,8 +32,14 @@ import communityTagsRouter from "./modules/community/routes/community-tag.routes
 import tagCategoryRouter from "./modules/community/routes/tag-category.routes";
 
 // Módulo de Recetas y Posts
-import recipeRoutes from "./modules/recipe/routes/recipe.routes";
-import postRoutes from "./modules/post/routes/post.routes";
+import recipeRoutes from "./modules/recipe/recipe.routes";
+import postRoutes from "./modules/post/post.routes";
+
+// Módulo de notificaciones
+import notificationRoutes from "./modules/notification/routes/notification.routes";
+
+// Módulo de Votes
+import voteRoutes from "./modules/votes/vote.routes";
 
 // Rutas sin agrupar en módulos (considera agruparlas si el proyecto crece)
 import onboardingRoutes from "./routes/onBoarding.routes";
@@ -50,7 +58,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 2. CONEXIONES Y SERVICIOS
+// 2.1. CREACIÓN DEL SERVIDOR HTTP (Requerido por Socket.io)
+// =========================================================================
+const httpServer = http.createServer(app);
+
+// 2.2. CONEXIONES Y SERVICIOS
 // =========================================================================
 
 // Verificar conexión a Redis al iniciar
@@ -58,6 +70,7 @@ async function initializeApp() {
   try {
     await redisClient.ping();
     console.log("✅ Redis OK - Aplicación iniciando...");
+    initializeSocket(httpServer);
   } catch (error) {
     console.error("❌ No se pudo conectar a Redis:", error);
     process.exit(1);
@@ -129,6 +142,12 @@ app.use(`${API_PREFIX}/community-tags`, communityTagsRouter);
 app.use(`${API_PREFIX}/recipe`, recipeRoutes);
 app.use(`${API_PREFIX}/post`, postRoutes);
 
+// Módulo de notificaciones
+app.use(`${API_PREFIX}/notification`, notificationRoutes);
+
+// Módulo de Votes
+app.use(`${API_PREFIX}/vote`, voteRoutes);
+
 // Módulo de Locales (si existen, aquí irían)
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/critiques", critiqueRoutes);
@@ -142,7 +161,7 @@ app.use("/admin", adminRouter);
 app.use("/api/admin", adminRouter);
 
 //Locales
-app.use('/api/users', usersRouter);
+app.use("/api/users", usersRouter);
 app.use("/api", qrRoutes);
 app.use("/api", ocrRoutes);
 app.use("/api", foodRoutes);
@@ -151,7 +170,7 @@ app.use("/api", critiqueRoutes);
 app.use("/api", statisticsRoutes);
 app.use("/api", orders);
 app.use("/api", manualLoadMenu);
-app.use('/api/local-menu-categories', localMenuCategoryRouter);
+app.use("/api/local-menu-categories", localMenuCategoryRouter);
 
 app.use("/api/qr", qrRoutes);
 app.use("/api/ocr", ocrRoutes);
@@ -195,8 +214,9 @@ app.use(
 // 7. INICIAR SERVIDOR
 // =========================================================================
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}${API_PREFIX}`);
+  console.log(`Servidor Socket.io escuchando en puerto ${PORT}`);
 });
 
 export default app;

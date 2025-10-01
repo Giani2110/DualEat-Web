@@ -6,19 +6,26 @@ import { supabaseAdmin } from "../../../config/supabase";
 export class CommunityController {
   constructor(private communityService: CommunityService) {}
 
+  /** CREATE COMMUNITY */
   async create(req: Request, res: Response) {
     const { name, description, visibility, selectedTags, creatorId } = req.body;
 
+    if (!name || !description || !visibility || !selectedTags || !creatorId) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios." });
+    }
+
+    let tagsArray: number[] = [];
     let themeColor: string | null = null;
     let imageUrl: string | null = null;
 
+
     try {
-      const parsedCreatorId = parseInt(creatorId, 10);
-      if (isNaN(parsedCreatorId)) {
-        return res
-          .status(400)
-          .json({ error: "El ID del usuario no es válido." });
-      }
+      const creator_id = String(creatorId);
+
+      if (typeof creator_id !== 'string' || creator_id.length === 0) {
+     return res.status(400).json({ error: "El ID del creador no es válido." });
+  }
+
       // Subir banner si existe
       if (req.files && (req.files as any).banner) {
         const bannerFile = (req.files as any).banner[0];
@@ -35,6 +42,10 @@ export class CommunityController {
         const { data: bannerPublic } = supabaseAdmin.storage
           .from("community")
           .getPublicUrl(bannerPath);
+
+        if (!bannerPublic.publicUrl) {
+          return res.status(400).json({ error: "Error al subir la imagen." });
+        }
 
         themeColor = bannerPublic.publicUrl;
       }
@@ -56,9 +67,16 @@ export class CommunityController {
           .from("community")
           .getPublicUrl(iconPath);
 
+        if (!iconPublic.publicUrl) {
+          return res.status(400).json({ error: "Error al subir la imagen." });
+        }
+
         imageUrl = iconPublic.publicUrl;
       }
 
+      tagsArray = JSON.parse(selectedTags);
+
+      
       // Crear la comunidad en la DB
       const community = await this.communityService.createCommunity({
         name,
@@ -68,8 +86,9 @@ export class CommunityController {
           "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg",
         theme_color: themeColor || "#e5a657",
         visibility,
-        creator_id: parsedCreatorId,
-        selectedTags: Array.isArray(selectedTags) ? selectedTags : [],
+        creator_id,
+        selectedTags: tagsArray,
+        //selectedTags: Array.isArray(selectedTags) ? selectedTags : [],
       });
 
       return res.status(201).json({ success: true, data: community });
@@ -81,12 +100,13 @@ export class CommunityController {
 
   /** JOIN COMMUNITY */
   async join(req: Request, res: Response) {
-    const { user_id, community_id } = req.body;
+    const { community_id } = req.body;
+    const user_id = (req as any).user?.id;
 
     try {
       const member = await this.communityService.joinCommunity(
-        Number(user_id),
-        Number(community_id)
+        String(user_id),
+        String(community_id)
       );
 
       res.status(200).json({
@@ -104,24 +124,35 @@ export class CommunityController {
 
   /** LEAVE COMMUNITY */
   async leave(req: Request, res: Response) {
-    const { userId, communityId } = req.body;
+    const { community_id } = req.body;
+    const user_id = (req as any).user?.id;
+
     try {
       const result = await this.communityService.leaveCommunity(
-        Number(userId),
-        Number(communityId)
+        String(user_id),
+        String(community_id)
       );
-      res.json(result);
+      res
+        .status(200)
+        .json({
+          success: true,
+          data: result,
+          message: "Abandonaste la comunidad",
+        });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
   }
 
-  /** GET COMMUNITY (by name) */
+  /** GET COMMUNITY (by slug) */
   async get(req: Request, res: Response) {
-    const { name } = req.query;
+    const { slug } = req.query;
+    const user_id = (req as any).user?.id;
+
     try {
       const community = await this.communityService.getCommunity(
-        name as string
+        slug as string,
+        user_id
       );
 
       if (!community) {
@@ -131,6 +162,24 @@ export class CommunityController {
       }
 
       res.status(200).json({ success: true, data: community });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  /** GET COMMUNITY POSTS */
+  async getPosts(req: Request, res: Response) {
+    const { communityId, page } = req.query;
+    const user_id = (req as any).user?.id;
+
+    try {
+      const result = await this.communityService.getCommunityPosts(
+        String(communityId),
+        Number(page),
+        String(user_id)
+      );
+
+      res.status(200).json({ success: true, ...result });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
     }
@@ -154,7 +203,7 @@ export class CommunityController {
     const { user_id } = req.query;
     try {
       const communities = await this.communityService.getRecommendedCommunities(
-        Number(user_id)
+        String(user_id)
       );
       res.status(200).json({ success: true, data: communities });
     } catch (error: any) {
@@ -194,21 +243,12 @@ export class CommunityController {
     }
   }
 
-  /** LIST COMMUNITY MEMBERS */
-  async listMembers(req: Request, res: Response) {
-    const { communityId } = req.params;
-    const members = await this.communityService.getCommunityMembers(
-      Number(communityId)
-    );
-    res.status(200).json(members);
-  }
-
-  /** LIST USER COMMUNITIES */
-  async listUserCommunities(req: Request, res: Response) {
-    const { user_id } = req.query;
+  /** GET USER COMMUNITIES */
+  async getUserCommunities(req: Request, res: Response) {
+     const user_id = (req as any).user?.id;
 
     // Validate that user_id exists and is a number
-    if (!user_id || isNaN(Number(user_id))) {
+    if (!user_id || typeof user_id !== 'string') {
       return res.status(400).json({
         success: false,
         message: "El ID del usuario es inválido o no se proporcionó.",
@@ -217,7 +257,7 @@ export class CommunityController {
 
     try {
       const communities = await this.communityService.getUserCommunities(
-        Number(user_id)
+        user_id
       );
       res.status(200).json({ success: true, data: communities });
     } catch (error: any) {

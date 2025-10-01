@@ -56,12 +56,13 @@ export const isAuthenticated = async (
     res.cookie("accessToken", token, cookieOptions);
 
     req.user = userData;
+
     next();
   } catch (err) {
     console.error("❌ Error de autenticación:", err);
     return res
-      .status(401)
-      .clearCookie("accessToken")
-      .json({ message: "Token inválido o expirado" });
+    .status(401)
+    .clearCookie("accessToken")
+    .redirect(`${process.env.FRONTEND_URL}/login`);
   }
 };

@@ -1,6 +1,6 @@
 import React from "react";
 
-import DownloadSectionBG from "../../components/DownloadSectionBG";
+import DownloadSectionBG from "../../components/shared/DownloadSectionBG";
 
 const AboutUs: React.FC = () => {
   return (
@@ -21,9 +21,7 @@ const AboutUs: React.FC = () => {
         <div className="bg-gray py-[100px] px-8 rounded-[20px]">
           <div className="max-w-[70%] mx-auto">
             <div className="grid grid-cols-2 justify-center">
-              <h2 className="text-[26px] Arvo-Bold">
-                Nuestros principios
-              </h2>
+              <h2 className="text-[26px] Arvo-Bold">Nuestros principios</h2>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-x-20">
@@ -105,8 +103,6 @@ const AboutUs: React.FC = () => {
           background2="bg-red"
         />
       </div>
-
-      
     </div>
   );
 };

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { X, Eye, EyeOff } from "lucide-react";
 import { withMinimumDelay } from "../../utils/timeUtils";
 import Loader from "../../components/animation/Loader";
-import OtpInput from "../../components/OtpInput";
+import OtpInput from "../../components/auth/OtpInput";
 
 import { ROUTES } from "../../constants/constants";
 import { useNavigate } from "react-router-dom";

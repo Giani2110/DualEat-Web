@@ -2,18 +2,7 @@ import { axiosInterceptor } from "../interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  provider: string;
-  isBusiness: boolean;
-  active: boolean;
-  subscription_status: string;
-  trial_ends_at: string;
-  avatar_url: string | null;
-}
+import type { User } from "../interface/global";
 
 export interface AuthResponse {
   success: boolean;

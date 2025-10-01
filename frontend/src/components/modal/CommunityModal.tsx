@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Image, Search, X, Globe, Eye, Lock } from "lucide-react";
-import RCrop from "../ReactCrop";
+import RCrop from "../shared/ReactCrop";
 import toast from "react-hot-toast";
 import type { CategoryTag, CommunityTag } from "../../interface/global";
 
+import { generateSlug } from "../../utils/sluglify";
+
 import {
-  getCommunityByName,
+  getCommunityBySlug,
   createCommunity,
 } from "../../services/community.api";
 import { getCommunityTags } from "../../services/community-tag.api";
@@ -15,7 +17,7 @@ import { StepDots } from "./StepNavigation";
 
 interface Props {
   onClose: () => void;
-  user: { id: number; name: string; email: string };
+  user: { id: string; name: string; email: string };
 }
 
 const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
@@ -47,7 +49,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
     "public" | "restricted" | "private"
   >("public");
 
-  const [step, setStep] = useState<"1" | "2" | "3" | "4">("3");
+  const [step, setStep] = useState<"1" | "2" | "3" | "4">("1");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -130,27 +132,33 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
     setError("");
     setLoading(true);
 
-    const timeout = setTimeout(async () => {
-      try {
-        if (name.length >= 3) {
-          const community = await getCommunityByName(name);
-          if (community) {
-            setError("La comunidad ya existe");
-          } else {
-            setError("");
-            setName(name);
-            console.log("Community fetched successfully:", name);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching community:", error);
-      } finally {
-        setLoading(false);
-      }
-    }, 1000);
+   const timeout = setTimeout(async () => {
+    try {
+      if (name.length >= 3) {
+        // --- 1. Generar el SLUG a partir del 'name' ---
+        const communitySlug = generateSlug(name);
 
-    return () => clearTimeout(timeout);
-  }, [name]);
+        // Si el slug resultante es muy corto o solo guiones, podrías añadir una validación aquí
+        if (communitySlug.length < 3) return; 
+
+        // --- 2. Cambiar la llamada al servicio a buscar por SLUG ---
+        const community = await getCommunityBySlug(communitySlug); 
+        
+        if (community) {
+          setError("La comunidad ya existe");
+        } else {
+          setError("");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching community:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, 1000);
+
+  return () => clearTimeout(timeout);
+}, [name]);
 
   useEffect(() => {
     const fetchCommunityTags = async () => {

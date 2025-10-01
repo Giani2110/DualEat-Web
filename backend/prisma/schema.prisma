@@ -87,28 +87,50 @@ enum TypesCategory {
   Origen_y_cultura
 }
 
+enum NotificationFrequency {
+  FREQUENT
+  RARE
+  NONE
+}
+
+enum NotificationContentType {
+  POST
+  COMMUNITY
+  LOCAL
+  ORDER
+  FOLLOWER
+  COMMENT
+}
+
 // MODELS
-
 model User {
-  id                  Int                @id @default(autoincrement())
-  name                String
-  email               String             @unique
-  password_hash       String?
-  avatar_url          String?
-  role                Role               @default(user)
-  is_business         Boolean            @default(false)
-  created_at          DateTime           @default(now())
-  updated_at          DateTime           @updatedAt
-  active              Boolean            @default(true)
-  trial_ends_at       DateTime?
-  subscription_status SubscriptionStatus @default(inactive)
-  provider            String             @default("local")
+  // 1. IDENTIFICACIÓN Y PERFIL
+  id         String  @id @default(cuid()) @map("id")
+  slug       String 
+  name       String
+  email      String  @unique
+  avatar_url String?
+  role       Role    @default(user)
+  active     Boolean @default(true)
 
-  // Recuperación
+  // 2. AUTENTICACIÓN Y SEGURIDAD
+  password_hash    String?
+  provider         String    @default("local")
   reset_code       String?
   reset_expires_at DateTime?
 
-  // Relaciones
+  // 3. CONFIGURACIÓN Y NEGOCIO
+  is_business         Boolean               @default(false)
+  subscription_status SubscriptionStatus    @default(inactive)
+  trial_ends_at       DateTime?
+  notificationsPref   NotificationFrequency @default(FREQUENT)
+
+  // 4. TIMESTAMPS
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // 5. RELACIONES
+  notifications       Notification[]
   owned_businesses    Business[]        @relation("BusinessOwner")
   local_users         LocalUser[]
   local_reviews       LocalReview[]
@@ -122,14 +144,47 @@ model User {
   preferences         UserPreference[]
   userAchievement     UserAchievement[]
   recipes             Recipe[]
+  //following           Follows[]         @relation("FollowingRelation")
+  //followers           Follows[]         @relation("FollowerRelation")
 
   @@index([email])
 }
 
+model Notification {
+  id           String                   @id @default(cuid()) @map("id")
+  user_id      String
+  content_type NotificationContentType?
+  content_id   String?
+
+  metadata Json?
+
+  message    String
+  read       Boolean  @default(false)
+  deleted    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([created_at, user_id])
+}
+
+/**
+ * model Follows {
+ * // El usuario que sigue (ej: A sigue a B)
+ * follower    User   @relation("FollowingRelation", fields: [follower_id], references: [id])
+ * follower_id String
+ * // El usuario que es seguido (ej: B es seguido por A)
+ * following    User   @relation("FollowerRelation", fields: [following_id], references: [id])
+ * following_id String
+ * created_at   DateTime @default(now())
+ * @@id([follower_id, following_id])
+ * }
+ */
+
 model UserPreference {
-  id      Int  @id @default(autoincrement())
-  user    User @relation(fields: [user_id], references: [id])
-  user_id Int
+  id      Int    @id @default(autoincrement())
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
 
   food_category_id Int?
   community_tag_id Int?
@@ -142,9 +197,9 @@ model UserPreference {
 }
 
 model Business {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(cuid()) @map("id")
   name       String?
-  owner_id   Int
+  owner_id   String
   owner      User     @relation("BusinessOwner", fields: [owner_id], references: [id])
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -154,7 +209,8 @@ model Business {
 }
 
 model Local {
-  id              Int       @id @default(autoincrement())
+  id              String    @id @default(cuid()) @map("id")
+  slug            String    @unique
   name            String
   description     String?
   address         String?
@@ -168,7 +224,7 @@ model Local {
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
-  business_id     Int
+  business_id     String
   business        Business            @relation(fields: [business_id], references: [id])
   local_users     LocalUser[]
   foods           Food[]
@@ -180,17 +236,15 @@ model Local {
 }
 
 model LocalMenuCategory {
-  id               Int      @id @default(autoincrement())
+  id               Int     @id @default(autoincrement())
   name             String
   description      String?
   icon_url         String?
-  local_id         Int
+  local_id         String
   food_category_id Int?
 
   local         Local         @relation(fields: [local_id], references: [id])
   food_category FoodCategory? @relation(fields: [food_category_id], references: [id])
-
-  foods Food[]
 
   foods Food[]
 
@@ -200,11 +254,11 @@ model LocalMenuCategory {
 }
 
 model LocalUser {
-  id         Int           @id @default(autoincrement())
+  id         String        @id @default(cuid()) @map("id")
   user       User          @relation(fields: [user_id], references: [id])
-  user_id    Int
+  user_id    String
   local      Local         @relation(fields: [local_id], references: [id])
-  local_id   Int
+  local_id   String
   role       LocalUserRole @default(staff)
   joined_at  DateTime      @default(now())
   updated_at DateTime      @updatedAt
@@ -228,33 +282,33 @@ model FoodCategory {
 }
 
 model Food {
-  id          Int           @id @default(autoincrement())
-  local       Local         @relation(fields: [local_id], references: [id])
-  local_id    Int
-  category    FoodCategory? @relation(fields: [category_id], references: [id])
-  category_id Int?
-  local_menu_category_id Int?
-  name        String
-  description String?
-  price       Float
-  discount    Boolean       @default(false)
-  image_url   String?
-  available   Boolean       @default(true)
-  votes_up    Int           @default(0)
-  votes_down  Int           @default(0)
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
+  id                     String        @id @default(cuid()) @map("id")
+  slug                   String?
+  local                  Local         @relation(fields: [local_id], references: [id])
+  local_id               String
+  category               FoodCategory? @relation(fields: [category_id], references: [id])
+  category_id            Int?
+  local_menu_category_id Int?
+  name                   String
+  description            String?
+  price                  Float
+  discount               Boolean       @default(false)
+  image_url              String?
+  available              Boolean       @default(true)
+  votes_up               Int           @default(0)
+  votes_down             Int           @default(0)
+  created_at             DateTime      @default(now())
+  updated_at             DateTime      @updatedAt
 
-  votes       Vote[]      @relation("FoodVotes")
-  order_items OrderItem[]
+  order_items OrderItem[]
 
   local_menu_category LocalMenuCategory? @relation(fields: [local_menu_category_id], references: [id])
 
-  @@index([local_id])
-  @@index([name])
-  @@index([price])
-  @@index([category_id])
-  @@index([local_menu_category_id])
+  @@index([local_id])
+  @@index([name])
+  @@index([price])
+  @@index([category_id])
+  @@index([local_menu_category_id])
 }
 
 /**
@@ -264,24 +318,24 @@ model Food {
 model Vote {
   id           Int         @id @default(autoincrement())
   user         User        @relation("UserVotes", fields: [user_id], references: [id])
-  user_id      Int
+  user_id      String
   content_type ContentType
-  content_id   Int
+  content_id   String
   vote_type    VoteType
   created_at   DateTime    @default(now())
   updated_at   DateTime    @updatedAt
 
-  food Food? @relation("FoodVotes", fields: [content_id], references: [id])
+  //food Food? @relation("FoodVotes", fields: [content_id], references: [id])
 
   @@unique([user_id, content_type, content_id])
 }
 
 model LocalReview {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(cuid()) @map("id")
   user       User     @relation(fields: [user_id], references: [id])
-  user_id    Int
+  user_id    String
   local      Local    @relation(fields: [local_id], references: [id])
-  local_id   Int
+  local_id   String
   rating     Int
   comment    String?
   created_at DateTime @default(now())
@@ -292,6 +346,7 @@ model LocalReview {
 
 model TagCategory {
   id          Int     @id @default(autoincrement())
+  slug        String  @unique
   name        String  @unique
   description String?
   icon_url    String?
@@ -300,15 +355,16 @@ model TagCategory {
 }
 
 model Community {
-  id            Int        @id @default(autoincrement())
-  name          String     @unique
+  id            String     @id @default(cuid()) @map("id")
+  slug          String     @unique
+  name          String
   description   String
   image_url     String?
   theme_color   String?
   visibility    Visibility @default(public)
   total_members Int        @default(0)
   creator       User       @relation("Creator", fields: [creator_id], references: [id])
-  creator_id    Int
+  creator_id    String
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
   active        Boolean    @default(true)
@@ -331,23 +387,25 @@ model CommunityTag {
 }
 
 model CommunityMember {
-  id           Int       @id @default(autoincrement())
-  user         User      @relation(fields: [user_id], references: [id])
-  user_id      Int
-  community    Community @relation(fields: [community_id], references: [id])
-  community_id Int
-  joined_at    DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-  is_moderator Boolean   @default(false)
+  id                     String                @id @default(cuid()) @map("id")
+  user                   User                  @relation(fields: [user_id], references: [id])
+  user_id                String
+  community              Community             @relation(fields: [community_id], references: [id])
+  community_id           String
+  receives_notifications NotificationFrequency @default(RARE)
+  joined_at              DateTime              @default(now())
+  updated_at             DateTime              @updatedAt
+  is_moderator           Boolean               @default(false)
 
   @@unique([user_id, community_id])
   @@index([community_id])
 }
 
 model Recipe {
-  id          Int    @id @default(autoincrement())
+  id          String @id @default(cuid()) @map("id")
+  slug        String
   user        User   @relation(fields: [user_id], references: [id])
-  user_id     Int
+  user_id     String
   name        String
   description String
   total_time  Int?
@@ -358,13 +416,13 @@ model Recipe {
 
   ingredients RecipeIngredient[]
   steps       RecipeStep[]
-  posts       Post[]     
+  posts       Post[]
 }
 
 model RecipeIngredient {
-  id                 Int           @id @default(autoincrement())
+  id                 String        @id @default(cuid()) @map("id")
   recipe             Recipe        @relation(fields: [recipe_id], references: [id])
-  recipe_id          Int
+  recipe_id          String
   ingredient         Ingredient    @relation(fields: [ingredient_id], references: [id])
   ingredient_id      Int
   quantity           String
@@ -376,9 +434,9 @@ model RecipeIngredient {
 }
 
 model RecipeStep {
-  id             Int     @id @default(autoincrement())
+  id             String  @id @default(cuid()) @map("id")
   recipe         Recipe  @relation(fields: [recipe_id], references: [id])
-  recipe_id      Int
+  recipe_id      String
   step_number    Int
   description    String
   image_url      String?
@@ -388,11 +446,12 @@ model RecipeStep {
 }
 
 model Post {
-  id             Int       @id @default(autoincrement())
+  id             String    @id @default(cuid()) @map("id")
+  slug           String
   user           User      @relation(fields: [user_id], references: [id])
-  user_id        Int
+  user_id        String
   community      Community @relation(fields: [community_id], references: [id])
-  community_id   Int
+  community_id   String
   title          String
   content        String
   image_urls     String[]
@@ -407,17 +466,17 @@ model Post {
 
   comments  PostComment[]
   recipe    Recipe?       @relation(fields: [recipe_id], references: [id])
-  recipe_id Int?
+  recipe_id String?
 }
 
 model PostComment {
-  id                Int          @id @default(autoincrement())
+  id                String       @id @default(cuid()) @map("id")
   user              User         @relation(fields: [user_id], references: [id])
-  user_id           Int
+  user_id           String
   post              Post         @relation(fields: [post_id], references: [id])
-  post_id           Int
+  post_id           String
   parent_comment    PostComment? @relation("CommentReplies", fields: [parent_comment_id], references: [id])
-  parent_comment_id Int?
+  parent_comment_id String?
   content           String
   votes_up          Int          @default(0)
   votes_down        Int          @default(0)
@@ -448,11 +507,11 @@ model Ingredient {
 }
 
 model Order {
-  id             Int         @id @default(autoincrement())
+  id             String      @id @default(cuid()) @map("id")
   user           User        @relation(fields: [user_id], references: [id])
-  user_id        Int
+  user_id        String
   local          Local       @relation(fields: [local_id], references: [id])
-  local_id       Int
+  local_id       String
   total          Float
   status         OrderStatus @default(pending)
   payment_method String?
@@ -465,11 +524,11 @@ model Order {
 }
 
 model OrderItem {
-  id         Int     @id @default(autoincrement())
+  id         String  @id @default(cuid()) @map("id")
   order      Order   @relation(fields: [order_id], references: [id])
-  order_id   Int
+  order_id   String
   food       Food    @relation(fields: [food_id], references: [id])
-  food_id    Int
+  food_id    String
   quantity   Int     @default(1)
   unit_price Float
   subtotal   Float
@@ -477,9 +536,9 @@ model OrderItem {
 }
 
 model Subscription {
-  id                Int                 @id @default(autoincrement())
+  id                String              @id @default(cuid()) @map("id")
   user              User                @relation(fields: [user_id], references: [id])
-  user_id           Int
+  user_id           String
   mp_preapproval_id String
   plan              SubscriptionPlan
   amount            Float
@@ -495,7 +554,7 @@ model Subscription {
 }
 
 model Achievement {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid()) @map("id")
   name        String
   description String
   goal        Int
@@ -506,11 +565,11 @@ model Achievement {
 }
 
 model UserAchievement {
-  id             Int         @id @default(autoincrement())
+  id             String      @id @default(cuid()) @map("id")
   user           User        @relation(fields: [user_id], references: [id])
-  user_id        Int
+  user_id        String
   achievement    Achievement @relation(fields: [achievement_id], references: [id])
-  achievement_id Int
+  achievement_id String
 
   progress   Int      @default(0)
   completed  Boolean  @default(false)

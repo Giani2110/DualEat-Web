@@ -3,6 +3,6 @@ export interface CreatePostDTO {
     content: string;
     image_urls?: string[];
     type: "post" | "recipe";
-    user_id: number;
-    community_id: number;
+    user_id: string;
+    community_id: string;
 }

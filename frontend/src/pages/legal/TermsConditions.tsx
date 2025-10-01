@@ -1,5 +1,5 @@
 import React from "react";
-import DownloadSectionBG from "../../components/DownloadSectionBG";
+import DownloadSectionBG from "../../components/shared/DownloadSectionBG";
 
 const TermsConditions: React.FC = () => {
   return (
@@ -8,9 +8,7 @@ const TermsConditions: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-[200px] pb-[100px]">
         <div className="bgsemi-white rounded-[20px] shadow-sm border-3 border-white p-8 md:p-12">
           <div className="text-center mb-12">
-            <h1 className="text-4xl Arvo-Bold mb-4">
-              Términos y condiciones
-            </h1>
+            <h1 className="text-4xl Arvo-Bold mb-4">Términos y condiciones</h1>
             <p className="text5">
               <strong>Última actualización:</strong> Julio 2025
             </p>
@@ -28,9 +26,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 1 */}
             <section className="mb-10">
-              <h2 className="Arvo-Bold text5 titleTC">
-                1. Identificación
-              </h2>
+              <h2 className="Arvo-Bold text5 titleTC">1. Identificación</h2>
               <p className="text4 textTC">
                 DualEat es un proyecto académico y comercial en desarrollo por
                 parte de Gianfranco Andreacchi y Axel Berger, operando
@@ -51,9 +47,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 2 */}
             <section className="mb-10">
-              <h2 className="Arvo-Bold text5 titleTC">
-                2. Definiciones
-              </h2>
+              <h2 className="Arvo-Bold text5 titleTC">2. Definiciones</h2>
               <div className="space-y-4 text4 textTC">
                 <div>
                   <p>
@@ -87,9 +81,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 3 */}
             <section className="mb-10">
-              <h2 className="Arvo-Bold text5 titleTC">
-                3. Condiciones de uso
-              </h2>
+              <h2 className="Arvo-Bold text5 titleTC">3. Condiciones de uso</h2>
               <p className="text4 textTC">
                 El uso de la plataforma implica el cumplimiento de estas reglas:
               </p>
@@ -178,18 +170,14 @@ const TermsConditions: React.FC = () => {
                 experiencia. Al usar nuestros servicios aceptás nuestra Política
                 de Privacidad.
               </p>
-              <p>
-                Usamos tus datos de forma segura para:
-              </p>
+              <p>Usamos tus datos de forma segura para:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Sugerencias personalizadas.</li>
                 <li>Estadísticas de uso.</li>
                 <li>Comunicación y notificaciones.</li>
                 <li>Ofertas y promociones relacionadas.</li>
               </ul>
-              <p className="mt-4">
-                No vendemos tus datos a terceros.
-              </p>
+              <p className="mt-4">No vendemos tus datos a terceros.</p>
             </section>
 
             {/* Section 7 */}

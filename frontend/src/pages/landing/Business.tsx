@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Mail, MessageCircle } from "lucide-react";
 import axios from "axios";
 
-import DownloadSectionBG from "../../components/DownloadSectionBG";
+import DownloadSectionBG from "../../components/shared/DownloadSectionBG";
 
 // Define la interfaz para el estado del formulario para un tipado estricto
 interface FormData {
@@ -271,7 +271,11 @@ const LandingBusiness: React.FC = () => {
               type="submit"
               disabled={loading}
               className={`w-full text-white py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-102 hover:shadow-lg
-              ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-red cursor-pointer"}`}
+              ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red cursor-pointer"
+              }`}
             >
               {loading ? "Enviando..." : "Enviar"}
             </button>

@@ -11,6 +11,11 @@ interface ResponseAI<T = unknown> {
   data?: T;
 }
 
+interface Comment {
+  text: string;
+  role: "user" | "ai";
+}
+
 export const getAllIngredients = async (): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/recipe/ingredients");
@@ -74,16 +79,22 @@ export const askOllama = async (
   type: string,
   ingredients: number[],
   page: number,
-  recipe_id?: number
+  conversation: Comment[]
 ): Promise<ResponseAI | null> => {
   try {
-    console.log("ingredients", ingredients);
+    const limitedConversation = conversation.slice(-10);
+
+    const mappedConversation = limitedConversation.map((msg) => ({
+      role: msg.role === "ai" ? "assistant" : "user",
+      content: msg.text,
+    }));
+
     const { data } = await axiosInterceptor.post<ResponseAI>("/recipe/ask", {
       question,
       type,
       ingredients,
       page,
-      recipe_id,
+      conversation: mappedConversation,
     });
 
     return data;
@@ -99,14 +110,22 @@ export const askOllama = async (
 
 export const askRecipe = async (
   question: string,
-  recipe_id: number
+  recipe_id: number,
+  conversation: Comment[]
 ): Promise<ResponseAI | null> => {
   try {
+    const limitedConversation = conversation.slice(-10);
+
+    const mappedConversation = limitedConversation.map((msg) => ({
+      role: msg.role === "ai" ? "assistant" : "user",
+      content: msg.text,
+    }));
     const { data } = await axiosInterceptor.post<ResponseAI>(
       "/recipe/ask-recipe",
       {
         question,
         recipe_id,
+        conversation: mappedConversation,
       }
     );
 

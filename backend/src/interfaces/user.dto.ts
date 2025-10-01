@@ -2,7 +2,8 @@ import { Role, SubscriptionStatus } from "@prisma/client";
 
 export interface BasicCreateDTO {
   email: string;
-  name?: string;
+  name: string;
+  slug: string;
   password_hash?: string;
   avatar_url?: string | null;
   provider?: string;
@@ -11,7 +12,7 @@ export interface BasicCreateDTO {
 }
 
 export interface RegisterStepTwoDto {
-  name?: string;
+  name: string;
   foodPreferences?: number[];
   communityPreferences?: number[];
 }
@@ -39,9 +40,10 @@ export interface TempTokenPayload {
 
 // Datos completos del usuario (guardados en Redis)
 export interface UserSessionData {
-  id: number;
+  id: string;
   name: string;
   email: string;
+  slug: string;
   role: Role;
   provider: string;
   isBusiness: boolean;

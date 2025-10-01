@@ -5,16 +5,16 @@
 }
 
 .sidebar-open {
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 280px 1fr;
 }
 
 .sidebar-closed {
-  grid-template-columns: 80px 1fr;
+  grid-template-columns: 40px 1fr;
 }
 
 .navlis {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar {
@@ -26,25 +26,23 @@
 }
 
 .bgFood {
-    position: relative;
+  position: relative;
 }
 
 .bgFood::before {
-    content: "";
-    position: fixed; 
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url("../../images/BGDash.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: repeat;
-    filter: invert(1) opacity(0.1);
-    z-index: -1;
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("../../images/BGDash.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: repeat;
+  filter: invert(1) opacity(0.1);
+  z-index: -1;
 }
-
-
 
 .bgFood2 {
   position: relative;
@@ -52,7 +50,7 @@
 
 .bgFood2::before {
   content: "";
-  position: fixed; 
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -65,10 +63,13 @@
   z-index: -1;
 }
 
-
-
 .scroll2::-webkit-scrollbar {
   width: 6px;
+  display: none;
+}
+
+.scroll:hover::-webkit-scrollbar {
+  display: block;
 }
 
 .scroll2::-webkit-scrollbar-track {
@@ -79,11 +80,32 @@
   background: #b53325;
   border-radius: 10px;
   cursor: pointer;
+  opacity: 0.5;
+}
+
+.bannerBG {
+  position: relative;
+  background-color: #f1f1f1;
+  border-radius: 10px;
+}
+
+.bannerBG::before {
+  content: "";
+  position: absolute;
+  filter: contrast(0.8);
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 10px;
+  z-index: -1;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
 }
 
 @media screen and (max-width: 768px) {
   .dashboard-layout {
     grid-template-columns: 0fr;
   }
-  
 }

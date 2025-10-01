@@ -18,7 +18,7 @@ interface BusinessSidebarProps {
 
 const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
   children,
-  isCollapsed = false,
+  isCollapsed,
 }) => {
   const location = useLocation();
   const { logout, user } = useAuth();

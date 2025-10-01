@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { RecipeController } from "../controllers/recipe.controller";
-import { RecipeService } from "../services/recipe.service";
+import { RecipeController } from "./recipe.controller";
+import { RecipeService } from "./recipe.service";
 
-import { isAuthenticated } from "../../../middlewares/isAuthenticated";
-import { iaLimiter } from "../../../middlewares/rateLimiter";
+import { isAuthenticated } from "../../middlewares/isAuthenticated";
+import { iaLimiter } from "../../middlewares/rateLimiter";
 
 const router = Router();
 const service = new RecipeService();
@@ -23,7 +23,11 @@ router.get("/", controller.getRecipeValidation.bind(controller));
 
 // 4. Obtener recetas del usuario
 // =========================================================
-router.get("/user", isAuthenticated, controller.getUserRecipes.bind(controller));
+router.get(
+  "/user",
+  isAuthenticated,
+  controller.getUserRecipes.bind(controller)
+);
 
 // 5. Obtener receta por id
 // =========================================================
@@ -31,15 +35,21 @@ router.get("/:id", controller.getRecipeById.bind(controller));
 
 // 6. Ask Ollama
 // =========================================================
-router.post("/ask", iaLimiter, isAuthenticated, controller.askOllama.bind(controller));
+router.post(
+  "/ask",
+  iaLimiter,
+  isAuthenticated,
+  controller.askOllama.bind(controller)
+);
 
 // 7. Ask Ollama (Recipe)
 // =========================================================
-router.post("/ask-recipe", iaLimiter, isAuthenticated, controller.askRecipe.bind(controller));
-
-
-
-
+router.post(
+  "/ask-recipe",
+  iaLimiter,
+  isAuthenticated,
+  controller.askRecipe.bind(controller)
+);
 
 /*
 // Crear receta

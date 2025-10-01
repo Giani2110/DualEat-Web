@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
 
-import { PostService } from "../services/post.service";
-import { supabaseAdmin } from "../../../config/supabase";
+import { PostService } from "./post.service";
 
-import { uploadAndGetUrl } from "../../../config/supabase";
+import { uploadAndGetUrl } from "../../config/supabase";
 
-import { CreateRecipeDTO } from "../../../interfaces/recipe.dto";
-import { CreatePostDTO } from "../../../interfaces/post.dto";
+import { CreateRecipeDTO } from "../../interfaces/recipe.dto";
+import { CreatePostDTO } from "../../interfaces/post.dto";
 
 export class PostController {
   constructor(private postService: PostService) {}
@@ -21,15 +20,22 @@ export class PostController {
     }
   }
 
-  /** GET POST BY ID */
-  async getById(req: Request, res: Response) {
-    const postId = parseInt(req.params.id);
-    if (isNaN(postId)) {
-      return res.status(400).json({ success: false, error: "Invalid post ID" });
+  /** GET POST (by slug)*/
+  async getBySlug(req: Request, res: Response) {
+    const communitySlug = req.query.communitySlug;
+    const postSlug = req.query.postSlug;
+    const userSlug = req.query.userSlug;
+
+    const user_id = (req as any).user?.id;
+
+    if (!communitySlug || !postSlug || !userSlug) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Slugs no encontrados" });
     }
 
     try {
-      const post = await this.postService.getPostById(postId);
+      const post = await this.postService.getPostBySlug(String(userSlug), String(communitySlug), String(postSlug), user_id);
       if (!post) {
         return res
           .status(404)
@@ -134,8 +140,8 @@ export class PostController {
         content,
         image_urls: imageUrls,
         type,
-        user_id: parseInt(user_id, 10),
-        community_id: parseInt(community_id, 10),
+        user_id: user_id,
+        community_id: community_id,
       };
 
       const parsedSteps = steps?.map((step: any) => ({
@@ -158,7 +164,7 @@ export class PostController {
             description,
             main_image: mainImageUrl || "",
             total_time: parseInt(total_time, 10) || 0,
-            user_id: parseInt(user_id, 10),
+            user_id: user_id,
             ingredients: parsedIngredients,
             steps: parsedSteps,
           }

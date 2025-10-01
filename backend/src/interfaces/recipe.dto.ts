@@ -3,7 +3,7 @@ export interface CreateRecipeDTO {
   description: string;
   main_image: string;
   total_time?: number;
-  user_id: number;
+  user_id: string;
 
   ingredients: {
     ingredient_id: number;
