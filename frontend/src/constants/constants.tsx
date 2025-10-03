@@ -24,6 +24,7 @@ import {
   UExplore,
   URecipes,
   UCommunity,
+  UComment,
 } from "../pages";
 
 export const ROUTES = {
@@ -124,7 +125,7 @@ export const appRoutes = [
   {
     path: ROUTES.USER.DASHBOARD,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute isBusiness={false}>
         <UserDashboard />
       </ProtectedRoute>
     ),
@@ -132,7 +133,7 @@ export const appRoutes = [
   {
     path: ROUTES.USER.CREATE_POST,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute isBusiness={false}>
         <UPost />
       </ProtectedRoute>
     ),
@@ -140,7 +141,7 @@ export const appRoutes = [
   {
     path: ROUTES.USER.EXPLORE,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute isBusiness={false}>
         <UExplore />
       </ProtectedRoute>
     ),
@@ -148,7 +149,7 @@ export const appRoutes = [
   {
     path: `${ROUTES.USER.EXPLORE}:categorySlug`,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute isBusiness={false}>
         <UExplore />
       </ProtectedRoute>
     ),
@@ -156,7 +157,7 @@ export const appRoutes = [
   {
     path: ROUTES.USER.RECIPES,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute isBusiness={false}>
         <URecipes />
       </ProtectedRoute>
     ),
@@ -164,8 +165,16 @@ export const appRoutes = [
   {
     path: `${ROUTES.USER.COMMUNITY}:communitySlug/`,
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute isBusiness={false}>
         <UCommunity />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: `${ROUTES.USER.COMMUNITY}:communitySlug/post/:userSlug/:postSlug`,
+    element: (
+      <ProtectedRoute isBusiness={false}>
+        <UComment />
       </ProtectedRoute>
     ),
   },
@@ -176,11 +185,60 @@ export const appRoutes = [
   { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
 
   // Local
-
-  { path: ROUTES.LOCAL.DASHBOARD, element: <ProtectedRoute ><LocalDashboard /></ProtectedRoute> },
-  { path: ROUTES.LOCAL.MENU, element: <ProtectedRoute><LocalMenu /></ProtectedRoute> },
-  { path: ROUTES.LOCAL.QR, element: <ProtectedRoute><LocalQR /></ProtectedRoute> },
-  { path: ROUTES.LOCAL.REVIEWS, element: <ProtectedRoute><LocalReviews /></ProtectedRoute> },
-  { path: ROUTES.LOCAL.SETTINGS, element: <ProtectedRoute><LocalSettings /></ProtectedRoute> },
-  { path: ROUTES.LOCAL.CALENDAR, element: <ProtectedRoute><LocalCalendar /></ProtectedRoute> },
+  {
+    path: ROUTES.LOCAL.DASHBOARD,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.MENU,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalMenu />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.DASHBOARD,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.MENU,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalMenu />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.QR,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalQR />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.REVIEWS,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalReviews />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.SETTINGS,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalSettings />
+      </ProtectedRoute>
+    ),
+  },
 ];
