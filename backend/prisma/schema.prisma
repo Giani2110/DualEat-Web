@@ -102,6 +102,16 @@ enum NotificationContentType {
   COMMENT
 }
 
+enum DayOfWeek {
+  LUNES
+  MARTES
+  MIERCOLES
+  JUEVES
+  VIERNES
+  SABADO
+  DOMINGO
+}
+
 // MODELS
 model User {
   // 1. IDENTIFICACIÓN Y PERFIL
@@ -217,8 +227,6 @@ model Local {
   phone           String?
   email           String?
   image_url       String
-  opening_time    DateTime?
-  closing_time    DateTime?
   categorias_menu String[]
   average_rating  Float     @default(0)
   created_at      DateTime  @default(now())
@@ -232,7 +240,18 @@ model Local {
   reviews         LocalReview[]
   menu_categories LocalMenuCategory[]
 
+  schedules LocalSchedule[]
   @@index([business_id])
+}
+
+model LocalSchedule {
+  id              String    @id @default(cuid())
+  day_of_week     DayOfWeek
+  open_time       String
+  close_time      String 
+  local_id        String
+  local           Local     @relation(fields: [local_id], references: [id])
+  @@unique([local_id, day_of_week])
 }
 
 model LocalMenuCategory {

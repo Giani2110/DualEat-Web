@@ -31,10 +31,10 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
       path: "/business/dashboard",
     },
     {
-      id: "personal",
-      label: "Personal",
+      id: "calendar",
+      label: "Calendario",
       icon: Users,
-      path: "/business/personal",
+      path: "/business/calendar",
     },
     {
       id: "menu",

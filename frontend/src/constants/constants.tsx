@@ -18,6 +18,7 @@ import {
   LocalMenu,
   LocalQR,
   LocalReviews,
+  LocalSettings,
   UPost,
   UExplore,
   URecipes,
@@ -52,7 +53,7 @@ export const ROUTES = {
   },
   LOCAL: {
     DASHBOARD: "/business/dashboard",
-    PERSONAL: "/business/personal",
+    CALENDAR: "/business/calendar",
     MENU: "/business/menu",
     QR: "/business/qr",
     REVIEWS: "/business/reviews",
@@ -195,4 +196,5 @@ export const appRoutes = [
   { path: ROUTES.LOCAL.MENU, element: <ProtectedRoute><LocalMenu /></ProtectedRoute> },
   { path: ROUTES.LOCAL.QR, element: <ProtectedRoute><LocalQR /></ProtectedRoute> },
   { path: ROUTES.LOCAL.REVIEWS, element: <ProtectedRoute><LocalReviews /></ProtectedRoute> },
+  { path: ROUTES.LOCAL.SETTINGS, element: <ProtectedRoute><LocalSettings /></ProtectedRoute> },
 ];
