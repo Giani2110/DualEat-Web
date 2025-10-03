@@ -241,4 +241,12 @@ export const appRoutes = [
       </ProtectedRoute>
     ),
   },
+  {
+    path: ROUTES.LOCAL.CALENDAR,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalCalendar />
+      </ProtectedRoute>
+    ),
+  },
 ];
