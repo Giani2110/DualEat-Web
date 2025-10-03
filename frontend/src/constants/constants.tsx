@@ -19,6 +19,7 @@ import {
   LocalQR,
   LocalReviews,
   LocalSettings,
+  LocalCalendar,
   UPost,
   UExplore,
   URecipes,
@@ -175,26 +176,11 @@ export const appRoutes = [
   { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
 
   // Local
-  {
-    path: ROUTES.LOCAL.DASHBOARD,
-    element: (
-      <ProtectedRoute>
-        <LocalDashboard />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: ROUTES.LOCAL.MENU,
-    element: (
-      <ProtectedRoute>
-        <LocalMenu />
-      </ProtectedRoute>
-    ),
-  },
 
   { path: ROUTES.LOCAL.DASHBOARD, element: <ProtectedRoute ><LocalDashboard /></ProtectedRoute> },
   { path: ROUTES.LOCAL.MENU, element: <ProtectedRoute><LocalMenu /></ProtectedRoute> },
   { path: ROUTES.LOCAL.QR, element: <ProtectedRoute><LocalQR /></ProtectedRoute> },
   { path: ROUTES.LOCAL.REVIEWS, element: <ProtectedRoute><LocalReviews /></ProtectedRoute> },
   { path: ROUTES.LOCAL.SETTINGS, element: <ProtectedRoute><LocalSettings /></ProtectedRoute> },
+  { path: ROUTES.LOCAL.CALENDAR, element: <ProtectedRoute><LocalCalendar /></ProtectedRoute> },
 ];
