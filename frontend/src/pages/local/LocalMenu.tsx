@@ -285,7 +285,7 @@ const LocalMenu = () => {
 
   const handleExtractedDishes = (dishes: any[]) => {
     if (dishes.length === 0) {
-      alert('La IA no pudo extraer platos de la foto. Asegúrate de que siga las recomendaciones.');
+      alert('No se encontraron platos extraídos.');
     }
     setExtractedDishes(dishes);
     setShowOcrModal(false);
@@ -312,7 +312,6 @@ const LocalMenu = () => {
       const savedDishes = await response.json();
       setFoods([...foods, ...savedDishes.data]);
       setExtractedDishes([]);
-      alert('¡Platos guardados con éxito!');
     } catch (error: any) {
       console.error("Error al guardar los platos extraídos:", error);
       setError(error.message);

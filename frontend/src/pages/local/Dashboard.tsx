@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, useMemo } from 'react';
 import { Star, DollarSign, ShoppingBag, Clock, Sun, Package, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, TrendingUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AuthContext } from '../../context/auth/AuthContext';
-import { AreaChart, XAxis, YAxis, Tooltip, Area, ResponsiveContainer } from 'recharts';
+import { AreaChart, XAxis, YAxis, Tooltip, Area, ResponsiveContainer, Dot } from 'recharts';
 import '../../assets/scss/users/users.scss';
 
 interface Order {
@@ -204,7 +204,7 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [localId, API_BASE]);
 
-  // Lógica de paginación usando useMemo para evitar recálculos innecesarios
+  // Lógica de paginación usando useMemo para evitar recálculos
   const EARNINGS_PER_PAGE = 3;
   const REVIEWS_PER_PAGE = 2;
   const TOP_FOODS_PER_PAGE = 3;
@@ -292,7 +292,7 @@ const Dashboard = () => {
   const EarningsCard = useMemo(() => {
     const totalYearRevenue = monthlyEarnings.reduce((sum, month) => sum + (month.total_earnings ?? 0), 0);
 
-    // Obtener los datos del mes actual y el mes anterior de forma segura
+    // Obtener los datos del mes actual y el mes anterior
     const currentMonthData = monthlyEarnings.length > 0 ? monthlyEarnings[monthlyEarnings.length - 1] : null;
     const prevMonthData = monthlyEarnings.length > 1 ? monthlyEarnings[monthlyEarnings.length - 2] : null;
 
@@ -311,6 +311,14 @@ const Dashboard = () => {
       return amount.toLocaleString('es-AR');
     };
 
+    const chartData = monthlyEarnings.length === 1 
+      ? [
+          { month: '', total_earnings: 0, isPlaceholder: true },
+          { ...monthlyEarnings[0], isPlaceholder: false },
+          { month: '', total_earnings: 0, isPlaceholder: true }
+        ]
+      : monthlyEarnings.map(item => ({ ...item, isPlaceholder: false }));
+
     return (
       <div className="rounded-2xl p-6 text-white overflow-hidden relative shadow-lg
         bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
@@ -318,24 +326,33 @@ const Dashboard = () => {
           <p className="text-lg text-gray-300 font-semibold mb-2">Promedio de ventas totales</p>
           <div className="flex items-end mb-4">
             <h2 className="text-4xl lg:text-5xl font-bold mr-4">{formatCurrency(totalYearRevenue)}</h2>
-            <div className="flex items-center text-sm">
-              <span className={`flex items-center px-2 py-1 rounded-full ${isPositiveGrowth ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                <TrendingUp className={`w-4 h-4 mr-1 ${!isPositiveGrowth && 'rotate-180'}`} />
-                {growthText}%
-              </span>
-              <p className="ml-2 text-gray-400 text-sm">vs el mes anterior</p>
-            </div>
+            {monthlyEarnings.length > 1 && (
+              <div className="flex items-center text-sm">
+                <span className={`flex items-center px-2 py-1 rounded-full ${isPositiveGrowth ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                  <TrendingUp className={`w-4 h-4 mr-1 ${!isPositiveGrowth && 'rotate-180'}`} />
+                  {growthText}%
+                </span>
+                <p className="ml-2 text-gray-400 text-sm">vs el mes anterior</p>
+              </div>
+            )}
           </div>
           {monthlyEarnings.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={monthlyEarnings} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8484E4" stopOpacity={0.8} />
                     <stop offset="95%" stopColor="#8484E4" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="month" stroke="#A0AEC0" tickLine={false} axisLine={false} tick={{ fill: '#CBD5E0', fontSize: 12 }} />
+                <XAxis 
+                  dataKey="month" 
+                  stroke="#A0AEC0" 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tick={{ fill: '#CBD5E0', fontSize: 12 }}
+                  hide={monthlyEarnings.length === 1}
+                />
                 <YAxis hide={true} domain={['auto', 'auto']} />
                 <Tooltip
                   contentStyle={{
@@ -346,10 +363,44 @@ const Dashboard = () => {
                     color: 'white',
                     fontSize: '12px'
                   }}
-                  labelFormatter={(label: string) => `Mes: ${label}`}
-                  formatter={(value: number) => [`Ingreso total\n${formatCurrencyShort(value)}`, '']}
+                  labelFormatter={(label: string) => label ? `Mes: ${label}` : ''}
+                  formatter={(value: number, _name: string, props: any) => {
+                    if (props.payload.isPlaceholder) return ['', ''];
+                    return [`Ingreso total\n${formatCurrencyShort(value)}`, ''];
+                  }}
                 />
-                <Area type="monotone" dataKey="total_earnings" stroke="#8484E4" fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area 
+                  type="monotone" 
+                  dataKey="total_earnings" 
+                  stroke="#8484E4" 
+                  strokeWidth={monthlyEarnings.length === 1 ? 0 : 2}
+                  fillOpacity={1} 
+                  fill="url(#colorRevenue)"
+                  dot={(props: any) => {
+                    if (props.payload.isPlaceholder) return <></>;
+                    return (
+                      <Dot
+                        {...props}
+                        r={monthlyEarnings.length === 1 ? 8 : 4}
+                        fill="#8484E4"
+                        stroke="#fff"
+                        strokeWidth={2}
+                      />
+                    );
+                  }}
+                  activeDot={(props: any) => {
+                    if (props.payload.isPlaceholder) return <></>;
+                    return (
+                      <Dot
+                        {...props}
+                        r={monthlyEarnings.length === 1 ? 10 : 6}
+                        fill="#8484E4"
+                        stroke="#fff"
+                        strokeWidth={2}
+                      />
+                    );
+                  }}
+                />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -357,10 +408,15 @@ const Dashboard = () => {
               <p>No hay datos suficientes para mostrar el gráfico.</p>
             </div>
           )}
+          {monthlyEarnings.length === 1 && (
+            <p className="text-center text-gray-400 text-sm mt-2">
+              {monthlyEarnings[0].month} - {monthlyEarnings[0].total_orders} pedidos
+            </p>
+          )}
         </div>
       </div>
     );
-  }, [monthlyEarnings]); // Solo se recalcula cuando cambian los datos de monthlyEarnings
+  }, [monthlyEarnings]);
 
   // Función helper para crear elementos vacíos para mantener altura fija
   const createEmptySlots = (currentItems: number, maxItems: number) => {
@@ -622,7 +678,6 @@ const Dashboard = () => {
                           </tr>
                         );
                       })}
-                      {/* Filas vacías para mantener altura consistente */}
                       {Array.from({ length: Math.max(0, ORDERS_PER_PAGE - paginationData.orders.data.length) }, (_, index) => (
                         <tr key={`empty-order-${index}`} style={{ height: '56px' }} className="invisible">
                           <td className="py-3 px-4">&nbsp;</td>
