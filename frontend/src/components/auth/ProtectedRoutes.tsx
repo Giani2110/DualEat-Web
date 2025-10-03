@@ -9,11 +9,13 @@ import LoadingScreen from "../animation/LoadingScreen";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   onlyTempToken?: boolean;
+  isBusiness?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   onlyTempToken = false,
+  isBusiness,
 }) => {
   const location = useLocation();
   const { user, loading } = useAuth();
@@ -26,17 +28,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const tokenFromUrl = queryParams.get("tempToken");
 
   if (onlyTempToken) {
-    if (tokenFromUrl) {
-      return <>{children}</>;
-    }
+    return tokenFromUrl ? <>{children}</> : <Navigate to={ROUTES.AUTH.LOGIN} replace />;
+  }
+
+  if (!user) {
     return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
   }
 
-  if (user) {
-    return <>{children}</>;
+  if (isBusiness === true && user.isBusiness === false) {
+    return <Navigate to={ROUTES.USER.DASHBOARD} replace />;
   }
 
-  return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
+  if (isBusiness === false && user.isBusiness === true) {
+    return <Navigate to={ROUTES.LOCAL.DASHBOARD} replace />;
+  }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
