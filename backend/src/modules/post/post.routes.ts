@@ -28,6 +28,15 @@ router.post(
 // =========================================================
 router.get("/", isAuthenticated, controller.getBySlug.bind(controller));
 
+// 3. Crear comentario para un post
+// =========================================================
+router.post(
+  "/comment",
+  generalLimiter,
+  isAuthenticated,
+  controller.createComment.bind(controller)
+);
+
 router.post("/test", upload.any(), controller.create.bind(controller));
 
 export default router;

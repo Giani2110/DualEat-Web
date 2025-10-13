@@ -13,7 +13,7 @@ const CommunityCard = ( { community }: { community: Community }) => (
           className="w-10 h-10 object-cover border rounded-full border-[#ebebeb]"
         />
         <div className="flex flex-col">
-          <h4 className="Arvo-Bold text5 text-[14px]">
+          <h4 className="Dosis-Bold text5 text-[14px]">
             {community.name}
           </h4>
           <p className="text-[11px] text4">

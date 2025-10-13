@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 import { getBySlug } from "../../services/post.api";
 import type { Recipe } from "../../interface/global";
@@ -14,6 +14,7 @@ import { createComment } from "../../services/post.api";
 import type { Comment } from "../../interface/global";
 
 import CommentsCard from "../../components/users/cards/CommentsCard";
+import { Loader } from "lucide-react";
 
 export interface PostFull {
   id: string;
@@ -74,6 +75,10 @@ const UComment = () => {
   const { communitySlug } = useParams<{ communitySlug: string }>();
   const { postSlug } = useParams<{ postSlug: string }>();
   const { userSlug } = useParams<{ userSlug: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const sortByParam = parseInt(searchParams.get("sortBy") || "1", 10);
+  const [sortBy, setSortBy] = useState(sortByParam);
 
   const [valueComment, setValueComment] = useState("");
 
@@ -87,19 +92,38 @@ const UComment = () => {
   const [voteUP, setVoteUP] = useState(hasVoted);
   const [voteDown, setVoteDown] = useState(hasVotedDown);
 
+  const [openInput, setOpenInput] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSortChange = (value: number) => {
+    setSearchParams({ sortBy: value.toString() });
+    setSortBy(value);
+    setOpenInput(false);
+  };
   useEffect(() => {
     const fetchPost = async () => {
       if (communitySlug && postSlug && userSlug) {
-        const response = await getBySlug(communitySlug, postSlug, userSlug);
-        console.log(response);
+        setLoading(true);
+        try {
+          const response = await getBySlug(
+            communitySlug,
+            postSlug,
+            userSlug,
+            sortBy
+          );
 
-        if (response && response.data) {
-          setPost(response.data as PostFull);
+          if (response && response.data) {
+            setPost(response.data as PostFull);
+          }
+        } catch (error) {
+          console.error("Error al obtener el post:", error);
+        } finally {
+          setLoading(false);
         }
       }
     };
     fetchPost();
-  }, [postSlug, communitySlug, userSlug]);
+  }, [postSlug, communitySlug, userSlug, sortBy]);
 
   useEffect(() => {
     if (post) {
@@ -172,6 +196,30 @@ const UComment = () => {
     }
   };
 
+  const handleAddReply = (parentId: string, newReply: Comment) => {
+    const addReplyToComment = (comments: Comment[]): Comment[] => {
+      return comments.map((comment) => {
+        if (comment.id === parentId) {
+          // Encontramos el comentario padre, agregamos la reply
+          return {
+            ...comment,
+            replies: [...comment.replies, newReply],
+          };
+        } else if (comment.replies && comment.replies.length > 0) {
+          // Buscar recursivamente en las replies
+          return {
+            ...comment,
+            replies: addReplyToComment(comment.replies),
+          };
+        }
+        return comment;
+      });
+    };
+
+    setPostComments((prevComments) => addReplyToComment(prevComments));
+  };
+
+  // Modificar handleComment para comentarios de nivel superior
   const handleComment = async () => {
     try {
       const response = await createComment(post?.id as string, valueComment);
@@ -461,12 +509,145 @@ const UComment = () => {
           </button>
         </div>
 
-        {/* Sección de comentarios */}
-        <section className="mt-10">
-          {postComments?.length > 0 &&
-            postComments?.map((comment) => (
-              <CommentsCard key={comment.id} comment={comment} />
-            ))}
+        <section className="mt-5">
+          <div className="flex items-center justify-start gap-4 mb-6">
+            <p className="text-[14px] text4">Ordenar por:</p>
+            <div
+              onClick={() => {
+                setOpenInput(!openInput);
+              }}
+              className={`relative flex items-center cursor-pointer  px-3 py-[6px] rounded-full gap-1 ${
+                openInput ? "bg-gray-300" : "hover:bg-gray-200"
+              }`}
+            >
+              <span className="text-[14px] text5 Dosis-Bold">
+                {sortBy === 1
+                  ? "Más votados"
+                  : sortBy === 2
+                  ? "Más recientes"
+                  : sortBy === 3
+                  ? "Más antiguos"
+                  : "Más polemicos"}
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height={"12"}
+                width={"12"}
+                viewBox="0 0 640 640"
+              >
+                <path d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z" />
+              </svg>
+
+              {openInput && (
+                <div className="absolute top-10 -left-10 min-w-[200px] flex flex-col bg-white rounded-[10px] overflow-hidden shadow-lg z-50">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSortChange(1);
+                    }}
+                    className={`text-[15px] py-3 flex items-start gap-3 px-3 text5 hover:bg-gray-200 cursor-pointer ${
+                      sortBy === 1 && "bg-gray-300"
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height={"20"}
+                      width={"20"}
+                      viewBox="0 0 640 640"
+                    >
+                      <path
+                        fill="#4A4947"
+                        d="M416 224C398.3 224 384 209.7 384 192C384 174.3 398.3 160 416 160L576 160C593.7 160 608 174.3 608 192L608 352C608 369.7 593.7 384 576 384C558.3 384 544 369.7 544 352L544 269.3L374.6 438.7C362.1 451.2 341.8 451.2 329.3 438.7L224 333.3L86.6 470.6C74.1 483.1 53.8 483.1 41.3 470.6C28.8 458.1 28.8 437.8 41.3 425.3L201.3 265.3C213.8 252.8 234.1 252.8 246.6 265.3L352 370.7L498.7 224L416 224z"
+                      />
+                    </svg>
+                    Más votados
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSortChange(2);
+                    }}
+                    className={`text-[15px] py-3 flex items-start gap-3 px-3 text5 hover:bg-gray-200 cursor-pointer ${
+                      sortBy === 2 && "bg-gray-300"
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height={"20"}
+                      width={"20"}
+                      viewBox="0 0 640 640"
+                    >
+                      <path
+                        fill="#4A4947"
+                        d="M320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320C64 178.6 178.6 64 320 64zM296 184L296 320C296 328 300 335.5 306.7 340L402.7 404C413.7 411.4 428.6 408.4 436 397.3C443.4 386.2 440.4 371.4 429.3 364L344 307.2L344 184C344 170.7 333.3 160 320 160C306.7 160 296 170.7 296 184z"
+                      />
+                    </svg>
+                    Más recientes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSortChange(3);
+                    }}
+                    className={`text-[15px] py-3 flex items-start gap-3 px-3 text5 hover:bg-gray-200 cursor-pointer ${
+                      sortBy === 3 && "bg-gray-300"
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height={"20"}
+                      width={"20"}
+                      viewBox="0 0 640 640"
+                    >
+                      <path
+                        fill="#4A4947"
+                        d="M302.7 69.1C313.2 62.3 326.8 62.3 337.3 69.1L561.3 213.1C573.2 220.8 578.7 235.4 574.7 249C570.7 262.6 558.2 272 544 272L512 272L512 480L563.2 518.4C571.3 524.4 576 533.9 576 544C576 561.7 561.7 576 544 576L96 576C78.3 576 64 561.7 64 544C64 533.9 68.7 524.4 76.8 518.4L128 480L128 480L128 272L96 272C81.8 272 69.3 262.6 65.3 249C61.3 235.4 66.8 220.7 78.7 213.1L302.7 69.1zM400 272L400 480L464 480L464 272L400 272zM288 480L352 480L352 272L288 272L288 480zM176 272L176 480L240 480L240 272L176 272z"
+                      />
+                    </svg>
+                    Más antiguos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSortChange(4);
+                    }}
+                    className={`text-[15px] py-3 flex items-start gap-3 px-3 text5 hover:bg-gray-200 cursor-pointer ${
+                      sortBy === 4 && "bg-gray-300" 
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height={"20"}
+                      width={"20"}
+                      viewBox="0 0 640 640"
+                    >
+                      <path
+                        fill="#4A4947"
+                        d="M320 64C324.6 64 329.2 65 333.4 66.9L521.8 146.8C543.8 156.1 560.2 177.8 560.1 204C559.6 303.2 518.8 484.7 346.5 567.2C329.8 575.2 310.4 575.2 293.7 567.2C121.3 484.7 80.6 303.2 80.1 204C80 177.8 96.4 156.1 118.4 146.8L306.7 66.9C310.9 65 315.4 64 320 64z"
+                      />
+                    </svg>
+                    Más polémicos
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          {postComments?.length > 0 && loading === false ? (
+            <div className="flex flex-col gap-5">
+              {postComments?.map((comment) => (
+                <CommentsCard
+                  key={comment.id}
+                  comment={comment}
+                  onAddReply={handleAddReply}
+                  setSortBy={setSortBy}
+                />
+              ))}
+            </div>
+          ) : loading === true && (
+            <Loader />
+          )}
+          
+           
         </section>
       </div>
 

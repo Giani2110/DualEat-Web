@@ -19,7 +19,7 @@ router.get("/units", controller.getAllUnits.bind(controller));
 
 // 3. Obtener receta por name (Validation de receta) // Si el usuario postea la misma receta en la misma comunidad con mismo nombre
 // =========================================================
-router.get("/", controller.getRecipeValidation.bind(controller));
+router.get("/", isAuthenticated, controller.getRecipeValidation.bind(controller));
 
 // 4. Obtener recetas del usuario
 // =========================================================

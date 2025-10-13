@@ -27,12 +27,17 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
   const [voteUP, setVoteUP] = useState(hasVoted);
   const [voteDown, setVoteDown] = useState(hasVotedDown);
 
-
-  const handleNavigate = (Post: Posts) => {
-    navigate(`/c/${Post.community.slug}/post/${Post.user.slug}/${Post.slug}`);
+  const handleNavigate = (e: React.MouseEvent, Post: Posts, post: boolean) => {
+    e.stopPropagation();
+    if (post) {
+      navigate(`/c/${Post.community.slug}/post/${Post.user.slug}/${Post.slug}`);
+    } else {
+      navigate(`/c/${Post.community.slug}/recipe/${Post.user.slug}/${Post.slug}`);
+    }
   };
 
-  const handleVote = async (type: boolean) => {
+  const handleVote = async (e: React.MouseEvent, type: boolean) => {
+    e.stopPropagation();
     const voteType = type ? "up" : "down";
 
     const response = await createVote(voteType, Post.id, "post");
@@ -69,18 +74,19 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
       setVoteDown(false);
 
       if (voteUP) {
-        setTotalLikes(totalLikes - 1); 
+        setTotalLikes(totalLikes - 1);
       } else if (voteDown) {
-        setTotalLikes(totalLikes + 1); 
+        setTotalLikes(totalLikes + 1);
       }
     }
   };
 
   return (
     <>
-      <div 
-      onClick={() => handleNavigate(Post)}
-      className="flex gap-4 w-full min-h-[120px] cursor-pointer rounded-[15px] p-4">
+      <div
+        onClick={(e) => handleNavigate(e, Post, true)}
+        className="flex gap-3 w-full min-h-[120px] cursor-pointer rounded-[15px] p-4 hover:bg-[#86868628] transition-colors duration-200"
+      >
         <div>
           <img
             src={
@@ -88,13 +94,13 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
               "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
             }
             alt="Imagen de perfil"
-            className="max-w-10 max-h-10 rounded-full"
+            className="max-w-8 max-h-8 rounded-full"
           />
         </div>
         <div className="flex flex-col w-full">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <h1 className="text-[17px] Dosis-Bold">{Post.user.name}</h1>
+              <h1 className="text5 text-[15px] Dosis-Bold">{Post.user.name}</h1>
               <span className="h-1 w-1 bg-gray-500 rounded-full" />
               <small className="text-[13px] text4">
                 {formatDistanceToNow(new Date(Post.created_at), {
@@ -115,7 +121,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
           </div>
 
           <div className="mt-1">
-            <h2 className="text5 Dosis-Bold">{Post.title}</h2>
+            <h2 className="text-[18px] Dosis-Bold">{Post.title}</h2>
 
             {Post.image_urls.length > 0 ? (
               <div className="max-w-[500px] aspect-[6/3] mt-3 overflow-hidden rounded-lg relative">
@@ -133,14 +139,37 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
                 />
               </div>
             ) : (
-              <p className="text5 text-[16px] mt-1 tracking-tight line-clamp-[10]">
+              <p className="text5 text-[15px] mt-2 tracking-tight line-clamp-[8]">
                 {Post.content}
               </p>
+            )}
+            {Post.recipe && (
+              <div
+                onClick={(e) => handleNavigate(e, Post, false)}
+                className="bg-gray flex mt-7 px-3 items-center gap-2 py-1 w-fit rounded-lg border border-[#dbdbdb] text5 text-[15px] tracking-tight hover:scale-101 hover:shadow-sm transition duration-100"
+              >
+                <img
+                  src={Post.recipe.main_image || ""}
+                  className="w-[30px] h-[30px] object-cover rounded-full border border-gray-300"
+                  alt="Imagen de la receta"
+                />
+                <p className="Dosis-Bold border-r border-[#8d8d8d] pe-2">
+                  {Post.recipe.name}
+                </p>
+                <p className="border-r border-[#8d8d8d] pe-2">
+                  {Post.recipe.total_time} min
+                </p>
+                <p className="border-r border-[#8d8d8d] pe-2">
+                  {Post.recipe._count.ingredients} ingredientes
+                </p>
+                <p>{Post.recipe._count.steps} pasos</p>
+              </div>
             )}
           </div>
 
           <div className="flex items-center justify-start mt-5 gap-4 w-full">
             <div
+              onClick={(e) => e.stopPropagation()}
               className={`flex items-center w-fit gap-1 p-[2px] rounded-full ${
                 voteUP
                   ? "bg-[#e5a657]"
@@ -152,7 +181,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
               <button
                 type="button"
                 title="Me gusta"
-                onClick={() => handleVote(true)}
+                onClick={(e) => handleVote(e, true)}
                 className={`cursor-pointer group p-1  rounded-full ${
                   voteUP ? "hover:bg-[#333333]" : "hover:bg-[#e4e4e4]"
                 }`}
@@ -195,7 +224,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
               <button
                 type="button"
                 title="No me gusta"
-                onClick={() => handleVote(false)}
+                onClick={(e) => handleVote(e, false)}
                 className={`cursor-pointer group p-1 rounded-full ${
                   voteDown ? "hover:bg-[#333333]" : "hover:bg-[#e4e4e4]"
                 }`}
@@ -249,7 +278,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
           </div>
         </div>
       </div>
-      <div className="w-[90%] h-[1px] mx-auto bg-gray-300 mb-10 mt-5"></div>
+      <div className="w-full h-[1px] mx-auto bg-gray-300 mb-4 mt-5"></div>
     </>
   );
 };

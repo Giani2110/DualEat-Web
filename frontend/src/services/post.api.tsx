@@ -20,7 +20,6 @@ export const createPost = async (
     if (recipeData) {
       const existingRecipe = await getRecipeByName(
         recipeData.name,
-        recipeData.user_id,
         postData.community_id
       );
 
@@ -38,7 +37,6 @@ export const createPost = async (
     formData.append("title", postData.title);
     formData.append("content", postData.content);
     formData.append("type", postData.type);
-    formData.append("user_id", String(postData.user_id));
     formData.append("community_id", String(postData.community_id));
 
     if (postData.image_urls?.length) {
@@ -54,7 +52,6 @@ export const createPost = async (
       formData.append("name", recipeData.name);
       formData.append("description", recipeData.description);
       formData.append("total_time", String(recipeData.total_time || 0));
-      formData.append("user_id", String(recipeData.user_id));
 
       if (recipeData.main_image instanceof File) {
         formData.append("main_image", recipeData.main_image);
@@ -108,13 +105,15 @@ export const getBySlug = async (
   communitySlug: string,
   postSlug: string,
   userSlug: string,
+  sortBy?: number
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/post/", {
       params: {
         communitySlug,
         postSlug,
-        userSlug
+        userSlug,
+        sortBy
       },
     });
     if (response.data.success === false) {
@@ -130,3 +129,25 @@ export const getBySlug = async (
     return null;
   }
 };
+
+export const createComment = async (
+  post_id: string,
+  content: string,
+  parent_comment_id?: string
+): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.post("/post/comment", {
+      post_id,
+      content,
+      parent_comment_id
+    });
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      toast.error(err.response?.data?.message || "Error al crear comentario");
+    } else {
+      toast.error("Error inesperado");
+    }
+    return null;
+  }
+}

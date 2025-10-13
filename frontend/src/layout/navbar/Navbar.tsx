@@ -69,7 +69,7 @@ const Header: React.FC = () => {
           className="flex items-center cursor-pointer"
         >
           <img className="w-[35px] h-[35px]" src={Logo} alt="Logo" />
-          <span className="ml-3 text-[17px] text1 Arvo-Bold text-red tracking-tighter">
+          <span className="ml-3 text-[17px] text1 Dosis-Bold text-red tracking-tighter">
             DualEat
           </span>
         </Link>

@@ -29,7 +29,7 @@ export interface PaginationInfo {
  * NOTA: El 'id' está definido como 'string', lo que es común para CUIDs/UUIDs.
  */
 export interface User {
-  id: string; 
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -76,7 +76,7 @@ export interface Community {
   image_url: string | null;
   theme_color: string | null;
   visibility: string | null;
-  creator_id: string; 
+  creator_id: string;
   total_members: number;
   tags: CommunityTag[];
   isMember: boolean;
@@ -137,7 +137,7 @@ export interface RecipeStep {
  */
 export interface Recipe {
   id: string; // Identificador único de la receta.
-  user_id: string; 
+  user_id: string;
   name: string;
   description: string;
   total_time: number;
@@ -154,14 +154,14 @@ export interface Recipe {
  */
 export interface Posts {
   id: string;
-  user_id: string; 
-  community_id: string; 
+  user_id: string;
+  community_id: string;
   title: string;
   content: string;
   image_urls: string[];
   type: "post" | "recipe";
   slug: string;
-  recipe_id: string | null; 
+  recipe_id: string | null;
   votes_up: number;
   votes_down: number;
   total_comments: number;
@@ -169,15 +169,91 @@ export interface Posts {
   updated_at: string;
   edited: boolean;
   active: boolean;
-  user: { // Información mínima del usuario que creó el post.
-    id: string; 
+  user: {
+    // Información mínima del usuario que creó el post.
+    id: string;
     name: string;
     avatar_url: string | null;
     slug: string;
   };
+  recipe: {
+    id: string;
+    name: string;
+    slug: string;
+    main_image: string | null;
+    total_time: number | null;
+    _count: {
+      steps: number;
+      ingredients: number;
+    };
+  };
   community: {
     slug: string;
   };
-  userVote: string | null; 
+  userVote: string | null;
   hasVoted: boolean | null;
+}
+
+/**
+ * @interface Comment
+ * Representa un comentario dentro de una publicación.
+ */
+
+export interface Comment {
+  id: string;
+  user_id: string;
+  post_id: string;
+  parent_comment_id: string | null;
+  content: string;
+  votes_up: number;
+  votes_down: number;
+  created_at: string;
+  updated_at: string;
+  edited: boolean;
+  active: boolean;
+  user: {
+    id: string;
+    name: string;
+    slug: string;
+    avatar_url: string | null;
+  };
+  userVote: string | null;
+  replies: Comment[];
+}
+
+/**
+ * @interface Notification
+ * Representa una notificación de usuario.
+ * */
+export interface Notification {
+  id: string;
+  user_id: string;
+  content_type: string;
+  content_id: string;
+  metadata: NotificationMetadata;
+  created_at: string;
+  read: boolean;
+  message: string;
+}
+
+/**
+ * @interface NotificationMetadata
+ * Define la estructura de los metadatos de una notificación.
+ */
+export interface NotificationMetadata {
+  title: string;
+  message: string;
+  type: "post" | "comment";
+  imageURLs: {
+    user?: string;
+    community?: string;
+    post?: string;
+  };
+  slugs: {
+    community?: string;
+    user?: string;
+    post?: string;
+  };
+  //imageURLs: string[]; // 1ro usuario, 2do comunidad
+  //slugs: string[]; // 1ro comunidad, 2do usuario del post, 3ro post
 }

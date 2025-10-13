@@ -30,7 +30,8 @@ export class RecipeController {
 
   /** GET RECIPE BY NAME */
   async getRecipeValidation(req: Request, res: Response) {
-    const { name, user_id, community_id } = req.query;
+    const { name, community_id } = req.query;
+    const user_id = (req as any).user?.id;
     try {
       const recipe = await this.recipeService.getRecipeValidation(
         name as string,
@@ -67,7 +68,7 @@ export class RecipeController {
 
   /** GET USER RECIPES */
   async getUserRecipes(req: Request, res: Response) {
-    const { user_id } = req.params;
+    const user_id = (req as any).user?.id;
     try {
       const recipes = await this.recipeService.getUserRecipes(user_id);
       res.status(200).json({ success: true, data: recipes });

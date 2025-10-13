@@ -13,7 +13,7 @@ const DownloadSectionBG: React.FC<Props> = ({ background, background2 }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
         {/* Contenido Izquierdo */}
         <div className="md:w-[60%] text-center md:text-left mb-12 md:mb-8 z-10">
-          <h1 className="text-[30px] Arvo-Bold text-white leading-[50px] mb-6">
+          <h1 className="text-[30px] Dosis-Bold text-white leading-[50px] mb-6">
             Descargá DualEat y descubrí un mundo lleno de sabores
           </h1>
           <p className="text-[16px] leading-[27px] tracking-[-0.4px] text-white mb-7 max-w-[700px]">

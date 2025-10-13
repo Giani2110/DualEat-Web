@@ -240,7 +240,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
       <div className="relative bg-white rounded-[20px] box-border py-4 px-5 shadow-md z-10 w-full max-w-[800px] h-fit">
         {step === "1" && (
           <>
-            <h2 className="text-[21px] text3 Arvo-Bold tracking-tight">
+            <h2 className="text-[21px] text3 Dosis-Bold tracking-tight">
               Cuéntanos sobre tu comunidad
             </h2>
             <p className="text-[13px] text6 tracking-tight mt-3">
@@ -372,7 +372,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
         {step === "2" && (
           <>
-            <h2 className="text-[21px] text3 Arvo-Bold tracking-tight">
+            <h2 className="text-[21px] text3 Dosis-Bold tracking-tight">
               Dale un diseño a tu comunidad
             </h2>
 
@@ -529,7 +529,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
         {step === "3" && (
           <div>
-            <h2 className="text-[21px] text3 Arvo-Bold tracking-tight">
+            <h2 className="text-[21px] text3 Dosis-Bold tracking-tight">
               Etiquetas de la comunidad
             </h2>
             <p className="text-[13px] text6 tracking-tight mt-3 mb-6">
@@ -552,7 +552,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                 </div>
                 {/* Contador de temas seleccionados */}
                 <div className="my-5 flex flex-wrap gap-2">
-                  <span className="text-[14px] text3 Arvo-Bold tracking-wide">
+                  <span className="text-[14px] text3 Dosis-Bold tracking-wide">
                     Temas: {selectedTags.length}/3
                   </span>
                 </div>
@@ -634,13 +634,13 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
         {step === "4" && (
           <div>
-            <h2 className="text-[21px] text3 Arvo-Bold tracking-tight">
+            <h2 className="text-[21px] text3 Dosis-Bold tracking-tight">
               ¿Qué tipo de comunidad es esta?
             </h2>
             <p className="text-[13px] text6 tracking-tight mt-3 leading-5 mb-6">
               Decide quién puede ver tu comunidad y colaborar en ella. Sólo las
               comunidades públicas aparecen en la búsqueda.
-              <span className="Arvo-Bold text5"> Importante:</span> Una vez
+              <span className="Dosis-Bold text5"> Importante:</span> Una vez
               configurado, deberás enviar una solicitud para cambiar el tipo de
               tu comunidad.
             </p>

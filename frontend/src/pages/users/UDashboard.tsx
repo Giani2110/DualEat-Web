@@ -101,12 +101,12 @@ const UserDashboard = () => {
                 src={community.image_url || undefined}
                 alt=""
               />
-              <h1 className="text-[12px] text5 Arvo-Bold tracking-wide ml-2">
+              <h1 className="text-[12px] text5 Dosis-Bold tracking-wide ml-2">
                 {community.name}
               </h1>
-              <span className="text-[11px] text4 Arvo-Bold mx-2">•</span>
+              <span className="text-[11px] text4 Dosis-Bold mx-2">•</span>
               <span className="text-[11px] text4">hace 14 hs</span>
-              <span className="text-[11px] text4 Arvo-Bold mx-2">•</span>
+              <span className="text-[11px] text4 Dosis-Bold mx-2">•</span>
               <span className="text-[11px] text4">123k seguidores</span>
             </div>
 
@@ -140,12 +140,12 @@ const UserDashboard = () => {
               src={user?.avatar_url || undefined}
               alt=""
             />
-            <h1 className="text-[12px] text5 Arvo-Bold tracking-wide ml-2">
+            <h1 className="text-[12px] text5 Dosis-Bold tracking-wide ml-2">
               {user?.name}
             </h1>
-            <span className="text-[11px] text4 Arvo-Bold  mx-2">•</span>
+            <span className="text-[11px] text4 Dosis-Bold  mx-2">•</span>
             <span className="text-[11px] text4">hace 14 hs</span>
-            <span className="text-[11px] text4 Arvo-Bold  mx-2">•</span>
+            <span className="text-[11px] text4 Dosis-Bold  mx-2">•</span>
             <span className="text-[11px] text4">123k seguidores</span>
           </div>
           <div>
@@ -159,7 +159,7 @@ const UserDashboard = () => {
           </div>
 
           <div className="flex flex-col mt-3">
-            <h1 className="Arvo-Bold text5 text-[16px]">
+            <h1 className="Dosis-Bold text5 text-[16px]">
               ¿Por qué el bife de chorizo lo venden caro?
             </h1>
             <div className="w-full aspect-[6/3] mt-3 overflow-hidden rounded-lg relative">

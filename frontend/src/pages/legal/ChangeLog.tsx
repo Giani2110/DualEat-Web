@@ -6,7 +6,7 @@ const ChangeLog: React.FC = () => {
     <div className="min-h-screen bgsemi-white pt-[15px]">
       <div className="rounded-[20px] mx-4 bg-gradient-to-t from-[#000000] to-[#434343] text-white h-[400px] relative">
         <div className="max-w-screen-2xl mx-auto text-center pt-[160px]">
-          <h1 className="text-[48px] Arvo-Bold mb-4">Changelog</h1>
+          <h1 className="text-[48px] Dosis-Bold mb-4">Changelog</h1>
           <p className="text-[18px] max-w-2xl mx-auto leading-[32px] tracking-[-0.3px]">
             Historial de cambios realizados a lo largo del sistema de DualEat
           </p>
@@ -19,14 +19,14 @@ const ChangeLog: React.FC = () => {
           <div className="pb-8 pt-8 border-b border-gray-200 max-w-[55%] mx-auto">
             <h2 className="text-[15px] text4">12 de julio de 2025</h2>
 
-            <h3 className="titleCL Arvo-Bold mb-1 mt-3">
+            <h3 className="titleCL Dosis-Bold mb-1 mt-3">
               Menús digitales más visuales
             </h3>
             <p className="text6 textCL">
               Los locales ahora pueden incluir imágenes de sus platos en el
               menú. Esto mejora la experiencia del cliente al elegir qué pedir.
             </p>
-            <h3 className="titleCL Arvo-Bold mb-1 mt-3">
+            <h3 className="titleCL Dosis-Bold mb-1 mt-3">
               Mejoras de seguridad en el inicio de sesión
             </h3>
             <p className="text6 textCL">
@@ -80,7 +80,7 @@ const ChangeLog: React.FC = () => {
                 </div>
               </div>
             </div>
-            <h3 className="titleCL Arvo-Bold mb-1 mt-3">Otras mejoras</h3>
+            <h3 className="titleCL Dosis-Bold mb-1 mt-3">Otras mejoras</h3>
             <ul className="list-disc pl-6 space-y-2 text6 textCL">
               <li>
                 Las recetas pueden compartirse fácilmente por WhatsApp o redes
@@ -94,7 +94,7 @@ const ChangeLog: React.FC = () => {
           <div className="pt-8 pb-8 border-b border-gray-200 max-w-[55%] mx-auto">
             <h2 className="text-[15px] text4">27 de junio de 2025</h2>
 
-            <h3 className="titleCL Arvo-Bold mb-1 mt-3">
+            <h3 className="titleCL Dosis-Bold mb-1 mt-3">
               Incorporamos filtros por tipo de comida
             </h3>
             <p className="text6 textCL">
@@ -102,7 +102,7 @@ const ChangeLog: React.FC = () => {
               alimentario: vegano, sin TACC, bajo en calorías y más. Seguimos
               sumando nuevas categorías.
             </p>
-            <h3 className="titleCL Arvo-Bold mb-1 mt-3">
+            <h3 className="titleCL Dosis-Bold mb-1 mt-3">
               Mejora en escaneo QR dentro de locales
             </h3>
             <p className="text6 textCL">
@@ -110,7 +110,7 @@ const ChangeLog: React.FC = () => {
               reseñas al instante. También suma puntos automáticamente al perfil
               del cliente.
             </p>
-            <h3 className="titleCL Arvo-Bold mb-1 mt-3">
+            <h3 className="titleCL Dosis-Bold mb-1 mt-3">
               Otras mejoras y correcciones
             </h3>
             <ul className="list-disc pl-6 space-y-2 text6 textCL">

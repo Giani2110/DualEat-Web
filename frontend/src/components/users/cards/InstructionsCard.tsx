@@ -175,7 +175,7 @@ const SortableInstruction = ({
       <div className="flex-[0.3] min-w-[120px]  border border-[#dbdbdb] rounded-[10px]">
         <input
           type="number"
-          step={5}
+          step={1}
           min={0}
           placeholder="Estimado (min)"
           className="w-full h-full text5 text-[13px] outline-none px-2"

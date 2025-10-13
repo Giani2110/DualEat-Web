@@ -8,7 +8,7 @@ const TermsConditions: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-[200px] pb-[100px]">
         <div className="bgsemi-white rounded-[20px] shadow-sm border-3 border-white p-8 md:p-12">
           <div className="text-center mb-12">
-            <h1 className="text-4xl Arvo-Bold mb-4">Términos y condiciones</h1>
+            <h1 className="text-4xl Dosis-Bold mb-4">Términos y condiciones</h1>
             <p className="text5">
               <strong>Última actualización:</strong> Julio 2025
             </p>
@@ -26,7 +26,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 1 */}
             <section className="mb-10">
-              <h2 className="Arvo-Bold text5 titleTC">1. Identificación</h2>
+              <h2 className="Dosis-Bold text5 titleTC">1. Identificación</h2>
               <p className="text4 textTC">
                 DualEat es un proyecto académico y comercial en desarrollo por
                 parte de Gianfranco Andreacchi y Axel Berger, operando
@@ -47,7 +47,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 2 */}
             <section className="mb-10">
-              <h2 className="Arvo-Bold text5 titleTC">2. Definiciones</h2>
+              <h2 className="Dosis-Bold text5 titleTC">2. Definiciones</h2>
               <div className="space-y-4 text4 textTC">
                 <div>
                   <p>
@@ -81,7 +81,9 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 3 */}
             <section className="mb-10">
-              <h2 className="Arvo-Bold text5 titleTC">3. Condiciones de uso</h2>
+              <h2 className="Dosis-Bold text5 titleTC">
+                3. Condiciones de uso
+              </h2>
               <p className="text4 textTC">
                 El uso de la plataforma implica el cumplimiento de estas reglas:
               </p>
@@ -107,7 +109,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 4 */}
             <section className="mb-10! text4 textTC">
-              <h2 className="Arvo-Bold text5 titleTC">
+              <h2 className="Dosis-Bold text5 titleTC">
                 4. Obligaciones de los locales gastronómicos
               </h2>
               <p>
@@ -137,7 +139,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 5 */}
             <section className="mb-10! text4 textTC">
-              <h2 className="Arvo-Bold text5 titleTC">
+              <h2 className="Dosis-Bold text5 titleTC">
                 5. Propiedad intelectual
               </h2>
               <div className="space-y-4">
@@ -162,7 +164,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 6 */}
             <section className="mb-10! text4 textTC ">
-              <h2 className="Arvo-Bold text5 titleTC">
+              <h2 className="Dosis-Bold text5 titleTC">
                 6. Privacidad y datos personales
               </h2>
               <p>
@@ -182,7 +184,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 7 */}
             <section className="mb-10! text4 textTC">
-              <h2 className="Arvo-Bold text5 titleTC">
+              <h2 className="Dosis-Bold text5 titleTC">
                 7. Limitación de responsabilidad
               </h2>
               <ul className="list-disc pl-6 space-y-2">
@@ -204,7 +206,7 @@ const TermsConditions: React.FC = () => {
 
             {/* Section 8 */}
             <section className="mb-10! text4 textTC">
-              <h2 className="Arvo-Bold text5 titleTC">
+              <h2 className="Dosis-Bold text5 titleTC">
                 8. Cambios en los términos
               </h2>
               <ul className="list-disc pl-6 space-y-2">

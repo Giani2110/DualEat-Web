@@ -87,7 +87,12 @@ export class CommunityService {
 
   /** LEAVE COMMUNITY */
   async leaveCommunity(user_id: string, community_id: string) {
-    console.log("Intentando abandonar comunidad con user_id:", user_id, "y community_id:", community_id);
+    console.log(
+      "Intentando abandonar comunidad con user_id:",
+      user_id,
+      "y community_id:",
+      community_id
+    );
     const result = await prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
         const exists = await tx.communityMember.findUnique({
@@ -294,11 +299,28 @@ export class CommunityService {
         prisma.post.findMany({
           where: { community_id, active: true },
           orderBy: { created_at: "desc" },
-          skip: (page - 1) * 10,
-          take: 10,
+          skip: (page - 1) * 5,
+          take: 5,
           include: {
             community: { select: { slug: true } },
-            user: { select: { id: true, name: true, avatar_url: true, slug: true } },
+            recipe: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                main_image: true,
+                total_time: true,
+                _count: {
+                  select: {
+                    steps: true,
+                    ingredients: true,
+                  },
+                },
+              },
+            },
+            user: {
+              select: { id: true, name: true, avatar_url: true, slug: true },
+            },
           },
         }),
         prisma.post.count({ where: { community_id, active: true } }),
@@ -331,7 +353,7 @@ export class CommunityService {
         hasVoted: voteMap.has(post.id),
       }));
 
-      const totalPages = Math.ceil(total / 10);
+      const totalPages = Math.ceil(total / 5);
 
       return {
         data: postsWithVotes,

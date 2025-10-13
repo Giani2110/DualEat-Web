@@ -22,10 +22,7 @@ export class PostController {
 
   /** GET POST (by slug)*/
   async getBySlug(req: Request, res: Response) {
-    const communitySlug = req.query.communitySlug;
-    const postSlug = req.query.postSlug;
-    const userSlug = req.query.userSlug;
-
+    const { communitySlug, postSlug, userSlug, sortBy } = req.query;
     const user_id = (req as any).user?.id;
 
     if (!communitySlug || !postSlug || !userSlug) {
@@ -35,7 +32,7 @@ export class PostController {
     }
 
     try {
-      const post = await this.postService.getPostBySlug(String(userSlug), String(communitySlug), String(postSlug), user_id);
+      const post = await this.postService.getPostBySlug(String(userSlug), String(communitySlug), String(postSlug), user_id, Number(sortBy));
       if (!post) {
         return res
           .status(404)
@@ -54,7 +51,6 @@ export class PostController {
         title,
         content,
         type,
-        user_id,
         community_id,
         name,
         description,
@@ -62,6 +58,8 @@ export class PostController {
         ingredients,
         steps,
       } = req.body;
+
+      const user_id = (req as any).user?.id;
 
       // Parse JSONs
       if (ingredients && typeof ingredients === "string") {
@@ -188,6 +186,29 @@ export class PostController {
         success: false,
         message: error.message || "Error interno del servidor",
       });
+    }
+  }
+
+
+  /** CREATE COMMENT */
+  async createComment(req: Request, res: Response) {
+    try {
+      const { post_id, content, parent_comment_id } = req.body;
+      const user_id = (req as any).user?.id;
+
+      if (!post_id || !content) {
+        return res.status(400).json({ success: false, message: "Faltan campos obligatorios" });
+      }
+      
+      const comment = await this.postService.createComment(
+        post_id,
+        user_id,
+        content,
+        parent_comment_id,
+      );
+      return res.status(201).json({ success: true, data: comment });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: (error as Error).message });
     }
   }
 }

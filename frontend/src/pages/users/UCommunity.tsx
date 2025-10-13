@@ -20,6 +20,8 @@ import { formatCompactNumber } from "../../utils/compactNumber";
 import { axiosInterceptor } from "../../interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
+import Loader from "../../components/animation/Loader";
+
 import { useCommunity } from "../../hooks/useUCommunity";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -32,21 +34,26 @@ const UCommunity = () => {
   const [community, setCommunity] = useState<Community | null>(null);
   const [posts, setPosts] = useState<Posts[]>([]);
 
+  // Paginación y flags
   const [hasMore, setHasMore] = useState(true);
-  const loaderRef = useRef<HTMLDivElement | null>(null);
   const [page, setPage] = useState(1);
-
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // UI local
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  // Refs para IntersectionObserver y sentinel
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const handleJoinCommunity = async (community: Community) => {
     try {
       if (community.isMember && community.creator_id === user?.id) {
         toast.error("No puedes unirte a tu propia comunidad");
         return;
-      };
+      }
 
       if (community.isMember === false) {
         const response = await joinCommunity(community.id);
@@ -129,67 +136,111 @@ const UCommunity = () => {
 
   // Obtener comunidad
   useEffect(() => {
+    console.log("🏁 Iniciando carga de comunidad...");
     const fetchCommunity = async () => {
       if (communitySlug) {
         const response = await getCommunityBySlug(communitySlug);
         if (response && response.data) {
           setCommunity(response.data as Community);
-          console.log(response.data);
+          console.log("✅ Comunidad cargada:", response.data);
         }
       }
     };
     fetchCommunity();
   }, [communitySlug]);
 
-  // Cargar posts iniciales y siguientes
+  // 2. Cargar posts cuando cambia la página
   useEffect(() => {
-    if (!community) return;
-    const fetchPosts = async (page: number) => {
-      if (!community || isLoading) return;
+    if (!community) {
+      return;
+    }
+
+    const fetchPosts = async () => {
+      if (isLoading) {
+        return;
+      }
       setIsLoading(true);
 
-      const response = await getCommunityPosts(community.id, page);
+      try {
+        const response = await getCommunityPosts(community.id, page);
 
-      console.log(response);
-      if (response && response.success) {
-        setPosts((prevPosts) => {
-          const newPosts = response.data as Posts[];
-          const existingIds = new Set(prevPosts.map((post) => post.id));
-          const uniqueNewPosts = newPosts.filter(
-            (post) => !existingIds.has(post.id)
-          );
-          return [...prevPosts, ...uniqueNewPosts];
-        });
+        if (response && response.success) {
+          setPosts((prevPosts) => {
+            const newPosts = response.data as Posts[];
 
-        setHasMore(response.pagination.page < response.pagination.totalPages);
+            const existingIds = new Set(prevPosts.map((post) => post.id));
+            const uniqueNewPosts = newPosts.filter(
+              (post) => !existingIds.has(post.id)
+            );
+
+            return [...prevPosts, ...uniqueNewPosts];
+          });
+
+          const newHasMore =
+            response.pagination.page < response.pagination.totalPages;
+          setHasMore(newHasMore);
+
+          console.log("📊 Paginación:", {
+            página: response.pagination.page,
+            total: response.pagination.totalPages,
+            hayMás: newHasMore,
+          });
+        }
+      } catch (error) {
+        console.error("🚨 Error al obtener posts:", error);
+      } finally {
+        setIsLoading(false);
+        setIsInitialized(true);
       }
-      setIsLoading(false);
     };
-    fetchPosts(page);
+
+    fetchPosts();
   }, [community, page]);
 
+  // 3. IntersectionObserver
   useEffect(() => {
-    const loaderElement = loaderRef.current;
+    const el = loaderRef.current;
+    if (!el) {
+      return;
+    }
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prev) => prev + 1);
+        const entry = entries[0];
+        console.log(
+          "Observer callback:",
+          entry.isIntersecting,
+          "ratio:",
+          entry.intersectionRatio,
+          "initialized:",
+          isInitialized
+        );
+
+        if (entry.isIntersecting && hasMore && !isLoading && isInitialized) {
+          console.log("➡️ Incrementando página");
+          setPage((p) => p + 1);
         }
       },
-      { threshold: 1 }
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0.1,
+      }
     );
 
-    if (loaderElement) {
-      observer.observe(loaderElement);
-    }
+    observer.observe(el);
+    observerRef.current = observer;
 
     return () => {
-      if (loaderElement) {
-        observer.unobserve(loaderElement);
-      }
+      observer.disconnect();
+      observerRef.current = null;
     };
-  }, [hasMore]);
+  }, [hasMore, isLoading, isInitialized]);
 
   return (
     <section className="w-[95%] md:w-[80%] mx-auto flex flex-col gap-3 px-2 py-1 mt-5">
@@ -212,7 +263,7 @@ const UCommunity = () => {
             {community?.image_url && (
               <img
                 alt="Logo de la comunidad"
-                className="w-18 h-18 sm:w-22 sm:h-22 object-cover border-4 border-white rounded-full"
+                className="w-20 h-20 sm:w-22 sm:h-22 object-cover rounded-full border-4 border-white flex-shrink-0"
                 src={community.image_url || ""}
               />
             )}
@@ -321,17 +372,27 @@ const UCommunity = () => {
               type="button"
               onClick={() => community && handleJoinCommunity(community)}
               className={`rounded-full border border-gray-300 cursor-pointer px-4 py-[6px] Dosis-Bold hover:bg-gray-100 ${
-                community?.creator_id === user?.id ? "bg-red" :
-                community?.isMember ? "" : "bg-blue"
+                community?.creator_id === user?.id
+                  ? "bg-red"
+                  : community?.isMember
+                  ? ""
+                  : "bg-blue"
               }`}
             >
               <span
                 className={`text-[15px] ${
-                  community?.creator_id === user?.id ? "text-white" :
-                  community?.isMember ? "text5" : "text-white"
+                  community?.creator_id === user?.id
+                    ? "text-white"
+                    : community?.isMember
+                    ? "text5"
+                    : "text-white"
                 }`}
               >
-                {community?.creator_id === user?.id ? "Eres el moderador" : community?.isMember ? "Se unió" : "Unirse"}
+                {community?.creator_id === user?.id
+                  ? "Eres el moderador"
+                  : community?.isMember
+                  ? "Se unió"
+                  : "Unirse"}
               </span>
             </button>
           </div>
@@ -340,13 +401,30 @@ const UCommunity = () => {
 
       <div className="flex gap-8 flex-wrap w-full mt-30">
         <div className="flex flex-col flex-[2] px-5">
+          {posts.length === 0 && !isLoading && (
+            <p className="text-center text-gray-500 py-8">
+              No hay posts en esta comunidad aún
+            </p>
+          )}
           {posts.map((post) => (
             <PostCard key={post.id} Post={post} />
           ))}
+          {/* Sentinel */}
+          <div
+            ref={loaderRef}
+            style={{ width: "100%", height: 1, marginTop: 8 }}
+            aria-hidden="true"
+          >
+            {isLoading && (
+              <div className="flex justify-center">
+                <Loader color="gray-500" size="12" />
+              </div>
+            )}
+          </div>
         </div>
 
         <div
-          className="flex-[0.6] hidden md:block bannerBG"
+          className="flex-[0.6] hidden md:block bannerBG h-fit"
           style={
             {
               "--bg-image": `url('${community?.theme_color}')`,

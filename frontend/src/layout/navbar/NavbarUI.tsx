@@ -10,6 +10,9 @@ import { Search, Plus, Bell, Menu } from "lucide-react";
 import LogoYellow from "../../assets/images/icon/Logo DualEatYellow.png";
 import LogoWhite from "../../assets/images/icon/Logo_DualEat.png";
 
+import type { Notification } from "../../interface/global";
+import { useNavigate } from "react-router-dom";
+
 import { formatShortTime } from "../../utils/compactNumber";
 
 interface HeaderUSERProps {
@@ -22,11 +25,13 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
   onToggleSidebar,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [scrolled, setScrolled] = React.useState(false);
   const { user } = useAuth();
 
-  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAsReadSingle } =
+    useNotifications();
 
   const [openNotifications, setOpenNotifications] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -63,6 +68,31 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
   const headerBorderColor = isBusiness ? "border-gray-700" : "border-[#e5a657]";
   const scrolledBgColor = isBusiness ? "bg-gray-900" : "bg-white";
   const textColor = isBusiness ? "text-white" : "text-yellow";
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (
+      notification.metadata.slugs &&
+      notification.metadata.type === "comment"
+    ) {
+      markAsReadSingle(notification.id);
+      navigate(
+        "/c/" +
+          notification.metadata.slugs.community +
+          "/post/" +
+          notification.metadata.slugs.user +
+          "/" +
+          notification.metadata.slugs.post
+      );
+    } else {
+      markAsReadSingle(notification.id);
+      navigate("/c/" + notification.metadata.slugs.community);
+    }
+  };
+
+  const toggleNotifications = () => {
+    navigate("/notifications");
+    setOpenNotifications(!openNotifications);
+  };
 
   return (
     <header
@@ -151,7 +181,11 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
           onMouseLeave={handleMouseLeave}
         >
           {/* Icono de campana */}
-          <div className="relative p-2 cursor-pointer group hover:bg-gray-800 rounded-full transition-colors duration-200">
+          <button
+            type="button"
+            onClick={() => toggleNotifications()}
+            className="relative p-2 cursor-pointer group hover:bg-gray-800 rounded-full transition-colors duration-200"
+          >
             <Bell
               className="w-[22px] text-[#4A4947] group-hover:text-white h-[22px] md:w-[23px] md:h-[23px]"
               strokeWidth={1.8}
@@ -163,7 +197,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
                 </span>
               </div>
             )}
-          </div>
+          </button>
 
           {/* Dropdown de notificaciones */}
           {openNotifications && (
@@ -182,20 +216,29 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
                   notifications.map((notif, index) => (
                     <Link
                       key={index}
-                      to={`/post/${notif}`}
+                      to={""}
                       className={`p-4 flex items-center justify-between gap-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0`}
-                      onClick={() => setOpenNotifications(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNotificationClick(notif);
+                      }}
                     >
-                      {notif.metadata?.postURLs?.length > 0 && (
+                      {notif.metadata?.imageURLs && (
                         <img
-                          src={notif.metadata?.postURLs[0]}
-                          alt=""
-                          className="w-[40px] h-[40px] rounded-full"
+                          src={
+                            notif.metadata.imageURLs.community !== undefined
+                              ? notif.metadata.imageURLs.community
+                              : notif.metadata.imageURLs.user !== undefined
+                              ? notif.metadata.imageURLs.user
+                              : "https://placehold.co/40x40/000000/FFFFFF.png"
+                          }
+                          alt="Imagen de la notificación"
+                          className="max-w-[35px] w-full max-h-[35px] h-full object-cover rounded-full"
                         />
                       )}
                       <div>
                         <p className="text-[14px] text5 Dosis-Bold">
-                          {notif.metadata.postTitle}
+                          {notif.metadata?.title}
                         </p>
                         <p className="text-[13px] text4">{notif.message}</p>
                       </div>

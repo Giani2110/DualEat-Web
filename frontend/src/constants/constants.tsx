@@ -24,6 +24,7 @@ import {
   URecipes,
   UCommunity,
   UComment,
+  UNotifications,
 } from "../pages";
 
 export const ROUTES = {
@@ -46,6 +47,7 @@ export const ROUTES = {
     EXPLORE: "/explore/",
     RECIPES: "/recipes/",
     COMMUNITY: "/c/",
+    NOTIFICATIONS: "/notifications",
   },
   ADMIN: {
     BUSINESS_CREATION: "/admin/business-creation",
@@ -174,6 +176,14 @@ export const appRoutes = [
     element: (
       <ProtectedRoute isBusiness={false}>
         <UComment />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.USER.NOTIFICATIONS,
+    element: (
+      <ProtectedRoute isBusiness={false}>
+        <UNotifications />
       </ProtectedRoute>
     ),
   },

@@ -42,12 +42,11 @@ export const getAllUnits = async (): Promise<Response | null> => {
 
 export const getRecipeByName = async (
   name: string,
-  user_id: number,
-  community_id: number
+  community_id: string
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/recipe/", {
-      params: { name, user_id, community_id },
+      params: { name, community_id },
     });
     return response.data as Response;
   } catch (err: unknown) {
@@ -59,7 +58,7 @@ export const getRecipeByName = async (
 };
 
 export const getUserRecipes = async (
-  user_id: number
+  user_id: string
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/recipe/user", {
@@ -110,7 +109,7 @@ export const askOllama = async (
 
 export const askRecipe = async (
   question: string,
-  recipe_id: number,
+  recipe_id: string,
   conversation: Comment[]
 ): Promise<ResponseAI | null> => {
   try {

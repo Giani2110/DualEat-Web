@@ -3,8 +3,7 @@ export interface CreatePostDTO {
   content: string;
   image_urls?: File[];
   type: "post" | "recipe";
-  user_id: number;
-  community_id: number;
+  community_id: string;
 }
 
 export interface CreateRecipeDTO {
@@ -12,7 +11,6 @@ export interface CreateRecipeDTO {
   description: string;
   main_image:  File | null;
   total_time?: number;
-  user_id: number;
   ingredients: {
     ingredient_id: string;
     quantity: string;

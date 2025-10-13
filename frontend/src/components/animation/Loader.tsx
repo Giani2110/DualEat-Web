@@ -1,7 +1,7 @@
 import React from "react";
 interface LoaderProps {
   color?: "white" | "black" | "gray-500" | "yellow" | "red"; 
-  size?:  "4" | "6"; 
+  size?:  "4" | "6" | "8" | "10" | "12"; 
 }
 
 const Loader: React.FC<LoaderProps> = ({ color = "white", size = "4" }) => {
