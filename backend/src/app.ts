@@ -52,6 +52,7 @@ import foodRoutes from "./modules/Locals/route/food.routes";
 import usersRouter from "./routes/users";
 import localMenuCategoryRouter from "./modules/Locals/route/foodCategory.routes";
 import localSettingsRouter from "./modules/Locals/route/settings.routes";
+import localCalendar from "./modules/Locals/route/calendar.routes";
 
 // =========================================================================
 
@@ -174,6 +175,7 @@ app.use("/api", orders);
 app.use("/api", manualLoadMenu);
 app.use("/api/local-menu-categories", localMenuCategoryRouter);
 app.use("/api/settings", localSettingsRouter);
+app.use("/api/calendar", localCalendar);
 
 app.use("/api/qr", qrRoutes);
 app.use("/api/ocr", ocrRoutes);

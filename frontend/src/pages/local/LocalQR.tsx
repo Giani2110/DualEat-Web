@@ -135,7 +135,7 @@ const LocalQR = () => {
                 onClick={() => downloadQr('png')}
                 disabled={!qrDataUrl}
                 className="flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors 
-                            bg-gray-900 hover:bg-gray-700 text-white 
+                            bg-gray-900 cursor-pointer hover:bg-gray-700 text-white 
                             disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                 <Download size={20} />
@@ -146,7 +146,7 @@ const LocalQR = () => {
                 onClick={() => downloadQr('jpg')}
                 disabled={!qrDataUrl}
                 className="flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors 
-                            bg-gray-900 hover:bg-gray-700 text-white 
+                            bg-gray-900 cursor-pointer hover:bg-gray-700 text-white 
                             disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                 <Download size={20} />

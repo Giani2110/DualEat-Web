@@ -112,6 +112,22 @@ enum DayOfWeek {
   DOMINGO
 }
 
+enum LocalEventType {
+  TASK       
+  PAYMENT    
+  DELIVERY   
+  MEETING    
+  MAINTENANCE 
+  OTHER       
+}
+
+enum EventStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  IN_PROGRESS
+}
+
 // MODELS
 model User {
   // 1. IDENTIFICACIÓN Y PERFIL
@@ -241,6 +257,8 @@ model Local {
   menu_categories LocalMenuCategory[]
 
   schedules LocalSchedule[]
+  calendar_events LocalCalendarEvent[]
+  notes           LocalNote[]
   @@index([business_id])
 }
 
@@ -270,6 +288,44 @@ model LocalMenuCategory {
   @@unique([local_id, name])
   @@index([local_id])
   @@index([food_category_id])
+}
+
+model LocalCalendarEvent {
+  id          String         @id @default(cuid()) @map("id")
+  local_id    String
+  local       Local          @relation(fields: [local_id], references: [id])
+
+  title       String        
+  description String?
+  start_time  DateTime       
+  end_time    DateTime?      
+  is_full_day Boolean        @default(false)
+
+  event_type  LocalEventType @default(TASK) 
+  status      EventStatus    @default(PENDING) 
+  priority    Int            @default(1)
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([local_id, start_time])
+}
+
+model LocalNote {
+  id           String    @id @default(cuid()) @map("id")
+  local_id     String
+  local        Local     @relation(fields: [local_id], references: [id])
+
+  title        String    
+  content      String 
+  is_pinned    Boolean   @default(false)
+  is_completed Boolean   @default(false)
+  due_date     DateTime?
+  
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@index([local_id, is_pinned, due_date])
 }
 
 model LocalUser {

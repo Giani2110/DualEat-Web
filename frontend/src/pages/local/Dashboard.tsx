@@ -48,7 +48,6 @@ interface DashboardStats {
 const Dashboard = () => {
   const authContext = useContext(AuthContext);
   const user = authContext?.user;
-
   const [localId, setLocalId] = useState<number | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
@@ -63,7 +62,7 @@ const Dashboard = () => {
   const [reviews, setReviews] = useState<LocalReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  
   // Estados de paginación
   const [earningsPage, setEarningsPage] = useState(0);
   const [reviewsPage, setReviewsPage] = useState(0);
@@ -71,7 +70,6 @@ const Dashboard = () => {
   const [ordersPage, setOrdersPage] = useState(0);
 
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
   const parseArray = <T,>(raw: any): T[] => {
     if (Array.isArray(raw)) return raw;
     if (raw && Array.isArray(raw.data)) return raw.data;
@@ -287,18 +285,17 @@ const Dashboard = () => {
       </div>
     </div>
   );
-
   // Componente del gráfico memoizado para evitar re-renders innecesarios
   const EarningsCard = useMemo(() => {
     const totalYearRevenue = monthlyEarnings.reduce((sum, month) => sum + (month.total_earnings ?? 0), 0);
 
-    // Obtener los datos del mes actual y el mes anterior
     const currentMonthData = monthlyEarnings.length > 0 ? monthlyEarnings[monthlyEarnings.length - 1] : null;
     const prevMonthData = monthlyEarnings.length > 1 ? monthlyEarnings[monthlyEarnings.length - 2] : null;
 
     let growthPercentage = 0;
     if (currentMonthData && prevMonthData && prevMonthData.total_earnings > 0) {
-      growthPercentage = ((currentMonthData.total_earnings - prevMonthData.total_earnings) / prevMonthData.total_earnings) * 100;
+      growthPercentage 
+        = ((currentMonthData.total_earnings - prevMonthData.total_earnings) / prevMonthData.total_earnings) * 100;
     }
 
     const isPositiveGrowth = growthPercentage >= 0;
@@ -312,13 +309,14 @@ const Dashboard = () => {
     };
 
     const chartData = monthlyEarnings.length === 1 
-      ? [
+      ?
+      [
           { month: '', total_earnings: 0, isPlaceholder: true },
           { ...monthlyEarnings[0], isPlaceholder: false },
           { month: '', total_earnings: 0, isPlaceholder: true }
         ]
       : monthlyEarnings.map(item => ({ ...item, isPlaceholder: false }));
-
+      
     return (
       <div className="rounded-2xl p-6 text-white overflow-hidden relative shadow-lg
         bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
@@ -341,7 +339,8 @@ const Dashboard = () => {
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8484E4" stopOpacity={0.8} />
+                    <stop offset="5%" 
+                      stopColor="#8484E4" stopOpacity={0.8} />
                     <stop offset="95%" stopColor="#8484E4" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -363,7 +362,8 @@ const Dashboard = () => {
                     color: 'white',
                     fontSize: '12px'
                   }}
-                  labelFormatter={(label: string) => label ? `Mes: ${label}` : ''}
+                  labelFormatter={(label: string) => label ?
+                    `Mes: ${label}` : ''}
                   formatter={(value: number, _name: string, props: any) => {
                     if (props.payload.isPlaceholder) return ['', ''];
                     return [`Ingreso total\n${formatCurrencyShort(value)}`, ''];
@@ -373,14 +373,16 @@ const Dashboard = () => {
                   type="monotone" 
                   dataKey="total_earnings" 
                   stroke="#8484E4" 
-                  strokeWidth={monthlyEarnings.length === 1 ? 0 : 2}
+                  strokeWidth={monthlyEarnings.length === 1 ?
+                    0 : 2}
                   fillOpacity={1} 
                   fill="url(#colorRevenue)"
-                  dot={(props: any) => {
-                    if (props.payload.isPlaceholder) return <></>;
+                  dot={({ key, ...restProps }: any) => {
+                    if (restProps.payload.isPlaceholder) return <></>;
                     return (
                       <Dot
-                        {...props}
+                        key={key}
+                        {...restProps}
                         r={monthlyEarnings.length === 1 ? 8 : 4}
                         fill="#8484E4"
                         stroke="#fff"
@@ -388,11 +390,12 @@ const Dashboard = () => {
                       />
                     );
                   }}
-                  activeDot={(props: any) => {
-                    if (props.payload.isPlaceholder) return <></>;
+                  activeDot={({ key, ...restProps }: any) => {
+                    if (restProps.payload.isPlaceholder) return <></>;
                     return (
                       <Dot
-                        {...props}
+                        key={key} 
+                        {...restProps}
                         r={monthlyEarnings.length === 1 ? 10 : 6}
                         fill="#8484E4"
                         stroke="#fff"
@@ -418,7 +421,6 @@ const Dashboard = () => {
     );
   }, [monthlyEarnings]);
 
-  // Función helper para crear elementos vacíos para mantener altura fija
   const createEmptySlots = (currentItems: number, maxItems: number) => {
     const emptySlots = maxItems - currentItems;
     return Array.from({ length: Math.max(0, emptySlots) }, (_, index) => (
@@ -434,7 +436,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-
   if (error) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-red-700 text-red-400">
@@ -444,7 +445,7 @@ const Dashboard = () => {
       </div>
     </div>
   );
-
+  
   return (
     <div className="bgFood2 min-h-screen text-white">
       <div className="p-6">
@@ -476,7 +477,8 @@ const Dashboard = () => {
                   <button
                     type='button'
                     title='Anterior'
-                    onClick={() => setEarningsPage(prev => Math.max(0, prev - 1))}
+                    onClick={() => setEarningsPage(prev => Math.max(0, prev - 
+                      1))}
                     disabled={earningsPage === 0}
                     className="p-1 rounded-full bg-gray-700 text-gray-400 disabled:opacity-50 hover:bg-gray-600 transition-colors"
                   >
@@ -538,14 +540,16 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="space-y-4" style={{ minHeight: `${TOP_FOODS_PER_PAGE * (48 + 16) + 32}px` }}>
-                <div className="grid grid-cols-4 gap-4 text-sm text-gray-400 font-medium pb-2 border-b border-gray-700">
+                <div className="grid grid-cols-4 gap-4 text-sm text-gray-400 
+                  font-medium pb-2 border-b border-gray-700">
                   <span>Plato</span><span>Precio</span><span>Vendidos</span><span>Estado</span>
                 </div>
                 {paginationData.topFoods.data.length > 0 ? (
                   <>
                     {paginationData.topFoods.data.map(food => (
                       <div key={food.food_id} className="grid grid-cols-4 gap-4 items-center bg-gray-700 p-3 rounded-lg hover:ring-1 hover:ring-gray-600 transition-all">
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center 
+                          space-x-3">
                           <div className="w-8 h-8 bg-orange-700/20 rounded-lg flex items-center justify-center">
                             <span className="text-orange-300 text-sm font-medium">🍽️</span>
                           </div>
@@ -591,17 +595,20 @@ const Dashboard = () => {
                   <>
                     {paginationData.reviews.data.map(review => (
                       <div key={review.id} className="border-b border-gray-700 last:border-b-0 pb-4 last:pb-0 bg-gray-700 p-3 rounded-lg hover:ring-1 hover:ring-gray-600 transition-all">
-                        <div className="flex items-start space-x-3">
+                        <div className="flex 
+                          items-start space-x-3">
                           <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
                             {review.user?.avatar_url ? (
-                              <img src={review.user.avatar_url} alt={review.user?.name ?? 'Usuario'} className="w-10 h-10 rounded-full object-cover" />
+                              <img src={review.user.avatar_url} alt={review.user?.name ?? 'Usuario'} className="w-10 
+                                h-10 rounded-full object-cover" />
                             ) : (
                               <span className="text-gray-400 text-sm font-medium">{(review.user?.name?.charAt(0) ?? '?').toUpperCase()}</span>
                             )}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
-                              <span className="font-medium text-white">{review.user?.name ?? 'Anónimo'}</span>
+                              <span className="font-medium text-white">{review.user?.name ??
+                                'Anónimo'}</span>
                               <div className="flex">
                                 {[...Array(5)].map((_, i) => (
                                   <Star key={i} className={`w-4 h-4 ${i < (review.rating ?? 0) ? 'text-yellow-400 fill-current' : 'text-gray-500'}`} />
@@ -666,7 +673,8 @@ const Dashboard = () => {
                         return (
                           <tr key={order.id} className="border-b border-gray-700 last:border-b-0">
                             <td className="py-3 px-4"><span className="font-medium text-white">{order.user?.name ?? 'Usuario desconocido'}</span></td>
-                            <td className="py-3 px-4"><span className="font-semibold text-white">{formatCurrency(order.total)}</span></td>
+                            <td className="py-3 px-4"><span className="font-semibold 
+                              text-white">{formatCurrency(order.total)}</span></td>
                             <td className="py-3 px-4">
                               <div className="flex items-center space-x-2">
                                 <StatusIcon className="w-4 h-4 text-white" />
@@ -674,7 +682,8 @@ const Dashboard = () => {
                               </div>
                             </td>
                             <td className="py-3 px-4"><span className="text-sm text-gray-400">{new Date(order.created_at).toLocaleDateString('es-AR')}</span></td>
-                            <td className="py-3 px-4"><span className="text-sm text-gray-400">{order.order_items.reduce((sum, i) => sum + (i.quantity ?? 0), 0)} items</span></td>
+                            <td className="py-3 px-4"><span className="text-sm text-gray-400">{order.order_items.reduce((sum, i) => sum + (i.quantity ??
+                              0), 0)} items</span></td>
                           </tr>
                         );
                       })}

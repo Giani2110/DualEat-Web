@@ -19,6 +19,7 @@ import {
   LocalQR,
   LocalReviews,
   LocalSettings,
+  LocalCalendar,
   UPost,
   UExplore,
   URecipes,
@@ -247,6 +248,14 @@ export const appRoutes = [
     element: (
       <ProtectedRoute isBusiness={true}>
         <LocalSettings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.CALENDAR,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalCalendar />
       </ProtectedRoute>
     ),
   },
