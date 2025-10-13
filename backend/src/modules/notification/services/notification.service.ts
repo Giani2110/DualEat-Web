@@ -19,7 +19,6 @@ export class NotificationService {
         },
       });
 
-      
       return result;
     } catch (error) {
       throw new Error(`Error al obtener notificaciones: ${error}`);
@@ -102,6 +101,16 @@ export class NotificationService {
   /** MARK AS READ */
   async markAsRead(id: string, user_id: string) {
     try {
+      const notif = await prisma.notification.findFirst({
+        where: {
+          id,
+          user_id,
+        },
+      });
+
+      if (!notif) {
+        throw new Error("Notificación no encontrada o no pertenece al usuario");
+      }
       const result = await prisma.notification.update({
         where: {
           id,

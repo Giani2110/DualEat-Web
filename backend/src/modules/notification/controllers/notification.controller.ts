@@ -86,7 +86,7 @@ export class NotificationController {
   /** PUT /api/notification/read */
   async markAsRead(req: Request, res: Response) {
     try {
-      const { id } = req.query;
+      const { id } = req.body;
       const user_id = (req as any).user?.id;
 
       if (!user_id) {

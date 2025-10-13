@@ -15,6 +15,7 @@ import { configurePassport } from "./config/passport";
 import { redisClient } from "./config/redis";
 import { API_PREFIX } from "./config/config";
 import { initializeSocket } from "./config/socket.config";
+import { CleanupJob } from "./jobs/cleanup.job";
 
 // Módulos principales y sus rutas
 import authRoutes from "./modules/auth/routes/auth.routes";
@@ -212,6 +213,10 @@ app.use(
     });
   }
 );
+
+// Iniciar tarea de limpieza
+const cleanupJob = new CleanupJob();
+cleanupJob.start();
 
 // 7. INICIAR SERVIDOR
 // =========================================================================
