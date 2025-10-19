@@ -336,7 +336,7 @@ const URecipes = () => {
               </h1>
               <p className="pt-2 text5 text-[18px] Dosis-Light tracking-tight">
                 Elija una de las sugerencias a continuación o escriba la suya
-                para comenzar a chatear con DualIAT.
+                para comenzar a chatear con DualIA.
               </p>
             </div>
           )}

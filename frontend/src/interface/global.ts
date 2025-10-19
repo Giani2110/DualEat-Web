@@ -10,6 +10,11 @@ export interface Response<T = unknown> {
   data?: T;
 }
 
+
+// Tipos derivados para modularidad y reutilización
+export type MinimalUser = Pick<User, "id" | "name" | "slug" | "avatar_url">;
+export type MinimalCommunity = Pick<Community, "slug" | "image_url">;
+
 /**
  * @interface PaginationInfo
  * Contiene metadatos para la paginación de listas largas.
@@ -31,6 +36,7 @@ export interface PaginationInfo {
 export interface User {
   id: string;
   name: string;
+  slug: string;
   email: string;
   role: string;
   provider: string;
@@ -113,9 +119,11 @@ export interface RecipeIngredient {
   id: number;
   recipe_id: number;
   ingredient_id: number;
-  quantity: string; // Cantidad (string para manejar fracciones o textos como "al gusto").
+  quantity: string; 
   unit_of_measure_id: number;
   notes: string;
+  ingredient?: Ingredient;
+  unit_of_measure?: UnitOfMeasure;
 }
 
 /**
@@ -128,7 +136,7 @@ export interface RecipeStep {
   step_number: number;
   description: string;
   image_url: string | null;
-  estimated_time: number; // Tiempo estimado para completar este paso.
+  estimated_time: number; 
 }
 
 /**
@@ -138,6 +146,7 @@ export interface RecipeStep {
 export interface Recipe {
   id: string; // Identificador único de la receta.
   user_id: string;
+  slug: string;
   name: string;
   description: string;
   total_time: number;
@@ -146,6 +155,7 @@ export interface Recipe {
   updated_at: string;
   ingredients: RecipeIngredient[];
   steps: RecipeStep[];
+  posts: Posts[] | null; // Posts asociados a esta receta (si los hay).
 }
 
 /**
@@ -169,13 +179,7 @@ export interface Posts {
   updated_at: string;
   edited: boolean;
   active: boolean;
-  user: {
-    // Información mínima del usuario que creó el post.
-    id: string;
-    name: string;
-    avatar_url: string | null;
-    slug: string;
-  };
+  user: MinimalUser;
   recipe: {
     id: string;
     name: string;
@@ -187,9 +191,7 @@ export interface Posts {
       ingredients: number;
     };
   };
-  community: {
-    slug: string;
-  };
+  community: MinimalCommunity;
   userVote: string | null;
   hasVoted: boolean | null;
 }

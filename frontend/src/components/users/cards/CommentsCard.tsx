@@ -120,45 +120,49 @@ const CommentsCard: React.FC<CommentsCardProps> = ({
     }
   };
 
+  {console.log("Depth:", depth, "Parent ID:", parentCommentId, "Comment ID:", comment.id, "isCollapsed:", isCollapsed);}
+
+
+
   return (
     <div className={`${shouldIndent || depth === 1 ? "ml-4 pl-4" : ""}`}>
       <div className="pt-2 flex gap-3">
         {/* Header */}
-        <div className="flex flex-col-reverse justify-between items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="cursor-pointer"
-          >
-            {isCollapsed ? (
-              <CirclePlus
-                size={18}
-                className="text-[#878787] hover:text-gray-900!"
-              />
-            ) : (
-              <CircleMinus
-                size={18}
-                className="text-[#878787] hover:text-gray-900!"
-              />
-            )}
-          </button>
-
+        <div className={`flex flex-col  items-center gap-2 ${isCollapsed ? "justify-center" : "justify-between"}`}>
           {comment?.user?.avatar_url ? (
             <img
               src={comment.user?.avatar_url}
               alt={comment.user?.name}
-              className={`w-8 h-8 rounded-full ${
-                isCollapsed ? "hidden" : ""
-              }`}
+              className={`w-8 h-8 rounded-full ${isCollapsed ? "hidden" : ""}`}
             />
           ) : (
             <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
               {comment?.user?.name.charAt(0).toUpperCase()}
             </div>
           )}
+
+         <div className="w-[1px] flex-1 bg-gray-300" />
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="cursor-pointer"
+          >
+            {isCollapsed && depth != 0 || isCollapsed && comment?.replies?.length !== 0 ? (
+              <CirclePlus
+                size={18}
+                className="text-[#878787] hover:text-gray-900!"
+              />
+            ) : !isCollapsed && depth != 0 || !isCollapsed && comment?.replies?.length !== 0 ? (
+              <CircleMinus
+                size={18}
+                className="text-[#878787] hover:text-gray-900!"
+              />
+            ) : null}
+          </button>
         </div>
 
-        <div className="flex flex-col items-start">
+        
+        <div className={`flex flex-col ${isCollapsed ? "justify-end" : "items-start"} `}>
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[14px] text-gray-900">
               {comment?.user?.name}

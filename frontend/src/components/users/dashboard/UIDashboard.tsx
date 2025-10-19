@@ -334,7 +334,7 @@ const UIDashboard: React.FC<Props> = ({
       {isSidebarOpen && (
         <div
           onClick={toggleSidebarOpen}
-          className="fixed inset-0 bg-black/40 z-20 md:hidden"
+          className="fixed inset-0 bg-black/40 z-20 lg:hidden"
         />
       )}
       <section
@@ -344,8 +344,8 @@ const UIDashboard: React.FC<Props> = ({
       >
         {/* Sidebar mobile */}
         <div
-          className={`fixed pt-6 pe-4 top-10 left-0 h-full bg-white shadow-lg overflow-y-auto border-r border-[#e5a657] z-40 transform transition-transform duration-300
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:hidden`}
+          className={`fixed pt-6 pe-4 top-10 left-0 h-full bg-[#f7f7f7] shadow-lg overflow-y-auto border-r border-[#e5a657] z-40 transform transition-transform duration-300
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:hidden`}
         >
           <div className="w-[250px] h-full justify-between max-h-[90vh] flex flex-col p-4">
             {sidebarContent}
@@ -353,21 +353,21 @@ const UIDashboard: React.FC<Props> = ({
         </div>
         {/* Sidebar */}
         <div
-          className={`border-r hidden md:block overflow-visible sidebar bg-[#fcfcfc] border-[#e5a657] fixed h-[100vh] ${
+          className={`border-r hidden lg:block overflow-visible sidebar bg-[#f7f7f7] border-[#e5a657] fixed h-[100vh] ${
             isSidebarOpen ? "w-[280px]" : "w-[40px]"
           } transition-width duration-300`}
         >
-          <div className="mt-4 flex flex-col justify-between h-[90vh] ms-4  me-9 text-[13px] pb-3 relative">
+          <div className="mt-4 flex flex-col justify-between h-[90vh] ms-4 me-9 text-[13px] pb-3 relative">
             {/* Botón posicionado en el borde derecho */}
             <button
               title={isSidebarOpen ? "Ocultar menú" : "Mostrar menú"}
               onClick={toggleSidebarOpen}
               type="button"
-              className={`cursor-pointer py-1 absolute top-2 z-10 bg-white border border-[#e5a657] rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow ${
-                isSidebarOpen ? "-right-[55px]" : "-right-[45px]"
+              className={`cursor-pointer hover:border-[#ec8209] py-1 absolute top-2 z-10 bg-[#f7f7f7] border border-[#e5a657] rounded-full w-9 h-9 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow ${
+                isSidebarOpen ? "-right-[55px]" : "-right-[40px]"
               }`}
             >
-              <AlignJustify color="#e27434" size={20} />
+              <AlignJustify color="#e27434" size={16} />
             </button>
 
             {isSidebarOpen && sidebarContent}

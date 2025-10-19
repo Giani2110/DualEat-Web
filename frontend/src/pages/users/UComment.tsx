@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 
 import { getBySlug } from "../../services/post.api";
 import type { Recipe } from "../../interface/global";
@@ -15,6 +15,7 @@ import type { Comment } from "../../interface/global";
 
 import CommentsCard from "../../components/users/cards/CommentsCard";
 import { Loader } from "lucide-react";
+import { formatCompactNumber } from "../../utils/compactNumber";
 
 export interface PostFull {
   id: string;
@@ -76,6 +77,7 @@ const UComment = () => {
   const { postSlug } = useParams<{ postSlug: string }>();
   const { userSlug } = useParams<{ userSlug: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const sortByParam = parseInt(searchParams.get("sortBy") || "1", 10);
   const [sortBy, setSortBy] = useState(sortByParam);
@@ -95,11 +97,14 @@ const UComment = () => {
   const [openInput, setOpenInput] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   const handleSortChange = (value: number) => {
     setSearchParams({ sortBy: value.toString() });
     setSortBy(value);
     setOpenInput(false);
   };
+
   useEffect(() => {
     const fetchPost = async () => {
       if (communitySlug && postSlug && userSlug) {
@@ -258,13 +263,34 @@ const UComment = () => {
   };
 
   return (
-    <section className="w-[95%] md:w-[80%] mx-auto flex gap-3 px-2 py-1 mt-5">
-      <div className="w-full flex-[2]">
-        <div className="flex gap-3">
+    <section className="w-[95%] md:w-[80%] mx-auto flex px-2 gap-15 py-1 mt-5">
+      <div className="w-full md:flex-[1] lg:flex-[3] max-w-3xl relative">
+        <div className="h-fit hidden md:block absolute -left-11 top-0">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            title="Volver atrás"
+            className="bg-gray rounded-full p-1.5 border border-[#dbdbdb] cursor-pointer hover:border-[#888888] hover:bg-[#dbdbdb]!"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height={20}
+              width={20}
+              viewBox="0 0 640 640"
+            >
+              <path
+                fill="#4A4947"
+                d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex gap-3 items-start">
           <img
             src={post?.community.image_url}
             alt="Imagen de la comunidad"
-            className="w-full h-full max-h-10 max-w-10 rounded-full object-cover"
+            className="w-full h-full max-h-8.5 max-w-8.5 rounded-full object-cover"
           />
           <div className="flex flex-col leading-5">
             <span className="text-[15px] text5 Dosis-Bold">
@@ -282,7 +308,7 @@ const UComment = () => {
                   locale: es,
                 }
               )}
-              className="text-[13px] text4"
+              className="text-[13px] text4 flex"
             >
               {formatDistanceToNow(new Date(post.created_at), {
                 locale: es,
@@ -612,7 +638,7 @@ const UComment = () => {
                       handleSortChange(4);
                     }}
                     className={`text-[15px] py-3 flex items-start gap-3 px-3 text5 hover:bg-gray-200 cursor-pointer ${
-                      sortBy === 4 && "bg-gray-300" 
+                      sortBy === 4 && "bg-gray-300"
                     }`}
                   >
                     <svg
@@ -643,15 +669,95 @@ const UComment = () => {
                 />
               ))}
             </div>
-          ) : loading === true && (
-            <Loader />
+          ) : (
+            loading === true && <Loader />
           )}
-          
-           
         </section>
       </div>
 
-      <div className="w-full flex-[1]  flex flex-col gap-3">p</div>
+      <div
+        className="md:flex-[1] hidden md:block bannerBG w-full max-w-[300px] h-fit"
+        style={
+          {
+            "--bg-image": `url('${post?.community?.theme_color}')`,
+          } as React.CSSProperties
+        }
+      >
+        <div className="px-5 py-4">
+          <h1 className="Dosis-Bold text-[16px] text5">
+            {post?.community?.name}
+          </h1>
+          <p
+            onClick={() => setIsOpen(!isOpen)}
+            className={`text-[15px] tracking-tight text4 leading-6 cursor-pointer ${
+              isOpen ? "line-clamp-4" : "line-clamp-0"
+            }`}
+          >
+            {post?.community?.description}
+          </p>
+          <div className="flex items-center gap-1 mt-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height={"20"}
+              width={"20"}
+              viewBox="0 0 640 640"
+            >
+              <path
+                fill="#707070"
+                d="M216 64C229.3 64 240 74.7 240 88L240 128L400 128L400 88C400 74.7 410.7 64 424 64C437.3 64 448 74.7 448 88L448 128L480 128C515.3 128 544 156.7 544 192L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 192C96 156.7 124.7 128 160 128L192 128L192 88C192 74.7 202.7 64 216 64zM480 496C488.8 496 496 488.8 496 480L496 416L408 416L408 496L480 496zM496 368L496 288L408 288L408 368L496 368zM360 368L360 288L280 288L280 368L360 368zM232 368L232 288L144 288L144 368L232 368zM144 416L144 480C144 488.8 151.2 496 160 496L232 496L232 416L144 416zM280 416L280 496L360 496L360 416L280 416zM216 176L160 176C151.2 176 144 183.2 144 192L144 240L496 240L496 192C496 183.2 488.8 176 480 176L216 176z"
+              />
+            </svg>
+            <span
+              title={
+                post?.community && post?.community?.created_at
+                  ? formatDistanceToNow(post.community.created_at, {
+                      locale: es,
+                      addSuffix: true,
+                    })
+                  : "N/A"
+              }
+              className="text-[13px] text4"
+            >
+              {post?.community && post?.community?.created_at
+                ? `Creado el ${format(
+                    new Date(post.community.created_at),
+                    "d MMM yyyy",
+                    {
+                      locale: es,
+                    }
+                  )}`
+                : "Fecha desconocida"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 mt-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#707070"
+              className="lucide lucide-globe-icon lucide-globe"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+            <span className="capitalize text-[13px] text4">
+              {post?.community?.visibility}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center mt-3">
+            <span className="Dosis-Bold text-[15px]">
+              {post?.community?.total_members
+                ? formatCompactNumber(post.community.total_members)
+                : "0"}
+            </span>
+            <span className="text-[14px] text4">Miembros</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };

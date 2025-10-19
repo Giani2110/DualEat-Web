@@ -168,7 +168,7 @@ model User {
   orders              Order[]
   subscriptions       Subscription[]
   preferences         UserPreference[]
-  userAchievement     UserAchievement[]
+  //userAchievement     UserAchievement[]
   recipes             Recipe[]
   //following           Follows[]         @relation("FollowingRelation")
   //followers           Follows[]         @relation("FollowerRelation")
@@ -628,6 +628,8 @@ model Subscription {
   @@index([mp_preapproval_id])
 }
 
+
+/*
 model Achievement {
   id          String   @id @default(cuid()) @map("id")
   name        String
@@ -653,3 +655,4 @@ model UserAchievement {
   @@unique([user_id, achievement_id])
   @@index([completed])
 }
+*/

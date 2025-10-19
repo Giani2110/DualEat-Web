@@ -26,6 +26,7 @@ import {
   UCommunity,
   UComment,
   UNotifications,
+  ERecipe
 } from "../pages";
 
 export const ROUTES = {
@@ -111,8 +112,22 @@ export const appRoutes = [
   },
 
   // Auth
-  { path: ROUTES.AUTH.LOGIN, element: <Login /> },
-  { path: ROUTES.AUTH.REGISTER, element: <Register /> },
+  {
+    path: ROUTES.AUTH.LOGIN,
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: ROUTES.AUTH.REGISTER,
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
+  },
   {
     path: ROUTES.AUTH.ONBOARDING,
     element: (
@@ -177,6 +192,14 @@ export const appRoutes = [
     element: (
       <ProtectedRoute isBusiness={false}>
         <UComment />
+      </ProtectedRoute>
+    ),
+  },
+   {
+    path: `${ROUTES.USER.COMMUNITY}:communitySlug/recipe/:userSlug/:recipeSlug`,
+    element: (
+      <ProtectedRoute isBusiness={false}>
+        <ERecipe />
       </ProtectedRoute>
     ),
   },

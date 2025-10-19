@@ -64,7 +64,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
   }
 
   // Se ajustan los colores para la versión isBusiness
-  const headerBgColor = isBusiness ? "bg-gray-900" : "bg-[#fcfcfc]";
+  const headerBgColor = isBusiness ? "bg-gray-900" : "bg-[#f7f7f7]";
   const headerBorderColor = isBusiness ? "border-gray-700" : "border-[#e5a657]";
   const scrolledBgColor = isBusiness ? "bg-gray-900" : "bg-white";
   const textColor = isBusiness ? "text-white" : "text-yellow";

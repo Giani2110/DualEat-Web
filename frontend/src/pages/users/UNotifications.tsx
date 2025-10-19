@@ -3,14 +3,18 @@ import { useNotifications } from "../../hooks/useNotifications";
 import { formatShortTime } from "../../utils/compactNumber";
 
 import { axiosInterceptor } from "../../interceptor/axios-interceptor";
+import { useNavigate } from "react-router-dom";
 
 import type { Notification } from "../../interface/global";
 import toast from "react-hot-toast";
 
 const UNotifications = () => {
-  const { markAsRead, markAsReadSingle } = useNotifications();
+  const { markAsRead, markAsReadSingle, setNotifications } = useNotifications();
+  const navigate = useNavigate();
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsPaginated, setNotificationsPaginated] = useState<
+    Notification[]
+  >([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -19,7 +23,7 @@ const UNotifications = () => {
         const response = await axiosInterceptor.get("/notification/");
 
         if (response.data.success === true && response.data.data) {
-          setNotifications(response.data.data);
+          setNotificationsPaginated(response.data.data);
         }
       } catch (error) {
         console.error(error);
@@ -28,20 +32,56 @@ const UNotifications = () => {
     fetchNotifications();
   }, []);
 
-  const handleDeleteNotification = async (id: string) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+  const handleDeleteNotification = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setNotificationsPaginated((prev) =>
+      prev.filter((notif) => notif.id !== id)
+    );
 
     const response = await axiosInterceptor.delete(`/notification/delete`, {
       params: { id },
     });
     if (response.data.success === true) {
-      toast.success("Notificación eliminada"); 
+      toast.success("Notificación eliminada");
       markAsReadSingle(id);
     } else {
       toast.error("Error al eliminar la notificación");
-      setNotifications((prev) => [...prev, notifications.find((notif) => notif.id === id)!]);
+      setNotificationsPaginated((prev) => [
+        ...prev,
+        notificationsPaginated.find((notif) => notif.id === id)!,
+      ]);
     }
-  }
+  };
+
+  const handleNotificationClick = (
+    e: React.MouseEvent<HTMLDivElement>,
+    notification: Notification
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (
+      notification.metadata.slugs &&
+      notification.metadata.type === "comment"
+    ) {
+      markAsReadSingle(notification.id);
+      navigate(
+        "/c/" +
+          notification.metadata.slugs.community +
+          "/post/" +
+          notification.metadata.slugs.user +
+          "/" +
+          notification.metadata.slugs.post
+      );
+    } else {
+      markAsReadSingle(notification.id);
+      navigate("/c/" + notification.metadata.slugs.community);
+    }
+  };
 
   return (
     <section className="w-[75%] md:w-[65%] mx-auto px-2 py-1 mt-5">
@@ -52,7 +92,14 @@ const UNotifications = () => {
         <div className="flex leading-4 justify-end items-center gap-1 mt-2">
           <button
             type="button"
-            onClick={markAsRead}
+            onClick={() => {
+              markAsRead();
+              setNotifications([]);
+              setNotificationsPaginated((prev) =>
+                prev.map((n) => ({ ...n, read: true }))
+              );
+            }}
+            title="Marcar notificaciones como leidas"
             className="cursor-pointer text3 Dosis-Bold text-[16px] text5 p-2"
           >
             Marcar como leido
@@ -70,9 +117,9 @@ const UNotifications = () => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="#b53325"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="lucide lucide-package-icon lucide-package"
             >
               <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
@@ -83,9 +130,10 @@ const UNotifications = () => {
           </button>
         </div>
         <div className="flex flex-col mt-2">
-          {notifications.map((notification, index) => (
+          {notificationsPaginated.map((notification, index) => (
             <div
               key={index}
+              onClick={(e) => handleNotificationClick(e, notification)}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={`relative flex flex-wrap gap-3 items-start cursor-pointer px-4 py-3 ${
@@ -145,7 +193,14 @@ const UNotifications = () => {
 
               {hoveredIndex === index && (
                 <div className="absolute rounded-full p-0.5 -top-5 border-1 border-[#a7a7a7] shadow-md right-0 w-fit h-fit bg-[#ffffff] z-10">
-                  <button onClick={() => handleDeleteNotification(notification.id)} className="p-2 hover:bg-[#dddddd] rounded-full cursor-pointer" type="button" title="Eliminar notificación">
+                  <button
+                    onClick={(e) =>
+                      handleDeleteNotification(e, notification.id)
+                    }
+                    className="p-2 hover:bg-[#dddddd] rounded-full cursor-pointer"
+                    type="button"
+                    title="Eliminar notificación"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -153,9 +208,9 @@ const UNotifications = () => {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="#4A4947"
-                      stroke-width="3"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       className="lucide lucide-trash-icon lucide-trash"
                     >
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />

@@ -28,6 +28,7 @@ export { default as URecipes } from "./users/URecipes";
 export { default as UCommunity } from "./users/UCommunity";
 export { default as UComment } from "./users/UComment";
 export { default as UNotifications } from "./users/UNotifications";
+export { default as ERecipe } from "./users/ERecipe";
 
 export { default as LoadingScreen } from "../components/animation/LoadingScreen";
 

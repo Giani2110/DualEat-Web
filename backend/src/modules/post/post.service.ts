@@ -257,7 +257,8 @@ export class PostService {
     sortBy: number
   ) {
     try {
-      // 1-4. [Código anterior sin cambios hasta allComments]
+      let isMember = false;
+
       const post = await prisma.post.findFirst({
         where: {
           slug: postSlug,
@@ -279,6 +280,19 @@ export class PostService {
       });
 
       if (!post) return null;
+
+      if (user_id) {
+        const member = await prisma.communityMember.findFirst({
+          where: {
+            community_id: post.community_id,
+            user_id,
+          },
+        });
+        if (member) {
+          isMember = true;
+        }
+      }
+
 
       const allComments = await prisma.postComment.findMany({
         where: {
@@ -401,6 +415,7 @@ export class PostService {
         ...post,
         userVote: postVote?.vote_type ?? null,
         comments: sortedComments,
+        isMember,
       };
     } catch (error) {
       throw new Error(`Error al obtener el post: ${error}`);

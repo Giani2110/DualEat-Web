@@ -1,0 +1,90 @@
+@startuml
+left to right direction
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #E8F0F2
+  BorderColor #555
+  ArrowColor #555
+}
+
+actor "Usuario Cliente" as Cliente
+actor "Dueño" as Dueno
+
+rectangle "DualEat" {
+  ' Casos de uso comunes
+  (Registrarse) as CU0
+  (Iniciar Sesión) as CU1
+  (Cerrar Sesión) as CU2
+  (Ver/Editar Perfil) as CU3
+  
+  ' Casos de uso de Usuario Cliente
+  (Ver Menú del Local) as CU10
+  (Escanear Código QR) as CU11
+  (Obtener Recomendaciones\nPersonalizadas) as CU12
+  (Buscar Recetas con\nIngredientes Disponibles) as CU13
+  (Participar en Comunidad\nGastronómica) as CU15
+  (Crear Post/Receta) as CU16
+  (Comentar/Valorar Posts) as CU17
+  
+  ' Casos de uso de Dueño
+  (Gestionar Menú del Local) as CU20
+  (Cargar Menú mediante Foto/OCR) as CU21
+  (Generar Código QR\nPersonalizado) as CU22
+  (Consultar Estadísticas\ndel Negocio) as CU23
+  (Gestionar Información\ndel Local) as CU25
+  (Gestionar Calendario) as CU26
+
+  ' ============ RELACIONES USUARIO CLIENTE ============
+  Cliente --> CU0
+  Cliente --> CU1
+  Cliente --> CU2
+  Cliente --> CU3
+  Cliente --> CU11
+  Cliente --> CU13
+  Cliente --> CU15
+  
+  ' Relaciones include para Cliente
+  CU11 ..> CU10 : <<include>>
+  CU12 ..> CU1 : <<include>>
+  CU15 ..> CU1 : <<include>>
+  CU15 ..> CU16 : <<include>>
+  CU17 ..> CU1 : <<include>>
+
+  ' ============ RELACIONES DUEÑO ============
+  Dueno --> CU0
+  Dueno --> CU1
+  Dueno --> CU2
+  Dueno --> CU3
+  Dueno --> CU20
+  Dueno --> CU23
+  Dueno --> CU26
+  
+  ' Relaciones include para Dueño
+  CU20 ..> CU1 : <<include>>
+  CU21 ..> CU20 : <<extend>>
+  CU22 ..> CU1 : <<include>>
+  CU22 ..> CU20 : <<include>>
+  CU23 ..> CU1 : <<include>>
+  CU25 ..> CU1 : <<include>>
+  CU26 ..> CU1 : <<include>>
+}
+
+note right of CU11
+  Al escanear el QR,
+  automáticamente se
+  muestra el menú del local
+end note
+
+note right of CU21
+  Usa OCR para extraer
+  texto de imágenes
+  de menús
+end note
+
+note bottom of CU12
+  Basadas en historial,
+  preferencias y restricciones
+  alimentarias del usuario
+end note
+
+@enduml

@@ -74,7 +74,7 @@ export class SessionService {
   }
 
   // Eliminar todas las sesiones de un usuario (logout all)
-  async deleteAllUserSessions(userId: number): Promise<void> {
+  async deleteAllUserSessions(userId: string): Promise<void> {
     try {
       const pattern = "session:*";
       const keys = await this.redis.keys(pattern);

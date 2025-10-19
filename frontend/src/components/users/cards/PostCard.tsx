@@ -32,7 +32,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
     if (post) {
       navigate(`/c/${Post.community.slug}/post/${Post.user.slug}/${Post.slug}`);
     } else {
-      navigate(`/c/${Post.community.slug}/recipe/${Post.user.slug}/${Post.slug}`);
+      navigate(`/c/${Post.community.slug}/recipe/${Post.user.slug}/${Post.recipe.slug}`);
     }
   };
 

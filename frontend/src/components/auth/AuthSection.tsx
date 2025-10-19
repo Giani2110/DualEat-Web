@@ -74,7 +74,7 @@ const AuthSection: React.FC<Props> = ({
     };
   }, [images]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (imagesPreloaded) {
       const interval = setInterval(() => {
         setCurrentImageIndex(
@@ -172,14 +172,24 @@ const AuthSection: React.FC<Props> = ({
           <p className="text4 text-[13px]">Volver a Inicio</p>
         </Link>
 
-        {/* Renderizar imagen condicionalmente una vez cargada o mostrar placeholder */}
+        {/* Contenedor de imágenes con crossfade */}
         {imagesPreloaded ? (
-          <div
-            className={`${background} absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out`}
-            style={{
-              backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%), url(${images[currentImageIndex]})`,
-            }}
-          ></div>
+          <div style={{ position: "absolute", inset: 0 }}>
+            {images.map((image, index) => (
+              <div
+                key={index}
+                className={`${background}`}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%), url(${image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  zIndex: currentImageIndex === index ? 1 : 0,
+                }}
+              />
+            ))}
+          </div>
         ) : (
           <div className="absolute inset-0 bg-gray-300 flex items-center justify-center">
             <p className="text-white text-lg">Cargando imágenes...</p>
@@ -187,7 +197,10 @@ const AuthSection: React.FC<Props> = ({
         )}
 
         {/* Logo y texto superpuesto con contenedor en forma D espejada y centrada */}
-        <div className="relative flex flex-col items-center justify-center h-full">
+        <div
+          className="relative flex flex-col items-center justify-center h-full"
+          style={{ zIndex: 2 }}
+        >
           <div
             className={`${Dform} px-[50px] ${items} py-[70px] flex flex-col`}
           >
@@ -198,7 +211,9 @@ const AuthSection: React.FC<Props> = ({
                 className="w-[50px] h-auto mb-[40px]"
               />
               <h1 className="text-[18px] text2">Bienvenido/a a</h1>
-              <h2 className="text-[36px] text-white Dosis-Bold mb-3">DualEat</h2>
+              <h2 className="text-[36px] text-white Dosis-Bold mb-3">
+                DualEat
+              </h2>
               <p className="text-[16px] text2 leading-[26px]">
                 {carouselTexts[currentImageIndex]}
               </p>

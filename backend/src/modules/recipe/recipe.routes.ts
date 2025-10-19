@@ -29,9 +29,10 @@ router.get(
   controller.getUserRecipes.bind(controller)
 );
 
-// 5. Obtener receta por id
+
+// 5. Obtener receta por Slug
 // =========================================================
-router.get("/:id", controller.getRecipeById.bind(controller));
+router.get("/slug", controller.getRecipeBySlug.bind(controller));
 
 // 6. Ask Ollama
 // =========================================================
@@ -51,26 +52,6 @@ router.post(
   controller.askRecipe.bind(controller)
 );
 
-/*
-// Crear receta
-router.post("/create", (req, res) => controller.createRecipe(req, res));
 
-// Ver ingredientes por nombre
-
-// Agregar ingrediente a receta
-router.post("/ingredient", (req, res) => controller.addIngredient(req, res));
-
-// Agregar paso a receta
-router.post("/step", (req, res) => controller.addStep(req, res));
-
-// Obtener receta completa
-router.get("/:recipeId", (req, res) => controller.getRecipe(req, res));
-
-// Listar recetas de un usuario
-router.get("/user/:userId", (req, res) => controller.listUserRecipes(req, res));
-
-// Eliminar receta
-router.delete("/", (req, res) => controller.deleteRecipe(req, res));
-*/
 
 export default router;

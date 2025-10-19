@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 
 import { PostService } from "./post.service";
 
-import { uploadAndGetUrl } from "../../config/supabase";
+import { uploadAndGetUrl, deleteSupabaseFiles } from "../../config/supabase";
 
 import { CreateRecipeDTO } from "../../interfaces/recipe.dto";
 import { CreatePostDTO } from "../../interfaces/post.dto";
@@ -32,7 +32,13 @@ export class PostController {
     }
 
     try {
-      const post = await this.postService.getPostBySlug(String(userSlug), String(communitySlug), String(postSlug), user_id, Number(sortBy));
+      const post = await this.postService.getPostBySlug(
+        String(userSlug),
+        String(communitySlug),
+        String(postSlug),
+        user_id,
+        Number(sortBy)
+      );
       if (!post) {
         return res
           .status(404)
@@ -86,7 +92,6 @@ export class PostController {
           )) as string[];
         } catch (error) {
           console.error("Error subiendo imágenes del post:", error);
-          // Continuar sin las imágenes
         }
       }
 
@@ -173,6 +178,27 @@ export class PostController {
       // ============================
       const result = await this.postService.createPost(postData, recipeData);
 
+      if (!result) {
+        try {
+          await deleteSupabaseFiles(imageUrls, "posts");
+          if (mainImageUrl)
+            await deleteSupabaseFiles([mainImageUrl], "recipes");
+
+          const stepImageUrls = parsedSteps
+            ?.map((s: any) => s.image_url)
+            .filter((url: string): url is string => !!url);
+          if (stepImageUrls && stepImageUrls.length > 0) {
+            await deleteSupabaseFiles(stepImageUrls, "recipes");
+          }
+        } catch (rollbackError) {
+          console.error("Error durante rollback de imágenes:", rollbackError);
+        }
+
+        return res.status(500).json({
+          success: false,
+          message: "Error al crear el post",
+        });
+      }
       return res.status(201).json({
         success: true,
         data: result,
@@ -189,7 +215,6 @@ export class PostController {
     }
   }
 
-
   /** CREATE COMMENT */
   async createComment(req: Request, res: Response) {
     try {
@@ -197,18 +222,22 @@ export class PostController {
       const user_id = (req as any).user?.id;
 
       if (!post_id || !content) {
-        return res.status(400).json({ success: false, message: "Faltan campos obligatorios" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Faltan campos obligatorios" });
       }
-      
+
       const comment = await this.postService.createComment(
         post_id,
         user_id,
         content,
-        parent_comment_id,
+        parent_comment_id
       );
       return res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      return res.status(500).json({ success: false, error: (error as Error).message });
+      return res
+        .status(500)
+        .json({ success: false, error: (error as Error).message });
     }
   }
 }

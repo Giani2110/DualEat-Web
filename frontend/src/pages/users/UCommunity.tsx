@@ -243,32 +243,40 @@ const UCommunity = () => {
   }, [hasMore, isLoading, isInitialized]);
 
   return (
-    <section className="w-[95%] md:w-[80%] mx-auto flex flex-col gap-3 px-2 py-1 mt-5">
+    <section className="w-[95%] md:w-[80%] md:max-w-[1000px] lg:max-w-[1200px] mx-auto flex flex-col gap-3 px-2 py-1 mt-5">
       <div className="w-full rounded-lg relative">
         {/* Banner */}
-        <div className="w-full h-32 md:h-34 lg:h-36 rounded-lg overflow-hidden">
-          {community?.theme_color && (
+        <div className="w-full h-32 md:h-34 rounded-lg overflow-hidden">
+          {community?.theme_color !== null ? (
             <img
               alt="Banner de la comunidad"
-              className="w-full h-full object-cover"
-              src={community.theme_color}
+              className="w-full h-32 md:h-34 object-cover"
+              src={community?.theme_color}
             />
+          ) : (
+            <div className="w-full h-18 md:h-20 rounded-lg object-cover bg-red" />
           )}
         </div>
 
         {/* Contenedor flexible sobre el banner */}
-        <div className="flex justify-between flex-col gap-3 md:gap-0 md:flex-row md:items-end md:-bottom-13 items-start px-5 w-full absolute -bottom-25 ">
+        <div
+          className={`flex justify-between flex-col gap-3 lg:gap-0 lg:flex-row lg:items-end  items-start px-5 w-full absolute ${
+            community?.theme_color !== null
+              ? " -bottom-26 md:-bottom-23 lg:-bottom-14"
+              : "-bottom-5 md:-bottom-3 lg:-bottom-2"
+          }`}
+        >
           {/* Logo + Nombre */}
           <div className="flex items-end gap-4">
             {community?.image_url && (
               <img
                 alt="Logo de la comunidad"
-                className="w-20 h-20 sm:w-22 sm:h-22 object-cover rounded-full border-4 border-white flex-shrink-0"
+                className="w-18 h-18 lg:w-22 lg:h-22 object-cover rounded-full border-4 border-white flex-shrink-0"
                 src={community.image_url || ""}
               />
             )}
             {community?.name && (
-              <h2 className="text-[24px] sm:text-[30px] md:text-[34px] Dosis-Bold tracking-tight text-gray-900">
+              <h2 className="text-[28px] sm:text-[30px] lg:text-[33px] Dosis-Bold tracking-tight text-gray-900">
                 {community.name}
               </h2>
             )}
@@ -399,7 +407,7 @@ const UCommunity = () => {
         </div>
       </div>
 
-      <div className="flex gap-8 flex-wrap w-full mt-30">
+      <div className="flex gap-8 justify-between w-full flex-wrap mt-30">
         <div className="flex flex-col flex-[2] px-5">
           {posts.length === 0 && !isLoading && (
             <p className="text-center text-gray-500 py-8">
@@ -424,7 +432,7 @@ const UCommunity = () => {
         </div>
 
         <div
-          className="flex-[0.6] hidden md:block bannerBG h-fit"
+          className="flex-[1] hidden lg:block bannerBG max-w-[300px] h-fit"
           style={
             {
               "--bg-image": `url('${community?.theme_color}')`,

@@ -8,32 +8,35 @@ import Layout from "../layout/layout";
 
 import { AuthProvider } from "../context/auth/AuthProvider";
 import { SocketProvider } from "../context/other/SocketContext";
+import { NotificationsProvider } from "../context/other/NotificationsProvider";
 
 function AppRouter() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <SocketProvider>
-          <CommunityProvider>
-            <ScrollToTop />
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: "#333",
-                  color: "#fff",
-                },
-              }}
-            />
-            <Layout>
-              <Routes>
-                {appRoutes.map(({ path, element }, index) => (
-                  <Route key={index} path={path} element={element} />
-                ))}
-              </Routes>
-            </Layout>
-          </CommunityProvider>
+          <NotificationsProvider>
+            <CommunityProvider>
+              <ScrollToTop />
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: "#333",
+                    color: "#fff",
+                  },
+                }}
+              />
+              <Layout>
+                <Routes>
+                  {appRoutes.map(({ path, element }, index) => (
+                    <Route key={index} path={path} element={element} />
+                  ))}
+                </Routes>
+              </Layout>
+            </CommunityProvider>
+          </NotificationsProvider>
         </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
