@@ -4,7 +4,7 @@ export interface CreateCommunityDTO {
   description: string;
   image_url?: string;
   theme_color?: string;
-  visibility: "public" | "private" | "restricted"; 
+  visibility: "public" | "private"; 
   creator_id: string;
   selectedTags: number[]; 
 }

@@ -16,6 +16,7 @@ import type { Comment } from "../../interface/global";
 import CommentsCard from "../../components/users/cards/CommentsCard";
 import { Loader } from "lucide-react";
 import { formatCompactNumber } from "../../utils/compactNumber";
+import { ROUTES } from "../../constants/constants";
 
 export interface PostFull {
   id: string;
@@ -119,16 +120,19 @@ const UComment = () => {
 
           if (response && response.data) {
             setPost(response.data as PostFull);
+          } else {
+            navigate(ROUTES.ERROR, { replace: true });
           }
         } catch (error) {
           console.error("Error al obtener el post:", error);
+          navigate(ROUTES.ERROR, { replace: true });
         } finally {
           setLoading(false);
         }
       }
     };
     fetchPost();
-  }, [postSlug, communitySlug, userSlug, sortBy]);
+  }, [postSlug, communitySlug, userSlug, sortBy, navigate]);
 
   useEffect(() => {
     if (post) {

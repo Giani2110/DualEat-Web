@@ -20,7 +20,7 @@ CREATE TYPE "SubscriptionPlan" AS ENUM ('user_premium', 'business');
 CREATE TYPE "SubscriptionStateMP" AS ENUM ('authorized', 'paused', 'cancelled', 'finished');
 
 -- CreateEnum
-CREATE TYPE "Visibility" AS ENUM ('public', 'restricted', 'private');
+CREATE TYPE "Visibility" AS ENUM ('public', 'private');
 
 -- CreateEnum
 CREATE TYPE "LocalUserRole" AS ENUM ('admin', 'staff');

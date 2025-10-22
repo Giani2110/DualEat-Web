@@ -32,7 +32,9 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
     if (post) {
       navigate(`/c/${Post.community.slug}/post/${Post.user.slug}/${Post.slug}`);
     } else {
-      navigate(`/c/${Post.community.slug}/recipe/${Post.user.slug}/${Post.recipe.slug}`);
+      navigate(
+        `/c/${Post.community.slug}/recipe/${Post.user.slug}/${Post.recipe.slug}`
+      );
     }
   };
 
@@ -146,7 +148,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
             {Post.recipe && (
               <div
                 onClick={(e) => handleNavigate(e, Post, false)}
-                className="bg-gray flex mt-7 px-3 items-center gap-2 py-1 w-fit rounded-lg border border-[#dbdbdb] text5 text-[15px] tracking-tight hover:scale-101 hover:shadow-sm transition duration-100"
+                className="bg-[#ffffff69] flex mt-7 px-3 items-center gap-2 py-1 w-fit rounded-lg border border-[#dbdbdb] text5 text-[15px] tracking-tight hover:scale-101 hover:shadow-sm transition duration-100"
               >
                 <img
                   src={Post.recipe.main_image || ""}
@@ -278,7 +280,6 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
           </div>
         </div>
       </div>
-      <div className="w-full h-[1px] mx-auto bg-gray-300 mb-4 mt-5"></div>
     </>
   );
 };

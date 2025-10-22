@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Image, Search, X, Globe, Eye, Lock } from "lucide-react";
+import { Image, Search, X, Globe, Lock } from "lucide-react";
 import RCrop from "../shared/ReactCrop";
 import toast from "react-hot-toast";
 import type { CategoryTag, CommunityTag } from "../../interface/global";
@@ -46,7 +46,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
   const [visibility, setVisibility] = useState<
-    "public" | "restricted" | "private"
+    "public" | "private"
   >("public");
 
   const [step, setStep] = useState<"1" | "2" | "3" | "4">("1");
@@ -678,38 +678,6 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                 />
               </div>
               <div
-                onClick={() => setVisibility("restricted")}
-                className={`flex gap-2 items-center rounded-[2px] cursor-pointer px-5 py-4 ${
-                  visibility === "restricted" ? "bg-gray-100" : ""
-                }`}
-              >
-                {visibility === "restricted" ? (
-                  <Eye
-                    strokeWidth={1.9}
-                    fill="#e5a657"
-                    className={`text-[#2f2f2f] text-[20px] mr-2`}
-                  />
-                ) : (
-                  <Eye className={`text-[20px] text-[#e5a657] mr-2`} />
-                )}
-                <div className="flex flex-col items-start tracking-tight">
-                  <span className="text-[13px] text5">Restringida</span>
-                  <span className="text-[12px] text6">
-                    Cualquiera puede ver, pero sólo los usuarios aprobados
-                    pueden colaborar
-                  </span>
-                </div>
-                <input
-                  title="Visibilidad restringida"
-                  type="radio"
-                  name="visibility"
-                  onChange={() => setVisibility("restricted")}
-                  value="restricted"
-                  checked={visibility === "restricted"}
-                  className="ml-auto  cursor-pointer accent-black w-[15px] h-[15px]"
-                />
-              </div>
-              <div
                 onClick={() => setVisibility("private")}
                 className={`flex gap-2 items-center rounded-[2px] cursor-pointer px-5 py-4 ${
                   visibility === "private" ? "bg-gray-100" : ""
@@ -727,7 +695,8 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                 <div className="flex flex-col items-start tracking-tight">
                   <span className="text-[13px] text5">Privada</span>
                   <span className="text-[12px] text6">
-                    Sólo los usuarios aprobados pueden ver y colaborar
+                    Cualquiera puede ver, pero sólo los usuarios aprobados
+                    pueden colaborar
                   </span>
                 </div>
                 <input

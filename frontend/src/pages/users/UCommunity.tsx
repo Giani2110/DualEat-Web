@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   getCommunityBySlug,
   joinCommunity,
@@ -21,12 +21,14 @@ import { axiosInterceptor } from "../../interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
 import Loader from "../../components/animation/Loader";
+import { ROUTES } from "../../constants/constants";
 
 import { useCommunity } from "../../hooks/useUCommunity";
 import { useAuth } from "../../hooks/useAuth";
 
 const UCommunity = () => {
   const { communitySlug } = useParams<{ communitySlug: string }>();
+  const navigate = useNavigate();
 
   const { user } = useAuth();
   const { refreshCommunities } = useCommunity();
@@ -136,14 +138,20 @@ const UCommunity = () => {
 
   // Obtener comunidad
   useEffect(() => {
-    console.log("🏁 Iniciando carga de comunidad...");
     const fetchCommunity = async () => {
-      if (communitySlug) {
-        const response = await getCommunityBySlug(communitySlug);
-        if (response && response.data) {
-          setCommunity(response.data as Community);
-          console.log("✅ Comunidad cargada:", response.data);
+      try {
+        if (communitySlug) {
+          const response = await getCommunityBySlug(communitySlug);
+          if (response && response.data) {
+            setCommunity(response.data as Community);
+            console.log("✅ Comunidad cargada:", response.data);
+          } else {
+            navigate(ROUTES.ERROR, { replace: true });
+          }
         }
+      } catch (error) {
+        console.error("Error al obtener la comunidad:", error);
+        navigate(ROUTES.ERROR, { replace: true });
       }
     };
     fetchCommunity();
@@ -243,7 +251,7 @@ const UCommunity = () => {
   }, [hasMore, isLoading, isInitialized]);
 
   return (
-    <section className="w-[95%] md:w-[80%] md:max-w-[1000px] lg:max-w-[1200px] mx-auto flex flex-col gap-3 px-2 py-1 mt-5">
+    <section className="w-[95%] md:w-[80%] md:max-w-[1000px] lg:max-w-[1200px] mx-auto flex flex-col gap-3 rounded-[10px] mt-5 ">
       <div className="w-full rounded-lg relative">
         {/* Banner */}
         <div className="w-full h-32 md:h-34 rounded-lg overflow-hidden">
@@ -414,8 +422,13 @@ const UCommunity = () => {
               No hay posts en esta comunidad aún
             </p>
           )}
-          {posts.map((post) => (
-            <PostCard key={post.id} Post={post} />
+          {posts.map((post, index) => (
+            <div key={post.id} className="w-full">
+              <PostCard Post={post} />
+              {index < posts.length - 1 && (
+                <div className="w-full h-[1px] mx-auto bg-gray-300 my-1" />
+              )}
+            </div>
           ))}
           {/* Sentinel */}
           <div

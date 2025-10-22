@@ -66,7 +66,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
   // Se ajustan los colores para la versión isBusiness
   const headerBgColor = isBusiness ? "bg-gray-900" : "bg-[#f7f7f7]";
   const headerBorderColor = isBusiness ? "border-gray-700" : "border-[#e5a657]";
-  const scrolledBgColor = isBusiness ? "bg-gray-900" : "bg-white";
+  const scrolledBgColor = isBusiness && "bg-gray-900";
   const textColor = isBusiness ? "text-white" : "text-yellow";
 
   const handleNotificationClick = (notification: Notification) => {
@@ -97,7 +97,7 @@ const HeaderUSER: React.FC<HeaderUSERProps> = ({
   return (
     <header
       className={`fixed top-0 w-full ${headerBgColor} border-b ${headerBorderColor} h-[60px] px-4 md:px-10 flex items-center justify-between pt-[5px] pb-[5px] z-50 ${
-        scrolled ? `${scrolledBgColor} ${headerBorderColor} shadow-md` : ""
+        scrolled ? `${scrolledBgColor}` : ""
       }`}
     >
       {/* Logo y botón hamburguesa - lado izquierdo */}

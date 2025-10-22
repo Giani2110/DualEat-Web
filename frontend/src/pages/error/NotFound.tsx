@@ -474,7 +474,9 @@ const NotFound = () => {
             />
           ) : (
             <img
-              src={"https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"}
+              src={
+                "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
+              }
               alt="Imagen de perfil"
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#dbdbdb] object-cover cursor-pointer hover:scale-105 transition-all duration-200"
             />
@@ -517,10 +519,7 @@ const NotFound = () => {
 
           {/* Canvas */}
           <div className="flex justify-center items-center order-1 lg:order-2">
-            <canvas
-              ref={canvasRef}
-              className="cursor-pointer max-w-full h-auto"
-            />
+            <canvas ref={canvasRef} className="max-w-full h-auto" />
           </div>
         </div>
       </main>
