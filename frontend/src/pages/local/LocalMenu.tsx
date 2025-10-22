@@ -1,12 +1,16 @@
-import { useState, useMemo, useRef, useEffect, useContext } from 'react';
-import { PlusCircle, Edit, Trash2, Tag, Sun, TrendingUp, Search, Upload, FilePlus, ChevronLeft, ChevronRight, CameraOff, TrendingDown, X, Sparkles, AlertTriangle, Check } from 'lucide-react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useContext, useMemo, useRef } from 'react';
+import { PlusCircle, Edit, Trash2, Tag, TrendingUp, Search, Upload, FilePlus, ChevronLeft, ChevronRight, CameraOff, TrendingDown, X, Sparkles, AlertTriangle, Check, HelpCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AuthContext } from '../../context/auth/AuthContext';
 import '../../assets/scss/users/users.scss';
 import EditFoodModal from '../../components/locals/EditFoodModal';
 import UploadMenuSection from '../../components/locals/UploadMenuSection';
+import React from 'react';
 
-// Definición de las interfaces
+// ----------------------------------------------------------------------
+// Interfaces de Datos
+// ----------------------------------------------------------------------
 interface Food {
   id: number;
   local_id: number;
@@ -39,6 +43,64 @@ interface StatPillProps {
   color: string;
   icon?: LucideIcon;
 }
+
+// ----------------------------------------------------------------------
+// Interfaces y Definición del Tour Manual
+// ----------------------------------------------------------------------
+interface Bounds {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+}
+
+interface TourStep {
+    id: number;
+    title: string;
+    text: string;
+    selector: string;
+    placement: 'right' | 'left' | 'top' | 'bottom';
+}
+
+const TOUR_STEPS: TourStep[] = [
+    {
+        id: 1,
+        title: "Bienvenido a la Gestión de Menú",
+        text: "Aquí puede administrar, crear y organizar todos los platos de su local. El menú es el corazón de su negocio.",
+        selector: "#help-button",
+        placement: "left",
+    },
+    {
+        id: 2,
+        title: "Creación y Carga",
+        text: "Estas tarjetas permiten las tres acciones principales: crear platos manualmente, subir una foto para escanear el menú (OCR) o añadir una nueva categoría.",
+        selector: "#creation-quick-links",
+        placement: "bottom",
+    },
+    {
+        id: 3,
+        title: "Búsqueda Rápida",
+        text: "Use esta barra para buscar cualquier plato o descripción, incluso a través de categorías.",
+        selector: "#search-bar-container",
+        placement: "bottom",
+    },
+    {
+        id: 4,
+        title: "Filtro de Categorías",
+        text: "Filtre su menú haciendo clic en las categorías. Si la lista es larga, puede usar las flechas laterales para desplazarse.",
+        selector: "#categories-filter",
+        placement: "bottom",
+    },
+    {
+        id: 5,
+        title: "Lista de Platos",
+        text: "Esta es la lista principal de su menú. Cada plato muestra su precio y votos. Puede editar o eliminar un plato haciendo clic en el botón de acciones.",
+        selector: "#menu-items-section",
+        placement: "top",
+    },
+];
+// ----------------------------------------------------------------------
+
 
 const StatPill = ({ text, color, icon: Icon }: StatPillProps) => (
   <span className={`px-2 py-1 text-xs font-semibold rounded-full flex items-center space-x-1 ${color}`}>
@@ -80,6 +142,20 @@ const LocalMenu = () => {
 
   const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
   const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
+
+  // ----------------------------------------------------------------------
+  // Estados y Lógica del Tour Manual
+  // ----------------------------------------------------------------------
+  const [currentStep, setCurrentStep] = useState(0); 
+  const isTourOpen = currentStep > 0;
+  
+  const startTour = () => setCurrentStep(1);
+  const closeTour = () => setCurrentStep(0);
+  const goToNextStep = () => setCurrentStep(prev => Math.min(prev + 1, TOUR_STEPS.length));
+  const goToPrevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  const activeStep = TOUR_STEPS.find(step => step.id === currentStep);
+  // ----------------------------------------------------------------------
+
 
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -150,7 +226,6 @@ const LocalMenu = () => {
     fetchLocalCategories();
   }, [localId, API_BASE]);
 
-  // Nuevo useEffect para obtener las categorías generales
   useEffect(() => {
     const fetchPredefinedCategories = async () => {
       try {
@@ -168,7 +243,7 @@ const LocalMenu = () => {
   }, [API_BASE]);
 
   useEffect(() => {
-    if (isModalOpen || isConfirmModalOpen || showOcrModal || showCreateCategoryModal || showDeleteCategoryModal) {
+    if (isModalOpen || isConfirmModalOpen || showOcrModal || showCreateCategoryModal || showDeleteCategoryModal || isTourOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -176,7 +251,7 @@ const LocalMenu = () => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isModalOpen, isConfirmModalOpen, showOcrModal, showCreateCategoryModal, showDeleteCategoryModal]);
+  }, [isModalOpen, isConfirmModalOpen, showOcrModal, showCreateCategoryModal, showDeleteCategoryModal, isTourOpen]);
 
   const handleHideFood = async () => {
     if (!foodToHide) return;
@@ -213,7 +288,7 @@ const LocalMenu = () => {
       id: 0,
       local_id: localId,
       category_id: 0,
-      local_menu_category_id: selectedCategory || undefined, // Usar la categoría local seleccionada
+      local_menu_category_id: selectedCategory || undefined,
       name: '',
       price: 0,
       description: '',
@@ -436,10 +511,10 @@ const LocalMenu = () => {
     return foods.filter(food =>
       food.available &&
       (selectedCategory === null || 
-       food.category_id === selectedCategory || 
-       food.local_menu_category_id === selectedCategory) &&
+        food.category_id === selectedCategory || 
+        food.local_menu_category_id === selectedCategory) &&
       (food.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       food.description?.toLowerCase().includes(searchTerm.toLowerCase()))
+        food.description?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [selectedCategory, searchTerm, foods]);
 
@@ -478,6 +553,190 @@ const LocalMenu = () => {
     }
   }, [localCategories]);
 
+
+  // ----------------------------------------------------------------------
+  // Componente Modal Flotante del Tour
+  // ----------------------------------------------------------------------
+    const TourModal = () => {
+        const [bounds, setBounds] = useState<Bounds | null>(null);
+        const [isPositioned, setIsPositioned] = useState(false);
+        const modalRef = React.useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+            if (!activeStep) return;
+
+            const element = document.querySelector(activeStep.selector) as HTMLElement;
+            if (!element) return;
+            
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const updateBoundsAndPosition = () => {
+                const rect = element.getBoundingClientRect();
+                
+                const padding = 10; 
+
+                setBounds({
+                    top: rect.top - padding,
+                    left: rect.left - padding,
+                    width: rect.width + 2 * padding,
+                    height: rect.height + 2 * padding,
+                });
+                
+                if (modalRef.current) {
+                    let modalStyle: React.CSSProperties = { top: 0, left: 0 };
+                    
+                    const OFFSET_DISTANCE = 25; 
+                    const MODAL_WIDTH = 320; 
+                    const MODAL_HEIGHT = 180; 
+
+                    switch (activeStep.placement) {
+                        case 'right':
+                            modalStyle.top = rect.top + (rect.height / 2) - (MODAL_HEIGHT / 2);
+                            modalStyle.left = rect.left + rect.width + OFFSET_DISTANCE;
+                            break;
+                        case 'left':
+                            modalStyle.top = rect.top + (rect.height / 2) - (MODAL_HEIGHT / 2);
+                            modalStyle.left = rect.left - MODAL_WIDTH - OFFSET_DISTANCE;
+                            break;
+                        case 'top':
+                            modalStyle.left = rect.left + (rect.width / 2) - (MODAL_WIDTH / 2);
+                            modalStyle.top = rect.top - MODAL_HEIGHT - OFFSET_DISTANCE;
+                            break;
+                        case 'bottom':
+                            modalStyle.left = rect.left + (rect.width / 2) - (MODAL_WIDTH / 2);
+                            modalStyle.top = rect.top + rect.height + OFFSET_DISTANCE;
+                            break;
+                    }
+                    
+                    // Ajuste de límites
+                    if (modalStyle.left && (modalStyle.left as number) + MODAL_WIDTH > window.innerWidth - 20) {
+                        modalStyle.left = window.innerWidth - MODAL_WIDTH - 20;
+                    }
+                    if (modalStyle.left && (modalStyle.left as number) < 20) {
+                        modalStyle.left = 20;
+                    }
+                    if (modalStyle.top && (modalStyle.top as number) < 20) {
+                        modalStyle.top = 20;
+                    }
+                    if (modalStyle.top && (modalStyle.top as number) + MODAL_HEIGHT > window.innerHeight - 20) {
+                        modalStyle.top = window.innerHeight - MODAL_HEIGHT - 20;
+                    }
+
+                    // Aplicar estilos y marcar como posicionado
+                    modalRef.current.style.top = `${modalStyle.top}px`;
+                    modalRef.current.style.left = `${modalStyle.left}px`;
+                    modalRef.current.style.transform = `none`; 
+                    setIsPositioned(true);
+                }
+            };
+
+            const timeout = setTimeout(updateBoundsAndPosition, 350); 
+            
+            updateBoundsAndPosition();
+            window.addEventListener('resize', updateBoundsAndPosition);
+            window.addEventListener('scroll', updateBoundsAndPosition);
+
+            return () => {
+                clearTimeout(timeout);
+                window.removeEventListener('resize', updateBoundsAndPosition);
+                window.removeEventListener('scroll', updateBoundsAndPosition);
+                setIsPositioned(false); 
+            };
+        }, [activeStep]);
+        
+        if (!isTourOpen || !activeStep || !bounds) return null;
+
+        const totalSteps = TOUR_STEPS.length;
+        const isFirst = activeStep.id === 1;
+        const isLast = activeStep.id === totalSteps;
+
+
+        return (
+            // Contenedor principal con posicionamiento FIXED (estable al scroll)
+            <div className="fixed inset-0 z-[1000] pointer-events-none">
+                
+                {/* Overlay Oscuro (Dividido en 4 partes para crear el "agujero") */}
+                <div className="absolute inset-0 bg-transparent">
+                    {/* Top Shade */}
+                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+                        top: 0, left: 0, right: 0, height: bounds.top,
+                    }}></div>
+                    {/* Bottom Shade */}
+                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+                        top: bounds.top + bounds.height, left: 0, right: 0, bottom: 0,
+                    }}></div>
+                    {/* Left Shade */}
+                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+                        top: bounds.top, left: 0, width: bounds.left, height: bounds.height,
+                    }}></div>
+                    {/* Right Shade */}
+                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+                        top: bounds.top, left: bounds.left + bounds.width, right: 0, height: bounds.height,
+                    }}></div>
+                </div>
+
+                {/* Contenedor del modal (usando posición fija para que se quede en pantalla) */}
+                <div 
+                    ref={modalRef} 
+                    className={`fixed z-[1001] w-80 p-0 rounded-xl shadow-2xl transition-opacity duration-200 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
+                    style={{ pointerEvents: 'auto' }}
+                >
+                    <div className="bg-gray-800 p-4 rounded-xl border border-purple-600 shadow-xl relative">
+                        {/* Botón de Cierre (Arriba a la derecha) */}
+                        <button
+                            onClick={closeTour}
+                            className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
+                            aria-label="Cerrar tutorial"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <h3 className="text-xl font-bold text-purple-400 mb-2 border-b border-gray-700 pb-2 pr-8">
+                            {activeStep.title}
+                        </h3>
+                        <p className="text-gray-300 text-sm mb-4">
+                            {activeStep.text}
+                        </p>
+
+                        <div className="flex justify-between items-center pt-3 border-t border-gray-700">
+                            <div className="text-xs text-purple-400 font-medium">
+                                Paso {currentStep} de {totalSteps}
+                            </div>
+                            <div className="flex space-x-2">
+                                {/* Botón Anterior */}
+                                {!isFirst && (
+                                    <button
+                                        onClick={goToPrevStep}
+                                        className="px-3 py-1 text-sm rounded-lg bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+                                    >
+                                        Anterior
+                                    </button>
+                                )}
+                                
+                                {/* Botón Siguiente / Finalizar */}
+                                {!isLast ? (
+                                    <button
+                                        onClick={goToNextStep}
+                                        className="px-3 py-1 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors"
+                                    >
+                                        {isFirst ? 'Comenzar' : 'Siguiente'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={closeTour}
+                                        className="px-3 py-1 text-sm rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors"
+                                    >
+                                        Finalizar
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
   if (loading) {
     return <div className="text-center text-white p-8">Cargando menú...</div>;
   }
@@ -492,6 +751,9 @@ const LocalMenu = () => {
 
   return (
     <>
+      {/* Componente Modal del Tour */}
+      <TourModal />
+      
       <div className="bgFood2 min-h-screen text-white p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
           <header className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-8">
@@ -501,9 +763,20 @@ const LocalMenu = () => {
                 Crea, edita y organiza los platos de tu restaurante.
               </p>
             </div>
+             {/* Botón de Ayuda "?" */}
+            <button
+                id="help-button" 
+                onClick={isTourOpen ? closeTour : startTour}
+                className={`fixed top-20 right-6 z-[1002] p-3 rounded-full 
+                            ${isTourOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white 
+                            shadow-lg transition-transform duration-300 transform hover:scale-110`}
+                title={isTourOpen ? "Cerrar Tutorial" : "Mostrar Tutorial"}
+            >
+                {isTourOpen ? <X className="w-6 h-6" /> : <HelpCircle className="w-6 h-6" />}
+            </button>
           </header>
 
-          <section className="mb-8">
+          <section className="mb-8" id="creation-quick-links">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div
                 className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border border-gray-700 hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
@@ -538,8 +811,8 @@ const LocalMenu = () => {
             </div>
           </section>
 
-          <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700 mb-8">
-            <div className="relative w-full mb-6">
+          <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700 mb-8" data-tour-id="filter-section">
+            <div className="relative w-full mb-6" id="search-bar-container">
               <input
                 type="text"
                 placeholder="Buscar platos o descripciones..."
@@ -549,7 +822,7 @@ const LocalMenu = () => {
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
-            <div className="relative">
+            <div className="relative" id="categories-filter">
               {showArrows && !isAtStart && (
                 <button
                   type="button"
@@ -690,7 +963,7 @@ const LocalMenu = () => {
             </section>
           )}
 
-          <section className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700 mt-8">
+          <section className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700 mt-8" id="menu-items-section">
             <h3 className="text-xl md:text-2xl font-bold text-white mb-6">Platos del Menú</h3>
             {loading ?
             (
@@ -746,7 +1019,6 @@ const LocalMenu = () => {
                           <div className="flex flex-wrap gap-1">
                             <StatPill text={`${food.votes_up} Likes`} color="bg-green-500/20 text-green-400" icon={TrendingUp} />
                             <StatPill text={`${food.votes_down} Dislikes`} color="bg-red-500/20 text-red-400" icon={TrendingDown} />
-                            <StatPill text={food.available ? "Disponible" : "No disponible"} color={food.available ? "bg-blue-500/20 text-blue-400" : "bg-red-500/20 text-red-400"} icon={Sun} />
                           </div>
                         </div>
                       </div>
