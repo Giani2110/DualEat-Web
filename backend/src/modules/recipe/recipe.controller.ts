@@ -177,7 +177,6 @@ export class RecipeController {
           .json({ success: false, error: "Datos inválidos." });
       }
 
-      const model = "llama3.2:1b";
       const recipe = await this.recipeService.getRecipeById(recipe_id);
       if (!recipe) {
         return res
@@ -185,51 +184,80 @@ export class RecipeController {
           .json({ success: false, comment: "Receta no encontrada" });
       }
 
-      const prompt = [
-        `El usuario pregunta: "${question}"`,
-        `Aquí está la receta completa para que la analices:`,
+      // Contexto de la receta
+      const recipeContext = [
         `Nombre: ${recipe.name}`,
         `Descripción: ${recipe.description || "Sin descripción"}`,
-        `Ingredientes y cantidades:\n${recipe.ingredients.map((ing: any) => `- ${ing.ingredient.name} - ${ing.quantity} ${ing.unit_of_measure.name}`).join("\n")}`,
-        `Pasos:\n${recipe.steps.map((step: any, i: number) => `${i + 1}. ${step.description}`).join("\n")}`,
-      ].join("\n\n");
+        `Ingredientes: ${(recipe.ingredients || [])
+          .map(
+            (ing: any) =>
+              `${ing.ingredient?.name || ing.name} (${ing.quantity || ""} ${ing.unit_of_measure?.name || ""})`
+          )
+          .join(", ")}`,
+        `Pasos: ${(recipe.steps || [])
+          .map((s: any, i: number) => `${i + 1}) ${s.description}`)
+          .join(" ")}`,
+      ].join("\n");
+
+      // Prompt del sistema MUY claro
+      const systemMessage = `Sos un asistente de cocina de DualEat. 
+      REGLA CRÍTICA: Solo usá la información de la receta si el usuario pregunta EXPLÍCITAMENTE sobre ella (ingredientes, pasos, tiempos, sustituciones, etc.). 
+
+      Si el usuario:
+      - Saluda o pregunta cosas generales (nombre, cómo estás, etc.) → Respondé brevemente SIN mencionar la receta
+      - Pregunta sobre la receta → Usá la info de abajo para responder de forma concisa
+
+      Receta disponible:
+      ${recipeContext}`;
+
+      const messages = [
+        { role: "system", content: systemMessage },
+        ...(Array.isArray(conversation) ? conversation : []),
+        { role: "user", content: question },
+      ];
 
       const response = await axios.post(`${ollamaConfig.host}/api/chat`, {
-        model,
-        messages: [
-          ...(Array.isArray(conversation) ? conversation : []),
-          { role: "user", content: prompt },
-        ],
+        model: "llama3.2:1b",
+        messages,
         stream: false,
+        temperature: 0.3,
       });
 
-      return res.status(200).json({
-        success: true,
-        comment: response.data.message?.content || "Sin respuesta",
-      });
+      const content = response.data?.message?.content || "Sin respuesta";
+
+      return res.status(200).json({ success: true, comment: content });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
   }
-
-
   async getRecipeBySlug(req: Request, res: Response) {
     const { communitySlug, recipeSlug, userSlug } = req.query;
 
     try {
       if (!communitySlug || !recipeSlug || !userSlug) {
-        return res.status(400).json({ success: false, message: "Faltan parámetros obligatorios" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Faltan parámetros obligatorios" });
       }
 
-      const recipe = await this.recipeService.getRecipeBySlug(communitySlug as string, recipeSlug as string, userSlug as string);
+      const recipe = await this.recipeService.getRecipeBySlug(
+        communitySlug as string,
+        recipeSlug as string,
+        userSlug as string
+      );
 
       if (recipe) {
         return res.status(200).json({ success: true, data: recipe });
       } else {
-        return res.status(404).json({ success: false, message: "Receta no encontrada" });
+        return res
+          .status(404)
+          .json({ success: false, message: "Receta no encontrada" });
       }
     } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message || "Error interno del servidor" });
+      res.status(500).json({
+        success: false,
+        message: error.message || "Error interno del servidor",
+      });
     }
   }
 }

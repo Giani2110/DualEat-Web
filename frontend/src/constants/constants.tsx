@@ -64,8 +64,8 @@ export const ROUTES = {
     REVIEWS: "/business/reviews",
     SETTINGS: "/business/settings",
   },
-
   LOADING: "/loading",
+  ERROR: "/404",
 };
 
 export const appRoutes = [

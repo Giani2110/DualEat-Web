@@ -17,7 +17,7 @@ export const login = async (
   password: string,
   rememberMe: boolean,
   recaptchaToken: string | null
-): Promise<User | null> => {
+): Promise<AuthResponse | null> => {
   try {
     const response = await axiosInterceptor.post(
       "/auth/login",

@@ -1,6 +1,5 @@
 import { axiosInterceptor } from "../interceptor/axios-interceptor";
-
-import type { Response, PaginationInfo } from "../interface/global";
+import type { Response, PaginationInfo, CommentIA } from "../interface/global";
 
 import axios from "axios";
 
@@ -9,11 +8,6 @@ interface ResponseAI<T = unknown> {
   comment: string;
   pagination?: PaginationInfo;
   data?: T;
-}
-
-interface Comment {
-  text: string;
-  role: "user" | "ai";
 }
 
 export const getAllIngredients = async (): Promise<Response | null> => {
@@ -78,7 +72,7 @@ export const askOllama = async (
   type: string,
   ingredients: number[],
   page: number,
-  conversation: Comment[]
+  conversation: CommentIA[]
 ): Promise<ResponseAI | null> => {
   try {
     const limitedConversation = conversation.slice(-10);
@@ -110,7 +104,7 @@ export const askOllama = async (
 export const askRecipe = async (
   question: string,
   recipe_id: string,
-  conversation: Comment[]
+  conversation: CommentIA[]
 ): Promise<ResponseAI | null> => {
   try {
     const limitedConversation = conversation.slice(-10);
@@ -139,12 +133,10 @@ export const askRecipe = async (
   }
 };
 
-
-
 export async function getIngredientNutrition(ingredient: string) {
   const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
     ingredient
-  )}&search_simple=1&action=process&json=1`;
+  )}&search_simple=1&action=process&json=1&page_size=20`;
 
   const { data } = await axios.get(searchUrl);
 
@@ -165,7 +157,6 @@ export async function getIngredientNutrition(ingredient: string) {
   };
 }
 
-
 export async function getRecipeNutrition(ingredients: string[]) {
   const results = await Promise.all(
     ingredients.map((ing) => getIngredientNutrition(ing))
@@ -175,13 +166,16 @@ export async function getRecipeNutrition(ingredients: string[]) {
   const valid = results.filter((r) => r.found);
 
   // Hacemos un promedio aproximado
-  const avg = (key: keyof typeof valid[0]) =>
-  (
-    valid.reduce((sum, r) => {
-      const value = typeof r[key] === "string" ? parseFloat(r[key] as string) : (r[key] as number);
-      return sum + (isNaN(value) ? 0 : value);
-    }, 0) / valid.length
-  ).toFixed(2);
+  const avg = (key: keyof (typeof valid)[0]) =>
+    (
+      valid.reduce((sum, r) => {
+        const value =
+          typeof r[key] === "string"
+            ? parseFloat(r[key] as string)
+            : (r[key] as number);
+        return sum + (isNaN(value) ? 0 : value);
+      }, 0) / valid.length
+    ).toFixed(2);
 
   return {
     total_ingredients: valid.length,
@@ -192,4 +186,3 @@ export async function getRecipeNutrition(ingredients: string[]) {
     details: valid,
   };
 }
-

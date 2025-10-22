@@ -259,3 +259,15 @@ export interface NotificationMetadata {
   //imageURLs: string[]; // 1ro usuario, 2do comunidad
   //slugs: string[]; // 1ro comunidad, 2do usuario del post, 3ro post
 }
+
+
+/**
+ * @interface CommentIA
+ * Representa una conversación entre dos usuarios.
+ */
+
+export interface CommentIA {
+  text: string;
+  role: "user" | "ai";
+}
+

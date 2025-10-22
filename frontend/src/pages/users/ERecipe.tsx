@@ -1,16 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { axiosInterceptor } from "../../interceptor/axios-interceptor";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
-import { capitalize, pluralize } from "../../utils/capitalize";
+import { useAuth } from "../../hooks/useAuth";
 
-import { getRecipeNutrition } from "../../services/recipes.api";
+import { Search, ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
+
+import LogoIA from "../../assets/images/icon/DualIA.avif";
+
+import {
+  capitalize,
+  pluralize,
+  getMimeTypeFromUrl,
+} from "../../utils/capitalize";
+
+import { getRecipeNutrition, askRecipe } from "../../services/recipes.api";
 
 import { Pie, PieChart } from "recharts";
 
-import type { Recipe } from "../../interface/global";
+import type { Recipe, CommentIA } from "../../interface/global";
+
+import "../../assets/scss/users/users.scss";
+import Loader from "../../components/animation/Loader";
 
 // Función para calcular el tiempo de lectura
 const calculateReadingTime = (text: string): number => {
@@ -39,6 +52,7 @@ type NutritionData = {
 
 const ERecipe = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { communitySlug, recipeSlug, userSlug } = useParams<{
     communitySlug: string;
     recipeSlug: string;
@@ -48,10 +62,41 @@ const ERecipe = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [readingTime, setReadingTime] = useState<number>(1);
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  const [search, setSearch] = useState("");
+  const [conversation, setConversation] = useState<CommentIA[]>([]);
+  const [started, setStarted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [nutritionData, setNutritionData] = useState<NutritionData | null>(
     null
   );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [actualIndex, setActualIndex] = useState<number>(0);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  const macronutrients = [
+    {
+      key: "carbs",
+      label: "Carbohidratos",
+      color: "#46999F",
+      value: nutritionData?.avg_carbs,
+    },
+    {
+      key: "fat",
+      label: "Grasas",
+      color: "#EE7D5F",
+      value: nutritionData?.avg_fat,
+    },
+    {
+      key: "proteins",
+      label: "Proteínas",
+      color: "#FDC343",
+      value: nutritionData?.avg_proteins,
+    },
+  ];
 
   useEffect(() => {
     if (!communitySlug || !recipeSlug || !userSlug) {
@@ -113,6 +158,15 @@ const ERecipe = () => {
     fetchNutrition();
   }, [recipe]);
 
+  useEffect(() => {
+    const container = endRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [conversation]);
+
+  
+
   // Función para obtener todo el texto de la receta
   const getRecipeReadingTime = (recipe: Recipe): number => {
     let fullText = "";
@@ -141,9 +195,51 @@ const ERecipe = () => {
     return calculateReadingTime(fullText);
   };
 
+  const parseBoldText = (text: string): React.ReactNode[] => {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+    return parts.map((part, i) => {
+      const safePart = part ?? ""; // asegura que no sea undefined
+
+      if (safePart.startsWith("**") && safePart.endsWith("**")) {
+        return <strong key={i}>{safePart.slice(2, -2)}</strong>;
+      }
+
+      return <span key={i}>{safePart}</span>;
+    });
+  };
+
+  const handleAskQuestion = async () => {
+    if (!search.trim() || !recipe) return;
+
+    setStarted(true);
+    setIsLoading(true);
+    setConversation((prev) => [...prev, { text: search, role: "user" }]);
+
+    try {
+      const response = await askRecipe(search, recipe.id, conversation);
+
+      if (response?.success && response.comment) {
+        const aiResponses: CommentIA[] = Array.isArray(response.comment)
+          ? response.comment.map((c: CommentIA) => ({
+              text: c.text,
+              role: "ai",
+            }))
+          : [{ text: response.comment, role: "ai" }];
+
+        setConversation((prev) => [...prev, ...aiResponses]);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
-    <section className="w-[95%] md:w-[80%] md:max-w-[1000px] lg:max-w-[1200px] mx-auto flex flex-col gap-3 px-2 py-1 mt-5">
-      <div className="w-full md:flex-[1] lg:flex-[3] max-w-3xl relative">
+    <section className="w-[95%] md:w-[80%] md:max-w-[1000px] lg:max-w-[1300px] flex-wrap mx-auto flex flex-col lg:flex-row gap-3 my-5 ">
+      <div className="w-full md:flex-[1] lg:flex-[3] relative">
         <div className="h-fit hidden md:block absolute -left-11 top-0">
           <button
             type="button"
@@ -207,15 +303,20 @@ const ERecipe = () => {
               )}
             </div>
 
-            <div className="mt-8">
-              <h1 className="text-[38px] Dosis-Bold text5 tracking-tight">
+            <div className="w-full mt-8 border border-[#dbdbdb] bg-[#ffffffd2] px-8 py-5 rounded-[15px]">
+              <h1 className="text-[30px] Dosis-Bold text5 tracking-tight">
                 {recipe.name}
               </h1>
 
               {/* Imagen principal de la receta */}
               {recipe.main_image && (
                 <>
-                  <div className="aspect-[5/4] mt-3 overflow-hidden rounded-sm relative">
+                  <a
+                    href={recipe.main_image}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block aspect-[5/3] mt-3 overflow-hidden rounded-sm relative"
+                  >
                     <div
                       className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-50"
                       style={{
@@ -228,21 +329,20 @@ const ERecipe = () => {
                       alt="Imagen del post"
                       src={recipe.main_image}
                     />
-                  </div>
-                  <div className="flex items-center justify-center gap-3 my-8 text-[18px] text-gray-700 font-medium">
-                    <span className=" text-gray-400">〰〰〰</span>
+                  </a>
+                  <div className="flex items-center justify-center gap-3 my-5 py-1 text-[14px] text5 border-t border-b border-[#dbdbdb]">
                     <span className="bg-red Dosis-Bold text1 px-3 rounded-[2px]">
                       RECETAS
                     </span>
-
                     <span className="text-[18px]">•</span>
                     <span>{readingTime} MIN DE LECTURA</span>
-                    <span className=" text-gray-400">〰〰〰</span>
+                    <span className="text-[18px]">•</span>
+                    <span>{recipe.total_time} MIN DE PREPARACIÓN</span>
                   </div>
                 </>
               )}
-
-              <p className="text5 text-[18px] mt-2 tracking-tight">
+              <h2 className="text-[20px] Dosis-Bold text5 mb-2">Descripción</h2>
+              <p className="text5 text-[17px] mt-2 tracking-tight">
                 {recipe.description}
               </p>
 
@@ -258,6 +358,7 @@ const ERecipe = () => {
                         {recipe.ingredients.length + " ingredientes"}{" "}
                       </span>
                     </div>
+                    <div className="w-full h-[1px] bg-[#414141] mb-3" />
                     <ul className="list-disc list-inside">
                       {recipe.ingredients.map((ingredient, index) => {
                         return (
@@ -282,7 +383,7 @@ const ERecipe = () => {
                                   <button
                                     type="button"
                                     title="Ver notas del ingrediente"
-                                    className="cursor-pointer"
+                                    className="cursor-pointer hover:scale-105 transition-all duration-100"
                                     onMouseEnter={() => setHoveredIndex(index)}
                                     onMouseLeave={() => setHoveredIndex(null)}
                                   >
@@ -315,9 +416,146 @@ const ERecipe = () => {
                 )}
               </div>
 
+              {/** Pasos */}
+              <div>
+                {recipe.steps && (
+                  <div className="mt-6">
+                    <h2 className="text-[20px] Dosis-Bold text5 mb-2">
+                      Pasos{" "}
+                      <span className="text4 text-[13px] Dosis-Medium">
+                        ({recipe.steps.length})
+                      </span>
+                    </h2>
+                    <div className="w-full h-[1px] bg-[#414141] mb-3" />
+                    <ol className="list-decimal list-inside">
+                      {recipe.steps.map((step, index) => {
+                        const type = getMimeTypeFromUrl(String(step.image_url));
+
+                        return (
+                          <li
+                            key={index}
+                            onClick={() => setActualIndex(index)}
+                            className={`text5 w-full px-2 overflow-hidden h-full flex justify-between text-[15px] border-b border-[#e0e0e0] py-3 tracking-tight group
+                              ${
+                                index === actualIndex
+                                  ? "max-h-[500px]"
+                                  : "max-h-[100px] cursor-pointer hover:bg-[#b53325]"
+                              }
+                              `}
+                          >
+                            {actualIndex === index ? (
+                              <div className="flex flex-col flex-wrap w-full justify-between">
+                                <span className="Dosis-Bold text-[16px] flex-[1] items-baseline">
+                                  Paso {step.step_number}
+                                </span>
+
+                                <div className="flex flex-wrap gap-3">
+                                  <div className="flex-1 flex min-w-[250px] h-full flex-col justify-between">
+                                    <p className="max-h-[200px] overflow-y-auto scroll2 pe-4 pb-4">
+                                      {step.description}
+                                    </p>
+                                    {step.estimated_time != 0 && (
+                                      <p className="Dosis-Bold pt-2">
+                                        Tiempo estimado: {step.estimated_time}{" "}
+                                        min
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="flex-[0.5] max-w-[200px]">
+                                    {step.image_url ? (
+                                      type === "video" ? (
+                                        <video
+                                          controls
+                                          preload="metadata"
+                                          className="w-full rounded-md"
+                                        >
+                                          <source src={step.image_url} />
+                                        </video>
+                                      ) : type === "audio" ? (
+                                        <audio controls className="w-full">
+                                          <source src={step.image_url} />
+                                        </audio>
+                                      ) : (
+                                        <a
+                                          href={step.image_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="aspect-[5/4] mt-3 overflow-hidden rounded-sm relative block"
+                                        >
+                                          <div
+                                            className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-50"
+                                            style={{
+                                              backgroundImage: `url(${step.image_url})`,
+                                            }}
+                                          />
+                                          <img
+                                            className="w-full h-full object-contain cursor-pointer relative z-10"
+                                            alt="Imagen del post"
+                                            loading="lazy"
+                                            src={step.image_url}
+                                          />
+                                        </a>
+                                      )
+                                    ) : (
+                                      <Loader size="4" color="black" />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="items-center flex w-full">
+                                <span className="Dosis-Bold flex-[0.1] group-hover:text-[#FFFFFF]">
+                                  {step.step_number}
+                                </span>
+                                <div className="flex-[4] h-[1px] group-hover:border-[#FFFFFF] border-dotted border-[#2c2c2c] border-b-2" />
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ol>
+
+                    {/** Buttons para pasar de paso */}
+                    <div className="w-full flex justify-between mt-6">
+                      <button
+                        title="Paso anterior"
+                        onClick={() => {
+                          if (actualIndex > 0) {
+                            setActualIndex(actualIndex - 1);
+                          }
+                        }}
+                        type="button"
+                        className="text-[13px] gap-2 group flex items-center justify-between text3 tracking-tight border border-[#b53325]  hover:bg-[#b53325] px-3 py-1 rounded-[5px] cursor-pointer"
+                      >
+                        <ChevronLeft className="w-6 h-6 text-red group-hover:text-[#FFFFFF]!" />
+                        <h1 className="text-[16px] text-red group-hover:text-[#FFFFFF]!">
+                          Paso anterior
+                        </h1>
+                      </button>
+                      <button
+                        title="Paso siguiente"
+                        onClick={() => {
+                          if (actualIndex < recipe.steps.length - 1) {
+                            setActualIndex(actualIndex + 1);
+                          }
+                        }}
+                        type="button"
+                        className="text-[13px] gap-2 group flex items-center justify-between text3 tracking-tight border border-[#b53325]  hover:bg-[#b53325] px-3 py-1 rounded-[5px] cursor-pointer"
+                      >
+                        <ChevronRight className="w-6 h-6 text-red group-hover:text-[#FFFFFF]!" />
+                        <h1 className="text-[16px] text-red group-hover:text-[#FFFFFF]!">
+                          Paso siguiente
+                        </h1>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/** Valor nutricional */}
               {nutritionData && (
-                <div className="mt-6">
+                <div className="mt-18">
                   <div className="flex items-baseline gap-2">
                     <h2 className="text-[20px] Dosis-Bold text5 mb-2">
                       Información Nutricional Aproximada
@@ -334,7 +572,7 @@ const ERecipe = () => {
                           width={250}
                           height={150}
                           tabIndex={-1}
-                          className="z-10"
+                          className="z-10 mx-auto"
                         >
                           <Pie
                             tabIndex={-1}
@@ -374,57 +612,30 @@ const ERecipe = () => {
                         </div>
                       </div>
                       <div className="flex-[2] flex min-w-[150px] mt-3 md:mt-0">
-                        <div className="flex flex-col leading-7 max-w-[150px] flex-1">
-                          <span className="text-[#46999F] Dosis-Bold">
-                            {nutritionData &&
-                              (
-                                (Number(nutritionData.avg_carbs) /
-                                  nutritionData.total) *
-                                100
-                              ).toFixed(0)}
-                            %
-                          </span>
-                          <span className="text5 text-[22px] Dosis-Bold">
-                            {Number(nutritionData.avg_carbs).toFixed(1)}g
-                          </span>
-                          <span className="text6 text-[14px]">
-                            Carbohidratos
-                          </span>
-                          <div className="max-w-20 mt-2 h-[3px] rounded-full bg-[#46999F]" />
-                        </div>
-
-                        <div className="flex flex-col leading-7 max-w-[150px] flex-1">
-                          <span className="text-[#EE7D5F] Dosis-Bold">
-                            {nutritionData &&
-                              (
-                                (Number(nutritionData.avg_fat) /
-                                  nutritionData.total) *
-                                100
-                              ).toFixed(0)}
-                            %
-                          </span>
-                          <span className="text5 text-[22px] Dosis-Bold">
-                            {Number(nutritionData.avg_fat).toFixed(1)}g
-                          </span>
-                          <span className="text6 text-[14px]">Grasas</span>
-                          <div className="max-w-20 mt-2 h-[3px] rounded-full bg-[#EE7D5F]" />
-                        </div>
-                        <div className="flex flex-col leading-7 max-w-[150px] flex-1">
-                          <span className="text-[#FDC343] Dosis-Bold">
-                            {nutritionData &&
-                              (
-                                (Number(nutritionData.avg_proteins) /
-                                  nutritionData.total) *
-                                100
-                              ).toFixed(0)}
-                            %
-                          </span>
-                          <span className="text5 text-[22px] Dosis-Bold">
-                            {Number(nutritionData.avg_proteins).toFixed(1)}g
-                          </span>
-                          <span className="text6 text-[14px]">Proteínas</span>
-                          <div className="max-w-20 mt-2 h-[3px] rounded-full bg-[#FDC343]" />
-                        </div>
+                        {macronutrients.map(({ key, label, color, value }) => (
+                          <div
+                            key={key}
+                            className="flex flex-col leading-7 max-w-[150px] flex-1"
+                          >
+                            <span className="Dosis-Bold" style={{ color }}>
+                              {value && nutritionData?.total
+                                ? (
+                                    (Number(value) / nutritionData.total) *
+                                    100
+                                  ).toFixed(0)
+                                : "0"}
+                              %
+                            </span>
+                            <span className="text5 text-[22px] Dosis-Bold">
+                              {value ? Number(value).toFixed(1) : "0"}g
+                            </span>
+                            <span className="text6 text-[14px]">{label}</span>
+                            <div
+                              className="max-w-20 mt-2 h-[3px] rounded-full"
+                              style={{ backgroundColor: color }}
+                            />
+                          </div>
+                        ))}
                       </div>
                     </div>
                     <div className="max-w-[600px] text-center mx-auto">
@@ -446,6 +657,167 @@ const ERecipe = () => {
             Cargando receta...
           </p>
         )}
+      </div>
+
+      {/** CHAT */}
+      <div className="w-full md:flex-[1] lg:flex-[2] border border-[#dbdbdb] bg-[#ffffffd2] h-fit px-4 py-5 rounded-[15px] mt-10 lg:mt-18 flex flex-col lg:max-w-[400px]">
+        <div className="flex justify-between gap-2 items-center border-b border-[#dbdbdb] pb-3 px-2">
+          <h3 className="Dosis-Bold text5 text-[17px] tracking-tight">
+            Chat con DualIA
+          </h3>
+          <button
+            type="button"
+            onClick={() => {
+              setStarted(false);
+              setConversation([]);
+            }}
+            className="px-2 py-1 rounded-[6px] bg-[#2F2F2F] hover:scale-103 transition-all duration-100 text1 tracking-tight text-[15px] flex gap-2 items-center cursor-pointer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="lucide lucide-bot-message-square-icon lucide-bot-message-square"
+            >
+              <path d="M12 6V2H8" />
+              <path d="M15 11v2" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="M20 16a2 2 0 0 1-2 2H8.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 4 20.286V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
+              <path d="M9 11v2" />
+            </svg>
+            Nuevo chat
+          </button>
+        </div>
+
+        {started ? (
+          <div
+            ref={endRef}
+            className="flex flex-col gap-6 overflow-y-auto max-h-[400px] px-5 py-3"
+          >
+            {conversation.map((msg, index) => {
+              const isExpanded = expandedIndex === index;
+              return (
+                <div
+                  key={index}
+                  onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                  className={`flex cursor-pointer items-start ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  {msg.role !== "user" && (
+                    <img
+                      src={LogoIA}
+                      className="rounded-full max-w-7 max-h-7 me-2"
+                      alt="Logo DualIA"
+                    />
+                  )}
+                  {/* Burbuja de mensaje con estilos diferentes para usuario y IA */}
+                  <div
+                    className={`max-w-[70%] lg:w-full p-2 rounded-[8px] bg-[#ffffffcc] shadow-md border border-[#dbdbdb] text5 text-[15px] ${
+                      msg.role === "user"
+                        ? "text-right border-[#4A4947]!"
+                        : "text-left"
+                    }
+                    ${isExpanded ? "line-clamp-none" : "line-clamp-2"}
+                    `}
+                  >
+                    {/* Procesa texto con negrita */}
+                    {parseBoldText(msg.text)}
+                  </div>
+                  {msg.role === "user" && (
+                    <img
+                      src={user.avatar_url}
+                      className="rounded-full max-w-7 max-h-7 ms-2"
+                      alt="Imagen de usuario"
+                    />
+                  )}
+                </div>
+              );
+            })}
+
+            {isLoading && (
+              <div className="flex gap-2 items-center">
+                <Loader size="4" color="gray-500" />
+                <p className="text4 text-[15px]">Cargando respuesta...</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col text-center tracking-tight justify-center items-center gap-y-4 py-3 mt-10">
+            <img
+              src={LogoIA}
+              className="max-w-12 max-h-12 mx-auto"
+              alt="Imagen de DualIA"
+            />
+            <h1 className="text-[22px] Dosis-Bold underline">
+              Bienvenido a DualIA
+            </h1>
+            <p className="text4">
+              DualIA te ayuda a resolver dudas sobre esta receta: ingredientes,
+              pasos, nutrición o adaptaciones. Escribí tu pregunta y recibí una
+              respuesta clara al instante.
+            </p>
+          </div>
+        )}
+
+        {/** TEXTAREA + BUTTON */}
+        <div className="w-full mt-4">
+          <div className="flex flex-col shadow-md shadow-[#f1f1f1] justify-between cursor-text rounded-[17px] bg-[#ffffffcb] border-[#dbdbdb] p-2 border mx-auto">
+            <textarea
+              ref={textareaRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAskQuestion();
+                  setSearch("");
+                  if (textareaRef.current) {
+                    textareaRef.current.style.height = "auto";
+                  }
+                }
+              }}
+              placeholder="Pregunta a DualIA"
+              rows={1}
+              className="placeholder:text-[#4A4947] resize-none overflow-y-auto max-h-[200px] scroll2 placeholder:tracking-tight break-words text5 outline-0 w-full px-2 pb-4"
+              onInput={(e) => {
+                e.currentTarget.style.height = "auto";
+                e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+              }}
+            />
+
+            <div className="flex justify-end w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  handleAskQuestion();
+                  setSearch("");
+                  if (textareaRef.current) {
+                    textareaRef.current.style.height = "auto";
+                  }
+                }}
+                className="p-2 rounded-full bg-[#b53325] cursor-pointer"
+              >
+                {search ? (
+                  <ArrowUp size={20} color="#ffffff" />
+                ) : (
+                  <Search size={20} color="#ffffff" />
+                )}
+              </button>
+            </div>
+          </div>
+          <p className="text4 text-center text-[14px] mt-2">
+            Las respuestas de DualIA pueden estar equivocadas. No se garantiza
+            su exactitud, solo proporcionan información general.
+          </p>
+        </div>
       </div>
     </section>
   );

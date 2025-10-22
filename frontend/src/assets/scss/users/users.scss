@@ -41,16 +41,13 @@
   background-size: cover;
   background-position: center;
   background-repeat: repeat;
-  filter: invert(1) opacity(0.1) ;
+  filter: invert(1) opacity(0.1);
   z-index: -1;
 }
-
-
 
 .bgFood2 {
   position: relative;
 }
-
 
 .bgFood2::before {
   content: "";
@@ -67,25 +64,6 @@
   z-index: -1;
 }
 
-.scroll2::-webkit-scrollbar {
-  width: 6px;
-  display: none;
-}
-
-.scroll:hover::-webkit-scrollbar {
-  display: block;
-}
-
-.scroll2::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.scroll2::-webkit-scrollbar-thumb {
-  background: #b53325;
-  border-radius: 10px;
-  cursor: pointer;
-  opacity: 0.5;
-}
 
 .bannerBG {
   position: relative;

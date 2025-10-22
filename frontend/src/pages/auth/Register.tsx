@@ -84,7 +84,7 @@ const Register: React.FC = () => {
                 setEmail(e.target.value)
               }
               placeholder="tu@email.com"
-              className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none"
+              className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none"
             />
           </div>
         </div>
@@ -100,7 +100,7 @@ const Register: React.FC = () => {
                 setPassword(e.target.value)
               }
               placeholder="••••••••"
-              className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none pr-12"
+              className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none pr-12"
             />
             <button
               type="button"
@@ -125,7 +125,7 @@ const Register: React.FC = () => {
                 setConfirmPassword(e.target.value)
               }
               placeholder="Repite tu contraseña"
-              className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#E5A657] text-[15px] outline-none pr-12"
+              className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#E5A657] text-[15px] outline-none pr-12"
             />
             <button
               type="button"

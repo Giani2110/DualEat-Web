@@ -5,6 +5,7 @@ import { CommunityProvider } from "../context/other/CommunityProvider";
 
 import ScrollToTop from "../components/shared/ScrollToTop";
 import Layout from "../layout/layout";
+import NotFound from "../pages/error/NotFound";
 
 import { AuthProvider } from "../context/auth/AuthProvider";
 import { SocketProvider } from "../context/other/SocketContext";
@@ -33,8 +34,11 @@ function AppRouter() {
                   {appRoutes.map(({ path, element }, index) => (
                     <Route key={index} path={path} element={element} />
                   ))}
+                  <Route path="/404" element={<NotFound />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </Layout>
+              
             </CommunityProvider>
           </NotificationsProvider>
         </SocketProvider>

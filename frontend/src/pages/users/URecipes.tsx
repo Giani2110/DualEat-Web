@@ -26,15 +26,10 @@ import type {
   Ingredient,
   Recipe,
   PaginationInfo,
+  CommentIA
 } from "../../interface/global";
 
 import Loader from "../../components/animation/Loader";
-
-// INTERFACES LOCALES
-interface Comment {
-  text: string;
-  role: "user" | "ai";
-}
 
 const URecipes = () => {
   // ESTADOS DE PAGINACIÓN Y BÚSQUEDA
@@ -74,7 +69,7 @@ const URecipes = () => {
   const [error, setError] = useState<string | null>(null);
 
   // ESTADOS DE CONVERSACIÓN Y CHAT
-  const [conversation, setConversation] = useState<Comment[]>([]);
+  const [conversation, setConversation] = useState<CommentIA[]>([]);
   // Índice del mensaje expandido en el chat (para mostrar texto completo)
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
@@ -124,8 +119,8 @@ const URecipes = () => {
 
       if (response?.success && response.comment) {
         // Procesa la respuesta de la IA (puede ser string o array)
-        const aiResponses: Comment[] = Array.isArray(response.comment)
-          ? response.comment.map((c: Comment) => ({
+        const aiResponses: CommentIA[] = Array.isArray(response.comment)
+          ? response.comment.map((c: CommentIA) => ({
               text: c.text,
               role: "ai",
             }))
@@ -167,8 +162,8 @@ const URecipes = () => {
       const response = await askRecipe(search, recipeSelected.id, conversation);
       if (response?.success && response.comment) {
         // Procesa respuesta de IA similar a searchRecipes
-        const aiResponses: Comment[] = Array.isArray(response.comment)
-          ? response.comment.map((c: Comment) => ({
+        const aiResponses: CommentIA[] = Array.isArray(response.comment)
+          ? response.comment.map((c: CommentIA) => ({
               text: c.text,
               role: "ai",
             }))

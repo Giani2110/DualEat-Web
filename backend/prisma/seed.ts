@@ -42,6 +42,7 @@ const unitsOfMeasure = [
   { name: "unidad", abbreviation: "u" },
   { name: "pizca", abbreviation: "pizca" },
   { name: "paquete", abbreviation: "paquete" },
+  { name: "opcional", abbreviation: "opcional" },
 ];
 // DATOS PARA COMUNIDADES Y PREFERENCIAS DE USUARIOS
 const tagData = [

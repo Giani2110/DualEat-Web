@@ -29,19 +29,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     setLoading(true);
     try {
-      const userData = await authLogin(
+      const response = await authLogin(
         email,
         password,
         rememberMe,
         recaptchaToken
       );
-      if (userData) {
-        setUser(userData);
+      if (response?.success && response.user) {
+        setUser(response.user);
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
         }
       }
-      return userData;
+      return response;
     } catch (error) {
       setUser(null);
       throw error;

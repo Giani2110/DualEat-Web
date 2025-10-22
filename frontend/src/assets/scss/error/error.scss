@@ -1,0 +1,19 @@
+.E404 {
+  position: relative;
+}
+
+.E404::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url(https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWo4d2VuNmdrM3RoaHlmNXg2Y3lqMGxsamR0N2d1cXp5bGZzZ3A0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kHsUiJD0pOLItuf0Cb/giphy.gif);
+  //background-color: #1F1F1F;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.08);
+  z-index: -1;
+}

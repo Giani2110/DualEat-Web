@@ -9,6 +9,9 @@ import Footer from "../layout/footer/Footer";
 
 import { useAuth } from "../hooks/useAuth";
 import { useDynamicTitle } from "../hooks/useDynamicTitle";
+import { useLocation, matchPath } from "react-router-dom";
+
+import { appRoutes } from "../constants/constants";
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,10 +20,20 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, loading } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const location = useLocation();
+
+  // Verificar si la ruta actual coincide con alguna ruta válida
+  const isValidRoute = appRoutes.some((route) =>
+    matchPath(route.path, location.pathname)
+  );
+
+  // Es 404 si estamos en /404 o si no es una ruta válida
+  const is404 = location.pathname === "/404" || !isValidRoute;
+
   useDynamicTitle();
 
   const renderContent = () => {
-    if (!user) {
+    if (is404 || !user) {
       return <>{children}</>;
     }
 
@@ -60,15 +73,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <>
-      {user ? (
+      {user && !is404 ? (
         <HeaderUSER
           isBusiness={user.isBusiness}
           onToggleSidebar={toggleSidebar}
         />
       ) : (
-        <Navbar />
+        !is404 && !user && <Navbar />
       )}
-      
+
       {renderContent()}
 
       {!loading && !user && <Footer />}

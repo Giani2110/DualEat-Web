@@ -8,7 +8,6 @@ import AuthSection from "../../components/auth/AuthSection";
 
 import toast from "react-hot-toast";
 
-
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +19,8 @@ const Login: React.FC = () => {
 
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const { login } = useAuth();
+
+  console.log("reCAPTCHA token:", recaptchaToken);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,8 +37,16 @@ const Login: React.FC = () => {
       recaptchaRef.current?.reset();
     }
 
-    if (response?.email) {
-      navigate(ROUTES.USER.DASHBOARD);
+    if (response?.success && response.user) {
+      setRecaptchaToken(null);
+      recaptchaRef.current?.reset();
+
+      if (response.user.isBusiness) {
+        navigate(ROUTES.LOCAL.DASHBOARD);
+      } else {
+        navigate(ROUTES.USER.DASHBOARD);
+      }
+
       console.log("Inicio de sesión exitoso:", response);
     }
   };
@@ -78,7 +87,7 @@ const Login: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full px-4 py-[10px] border border-gray-300 rounded-[8px] focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none"
+              className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-[8px] focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none"
             />
           </div>
 
@@ -123,7 +132,7 @@ const Login: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none pr-12"
+                className="w-full px-4 text5 py-[10px] border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent outline-none pr-12"
               />
               <button
                 type="button"

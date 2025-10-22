@@ -10,7 +10,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isVisible }) => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed  bgFood w-[100%] h-[100vh] bg-[#fcfcfc] z-50">
+    <div className="fixed bgFood w-[100%] h-[100vh] bg-[#fcfcfc] z-[1000]">
       <div className="flex flex-col items-center">
         <div className="relative h-14 flex items-center justify-center">
           <img src={Logo} alt="Logo DualEat" className="w-15 h-15 absolute top-[200px] z-10" />
