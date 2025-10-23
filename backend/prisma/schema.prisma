@@ -20,12 +20,12 @@ generator client {
   binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
-generator erd {
+/*generator erd {
   provider = "prisma-erd-generator"
   theme = "dark"
   output = "../DER.svg"
   disabled = true
-}
+}*/
 
 // Enums
 enum Role {
@@ -58,18 +58,6 @@ enum OrderStatus {
   ready
   delivered
   cancelled
-}
-
-enum SubscriptionPlan {
-  user_premium
-  business
-}
-
-enum SubscriptionStateMP {
-  authorized
-  paused
-  cancelled
-  finished
 }
 
 enum Visibility {
@@ -144,6 +132,7 @@ model User {
   avatar_url String?
   role       Role    @default(user)
   active     Boolean @default(true)
+  verified   Boolean @default(false)
 
   // 2. AUTENTICACIÓN Y SEGURIDAD
   password_hash    String?
@@ -268,6 +257,7 @@ model Local {
   calendar_events LocalCalendarEvent[]
   notes           LocalNote[]
   @@index([business_id])
+  Subscription Subscription[]
 }
 
 model LocalSchedule {
@@ -619,23 +609,56 @@ model OrderItem {
 }
 
 model Subscription {
-  id                String              @id @default(cuid()) @map("id")
-  user              User                @relation(fields: [user_id], references: [id])
-  user_id           String
+  id                String              @id @default(cuid()) @map("id")
+
+  user              User                @relation(fields: [user_id], references: [id])
+  user_id           String
+  
+  local             Local?            @relation(fields: [local_id], references: [id])
+  local_id          String?             @map("local_id")
+  
   mp_preapproval_id String
+
+  subscription_type SubscriptionType
   plan              SubscriptionPlan
   amount            Float
   currency_id       String              @default("ARS")
   status            SubscriptionStateMP @default(authorized)
+
   start_date        DateTime
   next_payment_date DateTime?
   end_date          DateTime?
+  auto_renew        Boolean             @default(true) 
+
+  payment_history Json?
+
   created_at        DateTime            @default(now())
   updated_at        DateTime            @updatedAt
 
   @@index([mp_preapproval_id])
+  @@unique([user_id, local_id, subscription_type])
 }
 
+enum SubscriptionStateMP {
+  inactive
+  authorized
+  active
+  paused
+  cancelled
+  finished
+}
+
+enum SubscriptionType {
+  LOCAL
+  COMMUNITY_USER
+}
+
+enum SubscriptionPlan {
+  LOCAL_MONTHLY
+  LOCAL_ANNUAL
+  COMMUNITY_USER_MONTHLY
+  COMMUNITY_USER_ANNUAL
+}
 
 /*
 model Achievement {

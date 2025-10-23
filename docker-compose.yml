@@ -82,7 +82,7 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-      - ollama_models:/ollama_models
+      - ./ollama_models:/ollama_models
     networks:
       - dualeat-network
     healthcheck:
