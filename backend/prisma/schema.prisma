@@ -241,14 +241,16 @@ model Business {
 }
 
 model Local {
-  id              String    @id @default(cuid()) @map("id")
-  slug            String    @unique
+  id              String   @id @default(cuid()) @map("id")
+  slug            String   @unique
   name            String
   description     String?
   address         String?
   phone           String?
   email           String?
   image_url       String
+  latitude        Float?
+  longitude       Float?
   categorias_menu String[]
   average_rating  Float     @default(0)
   created_at      DateTime  @default(now())
