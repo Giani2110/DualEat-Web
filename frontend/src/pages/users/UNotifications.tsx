@@ -89,47 +89,85 @@ const UNotifications = () => {
         Notificaciones
       </h1>
       <div className="flex flex-col max-w-[650px]">
-        <div className="flex leading-4 justify-end items-center gap-1 mt-2">
-          <button
-            type="button"
-            onClick={() => {
-              markAsRead();
-              setNotifications([]);
-              setNotificationsPaginated((prev) =>
-                prev.map((n) => ({ ...n, read: true }))
-              );
-            }}
-            title="Marcar notificaciones como leidas"
-            className="cursor-pointer text3 Dosis-Bold text-[16px] text5 p-2"
-          >
-            Marcar como leido
-          </button>
-          <div className="w-[2px] h-[25px] bg-[#b53325]"></div>
-          <button
-            title="Notificaciones leidas"
-            type="button"
-            className="cursor-pointer text3 Dosis-Bold text-[16px] p-2 text5"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#b53325"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-package-icon lucide-package"
+        {notificationsPaginated.length !== 0 && (
+          <div className="flex leading-4 justify-end items-center gap-1 mt-2">
+            <button
+              type="button"
+              onClick={() => {
+                markAsRead();
+                setNotifications([]);
+                setNotificationsPaginated((prev) =>
+                  prev.map((n) => ({ ...n, read: true }))
+                );
+              }}
+              title="Marcar notificaciones como leidas"
+              className="cursor-pointer text3 Dosis-Bold text-[16px] text5 p-2"
             >
-              <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
-              <path d="M12 22V12" />
-              <polyline points="3.29 7 12 12 20.71 7" />
-              <path d="m7.5 4.27 9 5.15" />
-            </svg>
-          </button>
-        </div>
-        <div className="flex flex-col mt-2">
+              Marcar como leido
+            </button>
+            <div className="w-[2px] h-[25px] bg-[#b53325]"></div>
+            <button
+              title="Notificaciones leidas"
+              type="button"
+              className="cursor-pointer text3 Dosis-Bold text-[16px] p-2 text5"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#b53325"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-package-icon lucide-package"
+              >
+                <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+                <path d="M12 22V12" />
+                <polyline points="3.29 7 12 12 20.71 7" />
+                <path d="m7.5 4.27 9 5.15" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col mt-2 min-h-[100px]">
+          {notificationsPaginated.length === 0 && (
+            <>
+              <img
+                src="https://img.freepik.com/premium-photo/directly-shot-food-table_1048944-7767269.jpg"
+                alt="Imagen de comida"
+                className="w-full h-full max-h-[100px] rounded-[5px]  object-cover object-top "
+              />
+
+              <div className="flex flex-col gap-1 items-center mt-3 py-3 border-t border-b border-dashed border-[#bebebe]">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4a4947"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-bell-minus-icon lucide-bell-minus"
+                >
+                  <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+                  <path d="M15 8h6" />
+                  <path d="M16.243 3.757A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673A9.4 9.4 0 0 1 18.667 12" />
+                </svg>
+                <p className="text5 Dosis-Bold text-[17px]">
+                  "Todo en Calma por Aquí"
+                </p>
+                <p className="text4 text-[16px] ">
+                  Tus alertas, mensajes y novedades importantes aparecerán en
+                  este lugar.
+                </p>
+              </div>
+            </>
+          )}
           {notificationsPaginated.map((notification, index) => (
             <div
               key={index}

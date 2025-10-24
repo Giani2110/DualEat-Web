@@ -754,7 +754,7 @@ const LocalMenu = () => {
       {/* Componente Modal del Tour */}
       <TourModal />
       
-      <div className="bgFood2 min-h-screen text-white p-4 md:p-6">
+      <div className="BGLocal min-h-screen text-white p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
           <header className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-8">
             <div>

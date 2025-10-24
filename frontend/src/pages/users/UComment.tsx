@@ -294,7 +294,7 @@ const UComment = () => {
           <img
             src={post?.community.image_url}
             alt="Imagen de la comunidad"
-            className="w-full h-full max-h-8.5 max-w-8.5 rounded-full object-cover"
+            className="w-8 h-8  rounded-full object-cover"
           />
           <div className="flex flex-col leading-5">
             <span className="text-[15px] text5 Dosis-Bold">
@@ -397,7 +397,7 @@ const UComment = () => {
           <div className="flex items-center justify-start mt-8 gap-4 w-full">
             <div
               onClick={(e) => e.stopPropagation()}
-              className={`flex items-center w-fit gap-1 p-[2px] rounded-full ${
+              className={`flex items-center border border-[#bebebe] w-fit gap-1 p-[2px] rounded-full ${
                 voteUP
                   ? "bg-[#e5a657]"
                   : voteDown
@@ -486,7 +486,7 @@ const UComment = () => {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 border border-[#dbdbdb] bg-[#f5f5f5] px-4 py-[7px] rounded-full">
+            <div className="flex items-center gap-2 border border-[#bebebe] bg-[#f5f5f5] px-4 py-[7px] rounded-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="20"

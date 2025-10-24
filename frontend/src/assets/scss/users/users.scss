@@ -5,7 +5,7 @@
 }
 
 .sidebar-open {
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 300px 1fr;
 }
 
 .sidebar-closed {
@@ -25,12 +25,13 @@
   grid-column: 2;
 }
 
-.bgFood {
+.BGUser {
   position: relative;
-  background-color: #a5a5a51c;
+  //background-color: #a5a5a51c;
+  //background-color: #ffffff7e;
 }
 
-.bgFood::before {
+.BGUser::before {
   content: "";
   position: fixed;
   top: 0;
@@ -41,15 +42,16 @@
   background-size: cover;
   background-position: center;
   background-repeat: repeat;
-  filter: invert(1) opacity(0.1);
+  filter: invert(1);
+  opacity: 0.1;
   z-index: -1;
 }
 
-.bgFood2 {
+.BGLocal {
   position: relative;
 }
 
-.bgFood2::before {
+.BGLocal::before {
   content: "";
   position: fixed;
   top: 0;
@@ -64,7 +66,6 @@
   z-index: -1;
 }
 
-
 .bannerBG {
   position: relative;
   background-color: #f1f1f1;
@@ -74,7 +75,6 @@
 .bannerBG::before {
   content: "";
   position: absolute;
-  filter: contrast(0.8);
   top: -3px;
   left: -3px;
   right: -3px;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import type { ReactNode } from "react";
 
 import Navbar from "../layout/navbar/Navbar";
@@ -19,7 +19,6 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, loading } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const location = useLocation();
 
   // Verificar si la ruta actual coincide con alguna ruta válida
@@ -38,52 +37,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
 
     if (user.isBusiness === false) {
-      return (
-        <UIDashboard
-          toggleSidebar={toggleSidebar}
-          isSidebarOpen={!sidebarCollapsed}
-        >
-          {children}
-        </UIDashboard>
-      );
+      return <UIDashboard>{children}</UIDashboard>;
     }
 
     if (user.isBusiness === true) {
-      return (
-        <BusinessSidebar
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={toggleSidebar}
-        >
-          {children}
-        </BusinessSidebar>
-      );
+      return <BusinessSidebar>{children}</BusinessSidebar>;
     }
   };
 
-  const toggleSidebar = () => {
-    const newState = !sidebarCollapsed;
-    setSidebarCollapsed(newState);
-    localStorage.setItem("sidebarOpen", sidebarCollapsed ? "true" : "false");
-  };
-
-  useEffect(() => {
-    const stored = localStorage.getItem("sidebarOpen");
-    setSidebarCollapsed(stored === "false");
-  }, []);
-
   return (
     <>
-      {user && !is404 ? (
-        <HeaderUSER
-          isBusiness={user.isBusiness}
-          onToggleSidebar={toggleSidebar}
-        />
-      ) : (
-        !is404 && !user && <Navbar />
-      )}
-
+      {user && !is404 ? <HeaderUSER /> : !is404 && !user && <Navbar />}
       {renderContent()}
-
       {!loading && !user && <Footer />}
     </>
   );

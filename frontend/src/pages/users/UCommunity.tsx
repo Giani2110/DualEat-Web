@@ -37,7 +37,7 @@ const UCommunity = () => {
   const [posts, setPosts] = useState<Posts[]>([]);
 
   // Paginación y flags
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -155,6 +155,17 @@ const UCommunity = () => {
       }
     };
     fetchCommunity();
+  }, [communitySlug]);
+
+  useEffect(() => {
+    // Se ejecuta cada vez que 'community' cambia (o al desmontar).
+    // Si communitySlug cambia (y por ende community), limpiamos los posts anteriores.
+    if (communitySlug) {
+      setPosts([]); 
+      setPage(1); 
+      setIsLoading(false);
+      setIsInitialized(false);
+    }
   }, [communitySlug]);
 
   // 2. Cargar posts cuando cambia la página
@@ -426,7 +437,7 @@ const UCommunity = () => {
             <div key={post.id} className="w-full">
               <PostCard Post={post} />
               {index < posts.length - 1 && (
-                <div className="w-full h-[1px] mx-auto bg-gray-300 my-1" />
+                <div className="w-full h-[1px] mx-auto bg-[#4A4947] my-1" />
               )}
             </div>
           ))}

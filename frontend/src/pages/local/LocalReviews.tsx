@@ -276,7 +276,7 @@ const LocalReviews = () => {
   );
 
   return (
-    <div className="bgFood2 min-h-screen text-white p-6">
+    <div className="BGLocal min-h-screen text-white p-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold pt-12 text-white mb-2">Reseñas y Ranking de Platos</h1>
         <p className="text-gray-400 mb-8">Información detallada sobre la opinión de tus clientes y los platos más populares.</p>

@@ -87,7 +87,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
     <>
       <div
         onClick={(e) => handleNavigate(e, Post, true)}
-        className="flex gap-3 w-full min-h-[120px] cursor-pointer rounded-[15px] p-4 hover:bg-[#86868628] transition-colors duration-200"
+        className="flex gap-3 w-full min-h-[120px] cursor-pointer rounded-[8px] border border-[#dddddd] bg-white/40 p-4 hover:bg-[#dddddd28] transition-colors duration-200"
       >
         <div>
           <img
@@ -172,7 +172,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
           <div className="flex items-center justify-start mt-5 gap-4 w-full">
             <div
               onClick={(e) => e.stopPropagation()}
-              className={`flex items-center w-fit gap-1 p-[2px] rounded-full ${
+              className={`flex items-center w-fit border border-[#bebebe] gap-1 p-[2px] rounded-full ${
                 voteUP
                   ? "bg-[#e5a657]"
                   : voteDown
@@ -261,7 +261,7 @@ const PostCard: React.FC<PostCardProps> = ({ Post }) => {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 border border-[#dbdbdb] bg-[#f5f5f5] px-4 py-[7px] rounded-full">
+            <div className="flex items-center gap-2 border border-[#bebebe] bg-[#f5f5f5] px-4 py-[7px] rounded-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="20"

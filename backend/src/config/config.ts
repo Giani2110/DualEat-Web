@@ -12,6 +12,8 @@ export const SECRET_KEY = process.env.JWT_SECRET || "clavePorDefecto";
 
 export const API_PREFIX = "/api";
 
+export const CRYPTO_SECRET_KEY = process.env.CRYPTO_SECRET_KEY || "";
+
 export const ollamaConfig = {
   host: process.env.OLLAMA_HOST,
   model: process.env.OLLAMA_MODEL || "llama3.2:1b",

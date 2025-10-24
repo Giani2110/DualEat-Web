@@ -353,7 +353,7 @@ const LocalQR = () => {
     }
 
     return (
-        <div className="bgFood2 min-h-screen text-white p-4 md:p-6">
+        <div className="BGLocal min-h-screen text-white p-4 md:p-6">
             
             {/* Componente Modal del Tour */}
             <TourModal />

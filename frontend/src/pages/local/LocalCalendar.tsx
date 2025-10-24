@@ -946,7 +946,7 @@ const LocalCalendar = () => {
   );
 
   return (
-    <div className="bgFood2 min-h-screen text-white relative">
+    <div className="BGLocal min-h-screen text-white relative">
       
       {/* Componente Modal del Tour */}
       <TourModal />
