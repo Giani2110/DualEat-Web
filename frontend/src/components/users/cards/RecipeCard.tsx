@@ -1,7 +1,8 @@
 import React from "react";
 import { Clock, Beef, ChefHat } from "lucide-react";
-import type { Recipe } from "../../../interface/global";
+import type { Recipe } from "@interface/global";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -9,7 +10,12 @@ interface RecipeCardProps {
   isSelected: boolean;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, RecipeFocus, isSelected }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({
+  recipe,
+  RecipeFocus,
+  isSelected,
+}) => {
+  const navigate = useNavigate();
   const formatTime = (minutes: number) => {
     if (minutes < 60) {
       return `${minutes}min`;
@@ -24,13 +30,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, RecipeFocus, isSelected
   const handleCardClick = () => {
     RecipeFocus(recipe);
     toast("Receta seleccionada", {
-        icon: "🍔",
-        duration: 1000,
-      });
+      icon: "🍔",
+      duration: 1000,
+    });
   };
 
   return (
-     <div
+    <div
       className={`bg-[hsl(0,0%,98%)] mb-2 rounded-[10px] shadow-sm hover:shadow-md overflow-hidden cursor-pointer group ${
         isSelected ? "border-[#b53325] border-2" : "border border-gray-300"
       }`}
@@ -39,9 +45,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, RecipeFocus, isSelected
       <div className="flex p-3 gap-3">
         {/* Imagen */}
         <div className="relative w-24 h-24 flex-shrink-0">
-        
           <img
-            src={recipe.main_image ? recipe.main_image : "https://placehold.co/400"}
+            src={
+              recipe.main_image ? recipe.main_image : "https://placehold.co/400"
+            }
             alt={recipe.name}
             className="w-full h-full rounded-[5px] object-cover"
           />
@@ -59,7 +66,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, RecipeFocus, isSelected
             <button
               type="button"
               className="text-xs text1 mt-2 bg-red p-[5px] w-full rounded-full cursor-pointer"
-              //onClick={onClick}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(
+                  `/c/${recipe.posts[0].community.slug}/recipe/${recipe.user.slug}/${recipe.slug}`
+                );
+              }}
             >
               <span className="text-xs">Ver Receta</span>
             </button>
@@ -70,7 +82,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, RecipeFocus, isSelected
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <Clock size={14} strokeWidth={2} className="text-red" />
-                <span>{recipe.total_time > 0 ? formatTime(recipe.total_time) : "N/A"}</span>
+                <span>
+                  {recipe.total_time > 0
+                    ? formatTime(recipe.total_time)
+                    : "N/A"}
+                </span>
               </div>
 
               <div className="flex items-center gap-1 text-xs text-gray-500">

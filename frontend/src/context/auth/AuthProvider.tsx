@@ -5,12 +5,12 @@ import {
   register as authRegister,
   completeProfile as authCompleteProfile,
   logout as authLogout,
-} from "../../services/auth.api";
-import type { AuthResponse } from "../../services/auth.api";
-import type { User } from "../../interface/global";
+} from "@services/auth.api";
+import type { AuthResponse } from "@services/auth.api";
+import type { User } from "@interface/global";
 
 import { AuthContext } from "./AuthContext";
-import { withMinimumDelay } from "../../utils/timeUtils";
+import { withMinimumDelay } from "@utils/timeUtils";
 import { useNavigate } from "react-router-dom";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({

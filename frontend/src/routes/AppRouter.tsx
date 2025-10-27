@@ -1,15 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { appRoutes } from "../constants/constants";
+import { appRoutes } from "@constants/constants";
 import { Toaster } from "react-hot-toast";
-import { CommunityProvider } from "../context/other/CommunityProvider";
+import { CommunityProvider } from "@context/other/CommunityProvider";
 
 import ScrollToTop from "../components/shared/ScrollToTop";
-import Layout from "../layout/layout";
-import NotFound from "../pages/error/NotFound";
+import Layout from "@layout/layout";
+import NotFound from "@pages/public/error/NotFound";
 
-import { AuthProvider } from "../context/auth/AuthProvider";
-import { SocketProvider } from "../context/other/SocketContext";
-import { NotificationsProvider } from "../context/other/NotificationsProvider";
+import { AuthProvider } from "@context/auth/AuthProvider";
+import { SocketProvider } from "@context/other/SocketContext";
+import { NotificationsProvider } from "@context/other/NotificationsProvider";
 
 function AppRouter() {
   return (

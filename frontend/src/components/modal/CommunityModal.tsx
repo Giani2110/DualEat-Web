@@ -2,15 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { Image, Search, X, Globe, Lock } from "lucide-react";
 import RCrop from "../shared/ReactCrop";
 import toast from "react-hot-toast";
-import type { CategoryTag, CommunityTag } from "../../interface/global";
+import type { CategoryTag, CommunityTag } from "@interface/global";
 
-import { generateSlug } from "../../utils/sluglify";
+import { generateSlug } from "@utils/sluglify";
 
 import {
   getCommunityBySlug,
   createCommunity,
-} from "../../services/community.api";
-import { getCommunityTags } from "../../services/community-tag.api";
+} from "@services/community.api";
+import { getCommunityTags } from "@services/community-tag.api";
 import Loader from "../animation/Loader";
 
 import { StepDots } from "./StepNavigation";

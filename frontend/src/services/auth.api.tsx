@@ -137,7 +137,7 @@ export const getMe = async () => {
     return response.data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      console.error("Error al obtener perfil:", err.response?.data?.message);
+      console.error(err.response?.data?.message);
     } else {
       console.error("Error desconocido");
     }

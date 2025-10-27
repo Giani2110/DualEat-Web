@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import type { Posts } from "../../../interface/global";
-import { useAuth } from "../../../hooks/useAuth";
+import type { Posts } from "@interface/global";
+import { useAuth } from "@hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { createVote } from "../../../services/vote.api";
+import { createVote } from "@services/vote.api";
 
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";

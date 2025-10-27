@@ -71,16 +71,23 @@ export class RecipeService {
     }
   }
 
-
   /** GET RECIPE BY SLUG */
-  async getRecipeBySlug(communitySlug: string, recipeSlug: string, userSlug: string) {
+  async getRecipeBySlug(
+    communitySlug: string,
+    recipeSlug: string,
+    userSlug: string
+  ) {
     try {
       const result = await prisma.recipe.findFirst({
-        where: { slug: recipeSlug,
+        where: {
+          slug: recipeSlug,
           posts: {
-            some: { community: { slug: communitySlug }, user: { slug: userSlug } }
-          }
-         },
+            some: {
+              community: { slug: communitySlug },
+              user: { slug: userSlug },
+            },
+          },
+        },
         include: {
           ingredients: {
             include: {
@@ -89,16 +96,18 @@ export class RecipeService {
             },
           },
           steps: true,
-          posts: { include: { community: { select: { image_url: true, slug: true } }, user: { select: { id: true, name: true, slug: true } } } },
+          posts: {
+            include: {
+              community: { select: { image_url: true, slug: true } },
+              user: { select: { id: true, name: true, slug: true } },
+            },
+          },
         },
       });
       return result;
     } catch (error) {
       throw new Error(`Error al obtener receta: ${error}`);
     }
-
-
-
   }
 
   /** GET USER RECIPES */
@@ -150,9 +159,19 @@ export class RecipeService {
         include: {
           ingredients: true,
           steps: true,
+          user: {
+            select: {
+              slug: true,
+            },
+          },
           posts: {
             select: {
               votes_up: true,
+              community: {
+                select: {
+                  slug: true,
+                },
+              },
             },
             orderBy: {
               votes_up: "desc",

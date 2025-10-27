@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Logo from '../../assets/images/icon/Logo DualEatBlack.png';
+import Logo from '@assets/images/icon/Logo DualEatBlack.png';
 
 interface LoadingScreenProps {
   isVisible: boolean;

@@ -8,7 +8,32 @@ import dotenv from "dotenv";
 import http from "http";
 
 // 1. IMPORTACIONES
-// =========================================================================
+import {
+  Auth,
+  Contact,
+  Review,
+  Critique,
+  Statistics,
+  Orders,
+  ManualLoadMenu,
+  QR,
+  Food,
+  LocalMenuCategory,
+  LocalSettings,
+  LocalCalendar,
+  Community,
+  CommunityTags,
+  TagCategory,
+  Recipe,
+  Post,
+  Chat,
+  Notification,
+  Vote,
+  Onboarding,
+  Admin,
+  OCR,
+  Users,
+} from "./index"
 
 // Configuración y utilidades
 import { configurePassport } from "./config/passport";
@@ -17,56 +42,15 @@ import { API_PREFIX } from "./config/config";
 import { initializeSocket } from "./config/socket.config";
 import { CleanupJob } from "./jobs/cleanup.job";
 
-// Módulos principales y sus rutas
-import authRoutes from "./modules/auth/routes/auth.routes";
-import contactRouter from "./modules/mail/routes/contact.routes";
-import reviewRoutes from "./modules/Locals/route/review.routes";
-import critiqueRoutes from "./modules/Locals/route/critique.routes";
-
-import statisticsRoutes from "./modules/Locals/route/statistics.routes";
-import orders from "./modules/Locals/route/order.routes";
-import manualLoadMenu from "./modules/Locals/route/manualLoadMenu.routes";
-
-// Módulo de Comunidad
-import communityRoutes from "./modules/community/routes/community.routes";
-import communityTagsRouter from "./modules/community/routes/community-tag.routes";
-import tagCategoryRouter from "./modules/community/routes/tag-category.routes";
-
-// Módulo de Recetas y Posts
-import recipeRoutes from "./modules/recipe/recipe.routes";
-import postRoutes from "./modules/post/post.routes";
-
-// Módulo de notificaciones
-import notificationRoutes from "./modules/notification/routes/notification.routes";
-
-// Módulo de Votes
-import voteRoutes from "./modules/votes/vote.routes";
-
-// Rutas sin agrupar en módulos (considera agruparlas si el proyecto crece)
-import onboardingRoutes from "./routes/onBoarding.routes";
-import foodCategoriesRoutes from "./routes/onBoarding.routes";
-import adminRouter from "./routes/admin.routes";
-import qrRoutes from "./modules/Locals/route/qr.routes";
-import ocrRoutes from "./routes/ocr.routes";
-import foodRoutes from "./modules/Locals/route/food.routes";
-import usersRouter from "./routes/users";
-import localMenuCategoryRouter from "./modules/Locals/route/foodCategory.routes";
-import localSettingsRouter from "./modules/Locals/route/settings.routes";
-import localCalendar from "./modules/Locals/route/calendar.routes";
-
-// =========================================================================
-
 // Inicialización de variables de entorno y aplicación
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 2.1. CREACIÓN DEL SERVIDOR HTTP (Requerido por Socket.io)
-// =========================================================================
 const httpServer = http.createServer(app);
 
 // 2.2. CONEXIONES Y SERVICIOS
-// =========================================================================
 
 // Verificar conexión a Redis al iniciar
 async function initializeApp() {
@@ -83,7 +67,6 @@ async function initializeApp() {
 initializeApp();
 
 // 3. MIDDLEWARES GLOBALES
-// =========================================================================
 
 // Configuración de CORS
 app.use(
@@ -123,72 +106,48 @@ app.use(
 );
 
 // 4. AUTENTICACIÓN (PASSPORT)
-// =========================================================================
-
 configurePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
 // 5. DEFINICIÓN DE RUTAS API
-// =========================================================================
 
-// Rutas de Módulos (agrupadas por funcionalidad)
-app.use(`${API_PREFIX}/auth`, authRoutes);
-app.use(`${API_PREFIX}/contact`, contactRouter);
+// Rutas de Módulos 
+app.use(`${API_PREFIX}/auth`, Auth);
+app.use(`${API_PREFIX}/contact`, Contact);
 
 // Módulo de Comunidad
-app.use(`${API_PREFIX}/community`, communityRoutes);
-app.use(`${API_PREFIX}/tags-categories`, tagCategoryRouter);
-app.use(`${API_PREFIX}/community-tags`, communityTagsRouter);
+app.use(`${API_PREFIX}/community`, Community);
+app.use(`${API_PREFIX}/tags-categories`, TagCategory);
+app.use(`${API_PREFIX}/community-tags`, CommunityTags);
+app.use(`${API_PREFIX}/recipe`, Recipe);
+app.use(`${API_PREFIX}/post`, Post);
+app.use(`${API_PREFIX}/notification`, Notification);
+app.use(`${API_PREFIX}/vote`, Vote);
+app.use(`${API_PREFIX}/chat`, Chat);
 
-// Módulo de Recetas y Posts
-app.use(`${API_PREFIX}/recipe`, recipeRoutes);
-app.use(`${API_PREFIX}/post`, postRoutes);
 
-// Módulo de notificaciones
-app.use(`${API_PREFIX}/notification`, notificationRoutes);
-
-// Módulo de Votes
-app.use(`${API_PREFIX}/vote`, voteRoutes);
-
-// Módulo de Locales (si existen, aquí irían)
-app.use("/api/reviews", reviewRoutes);
-app.use("/api/critiques", critiqueRoutes);
-
-// Otras rutas (considera agruparlas en módulos también)
-app.use(`${API_PREFIX}/onboarding`, onboardingRoutes);
-app.use(`${API_PREFIX}/food-categories`, foodCategoriesRoutes);
+app.use(`${API_PREFIX}/onboarding`, Onboarding);
 
 //Admin
-app.use("/admin", adminRouter);
-app.use("/api/admin", adminRouter);
+app.use(`${API_PREFIX}/admin`, Admin);
 
 //Locales
-app.use("/api/users", usersRouter);
-app.use("/api", qrRoutes);
-app.use("/api", ocrRoutes);
-app.use("/api", foodRoutes);
-app.use("/api", reviewRoutes);
-app.use("/api", critiqueRoutes);
-app.use("/api", statisticsRoutes);
-app.use("/api", orders);
-app.use("/api", manualLoadMenu);
-app.use("/api/local-menu-categories", localMenuCategoryRouter);
-app.use("/api/settings", localSettingsRouter);
-app.use("/api/calendar", localCalendar);
+app.use(`${API_PREFIX}/users`, Users);
+app.use(`${API_PREFIX}`, QR);
+app.use(`${API_PREFIX}`, OCR);
+app.use(`${API_PREFIX}`, Food);
+app.use(`${API_PREFIX}`, Review);
+app.use(`${API_PREFIX}`, Critique);
+app.use(`${API_PREFIX}`, Statistics);
+app.use(`${API_PREFIX}`, Orders);
+app.use(`${API_PREFIX}`, ManualLoadMenu);
+app.use(`${API_PREFIX}/local-menu-categories`, LocalMenuCategory);
+app.use(`${API_PREFIX}/settings`, LocalSettings);
+app.use(`${API_PREFIX}/calendar`, LocalCalendar);
 
-app.use("/api/qr", qrRoutes);
-app.use("/api/ocr", ocrRoutes);
-app.use("/api/food", foodRoutes);
-
-// Rutas de administración
-app.use("/admin", adminRouter);
-app.use("/api/admin", adminRouter); // Considera si necesitas ambas, a menudo una es suficiente
 
 // 6. RUTAS DE PRUEBA Y MANEJO DE ERRORES
-// =========================================================================
-
-// Ruta de prueba de autenticación
 app.get("/status", (req, res) => {
   const token = req.cookies?.accessToken;
   if (!token) return res.json({ authenticated: false });
@@ -200,7 +159,7 @@ app.get("/status", (req, res) => {
   }
 });
 
-// Middleware de manejo de errores (debe ir al final)
+// Middleware de manejo de errores
 app.use(
   (
     err: any,
@@ -216,13 +175,11 @@ app.use(
   }
 );
 
-// Iniciar tarea de limpieza
+// Tarea de limpieza
 const cleanupJob = new CleanupJob();
 cleanupJob.start();
 
 // 7. INICIAR SERVIDOR
-// =========================================================================
-
 httpServer.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}${API_PREFIX}`);
   console.log(`Servidor Socket.io escuchando en puerto ${PORT}`);

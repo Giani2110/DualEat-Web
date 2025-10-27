@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { ROUTES } from "../../constants/constants";
+import { ROUTES } from "@constants/constants";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-import Restaurant from "../../assets/images/auth/Restaurante.avif";
-import Restaurant2 from "../../assets/images/auth/Restaurante2.avif";
-import Restaurant3 from "../../assets/images/auth/Restaurante3.avif";
-import LogoDualEat from "../../assets/images/icon/Logo_DualEat.png";
+import Restaurant from "@assets/images/auth/Restaurante.avif";
+import Restaurant2 from "@assets/images/auth/Restaurante2.avif";
+import Restaurant3 from "@assets/images/auth/Restaurante3.avif";
+import LogoDualEat from "@assets/images/icon/Logo_DualEat.png";
 
 interface Props {
   flex: string;

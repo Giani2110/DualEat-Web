@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import type { ReactNode } from "react";
 
 import Navbar from "../layout/navbar/Navbar";
@@ -11,7 +11,9 @@ import { useAuth } from "../hooks/useAuth";
 import { useDynamicTitle } from "../hooks/useDynamicTitle";
 import { useLocation, matchPath } from "react-router-dom";
 
-import { appRoutes } from "../constants/constants";
+import { appRoutes, ROUTES } from "../constants/constants";
+import { useChat } from "@/hooks/useChat";
+import { getUserChats } from "@/services/chat.api";
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,6 +22,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const { setChats } = useChat();
 
   // Verificar si la ruta actual coincide con alguna ruta válida
   const isValidRoute = appRoutes.some((route) =>
@@ -28,6 +31,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Es 404 si estamos en /404 o si no es una ruta válida
   const is404 = location.pathname === "/404" || !isValidRoute;
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      if (
+        user &&
+        user.isBusiness === false &&
+        location.pathname === ROUTES.USER.RECIPES
+      ) {
+        const response = await getUserChats();
+        if (response?.success && Array.isArray(response.data)) {
+          setChats(response.data);
+        } else {
+          setChats([]);
+        }
+      }
+    };
+
+    fetchChats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, location.pathname]);
 
   useDynamicTitle();
 
@@ -39,7 +62,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (user.isBusiness === false) {
       return <UIDashboard>{children}</UIDashboard>;
     }
-
     if (user.isBusiness === true) {
       return <BusinessSidebar>{children}</BusinessSidebar>;
     }

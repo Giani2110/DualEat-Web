@@ -1,11 +1,11 @@
 import React from "react";
 import { Instagram, Twitter } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import Logo from "../../assets/images/icon/Logo_DualEat.png";
-import GooglePlay from "../../assets/images/GooglePlay_Badge_Web.png";
+import Logo from "@assets/images/icon/Logo_DualEat.png";
+import GooglePlay from "@assets/images/GooglePlay_Badge_Web.png";
 
-import { OUT_NAVBAR_ROUTES } from "../../constants/navbar-routes";
-import { ROUTES } from "../../constants/constants";
+import { OUT_NAVBAR_ROUTES } from "@constants/navbar-routes";
+import { ROUTES } from "@constants/constants";
 
 const Footer: React.FC = () => {
   const location = useLocation();

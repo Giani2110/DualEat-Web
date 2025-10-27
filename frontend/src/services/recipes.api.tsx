@@ -1,14 +1,7 @@
 import { axiosInterceptor } from "../interceptor/axios-interceptor";
-import type { Response, PaginationInfo, CommentIA } from "../interface/global";
+import type { Response } from "../interface/global";
 
 import axios from "axios";
-
-interface ResponseAI<T = unknown> {
-  success: boolean;
-  comment: string;
-  pagination?: PaginationInfo;
-  data?: T;
-}
 
 export const getAllIngredients = async (): Promise<Response | null> => {
   try {
@@ -62,72 +55,6 @@ export const getUserRecipes = async (
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       console.log(err.response?.data?.message || "Error al obtener recetas");
-    }
-    return null;
-  }
-};
-
-export const askOllama = async (
-  question: string,
-  type: string,
-  ingredients: number[],
-  page: number,
-  conversation: CommentIA[]
-): Promise<ResponseAI | null> => {
-  try {
-    const limitedConversation = conversation.slice(-10);
-
-    const mappedConversation = limitedConversation.map((msg) => ({
-      role: msg.role === "ai" ? "assistant" : "user",
-      content: msg.text,
-    }));
-
-    const { data } = await axiosInterceptor.post<ResponseAI>("/recipe/ask", {
-      question,
-      type,
-      ingredients,
-      page,
-      conversation: mappedConversation,
-    });
-
-    return data;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      console.log(
-        err.response?.data?.error || "Error al obtener respuesta de la IA"
-      );
-    }
-    return null;
-  }
-};
-
-export const askRecipe = async (
-  question: string,
-  recipe_id: string,
-  conversation: CommentIA[]
-): Promise<ResponseAI | null> => {
-  try {
-    const limitedConversation = conversation.slice(-10);
-
-    const mappedConversation = limitedConversation.map((msg) => ({
-      role: msg.role === "ai" ? "assistant" : "user",
-      content: msg.text,
-    }));
-    const { data } = await axiosInterceptor.post<ResponseAI>(
-      "/recipe/ask-recipe",
-      {
-        question,
-        recipe_id,
-        conversation: mappedConversation,
-      }
-    );
-
-    return data;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      console.log(
-        err.response?.data?.error || "Error al obtener respuesta de la IA"
-      );
     }
     return null;
   }

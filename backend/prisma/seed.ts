@@ -1,4 +1,3 @@
-// Seed.ts completo
 import {
   PrismaClient,
   TypesCategory,
@@ -6,30 +5,21 @@ import {
   SubscriptionStatus,
   LocalUserRole,
   PostType,
-  Visibility,
-  VoteType,
-  OrderStatus,
-  SubscriptionPlan,
-  SubscriptionStateMP,
-  ContentType,
 } from "@prisma/client";
 import { readFileSync } from "fs";
 import { join } from "path";
-import slugify from 'slugify'; // Importa la librería
+import slugify from 'slugify';
 
 const prisma = new PrismaClient();
 
-// Ruta al archivo de ingredientes (asumiendo que está en el mismo nivel que el directorio de prisma o ajusta la ruta)
 const ingredientsFilePath = join(__dirname, "../..", "ingredientes.txt");
 
 // =================================================================
 // FUNCIÓN DE AYUDA PARA SLUG
-// Función de slug simple (suficiente para el seed de prueba)
 function generateSlug(text: string): string {
     return slugify(text, { lower: true, strict: true, locale: 'es' });
 }
 // =================================================================
-
 // DATOS PARA UNIDADES DE MEDIDA
 const unitsOfMeasure = [
   { name: "gramos", abbreviation: "g" },
@@ -190,7 +180,6 @@ const tagData = [
 ];
 
 // CATEGORÍAS GLOBALES DE COMIDA
-// ... (Tus datos de foodCategories se mantienen igual) ...
 const foodCategories = [
   // TIPOS DE COMIDA
   {

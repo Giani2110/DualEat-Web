@@ -1,11 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useEffect, useState } from "react";
 import { useSocket } from "./SocketContext";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "@hooks/useAuth";
 
-import { axiosInterceptor } from "../../interceptor/axios-interceptor";
+import { axiosInterceptor } from "@interceptor/axios-interceptor";
 import toast from "react-hot-toast";
-import type { Notification } from "../../interface/global";
+import type { Notification } from "@interface/global";
 
 type NotificationsContextType = {
   notifications: Notification[];

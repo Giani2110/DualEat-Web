@@ -166,7 +166,7 @@ export const getCommunityPosts = async (
 };
 
 export const getRecommendedCommunities = async (
-  user_id: number
+  user_id: string
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/community/recommended", {

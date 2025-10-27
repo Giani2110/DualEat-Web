@@ -3,7 +3,6 @@ import { RecipeController } from "./recipe.controller";
 import { RecipeService } from "./recipe.service";
 
 import { isAuthenticated } from "../../middlewares/isAuthenticated";
-import { iaLimiter } from "../../middlewares/rateLimiter";
 
 const router = Router();
 const service = new RecipeService();
@@ -29,29 +28,8 @@ router.get(
   controller.getUserRecipes.bind(controller)
 );
 
-
 // 5. Obtener receta por Slug
 // =========================================================
 router.get("/slug", controller.getRecipeBySlug.bind(controller));
-
-// 6. Ask Ollama
-// =========================================================
-router.post(
-  "/ask",
-  iaLimiter,
-  isAuthenticated,
-  controller.askOllama.bind(controller)
-);
-
-// 7. Ask Ollama (Recipe)
-// =========================================================
-router.post(
-  "/ask-recipe",
-  iaLimiter,
-  isAuthenticated,
-  controller.askRecipe.bind(controller)
-);
-
-
 
 export default router;

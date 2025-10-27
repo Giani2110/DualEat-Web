@@ -145,7 +145,7 @@ export interface RecipeStep {
  */
 export interface Recipe {
   id: string; // Identificador único de la receta.
-  user_id: string;
+  user: MinimalUser;
   slug: string;
   name: string;
   description: string;
@@ -155,7 +155,7 @@ export interface Recipe {
   updated_at: string;
   ingredients: RecipeIngredient[];
   steps: RecipeStep[];
-  posts: Posts[] | null; // Posts asociados a esta receta (si los hay).
+  posts: Posts[]; 
 }
 
 /**
@@ -260,14 +260,27 @@ export interface NotificationMetadata {
   //slugs: string[]; // 1ro comunidad, 2do usuario del post, 3ro post
 }
 
-
-/**
- * @interface CommentIA
- * Representa una conversación entre dos usuarios.
- */
-
-export interface CommentIA {
-  text: string;
-  role: "user" | "ai";
+export interface ChatMetadata {
+  chatId: string;
+  title: string;
+  activeRecipeId?: string;
+  createdAt: string;
+  lastUpdated: string;
 }
+
+export interface ChatSessionData {
+  text: string;
+  role: "USER" | "IA";
+}
+
+export interface CHATData {
+  chatId?: string;
+  title?: string;
+  messages: ChatSessionData[];
+  createdAt?: string;
+  lastUpdated?: string;
+  activeRecipeId?: string;
+}
+
+
 

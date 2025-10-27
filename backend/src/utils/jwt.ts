@@ -9,7 +9,9 @@ import {
 import { Role } from "@prisma/client";
 import crypto from "crypto";
 
-import { sessionService } from "../modules/auth/services/session.service";
+import AuthSessionService from "../modules/auth/services/auth-session.service";
+
+const authSessionService = new AuthSessionService();
 
 export function createTempToken(payload: TempTokenPayload): string {
   return jwt.sign(payload, SECRET_KEY, {
@@ -56,7 +58,10 @@ export async function createSecureToken(
   const ttlSeconds = rememberMe ? 3 * 24 * 60 * 60 : 24 * 60 * 60; // 3 días vs 1 día
 
   // Crear sesión en Redis
-  const sessionId = await sessionService.createSession(userData, ttlSeconds);
+  const sessionId = await authSessionService.createSession(
+    userData,
+    ttlSeconds
+  );
 
   // Payload mínimo para JWT
   const payload: SecureTokenPayload = {

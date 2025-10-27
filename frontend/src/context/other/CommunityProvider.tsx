@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { getUserCommunities } from "../../services/community.api";
-import { useAuth } from "../../hooks/useAuth";
+import { getUserCommunities } from "@services/community.api";
+import { useAuth } from "@hooks/useAuth";
 
 import { CommunityContext } from "./CommunityContext";
 
-import type { Community } from "../../interface/global";
+import type { Community } from "@interface/global";
 
 type UserCommunityEntry = {
   community: Community;

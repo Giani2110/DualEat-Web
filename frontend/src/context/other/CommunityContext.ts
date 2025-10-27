@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Community } from "../../interface/global";
+import type { Community } from "@interface/global";
 
 type UserCommunityEntry = {
   community: Community;

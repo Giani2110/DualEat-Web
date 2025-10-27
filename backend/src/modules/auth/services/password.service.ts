@@ -1,5 +1,5 @@
 import { prisma } from "../../../prisma/prisma";
-import { sendPasswordResetEmail } from "../../mail/services/email.service";
+import { sendPasswordResetEmail } from "../../../modules/mail/services/email.service";
 
 import { hashPassword } from "../../../utils/hash";
 

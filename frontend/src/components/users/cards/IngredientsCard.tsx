@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import type { Ingredient, UnitOfMeasure } from "../../../interface/global";
-import { getAllIngredients, getAllUnits } from "../../../services/recipes.api";
+import type { Ingredient, UnitOfMeasure } from "@interface/global";
+import { getAllIngredients, getAllUnits } from "@services/recipes.api";
 
-import { capitalize } from "../../../utils/capitalize";
+import { capitalize } from "@utils/capitalize";
 
 import { Trash2, GripVertical, Plus } from "lucide-react";
 import {

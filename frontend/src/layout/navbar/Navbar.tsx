@@ -4,11 +4,11 @@ import { Link, useLocation } from "react-router-dom";
 import {
   NAVBAR_ROUTES,
   OUT_NAVBAR_ROUTES,
-} from "../../constants/navbar-routes";
-import { ROUTES } from "../../constants/constants";
+} from "@constants/navbar-routes";
+import { ROUTES } from "@constants/constants";
 
 import { Triangle } from "lucide-react";
-import Logo from "../../assets/images/icon/Logo DualEatRed.png";
+import Logo from "@assets/images/icon/Logo DualEatRed.png";
 
 const Header: React.FC = () => {
   const location = useLocation();

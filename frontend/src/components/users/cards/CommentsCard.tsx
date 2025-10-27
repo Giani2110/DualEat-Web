@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { MessageCircle, MoreHorizontal } from "lucide-react";
 
-import type { Comment } from "../../../interface/global";
+import type { Comment } from "@interface/global";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
-import { createVote } from "../../../services/vote.api";
-import { createComment } from "../../../services/post.api";
+import { createVote } from "@services/vote.api";
+import { createComment } from "@services/post.api";
 
 import { CircleMinus, CirclePlus } from "lucide-react";
 

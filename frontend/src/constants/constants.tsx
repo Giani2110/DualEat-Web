@@ -10,7 +10,7 @@ import {
   TermsConditions,
   ProtectedRoute,
   PublicRoute,
-  UserDashboard,
+  UDashboard,
   AdminBusinessCreation,
   AdminFoodCategories,
   AdminLocals,
@@ -143,7 +143,7 @@ export const appRoutes = [
     path: ROUTES.USER.DASHBOARD,
     element: (
       <ProtectedRoute isBusiness={false}>
-        <UserDashboard />
+        <UDashboard />
       </ProtectedRoute>
     ),
   },

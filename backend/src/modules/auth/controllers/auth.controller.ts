@@ -22,10 +22,11 @@ import {
   createTempToken,
   verifyTempToken,
 } from "../../../utils/jwt";
-import { sessionService } from "../services/session.service";
+import AuthSessionService from "../services/auth-session.service";
 import { generateUniqueSlug } from "../../../utils/sluglify";
 
 export class AuthController {
+  private readonly authSessionService = new AuthSessionService();
   constructor(private userService: UserService) {}
 
   async login(req: Request, res: Response) {
@@ -201,7 +202,6 @@ export class AuthController {
       }
 
       const userSlug = await generateUniqueSlug(name.trim(), model);
-      
 
       // Crear usuario real en DB
       const userDataToCreate: BasicCreateDTO = {
@@ -271,7 +271,7 @@ export class AuthController {
 
           // Eliminar sesión de Redis
           if (sessionId) {
-            await sessionService.deleteSession(sessionId);
+            await this.authSessionService.deleteSession(sessionId);
             console.log(`🗑️ Sesión eliminada en logout: ${sessionId}`);
           }
         } catch (jwtError) {

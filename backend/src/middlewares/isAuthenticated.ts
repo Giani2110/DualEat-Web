@@ -1,7 +1,9 @@
 import { verifyAccessToken } from "../utils/jwt";
-import { sessionService } from "../modules/auth/services/session.service";
+import AuthSessionService from "../modules/auth/services/auth-session.service";
 
 import { Request, Response, NextFunction } from "express";
+
+const authSessionService = new AuthSessionService();
 
 export const isAuthenticated = async (
   req: Request,
@@ -20,7 +22,7 @@ export const isAuthenticated = async (
     const payload = verifyAccessToken(token);
 
     // 2. Get data from Redis
-    const userData = await sessionService.getSession(payload.ses);
+    const userData = await authSessionService.getSession(payload.ses);
 
     if (!userData) {
       console.warn("⚠️ Sesión expirada:", payload.ses);
@@ -32,7 +34,7 @@ export const isAuthenticated = async (
 
     // 3. Check if the user is still active (THIS MUST BE BEFORE RENEWAL)
     if (!userData.active) {
-      await sessionService.deleteSession(payload.ses);
+      await authSessionService.deleteSession(payload.ses);
       return res
         .status(401)
         .clearCookie("accessToken")
@@ -61,8 +63,8 @@ export const isAuthenticated = async (
   } catch (err) {
     console.error("❌ Error de autenticación:", err);
     return res
-    .status(401)
-    .clearCookie("accessToken")
-    .redirect(`${process.env.FRONTEND_URL}/login`);
+      .status(401)
+      .clearCookie("accessToken")
+      .redirect(`${process.env.FRONTEND_URL}/login`);
   }
 };
