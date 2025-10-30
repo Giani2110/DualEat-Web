@@ -136,6 +136,7 @@ const UNotifications = () => {
           {notificationsPaginated.length === 0 && (
             <>
               <img
+                loading="lazy"
                 src="https://img.freepik.com/premium-photo/directly-shot-food-table_1048944-7767269.jpg"
                 alt="Imagen de comida"
                 className="w-full h-full max-h-[100px] rounded-[5px]  object-cover object-top "

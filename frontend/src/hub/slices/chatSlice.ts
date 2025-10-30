@@ -44,6 +44,15 @@ const chatSlice = createSlice({
     setStarted: (state, action: PayloadAction<boolean>) => {
       state.started = action.payload;
     },
+    updateChatTitle: (
+      state,
+      action: PayloadAction<{ chatId: string; newTitle: string }>
+    ) => {
+      const chat = state.chats.find((c) => c.chatId === action.payload.chatId);
+      if (chat) {
+        chat.title = action.payload.newTitle;
+      }
+    },
     setConversation: (
       state,
       action: PayloadAction<ChatSessionData[] | null>
@@ -61,6 +70,7 @@ export const {
   setActiveChatId,
   removeActiveChatId,
   setStarted,
+  updateChatTitle,
   setConversation,
 } = chatSlice.actions;
 

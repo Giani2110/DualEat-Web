@@ -1,5 +1,5 @@
-import { axiosInterceptor } from "../interceptor/axios-interceptor";
-import type { Response } from "../interface/global";
+import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import type { Response } from "@interface/global";
 
 import axios from "axios";
 
@@ -63,7 +63,7 @@ export const getUserRecipes = async (
 export async function getIngredientNutrition(ingredient: string) {
   const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
     ingredient
-  )}&search_simple=1&action=process&json=1&page_size=20`;
+  )}&search_simple=1&action=process&json=1&page_size=100`;
 
   const { data } = await axios.get(searchUrl);
 
@@ -103,6 +103,17 @@ export async function getRecipeNutrition(ingredients: string[]) {
         return sum + (isNaN(value) ? 0 : value);
       }, 0) / valid.length
     ).toFixed(2);
+
+  if (valid.length === 0) {
+    return {
+      total_ingredients: 0,
+      avg_calories: 0,
+      avg_proteins: 0,
+      avg_carbs: 0,
+      avg_fat: 0,
+      details: [],
+    };
+  }
 
   return {
     total_ingredients: valid.length,

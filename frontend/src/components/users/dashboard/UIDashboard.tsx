@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/constants";
 
 import { useCommunity } from "@hooks/useUCommunity";
@@ -7,13 +7,21 @@ import { useChat } from "@/hooks/useChat";
 
 import "@assets/scss/private/users/users.scss";
 import { ChevronDown, Ellipsis } from "lucide-react";
+import ChatModal from "@/components/modal/ChatModal";
+import {
+  useRecent,
+  type MinimalCommunityPlus,
+} from "@/hooks/useRecent";
+import type { User } from "@/interface/global";
 
 interface Props {
   children: React.ReactNode;
+  user: User;
 }
 
-const UIDashboard: React.FC<Props> = ({ children }) => {
+const UIDashboard: React.FC<Props> = ({ children, user }) => {
   const { userCommunities } = useCommunity();
+  const { handleCommunityClick } = useRecent(user.id);
   const {
     chats,
     chat_id,
@@ -24,11 +32,16 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
   } = useChat();
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [filter, setFilter] = useState("");
 
   const [isOpen, setIsOpen] = useState(true);
   const [openOptions, setOpenOptions] = useState<string>("");
+
+  const [editingChatId, setEditingChatId] = useState<string>("");
+  const [type, setType] = useState<"title" | "delete" | "">("");
+
   const divRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,35 +60,52 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
       <div className="flex flex-col">
         {/** Comunidades */}
         <div
-          className={`transition-all duration-300 cursor-pointer w-full py-[10px] overflow-hidden
+          className={`transition-all duration-300 cursor-pointer w-full py-[10px]
           `}
         >
           <div className={`flex justify-between px-3 items-center py-[10px]`}>
             <span className={`text-[15px] Dosis-Bold text5`}>Comunidades</span>
           </div>
 
-          {userCommunities.map((community) => (
-            <Link
-              key={community.community.id}
-              title={community.community.name}
-              to={`/c/${community.community.slug}/`}
-              className={`navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]`}
-            >
-              <img
-                src={
-                  (community.community.image_url !== null &&
-                    community.community.image_url) ||
-                  "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
-                }
-                className={`rounded-full h-4 w-4 flex-shrink-0`}
-                alt="Imagen de la comunidad"
-              />
+          <div>
+            {userCommunities.map((community) => {
+              const communityInfo = {
+                id: community.community.id,
+                name: community.community.name,
+                image_url: community.community.image_url,
+                slug: community.community.slug,
+              };
 
-              <span className={`ml-[10px] text-[14px] text4 whitespace-nowrap`}>
-                {community.community.name}
-              </span>
-            </Link>
-          ))}
+              return (
+                <button
+                  type="button"
+                  key={community.community.id}
+                  title={community.community.name}
+                  onClick={() => {
+                    handleCommunityClick(communityInfo as MinimalCommunityPlus);
+                    navigate(`/c/${community.community.slug}/`);
+                  }}
+                  className={`navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]`}
+                >
+                  <img
+                    src={
+                      (community.community.image_url !== null &&
+                        community.community.image_url) ||
+                      "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
+                    }
+                    className={`rounded-full h-4 w-4 flex-shrink-0`}
+                    alt="Imagen de la comunidad"
+                  />
+
+                  <span
+                    className={`ml-[10px] text-[14px] text4 whitespace-nowrap`}
+                  >
+                    {community.community.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         <div className="border-t border-gray-300 mt-2"></div>
 
@@ -112,6 +142,7 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                 </span>
               </div>
 
+              {/** Open Chats */}
               <div className="mx-2 mt-5 flex flex-col justify-between h-full min-h-screen">
                 <div className="flex-1">
                   <div
@@ -127,8 +158,10 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                       }`}
                     />
                   </div>
+
+                  {/** Chats */}
                   <div
-                    className={`flex flex-col gap-1.5 mt-2 overflow-y-scroll scroll2 pe-3 ${
+                    className={`flex flex-col gap-1.5 mt-2 overflow-y-auto scroll2 pe-3 ${
                       isOpen ? "max-h-[400px] min-h-[300px]" : "max-h-0"
                     }`}
                   >
@@ -175,10 +208,63 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
                                     : "text5 group-hover:text-[#fff]!"
                                 }`}
                               />
+
+                              {/** Opciones de chat */}
                               {isOptionsOpen && (
-                                <div className="absolute right-0 top-5 bg-white shadow-md rounded-md p-2">
-                                  {/* Opciones del chat */}
-                                  <button>Eliminar</button>
+                                <div className="fixed z-50 bg-gray-100 text1 mt-2 ms-5 shadow-[3px_3px_2px_rgba(0,0,0,0.2)] text5 text-[16px] rounded-md px-3 py-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setType("title");
+                                      setEditingChatId(chat.chatId);
+                                    }}
+                                    className="flex gap-3 w-full rounded-[2px] items-center py-2 cursor-pointer hover:text-[#fff] hover:bg-[#b53325] px-2"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="15"
+                                      height="15"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="lucide lucide-pen-line-icon lucide-pen-line"
+                                    >
+                                      <path d="M13 21h8" />
+                                      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                    </svg>
+                                    Cambiar nombre
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setType("delete");
+                                      setEditingChatId(chat.chatId);
+                                    }}
+                                    className="flex gap-3 w-full rounded-[2px] items-center py-2 cursor-pointer hover:text-[#fff] hover:bg-[#b53325] px-2"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="15"
+                                      height="15"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="lucide lucide-trash2-icon lucide-trash-2"
+                                    >
+                                      <path d="M10 11v6" />
+                                      <path d="M14 11v6" />
+                                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                      <path d="M3 6h18" />
+                                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                    Eliminar
+                                  </button>
                                 </div>
                               )}
                             </div>
@@ -202,21 +288,31 @@ const UIDashboard: React.FC<Props> = ({ children }) => {
   );
 
   return (
-    <div className={`min-h-screen BGUser`}>
-      <section className={`lg:grid grid-cols-[280px_1fr] pt-15 min-h-screen`}>
-        {/* Sidebar */}
-        <div
-          className={`border-r hidden lg:block sidebar bg-[#ffffff] border-[#e5a657] fixed h-[100vh] w-[280px]`}
-        >
-          <div className="mt-4 flex flex-col justify-between h-[90vh] ms-4 me-5 text-[13px] pb-3 relative">
-            {sidebarContent}
+    <>
+      <div className={`min-h-screen BGUser`}>
+        <section className={`lg:grid grid-cols-[300px_1fr] pt-15 min-h-screen`}>
+          {/* Sidebar */}
+          <div
+            className={`border-r hidden lg:block sidebar bg-[#ffffff] border-[#e5a657] fixed h-[100vh] w-[300px]`}
+          >
+            <div className="mt-4 flex flex-col justify-between h-[90vh] ms-4 me-5 text-[13px] pb-3 relative">
+              {sidebarContent}
+            </div>
           </div>
-        </div>
 
-        {/* Contenido ${isSideBarOpen ? "ps-[3%] md:ps-[10%]" : "ps-[3%] md:ps-[4%]"}*/}
-        <div className={`main-content`}>{children}</div>
-      </section>
-    </div>
+          {/* Contenido ${isSideBarOpen ? "ps-[3%] md:ps-[10%]" : "ps-[3%] md:ps-[4%]"}*/}
+          <div className={`main-content`}>{children}</div>
+        </section>
+      </div>
+
+      {type === "title" || (type === "delete" && editingChatId) ? (
+        <ChatModal
+          type={type}
+          chat_id={editingChatId}
+          onClose={() => setType("")}
+        />
+      ) : null}
+    </>
   );
 };
 

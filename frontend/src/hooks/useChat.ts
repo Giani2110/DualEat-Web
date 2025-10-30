@@ -9,6 +9,7 @@ import {
   setActiveChatId,
   setStarted,
   setConversation,
+  updateChatTitle,
 } from "../hub/slices/chatSlice";
 import type { ChatMetadata, ChatSessionData } from "@/interface/global";
 
@@ -33,6 +34,8 @@ export const useChat = () => {
     setActiveChatId: (chatId: string) => dispatch(setActiveChatId(chatId)),
     removeActiveChatId: () => dispatch(removeActiveChatId()),
     setStarted: (value: boolean) => dispatch(setStarted(value)),
+    updateChatTitle: (chatId: string, newTitle: string) =>
+      dispatch(updateChatTitle({ chatId, newTitle })),
     setConversation: (data: ChatSessionData[] | null) =>
       dispatch(setConversation(data)),
   };

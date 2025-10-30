@@ -1,4 +1,4 @@
-import { axiosInterceptor } from "../interceptor/axios-interceptor";
+import { axiosInterceptor } from "@interceptor/axios-interceptor";
 
 import axios from "axios";
 

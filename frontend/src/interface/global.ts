@@ -10,10 +10,15 @@ export interface Response<T = unknown> {
   data?: T;
 }
 
+export interface ResponseWithPagination<T = unknown> {
+  success: boolean;
+  pagination: PaginationInfo;
+  data?: T;
+}
 
 // Tipos derivados para modularidad y reutilización
 export type MinimalUser = Pick<User, "id" | "name" | "slug" | "avatar_url">;
-export type MinimalCommunity = Pick<Community, "slug" | "image_url">;
+export type MinimalCommunity = Pick<Community, "slug" | "image_url" | "name">;
 
 /**
  * @interface PaginationInfo
@@ -22,6 +27,7 @@ export type MinimalCommunity = Pick<Community, "slug" | "image_url">;
 export interface PaginationInfo {
   page: number; // Página actual.
   limit: number; // Límite de ítems por página.
+  hasMore: boolean;
   total: number; // Total de ítems disponibles (en toda la colección).
   totalPages: number; // Total de páginas.
   hasNext: boolean; // Indica si hay una página siguiente.

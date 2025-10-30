@@ -38,6 +38,36 @@ export const getChat = async (chat_id: string): Promise<ResponseAI | null> => {
   }
 }
 
+export const editChat = async (chat_id: string, title: string): Promise<ResponseAI | null> => {
+  try {
+    const { data } = await axiosInterceptor.put(`/chat/edit`, {
+        chat_id,
+        title,
+    });
+    return data as ResponseAI;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener recetas");
+    }
+    return null;
+  }
+}
+
+
+export const deleteChat = async (chat_id: string): Promise<ResponseAI | null> => {
+  try {
+    const { data } = await axiosInterceptor.delete(`/chat/session`, {
+      params: { chat_id },
+    });
+    return data as ResponseAI;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener recetas");
+    }
+    return null;
+  }
+}
+
 
 export const askOllama = async (
   question: string,
@@ -54,7 +84,6 @@ export const askOllama = async (
       role: msg.role === "IA" ? "assistant" : "USER",
       content: msg.text,
     }));
-
 
     const { data } = await axiosInterceptor.post("/chat/ask", {
       question,

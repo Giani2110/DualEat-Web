@@ -1,5 +1,5 @@
-import { axiosInterceptor } from "../interceptor/axios-interceptor";
-import type { Response } from "../interface/global";
+import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import type { Response } from "@interface/global";
 
 import axios from "axios";
 

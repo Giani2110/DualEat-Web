@@ -1,8 +1,8 @@
-import { axiosInterceptor } from "../interceptor/axios-interceptor";
+import { axiosInterceptor } from "@interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-import type { User } from "../interface/global";
+import type { User } from "@interface/global";
 
 export interface AuthResponse {
   success: boolean;

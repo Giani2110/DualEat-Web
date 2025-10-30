@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { CommunityContext } from "../context/other/CommunityContext";
+import { CommunityContext } from "@context/other/CommunityContext";
 
 export const useCommunity = () => {
     const context = useContext(CommunityContext);

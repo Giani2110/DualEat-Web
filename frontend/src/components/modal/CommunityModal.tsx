@@ -235,7 +235,7 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
       <div
         className="absolute inset-0 bg-black opacity-50"
         onClick={onClose}
-      ></div>
+      />
 
       <div className="relative bg-white rounded-[20px] box-border py-4 px-5 shadow-md z-10 w-full max-w-[800px] h-fit">
         {step === "1" && (

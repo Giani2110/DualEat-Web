@@ -295,12 +295,15 @@ export class CommunityService {
   /** GET COMMUNITY POSTS */
   async getCommunityPosts(community_id: string, page: number, user_id: string) {
     try {
+      const pageSize = 20;
+      const skipAmount = (page - 1) * pageSize;
+
       const [posts, total] = await Promise.all([
         prisma.post.findMany({
           where: { community_id, active: true },
           orderBy: { created_at: "desc" },
-          skip: (page - 1) * 5,
-          take: 5,
+          skip: skipAmount,
+          take: pageSize,
           include: {
             community: { select: { slug: true } },
             recipe: {
@@ -353,7 +356,7 @@ export class CommunityService {
         hasVoted: voteMap.has(post.id),
       }));
 
-      const totalPages = Math.ceil(total / 5);
+      const totalPages = Math.ceil(total / pageSize);
 
       return {
         data: postsWithVotes,

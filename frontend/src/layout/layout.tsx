@@ -1,17 +1,17 @@
 import React, { useEffect } from "react";
 import type { ReactNode } from "react";
 
-import Navbar from "../layout/navbar/Navbar";
-import HeaderUSER from "../layout/navbar/NavbarUI";
-import BusinessSidebar from "../components/locals/UISidebarLocal";
-import UIDashboard from "../components/users/dashboard/UIDashboard";
-import Footer from "../layout/footer/Footer";
+import Navbar from "@layout/navbar/Navbar";
+import HeaderUSER from "@layout/navbar/NavbarUI";
+import BusinessSidebar from "@components/locals/UISidebarLocal";
+import UIDashboard from "@components/users/dashboard/UIDashboard";
+import Footer from "@layout/footer/Footer";
 
-import { useAuth } from "../hooks/useAuth";
-import { useDynamicTitle } from "../hooks/useDynamicTitle";
+import { useAuth } from "@hooks/useAuth";
+import { useDynamicTitle } from "@hooks/useDynamicTitle";
 import { useLocation, matchPath } from "react-router-dom";
 
-import { appRoutes, ROUTES } from "../constants/constants";
+import { appRoutes } from "@constants/constants";
 import { useChat } from "@/hooks/useChat";
 import { getUserChats } from "@/services/chat.api";
 
@@ -36,8 +36,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const fetchChats = async () => {
       if (
         user &&
-        user.isBusiness === false &&
-        location.pathname === ROUTES.USER.RECIPES
+        user.isBusiness === false
       ) {
         const response = await getUserChats();
         if (response?.success && Array.isArray(response.data)) {
@@ -49,8 +48,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
 
     fetchChats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, location.pathname]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useDynamicTitle();
 
@@ -60,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
 
     if (user.isBusiness === false) {
-      return <UIDashboard>{children}</UIDashboard>;
+      return <UIDashboard user={user}>{children}</UIDashboard>;
     }
     if (user.isBusiness === true) {
       return <BusinessSidebar>{children}</BusinessSidebar>;

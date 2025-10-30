@@ -261,6 +261,31 @@ export class ChatSessionService {
     }
   }
 
+  async editTitle(chatId: string, userId: string, title: string): Promise<CHATData | null> {
+    try {
+      const encryptedUserId = this.hashUser(userId);
+      const redisKey = `${this.SESSION_PREFIX}${encryptedUserId}/${chatId}`;
+      const data = await this.sessionService.get(redisKey);
+      if (!data) throw new Error("Chat no encontrado.");
+
+      const chatData: CHATData = JSON.parse(data);
+      chatData.title = title;
+      chatData.lastUpdated = new Date().toISOString();
+
+      await this.sessionService.set(
+        redisKey,
+        JSON.stringify(chatData),
+        await this.sessionService.getTtl(redisKey)
+      );
+
+      console.log(`Chat actualizado: ${chatId} (Título: ${title})`);
+      return chatData;
+    } catch (error) {
+      console.error("Error actualizando chat:", error);
+      return null;
+    }
+  }
+
   async deleteChat(chat_id: string, user_id: string): Promise<boolean> {
     try {
       const key = `${this.SESSION_PREFIX}${this.hashUser(user_id)}/${chat_id}`;

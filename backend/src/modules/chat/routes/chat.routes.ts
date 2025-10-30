@@ -45,7 +45,15 @@ router.get(
   controller.getChatSessions.bind(controller)
 );
 
-// 5. Eliminar sesión de chat
+// 5. Editar sesión de chat
+// =========================================================
+router.put(
+  "/edit",
+  isAuthenticated,
+  controller.editChatSession.bind(controller)
+);
+
+// 6. Eliminar sesión de chat
 // =========================================================
 router.delete(
   "/session",
@@ -53,7 +61,7 @@ router.delete(
   controller.deleteChatSession.bind(controller)
 );
 
-// 6. Eliminar todas las sesiones de chat
+// 7. Eliminar todas las sesiones de chat
 // =========================================================
 router.delete(
   "/all-sessions",

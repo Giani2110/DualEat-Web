@@ -5,12 +5,17 @@ import { CreateRecipeDTO } from "../../interfaces/recipe.dto";
 
 import { generateReadableSlug } from "../../utils/sluglify";
 import { getSocketServer } from "../../config/socket.config";
-import { Post, Recipe, Community } from "@prisma/client";
+import { Post, Recipe, Community, PostType } from "@prisma/client";
+
+import { shuffleArray } from "../../utils/shuffler";
 
 export class PostService {
   constructor() {}
 
-  private async sendPostNotification(post: Post & { community?: Community | null }, recipe?: Recipe) {
+  private async sendPostNotification(
+    post: Post & { community?: Community | null },
+    recipe?: Recipe
+  ) {
     if (!post.community_id) {
       return;
     }
@@ -44,8 +49,6 @@ export class PostService {
     // 3. Crear notificaciones en BD para usuarios con notificaciones inmediatas
     if (immediateSubscribers.length > 0) {
       const immediateUserIds = immediateSubscribers.map((m) => m.user_id);
-
-      
 
       if (recipe) {
         await prisma.notification.createMany({
@@ -189,7 +192,7 @@ export class PostService {
               message: content,
               type: "comment",
               imageURLs: {
-                user: commenter?.avatar_url
+                user: commenter?.avatar_url,
               },
               slugs: {
                 community: post.community.slug,
@@ -213,7 +216,7 @@ export class PostService {
               message: content,
               type: "comment",
               imageURLs: {
-                user: commenter?.avatar_url
+                user: commenter?.avatar_url,
               },
               slugs: {
                 community: post.community.slug,
@@ -239,12 +242,105 @@ export class PostService {
   }
 
   /** GET ALL POSTS */
-  async getAllPosts() {
+  async getAllPosts(page: number, user_id: string, recipe: boolean) {
     try {
-      const result = await prisma.post.findMany();
-      return result;
+      const pageSize = 20;
+      const skipAmount = (page - 1) * pageSize;
+
+      const createPostQuery = (whereClause: any) => ({
+        where: whereClause,
+        include: {
+          community: { select: { name: true, image_url: true, slug: true } },
+          recipe: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              main_image: true,
+              total_time: true,
+              _count: { select: { steps: true, ingredients: true } },
+            },
+          },
+          user: {
+            select: { id: true, name: true, avatar_url: true, slug: true },
+          },
+        },
+        skip: skipAmount,
+        take: pageSize,
+        orderBy: { created_at: "desc" as const },
+      });
+
+      const results = await Promise.allSettled([
+        prisma.post.findMany(
+          createPostQuery({
+            community: { members: { some: { user_id } } },
+          })
+        ),
+        prisma.post.findMany(
+          createPostQuery({
+            community: {
+              members: { none: { user_id } },
+              tags: { some: { user_preferences: { some: { user_id } } } },
+            },
+          })
+        ),
+        prisma.post.findMany(
+          createPostQuery({
+            community: {
+              members: { none: { user_id } },
+              tags: { none: { user_preferences: { some: { user_id } } } },
+            },
+          })
+        ),
+      ]);
+
+      const votes = await prisma.vote.findMany({
+        where: {
+          content_type: "post",
+          content_id: {
+            in: results
+              .filter((r) => r.status === "fulfilled")
+              .flatMap((r) => (r as PromiseFulfilledResult<any>).value)
+              .map((post) => post.id),
+          },
+        },
+        select: {
+          content_id: true,
+          vote_type: true,
+        },
+      });
+
+      // Crear mapa de votos para acceso rápido
+      const voteMap = new Map(
+        votes.map((vote) => [vote.content_id, vote.vote_type])
+      );
+
+      const allPosts = results
+        .filter((r) => r.status === "fulfilled")
+        .flatMap((r) => (r as PromiseFulfilledResult<any>).value);
+
+      const uniquePosts = Array.from(
+        new Map(allPosts.map((post) => [post.id, post])).values()
+      );
+
+      const data = uniquePosts.map((post) => {
+        return {
+          ...post,
+          userVote: voteMap.get(post.id) || null,
+          hasVoted: voteMap.has(post.id),
+        };
+      });
+
+      return {
+        data: data,
+        pagination: {
+          page,
+          hasMore: uniquePosts.length >= pageSize,
+        },
+      };
     } catch (error) {
-      throw new Error(`Error al obtener posts: ${error}`);
+      console.error("Error al obtener posts:", error);
+      return { success: false, error: "Error al obtener los posts" };
     }
   }
 
@@ -292,7 +388,6 @@ export class PostService {
           isMember = true;
         }
       }
-
 
       const allComments = await prisma.postComment.findMany({
         where: {
@@ -463,13 +558,12 @@ export class PostService {
             },
             include: {
               community: true,
-            }
+            },
           });
           await this.sendPostNotification(post, recipe);
           return { post, recipe };
         });
 
-       
         return result;
       } else {
         const post = await prisma.post.create({

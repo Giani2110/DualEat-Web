@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { OUT_NAVBAR_ROUTES } from "@constants/navbar-routes";
 import { ROUTES } from "@constants/constants";
@@ -18,31 +18,41 @@ import {
   MessageSquare,
   QrCode,
   Settings,
+  ChevronDown,
 } from "lucide-react";
 import LogoYellow from "@assets/images/icon/Logo DualEatYellow.png";
 import LogoWhite from "@assets/images/icon/Logo_DualEat.png";
 import CommunityModal from "@components/modal/CommunityModal";
-import type { Community, Notification } from "@interface/global";
+import type { Notification } from "@interface/global";
 import { useNavigate } from "react-router-dom";
 import { formatShortTime } from "@utils/compactNumber";
+import { useChat } from "@/hooks/useChat";
+import {
+  useRecent,
+  type MinimalCommunityPlus,
+} from "@/hooks/useRecent";
 
 const HeaderUSER = () => {
   // ==================== HOOKS ====================
   const location = useLocation();
   const navigate = useNavigate();
+
   const { user, logout } = useAuth();
   const { userCommunities } = useCommunity();
+
+  const { recents, handleCommunityClick } = useRecent(user?.id);
   const { notifications, unreadCount, markAsRead, markAsReadSingle } =
     useNotifications();
+  const { chats, setActiveChatId } = useChat();
 
   // ==================== ESTADOS ====================
   const [communityOpen, setCommunityOpen] = useState(true);
-  const [recents, setRecents] = useState<[]>([]);
-  const [recentsOpen, setRecentsOpen] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatsOpen, setChatsOpen] = useState(true);
   const [createCommunityModalOpen, setCreateCommunityModalOpen] =
     useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
+  const [recentsOpen, setRecentsOpen] = useState(true);
 
   // ==================== REFS ====================
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -93,14 +103,6 @@ const HeaderUSER = () => {
   // ==================== EFECTOS ====================
   // Detectar scroll
 
-  // Cargar comunidades recientes del localStorage
-  useEffect(() => {
-    const communities = localStorage.getItem("community");
-    if (communities) {
-      setRecents(JSON.parse(communities));
-    }
-  }, [location.pathname]);
-
   // ==================== HANDLERS ====================
   // Manejo de hover en notificaciones
   const handleMouseEnter = () => {
@@ -143,24 +145,6 @@ const HeaderUSER = () => {
     setOpenNotifications(!openNotifications);
   };
 
-  // Click en comunidad (guarda en recientes)
-  const handleCommunityClick = (Community: Community) => {
-    const stored = localStorage.getItem("community");
-    const communities = stored ? JSON.parse(stored) : [];
-
-    // Evitar duplicados
-    const exists = communities.some((c: Community) => c.id === Community.id);
-
-    if (!exists) {
-      if (communities.length > 5) {
-        communities.shift();
-      }
-      communities.push(Community);
-      localStorage.setItem("community", JSON.stringify(communities));
-    }
-    navigate(`/c/${Community.slug}/`);
-  };
-
   // Cerrar sesión
   const handleLogout = () => {
     logout();
@@ -198,7 +182,6 @@ const HeaderUSER = () => {
   }
 
   // ==================== CONTENIDO DEL SIDEBAR ====================
-  // Sidebar para usuarios business
   const sidebarContent = user?.isBusiness ? (
     <>
       {/* Información del usuario */}
@@ -269,9 +252,17 @@ const HeaderUSER = () => {
   ) : (
     // Sidebar para usuarios regulares
     <>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 h-full">
         {/* Inicio */}
-        <Link title="Inicio" to={ROUTES.USER.DASHBOARD} className={`navlis`}>
+        <button
+          type="button"
+          title="Inicio"
+          onClick={() => {
+            setSidebarOpen(false);
+            navigate(ROUTES.USER.DASHBOARD);
+          }}
+          className={`navlis`}
+        >
           {location.pathname === ROUTES.USER.DASHBOARD && (
             <div className="w-1 h-[80%] rounded-[10px] bg-[#e5a657]"></div>
           )}
@@ -300,12 +291,16 @@ const HeaderUSER = () => {
             </svg>
             <span className={`ml-3 text-[15px]`}>Inicio</span>
           </div>
-        </Link>
+        </button>
 
         {/* Explorar */}
-        <Link
+        <button
+          type="button"
           title="Explorar comunidades"
-          to={ROUTES.USER.EXPLORE}
+          onClick={() => {
+            setSidebarOpen(false);
+            navigate(ROUTES.USER.EXPLORE);
+          }}
           className={`navlis`}
         >
           {location.pathname === ROUTES.USER.EXPLORE && (
@@ -337,12 +332,16 @@ const HeaderUSER = () => {
             </svg>
             <span className={`ml-3 text-[15px]`}>Explorar</span>
           </div>
-        </Link>
+        </button>
 
         {/* Recetas */}
-        <Link
+        <button
+          type="button"
           title="Explorar recetas"
-          to={ROUTES.USER.RECIPES}
+          onClick={() => {
+            setSidebarOpen(false);
+            navigate(ROUTES.USER.RECIPES);
+          }}
           className={`navlis`}
         >
           {location.pathname === ROUTES.USER.RECIPES && (
@@ -375,158 +374,201 @@ const HeaderUSER = () => {
             </svg>
             <span className={`ml-3 text-[15px]`}>Recetas</span>
           </div>
-        </Link>
+        </button>
 
         <div className="w-full h-[1px] border-t border-[#dbdbdb] mt-3" />
 
-        {/* Recientes */}
-        <div className="px-2">
-          <div
-            onClick={() => setRecentsOpen(!recentsOpen)}
-            className="w-full flex items-center justify-between mb-2 mt-3 px-2 cursor-pointer hover:bg-[#f8f8f8] py-2 rounded-[5px]"
-          >
-            <h3 className="text-[13px] text4 tracking-wide Dosis-Bold ">
-              Recientes
-            </h3>
-            <ChevronUp
-              size={18}
-              color="#333333"
-              className={`transition-transform duration-300 ${
-                recentsOpen ? "rotate-0" : "rotate-180"
-              } `}
-            />
-          </div>
-          {recentsOpen && (
-            <>
-              {recents.length > 0 &&
-                recents.map((community: Community) => (
-                  <button
-                    type="button"
-                    key={community.id}
-                    title={community.name}
-                    onClick={() => handleCommunityClick(community)}
-                    className="navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]"
-                  >
-                    <img
-                      src={
-                        community.image_url ??
-                        "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
-                      }
-                      className="rounded-full h-4 w-4 flex-shrink-0"
-                      alt="Imagen de la comunidad"
-                    />
-                    <span className="ml-[10px] text-[14px] text5 whitespace-nowrap">
-                      {community.name}
-                    </span>
-                  </button>
-                ))}
-            </>
-          )}
-        </div>
-
-        <div className="w-full h-[1px] border-t border-[#dbdbdb] mt-1" />
-
-        {/* Comunidades */}
-        <div className="px-2">
-          <div
-            onClick={() => setCommunityOpen(!communityOpen)}
-            className="w-full flex items-center justify-between mb-2 mt-3 px-2 cursor-pointer hover:bg-[#f8f8f8] py-2 rounded-[5px]"
-          >
-            <h3 className="text-[13px] text4 tracking-wide Dosis-Bold ">
-              Comunidades
-            </h3>
-            <ChevronUp
-              size={18}
-              color="#333333"
-              className={`transition-transform duration-300 ${
-                communityOpen ? "rotate-0" : "rotate-180"
-              } `}
-            />
+        <div className="flex flex-col h-full">
+          {/* Recientes */}
+          <div className={`px-2 ${recentsOpen ? "flex-[0.5]" : "flex-0"}`}>
+            <div
+              onClick={() => setRecentsOpen(!recentsOpen)}
+              className="w-full flex items-center justify-between mb-2 mt-3 px-2 cursor-pointer hover:bg-[#f8f8f8] py-2 rounded-[5px]"
+            >
+              <h3 className="text-[13px] text4 tracking-wide Dosis-Bold ">
+                Recientes
+              </h3>
+              <ChevronUp
+                size={18}
+                color="#333333"
+                className={`transition-transform duration-300 ${
+                  recentsOpen ? "rotate-0" : "rotate-180"
+                } `}
+              />
+            </div>
+            {recentsOpen && (
+              <>
+                {recents.length > 0 &&
+                  recents.map((community) => (
+                    <button
+                      type="button"
+                      key={community.id}
+                      title={community.name}
+                      onClick={() => {
+                        setSidebarOpen(false);
+                        handleCommunityClick(community);
+                      }}
+                      className="navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]"
+                    >
+                      <img
+                        src={
+                          community.image_url ??
+                          "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
+                        }
+                        className="rounded-full h-4 w-4 flex-shrink-0"
+                        alt="Imagen de la comunidad"
+                      />
+                      <span className="ml-[10px] text-[14px] text5 whitespace-nowrap">
+                        {community.name}
+                      </span>
+                    </button>
+                  ))}
+              </>
+            )}
           </div>
 
-          {/* Lista de comunidades */}
-          {communityOpen && (
-            <>
-              {/* Botón crear comunidad */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCreateCommunityModalOpen(!createCommunityModalOpen);
-                }}
-                type="button"
-                className={`navlis hover:bg-[#e9e9e9] cursor-pointer w-full py-[5px] px-1 mb-2 border-t border-dashed border-b border-[#dbdbdb]`}
-              >
-                <Plus
-                  className="flex-shrink-0"
-                  color="#e5a657"
-                  size={20}
-                  strokeWidth={1.7}
-                />
-                <span
-                  className={`ml-[14px] text5 text-[14px] whitespace-nowrap`}
-                >
-                  Crear comunidad
-                </span>
-              </button>
+          <div className="w-full h-[1px] border-t border-[#dbdbdb] mt-2" />
 
-              {/* Listado de comunidades del usuario */}
-              {userCommunities.map((community) => (
+          {/* Comunidades */}
+          <div className={`px-2 ${communityOpen ? "flex-2" : "flex-0"}`}>
+            <div
+              onClick={() => setCommunityOpen(!communityOpen)}
+              className="w-full flex items-center justify-between mb-2 mt-4 px-2 cursor-pointer hover:bg-[#f8f8f8] py-2 rounded-[5px]"
+            >
+              <h3 className="text-[13px] text4 tracking-wide Dosis-Bold">
+                Comunidades
+              </h3>
+              <ChevronUp
+                size={18}
+                color="#333333"
+                className={`transition-transform duration-300 ${
+                  communityOpen ? "rotate-0" : "rotate-180"
+                } `}
+              />
+            </div>
+
+            {/* Lista de comunidades */}
+            {communityOpen && (
+              <>
+                {/* Botón crear comunidad */}
                 <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCreateCommunityModalOpen(!createCommunityModalOpen);
+                  }}
                   type="button"
-                  key={community.community.id}
-                  title={community.community.name}
-                  onClick={() => handleCommunityClick(community.community)}
-                  className="navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]"
+                  className={`navlis hover:bg-[#e9e9e9] cursor-pointer w-full py-[5px] px-1 mb-2 border-t border-dashed border-b border-[#dbdbdb]`}
                 >
-                  <img
-                    src={
-                      community.community.image_url ??
-                      "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
-                    }
-                    className="rounded-full h-4 w-4 flex-shrink-0"
-                    alt="Imagen de la comunidad"
+                  <Plus
+                    className="flex-shrink-0"
+                    color="#e5a657"
+                    size={20}
+                    strokeWidth={1.7}
                   />
-                  <span className="ml-[10px] text-[14px] text5 whitespace-nowrap">
-                    {community.community.name}
+                  <span
+                    className={`ml-[14px] text5 text-[14px] whitespace-nowrap`}
+                  >
+                    Crear comunidad
                   </span>
                 </button>
-              ))}
-            </>
-          )}
-        </div>
 
-        <div className="w-full h-[1px] border-t border-[#dbdbdb] mt-1" />
+                {/* Listado de comunidades del usuario */}
+                {userCommunities.map((community) => {
+                  const communityInfo = {
+                    id: community.community.id,
+                    name: community.community.name,
+                    image_url: community.community.image_url,
+                    slug: community.community.slug,
+                  };
+                  return (
+                    <button
+                      type="button"
+                      key={community.community.id}
+                      title={community.community.name}
+                      onClick={() => {
+                        setSidebarOpen(false);
+                        handleCommunityClick(
+                          communityInfo as MinimalCommunityPlus
+                        );
+                      }}
+                      className="navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]"
+                    >
+                      <img
+                        src={
+                          community.community.image_url ??
+                          "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
+                        }
+                        className="rounded-full h-4 w-4 flex-shrink-0"
+                        alt="Imagen de la comunidad"
+                      />
+                      <span className="ml-[10px] text-[14px] text5 whitespace-nowrap">
+                        {community.community.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </>
+            )}
+          </div>
 
-        {/* Chats */}
-        <div className="px-2">
-          <div className="w-full flex items-center justify-between px-2 mb-2 mt-3 cursor-pointer hover:bg-[#f8f8f8] py-2 rounded-[5px]">
-            <h3 className="text-[13px] text4 tracking-wide Dosis-Bold ">
-              Chats
-            </h3>
-            <ChevronUp
-              size={18}
-              color="#333333"
-              className={`transition-transform duration-300 ${
-                recentsOpen ? "rotate-0" : "rotate-180"
-              } `}
-            />
+          <div className="w-full h-[1px] border-t border-[#dbdbdb] mt-2" />
+
+          {/* Chats */}
+          <div className={`px-2 ${chatsOpen ? "flex-[0.5]" : "flex-0"}`}>
+            <div
+              typeof="button"
+              onClick={() => setChatsOpen(!chatsOpen)}
+              className="-full flex items-center justify-between mb-2 mt-4 px-2 cursor-pointer hover:bg-[#f8f8f8] py-2 rounded-[5px]"
+            >
+              <p className="text-[13px] text4 tracking-wide Dosis-Bold">
+                Chats
+              </p>
+              <ChevronDown
+                size={18}
+                className={`text5 transition-transform duration-200 ${
+                  chatsOpen ? "rotate-180" : ""
+                }`}
+              />
+            </div>
+            <div
+              tabIndex={-1}
+              className={`flex flex-col gap-1.5 mt-2 overflow-y-auto scroll2 pe-3 mb-5 ${
+                chatsOpen ? "max-h-[150px]" : "max-h-0"
+              }`}
+            >
+              {chats.map((chat) => {
+                return (
+                  <div
+                    key={chat.chatId}
+                    className={`navlis rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]`}
+                    onClick={() => {
+                      setActiveChatId(chat.chatId);
+                      setSidebarOpen(false);
+                      navigate(`/recipes/`);
+                    }}
+                  >
+                    <p className="ml-[10px] text-[14px] text5">{chat.title}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
     </>
   );
 
-  // ==================== RENDER PRINCIPAL ====================
   return (
     <header
       className={`fixed top-0 w-full ${headerBgColor} border-b ${headerBorderColor} h-[60px] px-4 md:px-10 flex items-center justify-between pt-[5px] pb-[5px] z-50`}
     >
-      {/* ========== LADO IZQUIERDO: Logo y botón hamburguesa ========== */}
+      {/* ========== LADO IZQUIERDO ========== */}
       <div className="flex items-center flex-[1]">
         {/* Botón hamburguesa */}
         <button
           type="button"
           title="Menu"
+          tabIndex={-1}
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className={`mr-8 p-[6px] cursor-pointer rounded-[5px] transition-colors duration-200 border  ${
             user?.isBusiness
@@ -563,7 +605,7 @@ const HeaderUSER = () => {
         </Link>
       </div>
 
-      {/* ========== LADO DERECHO: Iconos de acción ========== */}
+      {/* ========== LADO DERECHO ========== */}
       <div className="flex items-center justify-end space-x-1 md:space-x-3 text-[14px] flex-[1]">
         {/* Buscador (solo para usuarios regulares) */}
         {!user?.isBusiness && (

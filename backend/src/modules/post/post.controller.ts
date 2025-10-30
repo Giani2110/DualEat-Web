@@ -13,10 +13,24 @@ export class PostController {
   /** GET ALL POSTS */
   async getAll(req: Request, res: Response) {
     try {
-      const posts = await this.postService.getAllPosts();
-      res.status(200).json({ success: true, data: posts });
-    } catch (error) {
-      res.status(500).json({ success: false, error: (error as Error).message });
+      const { page, recipe } = req.query;
+      const user_id = (req as any).user?.id;
+
+      const result = await this.postService.getAllPosts(
+        Number(page),
+        String(user_id),
+        Boolean(recipe)
+      );
+
+      if (!result) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Posts not found" });
+      }
+
+      res.status(200).json({ success: true, ...result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 

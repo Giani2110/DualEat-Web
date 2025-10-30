@@ -131,23 +131,27 @@ const ERecipe = () => {
       if (!recipe?.ingredients) return;
 
       try {
-        // obtenemos nombres de los ingredientes
         const ingredientNames = recipe.ingredients.map(
           (i) => i.ingredient?.name
         ) as string[];
 
-        // llamamos a la API o función local
         const nutritionData = await getRecipeNutrition(ingredientNames);
-
-        console.log(nutritionData);
 
         const proteins = Number(nutritionData?.avg_proteins) || 0;
         const carbs = Number(nutritionData?.avg_carbs) || 0;
         const fats = Number(nutritionData?.avg_fat) || 0;
 
         setNutritionData({
-          ...nutritionData,
-          total: Number(proteins + carbs + fats),
+          total_ingredients: nutritionData?.total_ingredients ?? 0,
+          avg_calories: String(nutritionData?.avg_calories ?? ""),
+          avg_proteins: String(nutritionData?.avg_proteins ?? ""),
+          avg_carbs: String(nutritionData?.avg_carbs ?? ""),
+          avg_fat: String(nutritionData?.avg_fat ?? ""),
+          details:
+            nutritionData && Array.isArray(nutritionData.details)
+              ? nutritionData.details
+              : [],
+          total: Number(proteins + carbs + fats) || 0,
         });
       } catch (error) {
         console.error("Error al obtener los valores nutricionales:", error);
@@ -267,7 +271,7 @@ const ERecipe = () => {
                     "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
                   }
                   alt="Imagen de la comunidad"
-                  className="w-full h-full max-h-8.5 max-w-8.5 rounded-full object-cover"
+                  className="h-9 w-9 rounded-full object-cover"
                 />
                 <div className="flex flex-col leading-5">
                   <span className="text-[15px] text5 Dosis-Bold">
@@ -432,7 +436,10 @@ const ERecipe = () => {
                       </h2>
                       <div className="w-full h-[1px] bg-[#414141] mb-3" />
                       <ol className="list-decimal list-inside">
-                        {recipe.steps.map((step, index) => {
+                        {recipe.steps.map((step, index) =>
+
+
+                         {
                           const type = getMimeTypeFromUrl(
                             String(step.image_url)
                           );
@@ -450,13 +457,13 @@ const ERecipe = () => {
                               `}
                             >
                               {actualIndex === index ? (
-                                <div className="flex flex-col flex-wrap w-full justify-between">
+                                <div className="flex flex-col w-full">
                                   <span className="Dosis-Bold text-[16px] flex-[1] items-baseline">
                                     Paso {step.step_number}
                                   </span>
 
-                                  <div className="flex flex-wrap gap-3">
-                                    <div className="flex-1 flex min-w-[250px] h-full flex-col justify-between">
+                                  <div className="flex flex-col md:flex-row gap-3 justify-between">
+                                    <div className="flex h-full flex-[1] flex-col justify-between">
                                       <p className="max-h-[200px] overflow-y-auto scroll2 pe-4 pb-4">
                                         {step.description}
                                       </p>
@@ -468,13 +475,15 @@ const ERecipe = () => {
                                       )}
                                     </div>
 
-                                    <div className="flex-[0.5] max-w-[200px]">
+                                    <div
+                                      className="w-full min-w-[200px] flex-[0.5] flex flex-col justify-between"
+                                    >
                                       {step.image_url ? (
                                         type === "video" ? (
                                           <video
                                             controls
                                             preload="metadata"
-                                            className="w-full rounded-md"
+                                            className="w-full h-auto rounded-md"
                                           >
                                             <source src={step.image_url} />
                                           </video>
@@ -487,8 +496,9 @@ const ERecipe = () => {
                                             href={step.image_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="aspect-[5/4] mt-3 overflow-hidden rounded-sm relative block"
+                                            className="w-full aspect-[5/3] mt-3 overflow-hidden rounded-sm relative block"
                                           >
+                                            {/* Contenido de la imagen... */}
                                             <div
                                               className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-50"
                                               style={{
@@ -496,14 +506,14 @@ const ERecipe = () => {
                                               }}
                                             />
                                             <img
+                                              loading="lazy"
                                               className="w-full h-full object-contain cursor-pointer relative z-10"
                                               alt="Imagen del post"
-                                              loading="lazy"
                                               src={step.image_url}
                                             />
                                           </a>
                                         )
-                                      ) : (
+                                      ) : step.image_url !== null && (
                                         <Loader size="4" color="black" />
                                       )}
                                     </div>
@@ -560,7 +570,7 @@ const ERecipe = () => {
                 </div>
 
                 {/** Valor nutricional */}
-                {nutritionData && (
+                {nutritionData && nutritionData.total_ingredients > 0 && (
                   <div className="mt-18">
                     <div className="flex items-baseline gap-2">
                       <h2 className="text-[20px] Dosis-Bold text5 mb-2">
@@ -686,9 +696,9 @@ const ERecipe = () => {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className="lucide lucide-bot-message-square-icon lucide-bot-message-square"
                 >
                   <path d="M12 6V2H8" />
@@ -778,7 +788,7 @@ const ERecipe = () => {
 
             {/** TEXTAREA + BUTTON */}
             <div className="w-full mt-4">
-              <div className="flex flex-col shadow-md shadow-[#f1f1f1] justify-between cursor-text rounded-[17px] bg-[#ffffffcb] border-[#dbdbdb] p-2 border mx-auto">
+              <div className="flex shadow-md shadow-[#f1f1f1] justify-between cursor-text rounded-[10px] bg-[#ffffffcb] border-[#dbdbdb] p-2 border mx-auto">
                 <textarea
                   ref={textareaRef}
                   value={search}
@@ -795,14 +805,14 @@ const ERecipe = () => {
                   }}
                   placeholder="Pregunta a DualIA"
                   rows={1}
-                  className="placeholder:text-[#4A4947] resize-none overflow-y-auto max-h-[200px] scroll2 placeholder:tracking-tight break-words text5 outline-0 w-full px-2 pb-4"
+                  className="placeholder:text-[#4A4947] resize-none overflow-y-auto scroll2 placeholder:tracking-tight break-words text5 outline-0 w-full px-2"
                   onInput={(e) => {
                     e.currentTarget.style.height = "auto";
                     e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
                   }}
                 />
 
-                <div className="flex justify-end w-full">
+                <div className="flex justify-end h-fit">
                   <button
                     type="button"
                     onClick={() => {
@@ -822,10 +832,6 @@ const ERecipe = () => {
                   </button>
                 </div>
               </div>
-              <p className="text4 text-center text-[14px] mt-2">
-                Las respuestas de DualIA pueden estar equivocadas. No se
-                garantiza su exactitud, solo proporcionan información general.
-              </p>
             </div>
           </div>
         </>

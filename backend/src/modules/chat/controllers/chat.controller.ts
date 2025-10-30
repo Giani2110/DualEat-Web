@@ -270,6 +270,28 @@ export class ChatController {
     }
   }
 
+  /** PUT /api/chat/edit EDIT USER TITLE */
+  async editChatSession(req: Request, res: Response) {
+    const { chat_id, title } = req.body;
+    const user_id = (req as any).user?.id;
+
+    try {
+      const chatSession = await this.chatSessionService.editTitle(
+        String(chat_id),
+        String(user_id),
+        String(title)
+      );
+
+      if (!chatSession) {
+        return res.status(400).json({ success: false, error: "Error editando título del chat." });
+      }
+
+      res.status(200).json({ success: true, data: chatSession });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }
+
   /** DELETE /api/chat/session DELETE USER CHAT */
   async deleteChatSession(req: Request, res: Response) {
     const { chat_id } = req.query;

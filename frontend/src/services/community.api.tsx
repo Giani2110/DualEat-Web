@@ -1,15 +1,9 @@
-import { axiosInterceptor } from "../interceptor/axios-interceptor";
+import { axiosInterceptor } from "@interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
-import type { Response, PaginationInfo } from "../interface/global";
+import type { Response, ResponseWithPagination } from "@interface/global";
 
 import axios from "axios";
-
-interface ResponseWithPagination<T = unknown> {
-  success: boolean;
-  pagination: PaginationInfo;
-  data?: T;
-}
 
 /** CREATE COMMUNITY */
 export const createCommunity = async (

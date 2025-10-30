@@ -24,11 +24,15 @@ router.post(
   controller.create.bind(controller)
 );
 
-// 2. Obtener post por slug (slug de la comunidad)
+// 2. Obtener todos los posts
 // =========================================================
-router.get("/", isAuthenticated, controller.getBySlug.bind(controller));
+router.get("/", isAuthenticated, controller.getAll.bind(controller));
 
-// 3. Crear comentario para un post
+// 3. Obtener post por slug (slug de la comunidad)
+// =========================================================
+router.get("/slug", isAuthenticated, controller.getBySlug.bind(controller));
+
+// 4. Crear comentario para un post
 // =========================================================
 router.post(
   "/comment",

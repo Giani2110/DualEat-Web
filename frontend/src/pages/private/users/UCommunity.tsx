@@ -198,12 +198,6 @@ const UCommunity = () => {
           const newHasMore =
             response.pagination.page < response.pagination.totalPages;
           setHasMore(newHasMore);
-
-          console.log("📊 Paginación:", {
-            página: response.pagination.page,
-            total: response.pagination.totalPages,
-            hayMás: newHasMore,
-          });
         }
       } catch (error) {
         console.error("🚨 Error al obtener posts:", error);

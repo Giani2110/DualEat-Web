@@ -1,11 +1,11 @@
-import { axiosInterceptor } from "../interceptor/axios-interceptor";
+import { axiosInterceptor } from "@interceptor/axios-interceptor";
 import axios from "axios";
 import toast from "react-hot-toast";
 
 import { getRecipeByName } from "./recipes.api";
 
-import type { Response } from "../interface/global";
-import type { CreatePostDTO, CreateRecipeDTO } from "../interface/global.dto";
+import type { Posts, Response, ResponseWithPagination } from "@interface/global";
+import type { CreatePostDTO, CreateRecipeDTO } from "@interface/global.dto";
 
 export const createPost = async (
   postData: CreatePostDTO,
@@ -101,6 +101,30 @@ export const createPost = async (
   }
 };
 
+export const getAllPosts = async (
+  page: number,
+  recipe: boolean
+): Promise<ResponseWithPagination<Posts>> => {
+  try {
+    const { data } = await axiosInterceptor.get("/post/", {
+      params: {
+        page,
+        recipe,
+      },
+    });
+    return data as ResponseWithPagination<Posts>;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      const message = err.response?.data?.message || "Error al obtener posts";
+      toast.error(message);
+      throw new Error(message);
+    } else {
+      toast.error("Error inesperado");
+      throw new Error("Error inesperado");
+    }
+  }
+};
+
 export const getBySlug = async (
   communitySlug: string,
   postSlug: string,
@@ -108,7 +132,7 @@ export const getBySlug = async (
   sortBy?: number
 ): Promise<Response | null> => {
   try {
-    const response = await axiosInterceptor.get("/post/", {
+    const response = await axiosInterceptor.get("/post/slug", {
       params: {
         communitySlug,
         postSlug,

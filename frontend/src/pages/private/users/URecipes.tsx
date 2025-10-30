@@ -56,11 +56,11 @@ const URecipes = () => {
   const [expanded, setExpanded] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // ESTADOS DE CONVERSACIÓN Y CHAT
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -79,15 +79,19 @@ const URecipes = () => {
 
     setIsLoading(true);
 
-    // Declaramos conversationBeforeRequest con un valor por defecto
+    // Declaramos conversationBeforeRequest y la inicializamos con el estado actual.
     let conversationBeforeRequest = conversation || [];
+    let aiResponses: ChatSessionData[] = [];
 
+    // --- LÓGICA PRE-PETICIÓN (Solo si type es "ask") ---
     if (type === "ask") {
       setStarted(true);
       const userMessage: ChatSessionData = { text: search, role: "USER" };
 
-      conversationBeforeRequest = (conversation || []).concat(userMessage);
+      // Calculamos el nuevo array para la petición y la actualización de Redux.
+      conversationBeforeRequest = conversationBeforeRequest.concat(userMessage);
 
+      // Actualizamos Redux con el mensaje del usuario.
       setConversation(conversationBeforeRequest);
     }
 
@@ -105,37 +109,71 @@ const URecipes = () => {
         chat_id
       );
 
+      // Limpiamos los resultados antes de procesar la respuesta
       setPagination(null);
       setRecipes([]);
 
-      if (response?.success) {
-        const aiResponses: ChatSessionData[] = Array.isArray(response.comment)
+      if (!response?.success) {
+        toast.error(
+          "Perdón, no pudimos obtener respuesta. Intenta nuevamente."
+        );
+        return;
+      }
+
+      // --- LÓGICA POST-PETICIÓN (Si response.success es true) ---
+
+      // 1. Manejo de la Respuesta del Chat (si existe un 'comment')
+      if (response.comment) {
+        aiResponses = Array.isArray(response.comment)
           ? response.comment.map((c: ChatSessionData) => ({
               text: c.text,
               role: "IA",
             }))
           : [{ text: response.comment, role: "IA" }];
+      }
 
-        if (type === "ask") {
+      // 2. Actualización de CONVERSACIÓN (Solo si type es "ask")
+      if (type === "ask") {
+        if (aiResponses.length > 0) {
+          // Unimos el historial de antes de la petición con la nueva respuesta de la IA.
           const finalConversation =
             conversationBeforeRequest.concat(aiResponses);
           setConversation(finalConversation);
         }
+        // Opcional: Mostrar un mensaje si 'ask' no devolvió comment (respuesta vacía)
+        if (!response.comment) {
+          toast.error("No se recibió una respuesta del modelo.");
+        }
+      }
 
-        if (type === "ingredient" || type === "recipe") {
-          setRecipes((prev) =>
-            isLoadMore
-              ? [...prev, ...(response.data as Recipe[])]
-              : (response.data as Recipe[])
-          );
+      // 3. Actualización de RECETAS y Paginación (Si hay datos de recetas)
+      if (type !== "ask" && response.data) {
+        setRecipes((prev) =>
+          isLoadMore
+            ? [...prev, ...(response.data as Recipe[])]
+            : (response.data as Recipe[])
+        );
+
+        if (recipes.length === 0) {
+          toast.error("No se encontraron recetas. Intenta otra.");
         }
 
+        // La paginación siempre va con recetas
         if (response.pagination) {
           setPagination(response.pagination as PaginationInfo);
         }
       }
+
+      // 4. Muestra la receta si el type no es ask y no hay data (pudo ser un error de la IA)
+      if (type !== "ask" && !response.data) {
+        toast.error(
+          response.comment || "Búsqueda sin resultados. Intenta otra."
+        );
+      }
     } catch (err) {
-      setError("Perdón, no pudimos responder tu pregunta. Intenta nuevamente.");
+      toast.error(
+        "Perdón, ocurrió un error en la conexión. Intenta nuevamente."
+      );
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -173,7 +211,9 @@ const URecipes = () => {
         setConversation(finalConversation);
       }
     } catch (err) {
-      setError("Perdón, no pudimos responder tu pregunta. Intenta nuevamente.");
+      toast.error(
+        "Perdón, no pudimos responder tu pregunta. Intenta nuevamente."
+      );
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -199,7 +239,11 @@ const URecipes = () => {
   };
 
   const handleRecipeFocus = (recipe: Recipe) => {
-    setRecipeSelected(recipe);
+    if (recipeSelected?.id === recipe.id) {
+      setRecipeSelected(null);
+    } else {
+      setRecipeSelected(recipe);
+    }
   };
 
   // Cambia el tipo de búsqueda y resetea la conversación
@@ -316,18 +360,28 @@ const URecipes = () => {
     };
   }, [showDropdown]);
 
+  useEffect(() => {
+    const container = endRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [conversation]);
+
   return (
     <div
-      className={`flex 
-      } h-full pb-20 lg:pb-0 flex-col-reverse lg:flex-row w-[90%] gap-6 mx-auto justify-center`}
+      className={`flex h-full min-h-[85vh] flex-col lg:flex-row w-[90%] gap-8 lg:gap-6 mx-auto
+        `}
     >
       {/* SECCIÓN PRINCIPAL - CHAT Y BÚSQUEDA */}
       <section
-        className={`mt-10 ${
-          recipes?.length > 0 ? "lg:flex-[1]" : "flex-[1]"
-        } flex flex-col ${
-          !started ? "justify-center h-[70vh]" : "justify-end h-[80vh]"
-        }   items-center w-full`}
+        className={`flex flex-col w-full h-full lg:h-[90vh] flex-2  ${
+          !started
+            ? "items-center justify-center flex-1"
+            : recipes.length > 0
+            ? "justify-start"
+            : "justify-end"
+        } 
+    `}
       >
         {/* PANTALLA INICIAL - Solo se muestra antes de comenzar */}
         {!started && (
@@ -342,21 +396,30 @@ const URecipes = () => {
               Elija una de las sugerencias a continuación o escriba la suya para
               comenzar a chatear con DualIA.
             </p>
+
+            {isLoading && (
+              <div className="w-full mt-4 flex items-center gap-2">
+                <Loader color="gray-500" />
+                <span className="text-[15px] text5">
+                  Esperando respuesta...
+                </span>
+              </div>
+            )}
           </div>
         )}
 
         {/* ÁREA DE CONVERSACIÓN - Se muestra después de comenzar */}
         {started && (
-          <div className="w-full max-w-[1100px] pe-3 max-h-[60vh] scroll2 h-full overflow-y-auto mt-4 flex flex-col gap-6">
-            {/* Mapea todos los mensajes de la conversación */}
+          <div
+            ref={endRef}
+            className="w-full pe-3 max-h-[80vh] pb-3 scroll2 h-full overflow-y-auto mt-8 flex flex-col gap-4"
+          >
             {(Array.isArray(conversation) ? conversation : []).map(
               (msg, index) => {
                 const isExpanded = expandedIndex === index;
                 return (
                   <div
-                    key={index}
-                    onClick={() => setExpandedIndex(isExpanded ? null : index)}
-                    className={`flex cursor-pointer ${
+                    className={`flex ${
                       msg.role === "USER" ? "justify-end" : "justify-start"
                     }`}
                   >
@@ -366,7 +429,11 @@ const URecipes = () => {
                       }`}
                     >
                       <div
-                        className={`p-2 rounded-lg shadow text5 text-[15px] border-1 bg-[#ffffffcc] ${
+                        key={index}
+                        onClick={() =>
+                          setExpandedIndex(isExpanded ? null : index)
+                        }
+                        className={`p-2 rounded-lg shadow text5 cursor-pointer text-[15px] border-1 bg-[#ffffffcc] ${
                           msg.role === "USER"
                             ? "border-[#4A4947] text-right"
                             : "border-[#dbdbdb] text-left"
@@ -386,7 +453,7 @@ const URecipes = () => {
                         alt="Imagen del usuario"
                         className="max-w-7 max-h-7 rounded-full"
                       />
-                    </div>    
+                    </div>
                   </div>
                 );
               }
@@ -395,23 +462,10 @@ const URecipes = () => {
         )}
 
         {/* INDICADOR DE CARGA - Cuando está esperando respuesta */}
-        {started && (
-          <div className="w-full max-w-[1100px] mt-4 flex items-center justify-start gap-2">
-            {isLoading && (
-              <>
-                <Loader color="gray-500" />
-                <span className="text-[15px] text5">
-                  Esperando respuesta...
-                </span>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* MENSAJES DE ERROR */}
-        {started && !isLoading && (
-          <div className="w-full max-w-[1100px] mt-4 flex items-center justify-start gap-2">
-            {error && <span className="text-[15px] text5">{error}</span>}
+        {started && isLoading && (
+          <div className="w-full mt-4 flex items-center gap-2">
+            <Loader color="gray-500" />
+            <span className="text-[15px] text5">Esperando respuesta...</span>
           </div>
         )}
 
@@ -495,7 +549,7 @@ const URecipes = () => {
           ${
             !started
               ? "max-w-[900px] flex-col"
-              : "max-w-[1200px] flex-row justify-between items-center"
+              : "flex-row justify-between items-center"
           }
             flex-wrap`}
         >
@@ -521,7 +575,7 @@ const URecipes = () => {
                 ? "Buscar recetas por ingredientes"
                 : type === "recipe"
                 ? "Buscar recetas por nombre"
-                : "Realiza una consulta o haz un pedido"
+                : "Realiza una consulta"
             }...`}
             className={`outline-none flex-[3] ps-3 placeholder:text-[#707070] ${
               !started && "pt-2"
@@ -554,9 +608,7 @@ const URecipes = () => {
               {/* Menú desplegable de tipos de búsqueda */}
               {open && (
                 <div
-                  className={`absolute top-full right-0 mt-2 z-50 flex items-center ${
-                    !started && "flex-col"
-                  } gap-1 p-2 rounded-lg shadow-lg`}
+                  className={`absolute -top-18 right-0 bg-[#f5f5f5] border border-[#dbdbdb] z-50 flex items-center gap-1 p-2 rounded-lg shadow-md`}
                 >
                   <button
                     type="button"
@@ -642,16 +694,16 @@ const URecipes = () => {
 
       {/* SECCIÓN DE RESULTADOS - RECETAS ENCONTRADAS */}
       {recipes?.length > 0 ? (
-        <section className="lg:flex-[0.3] mt-10 overflow-y-auto scroll2 max-h-fit md:max-h-[60vh] h-full">
+        <section className="flex-[1] flex flex-col justify-start mt-8 overflow-y-auto scroll2 mx-auto w-full max-h-fit max-w-[1100px] md:max-h-[60vh] h-full">
           {/* Información de paginación y botón limpiar */}
           {pagination && (
-            <div className="flex justify-between">
-              <div className="mb-4 text-sm text-gray-600">
+            <div className="flex justify-between text-sm mb-4">
+              <div className="text5">
                 Mostrando {recipes.length} de {pagination.total} recetas
                 {pagination.totalPages > 1 &&
                   ` (Página ${pagination.page} de ${pagination.totalPages})`}
               </div>
-              <div className="mb-4 text-sm">
+              <div>
                 <button
                   type="button"
                   onClick={() => handleClearSearch()}
@@ -697,8 +749,7 @@ const URecipes = () => {
           )}
         </section>
       ) : (
-        recipes?.length === 0 ||
-        (started && (
+        recipes?.length === 0 || (
           <section className="flex-[0.3] mt-15 overflow-y-auto scroll2 max-h-fit md:max-h-[30vh] flex-col h-full gap-2 flex items-center justify-center">
             <div className="p-2 rounded-full bg-gray-100 border-2 border-[#e6e6e6]">
               <Search size={22} color="#2F2F2F" />
@@ -712,7 +763,7 @@ const URecipes = () => {
               </p>
             </div>
           </section>
-        ))
+        )
       )}
     </div>
   );

@@ -19,7 +19,15 @@ export function pluralize(unit: string, quantity: number): string {
 }
 
 export const getMimeTypeFromUrl = (url: string): string | null => {
-  const pathname = new URL(url).pathname;
+  if (!url) return null;
+
+  let pathname: string;
+  try {
+    pathname = new URL(url).pathname;
+  } catch {
+    return null;
+  }
+
   const ext = pathname.split(".").pop()?.toLowerCase();
   if (!ext) return null;
 
