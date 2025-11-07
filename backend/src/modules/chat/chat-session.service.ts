@@ -1,5 +1,5 @@
-import SessionService from "../../../services/session.service";
-import { ollamaConfig } from "../../../config/config";
+import SessionService from "../../services/session.service";
+import { ollamaConfig } from "../../config/config";
 
 import axios from "axios";
 import { createHash } from "crypto";

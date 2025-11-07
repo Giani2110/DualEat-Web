@@ -8,15 +8,15 @@ import {
 } from "@services/community.api";
 import { Plus } from "lucide-react";
 
-import { format, formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
-
-import PostCard from "@components/users/cards/PostCard";
+import PostCard from "@/components/private/users/ui/PostCard";
 
 import { getCommunityPosts } from "@services/community.api";
-import type { Posts, Community, CommunityTag } from "@interface/global";
+import type {
+  Posts,
+  Community,
+  ResponseWithPagination,
+} from "@interface/global";
 
-import { formatCompactNumber } from "@utils/compactNumber";
 import { axiosInterceptor } from "@interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
@@ -26,6 +26,9 @@ import { ROUTES } from "@constants/constants";
 import { useCommunity } from "@hooks/useUCommunity";
 import { useAuth } from "@hooks/useAuth";
 
+import { useInfiniteQuery } from "@tanstack/react-query";
+import CommunityInfo from "@/components/private/users/ui/CommunityInfo";
+
 const UCommunity = () => {
   const { communitySlug } = useParams<{ communitySlug: string }>();
   const navigate = useNavigate();
@@ -34,21 +37,34 @@ const UCommunity = () => {
   const { refreshCommunities } = useCommunity();
 
   const [community, setCommunity] = useState<Community | null>(null);
-  const [posts, setPosts] = useState<Posts[]>([]);
-
-  // Paginación y flags
-  const [hasMore, setHasMore] = useState(false);
-  const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // UI local
-  const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   // Refs para IntersectionObserver y sentinel
   const loaderRef = useRef<HTMLDivElement | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isError,
+    error,
+  } = useInfiniteQuery<ResponseWithPagination<Posts>>({
+    queryKey: ["communityPosts", community?.id],
+    queryFn: ({ pageParam = 1 }) =>
+      getCommunityPosts(pageParam as number, community!.id),
+    getNextPageParam: (lastPage) => {
+      if (lastPage.pagination.hasMore) {
+        return lastPage.pagination.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
+    enabled: !!user && !!community,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const handleJoinCommunity = async (community: Community) => {
     try {
@@ -144,7 +160,6 @@ const UCommunity = () => {
           const response = await getCommunityBySlug(communitySlug);
           if (response && response.data) {
             setCommunity(response.data as Community);
-            console.log("✅ Comunidad cargada:", response.data);
           } else {
             navigate(ROUTES.ERROR, { replace: true });
           }
@@ -157,106 +172,48 @@ const UCommunity = () => {
     fetchCommunity();
   }, [communitySlug]);
 
-  useEffect(() => {
-    // Se ejecuta cada vez que 'community' cambia (o al desmontar).
-    // Si communitySlug cambia (y por ende community), limpiamos los posts anteriores.
-    if (communitySlug) {
-      setPosts([]); 
-      setPage(1); 
-      setIsLoading(false);
-      setIsInitialized(false);
-    }
-  }, [communitySlug]);
-
-  // 2. Cargar posts cuando cambia la página
-  useEffect(() => {
-    if (!community) {
-      return;
-    }
-
-    const fetchPosts = async () => {
-      if (isLoading) {
-        return;
-      }
-      setIsLoading(true);
-
-      try {
-        const response = await getCommunityPosts(community.id, page);
-
-        if (response && response.success) {
-          setPosts((prevPosts) => {
-            const newPosts = response.data as Posts[];
-
-            const existingIds = new Set(prevPosts.map((post) => post.id));
-            const uniqueNewPosts = newPosts.filter(
-              (post) => !existingIds.has(post.id)
-            );
-
-            return [...prevPosts, ...uniqueNewPosts];
-          });
-
-          const newHasMore =
-            response.pagination.page < response.pagination.totalPages;
-          setHasMore(newHasMore);
-        }
-      } catch (error) {
-        console.error("🚨 Error al obtener posts:", error);
-      } finally {
-        setIsLoading(false);
-        setIsInitialized(true);
-      }
-    };
-
-    fetchPosts();
-  }, [community, page]);
-
-  // 3. IntersectionObserver
+  // IntersectionObserver
   useEffect(() => {
     const el = loaderRef.current;
-    if (!el) {
-      return;
-    }
-
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-      observerRef.current = null;
-    }
+    if (!el) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        console.log(
-          "Observer callback:",
-          entry.isIntersecting,
-          "ratio:",
-          entry.intersectionRatio,
-          "initialized:",
-          isInitialized
-        );
 
-        if (entry.isIntersecting && hasMore && !isLoading && isInitialized) {
-          console.log("➡️ Incrementando página");
-          setPage((p) => p + 1);
+        // Si el sentinel es visible Y hay más páginas Y no estamos cargando
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       {
         root: null,
-        rootMargin: "200px",
+        rootMargin: "200px", // Cargar antes de llegar al final
         threshold: 0.1,
       }
     );
-
     observer.observe(el);
-    observerRef.current = observer;
 
-    return () => {
-      observer.disconnect();
-      observerRef.current = null;
-    };
-  }, [hasMore, isLoading, isInitialized]);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const communityPosts =
+    data?.pages
+      .flatMap((page) => page.data)
+      .filter((post): post is Posts => Boolean(post)) || [];
+
+  if (isError) {
+    return (
+      <section className="w-[80%] mx-auto mt-10 text-center text-red-500">
+        <p>Error al cargar los posts</p>
+        <p className="text-sm text-gray-600">{(error as Error).message}</p>
+      </section>
+    );
+  }
 
   return (
     <section className="w-[95%] md:w-[80%] md:max-w-[1000px] lg:max-w-[1200px] mx-auto flex flex-col gap-3 rounded-[10px] mt-5 ">
+      {/* Contenedor de la comunidad */}
       <div className="w-full rounded-lg relative">
         {/* Banner */}
         <div className="w-full h-32 md:h-34 rounded-lg overflow-hidden">
@@ -420,137 +377,45 @@ const UCommunity = () => {
         </div>
       </div>
 
+      {/** Posts de la comunidad */}
       <div className="flex gap-8 justify-between w-full flex-wrap mt-30">
         <div className="flex flex-col flex-[2] px-5">
-          {posts.length === 0 && !isLoading && (
-            <p className="text-center text-gray-500 py-8">
-              No hay posts en esta comunidad aún
-            </p>
-          )}
-          {posts.map((post, index) => (
-            <div key={post.id} className="w-full">
-              <PostCard Post={post} />
-              {index < posts.length - 1 && (
-                <div className="w-full h-[1px] mx-auto bg-[#4A4947] my-1" />
-              )}
+          {Array.isArray(communityPosts) && communityPosts.length > 0 ? (
+            communityPosts.map((post: Posts, index) => (
+              <div key={post.id} className="w-full">
+                <PostCard Post={post} isDashboard={false} />
+                {index < communityPosts.length - 1 && (
+                  <div className="w-full h-[1px] mx-auto bg-[#4A4947] my-1" />
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 mt-5">
+              No hay posts disponibles para mostrar.
             </div>
-          ))}
+          )}
+
           {/* Sentinel */}
           <div
             ref={loaderRef}
-            style={{ width: "100%", height: 1, marginTop: 8 }}
+            className="w-full py-4 flex justify-center"
             aria-hidden="true"
           >
-            {isLoading && (
-              <div className="flex justify-center">
+            {isFetchingNextPage && (
+              <div className="flex items-center gap-2 text-gray-500">
                 <Loader color="gray-500" size="12" />
+                <span className="text-sm">Cargando más posts...</span>
               </div>
+            )}
+
+            {!hasNextPage && communityPosts.length > 0 && (
+              <div className="text-sm text5">No hay más posts para mostrar</div>
             )}
           </div>
         </div>
 
-        <div
-          className="flex-[1] hidden lg:block bannerBG max-w-[300px] h-fit"
-          style={
-            {
-              "--bg-image": `url('${community?.theme_color}')`,
-            } as React.CSSProperties
-          }
-        >
-          <div className="px-5 py-4">
-            <h1 className="Dosis-Bold text-[16px] text5">{community?.name}</h1>
-            <p
-              onClick={() => setIsOpen(!isOpen)}
-              className={`text-[15px] tracking-tight text4 leading-6 cursor-pointer ${
-                isOpen ? "line-clamp-4" : "line-clamp-0"
-              }`}
-            >
-              {community?.description}
-            </p>
-            <div className="flex items-center gap-1 mt-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height={"20"}
-                width={"20"}
-                viewBox="0 0 640 640"
-              >
-                <path
-                  fill="#707070"
-                  d="M216 64C229.3 64 240 74.7 240 88L240 128L400 128L400 88C400 74.7 410.7 64 424 64C437.3 64 448 74.7 448 88L448 128L480 128C515.3 128 544 156.7 544 192L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 192C96 156.7 124.7 128 160 128L192 128L192 88C192 74.7 202.7 64 216 64zM480 496C488.8 496 496 488.8 496 480L496 416L408 416L408 496L480 496zM496 368L496 288L408 288L408 368L496 368zM360 368L360 288L280 288L280 368L360 368zM232 368L232 288L144 288L144 368L232 368zM144 416L144 480C144 488.8 151.2 496 160 496L232 496L232 416L144 416zM280 416L280 496L360 496L360 416L280 416zM216 176L160 176C151.2 176 144 183.2 144 192L144 240L496 240L496 192C496 183.2 488.8 176 480 176L216 176z"
-                />
-              </svg>
-              <span
-                title={
-                  community && community?.created_at
-                    ? formatDistanceToNow(community.created_at, {
-                        locale: es,
-                        addSuffix: true,
-                      })
-                    : "N/A"
-                }
-                className="text-[13px] text4"
-              >
-                {community?.created_at
-                  ? `Creado el ${format(
-                      new Date(community.created_at),
-                      "d MMM yyyy",
-                      {
-                        locale: es,
-                      }
-                    )}`
-                  : "Fecha desconocida"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 mt-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#707070"
-                className="lucide lucide-globe-icon lucide-globe"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                <path d="M2 12h20" />
-              </svg>
-              <span className="capitalize text-[13px] text4">
-                {community?.visibility}
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center mt-3">
-              <span className="Dosis-Bold text-[15px]">
-                {community?.total_members
-                  ? formatCompactNumber(community.total_members)
-                  : "0"}
-              </span>
-              <span className="text-[14px] text4">Miembros</span>
-            </div>
-          </div>
-
-          <div className="px-3 pb-5 pt-2 w-full">
-            <div className="w-full h-[1px] mx-auto bg-gray-300"></div>
-            <h1 className="text-[16px] text5 pt-3 Dosis-Bold tracking-tight">
-              Etiquetas de la comunidad
-            </h1>
-            {Array.isArray(community?.tags) && community.tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {community?.tags.map((tag: CommunityTag) => (
-                  <span
-                    key={tag.id}
-                    className="bg-red text1 text-[13px] w-full text-center py-1 px-2 rounded-full"
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="text-[13px] text4">Sin etiquetas</span>
-            )}
-          </div>
-        </div>
+        {/* Información de la comunidad */}
+        {community && <CommunityInfo community={community} isCommunity={true} />}
       </div>
     </section>
   );

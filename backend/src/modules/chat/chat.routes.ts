@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { ChatController } from "../controllers/chat.controller";
-import { RecipeService } from "../../recipe/recipe.service";
+import { ChatController } from "./chat.controller";
+import { RecipeService } from "../recipe/recipe.service";
 
-import { isAuthenticated } from "../../../middlewares/isAuthenticated";
-import { iaLimiter } from "../../../middlewares/rateLimiter";
+import { isAuthenticated } from "../../middlewares/isAuthenticated";
+import { iaLimiter } from "../../middlewares/rateLimiter";
 
 const recipeService = new RecipeService();
 const controller = new ChatController(recipeService);

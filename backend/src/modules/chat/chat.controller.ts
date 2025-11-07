@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 
-import { ollamaConfig } from "../../../config/config";
-import { RecipeService } from "../../recipe/recipe.service";
+import { ollamaConfig } from "../../config/config";
+import { RecipeService } from "../recipe/recipe.service";
 
-import ChatSessionService from "../services/chat-session.service";
-import SessionService from "../../../services/session.service";
+import ChatSessionService from "./chat-session.service";
+import SessionService from "../../services/session.service";
 
 import axios from "axios";
 
@@ -130,7 +130,7 @@ export class ChatController {
   /** POST /api/chat/ask-recipe ASK RECIPE */
   async askRecipe(req: Request, res: Response) {
     // puede tener un chatId si es una conversación existente
-    const { question, recipe_id, conversation, chatId } = req.body;
+    const { question, recipe_id, conversation, chat_id } = req.body;
 
     const user_id = (req as any).user?.id;
 
@@ -143,8 +143,8 @@ export class ChatController {
       }
 
       // Determinar si es un chat existente o el primer mensaje (aunque idealmente siempre debería tener chatId aquí)
-      const finalChatId = chatId || this.sessionService.generateUniqueId();
-      const exists = !!chatId;
+      const finalChatId = chat_id || this.sessionService.generateUniqueId();
+      const exists = !!chat_id;
 
       const recipe = await this.recipeService.getRecipeById(recipe_id);
       if (!recipe) {
@@ -195,7 +195,7 @@ export class ChatController {
       const iaResponse =
         ollamaResponse.data.message?.content || "Sin respuesta";
 
-      const title = exists ? "" : recipe.name;
+      const title = "Receta: " + recipe.name;
 
       res.status(200).json({
         success: true,
@@ -283,7 +283,9 @@ export class ChatController {
       );
 
       if (!chatSession) {
-        return res.status(400).json({ success: false, error: "Error editando título del chat." });
+        return res
+          .status(400)
+          .json({ success: false, error: "Error editando título del chat." });
       }
 
       res.status(200).json({ success: true, data: chatSession });

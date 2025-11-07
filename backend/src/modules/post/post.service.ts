@@ -7,7 +7,7 @@ import { generateReadableSlug } from "../../utils/sluglify";
 import { getSocketServer } from "../../config/socket.config";
 import { Post, Recipe, Community, PostType } from "@prisma/client";
 
-import { shuffleArray } from "../../utils/shuffler";
+import { interleaveByCommunity, shuffleArray } from "../../utils/shuffler";
 
 export class PostService {
   constructor() {}
@@ -331,8 +331,10 @@ export class PostService {
         };
       });
 
+      const shuffledData = interleaveByCommunity(data);
+
       return {
-        data: data,
+        data: shuffledData,
         pagination: {
           page,
           hasMore: uniquePosts.length >= pageSize,

@@ -169,13 +169,13 @@ export class CommunityController {
 
   /** GET COMMUNITY POSTS */
   async getPosts(req: Request, res: Response) {
-    const { communityId, page } = req.query;
+    const { page, communityId, } = req.query;
     const user_id = (req as any).user?.id;
 
     try {
       const result = await this.communityService.getCommunityPosts(
-        String(communityId),
         Number(page),
+        String(communityId),
         String(user_id)
       );
 

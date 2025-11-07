@@ -26,7 +26,7 @@ import CommunityModal from "@components/modal/CommunityModal";
 import type { Notification } from "@interface/global";
 import { useNavigate } from "react-router-dom";
 import { formatShortTime } from "@utils/compactNumber";
-import { useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/chat/useChat";
 import {
   useRecent,
   type MinimalCommunityPlus,
@@ -43,7 +43,7 @@ const HeaderUSER = () => {
   const { recents, handleCommunityClick } = useRecent(user?.id);
   const { notifications, unreadCount, markAsRead, markAsReadSingle } =
     useNotifications();
-  const { chats, setActiveChatId } = useChat();
+  const { chats, setChatID } = useChat();
 
   // ==================== ESTADOS ====================
   const [communityOpen, setCommunityOpen] = useState(true);
@@ -542,7 +542,7 @@ const HeaderUSER = () => {
                     key={chat.chatId}
                     className={`navlis rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]`}
                     onClick={() => {
-                      setActiveChatId(chat.chatId);
+                      setChatID(chat.chatId);
                       setSidebarOpen(false);
                       navigate(`/recipes/`);
                     }}

@@ -90,7 +90,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 120s
     restart: unless-stopped
 
   # ===== BACKEND =====
@@ -112,7 +112,8 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://DualEat:DualEat21102504@postgres:5432/DualEat
-      - CORS_ORIGIN=http://localhost:5173
+      - FRONTEND_URL=http://localhost:5173
+      - MOBILE_URL=http://localhost:8082
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - OLLAMA_HOST=http://ollama:11434
@@ -124,7 +125,7 @@ services:
       - backend_logs:/app/logs  # Para logs persistentes
     networks:
       - dualeat-network
-    command: ["sh", "-c", "npx prisma db push && npm run dev"]
+    command: ["sh", "-c", "npx prisma db push --accept-data-loss && npm run dev"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s

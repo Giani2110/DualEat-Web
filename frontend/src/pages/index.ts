@@ -17,8 +17,8 @@ export { default as AdminFoodCategories } from "./private/admin/AdminFoodCategor
 export { default as AdminLocals } from "./private/admin/AdminLocals";
 
 // Components
-export { default as ProtectedRoute } from "@components/auth/ProtectedRoutes";
-export { default as PublicRoute } from "@components/auth/PublicRoutes";
+export { default as ProtectedRoute } from "@/components/public/auth/ProtectedRoutes";
+export { default as PublicRoute } from "@/components/public/auth/PublicRoutes";
 
 // User
 export { default as UDashboard } from "./private/users/UDashboard";

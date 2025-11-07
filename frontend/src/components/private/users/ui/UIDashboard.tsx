@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/constants";
 
 import { useCommunity } from "@hooks/useUCommunity";
-import { useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/chat/useChat";
 
 import "@assets/scss/private/users/users.scss";
 import { ChevronDown, Ellipsis } from "lucide-react";
@@ -25,9 +25,9 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
   const {
     chats,
     chat_id,
-    setActiveChatId,
+    setChatID,
     setConversation,
-    removeActiveChatId,
+    removeChatID,
     setStarted,
   } = useChat();
 
@@ -123,7 +123,7 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
                 onClick={() => {
                   setStarted(false);
                   setConversation([]);
-                  removeActiveChatId();
+                  removeChatID();
                 }}
                 className="flex items-center p-2 hover:bg-[#E9E9E9] mt-4 cursor-pointer border-t border-b border-dashed border-[#dbdbdb]"
               >
@@ -179,7 +179,7 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
                             className={`cursor-pointer flex justify-between items-center hover:bg-[#E9E9E9] px-2 py-1 rounded-[5px] transition-all duration-100 ${
                               isActive ? "bg-yellow" : ""
                             }`}
-                            onClick={() => setActiveChatId(chat.chatId)}
+                            onClick={() => setChatID(chat.chatId)}
                             ref={isOptionsOpen ? divRef : null}
                           >
                             <p

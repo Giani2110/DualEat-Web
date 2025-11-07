@@ -202,6 +202,62 @@ export interface Posts {
   hasVoted: boolean | null;
 }
 
+export interface PostFull {
+  id: string;
+  slug: string;
+  title: string;
+  content: string;
+  image_urls: string[];
+  type: "post" | "recipe";
+  votes_up: number;
+  votes_down: number;
+  total_comments: number;
+  created_at: string;
+  updated_at: string;
+  edited: boolean;
+  active: boolean;
+  user_id: string;
+  community_id: string;
+  recipe_id: string | null;
+  userVote: "up" | "down" | null;
+  hasVoted: boolean | null;
+
+  user: {
+    id: string;
+    slug: string;
+    name: string;
+    email: string;
+    avatar_url: string;
+    role: "user" | "admin";
+    active: boolean;
+    provider: string;
+    is_business: boolean;
+    subscription_status: "active" | "inactive";
+    trial_ends_at: string | null;
+    created_at: string;
+    updated_at: string;
+  };
+
+  community: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string;
+    image_url: string;
+    theme_color: string;
+    visibility: "public" | "private";
+    total_members: number;
+    creator_id: string;
+    created_at: string;
+    updated_at: string;
+    active: boolean;
+  };
+
+  recipe: Recipe | null;
+
+  comments: Comment[];
+}
+
 /**
  * @interface Comment
  * Representa un comentario dentro de una publicación.

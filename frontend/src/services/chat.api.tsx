@@ -108,10 +108,11 @@ export const askOllama = async (
 export const askRecipe = async (
   question: string,
   recipe_id: string,
-  conversation: ChatSessionData[]
+  conversation: ChatSessionData[],
+  chat_id?: string
 ): Promise<ResponseAI | null> => {
   try {
-    const limitedConversation = conversation.slice(-10);
+    const limitedConversation = conversation.slice(-30);
 
     const mappedConversation = limitedConversation.map((msg) => ({
       role: msg.role === "IA" ? "assistant" : "USER",
@@ -123,6 +124,7 @@ export const askRecipe = async (
         question,
         recipe_id,
         conversation: mappedConversation,
+        chat_id,
       }
     );
 

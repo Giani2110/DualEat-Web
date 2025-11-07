@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { editChat, deleteChat } from "@/services/chat.api";
 import toast from "react-hot-toast";
-import { useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/chat/useChat";
 
 interface ChatModalProps {
   onClose: () => void;
@@ -12,7 +12,7 @@ interface ChatModalProps {
 
 const ChatModal: React.FC<ChatModalProps> = ({ type, onClose, chat_id }) => {
   const [inputValue, setInputValue] = useState("");
-  const { removeChat, updateChatTitle } = useChat();
+  const { removeChat, updateTitle, setStarted, setConversation, removeChatID } = useChat();
 
   const handleButton = async () => {
     try {
@@ -20,13 +20,16 @@ const ChatModal: React.FC<ChatModalProps> = ({ type, onClose, chat_id }) => {
         const response = await editChat(chat_id, inputValue);
         if (response?.success) {
           toast.success("Título actualizado");
-          updateChatTitle(chat_id, inputValue);
+          updateTitle(chat_id, inputValue);
         }
       } else if (type === "delete") {
         const response = await deleteChat(chat_id);
         if (response?.success) {
           toast.success("Conversación eliminada");
           removeChat(chat_id);
+          removeChatID();
+          setStarted(false);
+          setConversation([]);
         }
       }
       setTimeout(() => {

@@ -1,7 +1,7 @@
 import { axiosInterceptor } from "@interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
-import type { Response, ResponseWithPagination } from "@interface/global";
+import type { Posts, Response, ResponseWithPagination } from "@interface/global";
 
 import axios from "axios";
 
@@ -143,19 +143,17 @@ export const getUserCommunities = async (): Promise<Response | null> => {
 
 /** GET COMMUNITY POSTS */
 export const getCommunityPosts = async (
+  page: number,
   communityId: string,
-  page: number
-): Promise<ResponseWithPagination | null> => {
+): Promise<ResponseWithPagination<Posts>> => { 
   try {
     const { data } = await axiosInterceptor.get("/community/posts", {
-      params: { communityId, page },
+      params: { page, communityId },
     });
-    return data;
+    return data; // No es necesario el 'as' si la API siempre devuelve el tipo correcto
   } catch (err) {
-    if (axios.isAxiosError(err)) {
-      console.log(err.response?.data?.message || "Error al obtener comunidad");
-    }
-    return null;
+    console.error("Error al obtener posts de la comunidad:", err);
+    throw err; 
   }
 };
 

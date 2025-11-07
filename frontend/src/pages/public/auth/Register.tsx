@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
-import AuthSection from "@components/auth/AuthSection";
+import AuthSection from "@/components/public/auth/AuthSection";
 
 import { ROUTES } from "@constants/constants";
 import { Link, useNavigate } from "react-router-dom";

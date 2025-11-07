@@ -10,17 +10,14 @@ import {
   CircleAlert,
   FileImage,
 } from "lucide-react";
-import IngredientsCard from "@components/users/cards/IngredientsCard";
-import InstructionCard from "@components/users/cards/InstructionsCard";
+import IngredientsCard from "@/components/private/users/post/IngredientsCard";
+import InstructionCard from "@/components/private/users/post/InstructionsCard";
 
 import { createPost } from "@services/post.api";
 
 import toast from "react-hot-toast";
 
-import type {
-  CreatePostDTO,
-  CreateRecipeDTO,
-} from "@interface/global.dto";
+import type { CreatePostDTO, CreateRecipeDTO } from "@interface/global.dto";
 import type { Community } from "@interface/global";
 
 import "@assets/scss/private/users/users.scss";

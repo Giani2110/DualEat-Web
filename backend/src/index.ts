@@ -21,12 +21,12 @@ export { default as TagCategory } from "./modules/community/routes/tag-category.
 // --- Módulos de Contenido (Recetas y Posts) ---
 export { default as Recipe } from "./modules/recipe/recipe.routes";
 export { default as Post } from "./modules/post/post.routes";
-export { default as Chat } from "./modules/chat/routes/chat.routes";
+export { default as Chat } from "./modules/chat/chat.routes";
 
 // --- Módulos de Utilidad y Misceláneos ---
 export { default as Notification } from "./modules/notification/routes/notification.routes";
 export { default as Vote } from "./modules/votes/vote.routes";
-export { default as Onboarding} from "./routes/onBoarding.routes";
+export { default as Onboarding } from "./routes/onBoarding.routes";
 export { default as Admin } from "./routes/admin.routes";
 export { default as OCR } from "./routes/ocr.routes";
 export { default as Users } from "./routes/users";

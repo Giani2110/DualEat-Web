@@ -3,7 +3,7 @@ import { useAuth } from "@hooks/useAuth";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getAllPosts } from "@/services/post.api";
 import type { Posts, ResponseWithPagination } from "@interface/global";
-import PostCard from "@/components/users/cards/PostCard";
+import PostCard from "@/components/private/users/ui/PostCard";
 import { Loader } from "lucide-react";
 
 const UDashboard = () => {
@@ -63,7 +63,7 @@ const UDashboard = () => {
     data?.pages
       .flatMap((page) => page.data)
       .filter((post): post is Posts => Boolean(post)) || [];
-  
+
   if (isError) {
     return (
       <section className="w-[80%] mx-auto mt-10 text-center text-red-500">
@@ -103,9 +103,7 @@ const UDashboard = () => {
             )}
 
             {!hasNextPage && allPosts.length > 0 && (
-              <div className="text-sm text5">
-                No hay más posts para mostrar
-              </div>
+              <div className="text-sm text5">No hay más posts para mostrar</div>
             )}
           </div>
         </div>

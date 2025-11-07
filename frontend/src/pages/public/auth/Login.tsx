@@ -4,7 +4,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
 import { ROUTES } from "@constants/constants";
-import AuthSection from "@components/auth/AuthSection";
+import AuthSection from "@/components/public/auth/AuthSection";
 
 import toast from "react-hot-toast";
 

@@ -5,14 +5,14 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 interface ChatState {
   chats: ChatMetadata[];
-  activeChatId: string | null;
+  chat_id: string | null;
   started: boolean;
   conversation: ChatSessionData[] | null;
 }
 
 const initialState: ChatState = {
   chats: [],
-  activeChatId: null,
+  chat_id: null,
   started: false,
   conversation: null,
 };
@@ -35,16 +35,18 @@ const chatSlice = createSlice({
         (chat) => chat.chatId !== action.payload
       );
     },
-    setActiveChatId: (state, action: PayloadAction<string>) => {
-      state.activeChatId = action.payload;
+    setChatID: (state, action: PayloadAction<string>) => {
+      state.chat_id = action.payload;
     },
-    removeActiveChatId: (state) => {
-      state.activeChatId = null;
+    removeChatID: (state) => {
+      state.chat_id = null;
     },
+
+
     setStarted: (state, action: PayloadAction<boolean>) => {
       state.started = action.payload;
     },
-    updateChatTitle: (
+    updateTitle: (
       state,
       action: PayloadAction<{ chatId: string; newTitle: string }>
     ) => {
@@ -67,10 +69,10 @@ export const {
   clearChats,
   addChat,
   removeChat,
-  setActiveChatId,
-  removeActiveChatId,
+  setChatID,
+  removeChatID,
   setStarted,
-  updateChatTitle,
+  updateTitle,
   setConversation,
 } = chatSlice.actions;
 

@@ -4,7 +4,7 @@ import { useAuth } from "@hooks/useAuth";
 
 import { ROUTES } from "@constants/constants";
 
-import LoadingScreen from "../animation/LoadingScreen";
+import LoadingScreen from "../../animation/LoadingScreen";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -28,7 +28,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const tokenFromUrl = queryParams.get("tempToken");
 
   if (onlyTempToken) {
-    return tokenFromUrl ? <>{children}</> : <Navigate to={ROUTES.AUTH.LOGIN} replace />;
+    return tokenFromUrl ? (
+      <>{children}</>
+    ) : (
+      <Navigate to={ROUTES.AUTH.LOGIN} replace />
+    );
   }
 
   if (!user) {

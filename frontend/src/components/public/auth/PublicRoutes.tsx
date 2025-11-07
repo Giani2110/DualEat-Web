@@ -1,10 +1,10 @@
-import React, { useEffect} from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 
 import { ROUTES } from "@constants/constants";
 
-import LoadingScreen from "../animation/LoadingScreen";
+import LoadingScreen from "../../animation/LoadingScreen";
 
 interface RouteProps {
   children: React.ReactNode;
@@ -27,6 +27,5 @@ const PublicRoute: React.FC<RouteProps> = ({ children }) => {
 
   return <>{children}</>;
 };
-
 
 export default PublicRoute;

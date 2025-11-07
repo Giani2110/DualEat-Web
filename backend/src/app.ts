@@ -66,14 +66,25 @@ async function initializeApp() {
 
 initializeApp();
 
-// 3. MIDDLEWARES GLOBALES
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.MOBILE_URL,
+];
+
+
+const validOrigins = allowedOrigins.filter(
+  (origin): origin is string => typeof origin === 'string'
+);
+
+
+// 3. MIDDLEWARES GLOBALES
 // Configuración de CORS
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: validOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
       "Content-Type",
       "Authorization",

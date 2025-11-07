@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 
 import Navbar from "@layout/navbar/Navbar";
 import HeaderUSER from "@layout/navbar/NavbarUI";
-import BusinessSidebar from "@components/locals/UISidebarLocal";
-import UIDashboard from "@components/users/dashboard/UIDashboard";
+import BusinessSidebar from "@/components/private/locals/UISidebarLocal";
+import UIDashboard from "@/components/private/users/ui/UIDashboard";
 import Footer from "@layout/footer/Footer";
 
 import { useAuth } from "@hooks/useAuth";
@@ -12,7 +12,7 @@ import { useDynamicTitle } from "@hooks/useDynamicTitle";
 import { useLocation, matchPath } from "react-router-dom";
 
 import { appRoutes } from "@constants/constants";
-import { useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/chat/useChat";
 import { getUserChats } from "@/services/chat.api";
 
 interface LayoutProps {
@@ -34,10 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const fetchChats = async () => {
-      if (
-        user &&
-        user.isBusiness === false
-      ) {
+      if (user && user.isBusiness === false) {
         const response = await getUserChats();
         if (response?.success && Array.isArray(response.data)) {
           setChats(response.data);
@@ -48,7 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
 
     fetchChats();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useDynamicTitle();

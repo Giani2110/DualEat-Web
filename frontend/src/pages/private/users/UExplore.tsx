@@ -10,14 +10,10 @@ import {
 import { getCategoriesTag } from "@services/tag-category.api";
 import { getByCategoryId } from "@services/community-tag.api";
 
-import type {
-  CategoryTag,
-  Community,
-  CommunityTag,
-} from "@interface/global";
+import type { CategoryTag, Community, CommunityTag } from "@interface/global";
 import { useNavigate, useParams } from "react-router-dom";
 
-import CommunityCard from "@components/users/cards/CommunityCard";
+import CommunityCard from "@/components/private/users/cards/CommunityCard";
 
 const UExplore = () => {
   const [tags, setTags] = useState<CategoryTag[]>([]);
@@ -65,7 +61,9 @@ const UExplore = () => {
     if (!categorySlug && user) {
       const fetchData = async () => {
         // Obtener comunidades recomendadas
-        const recommendedResponse = await getRecommendedCommunities(String(user.id));
+        const recommendedResponse = await getRecommendedCommunities(
+          String(user.id)
+        );
         if (recommendedResponse && recommendedResponse?.success) {
           setRecommendedCommunities(recommendedResponse.data as Community[]);
         }
@@ -260,7 +258,9 @@ const UExplore = () => {
                 !renderedCommunityIds.has(Number(c.id))
             );
 
-            communitiesInTag.forEach((c) => renderedCommunityIds.add(Number(c.id)));
+            communitiesInTag.forEach((c) =>
+              renderedCommunityIds.add(Number(c.id))
+            );
 
             if (communitiesInTag.length > 0) {
               return (
