@@ -90,7 +90,7 @@ const AuthSection: React.FC<Props> = ({
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+   window.location.href = "http://localhost:3000/api/auth/google?platform=web";
   };
 
   return (
@@ -108,10 +108,10 @@ const AuthSection: React.FC<Props> = ({
               />
             </div>
           </div>
-          <h3 className="font-bold text3 text-[30px] mb-2 text-center">
+          <h3 className="Dosis-Bold text3 text-[30px] mb-2 text-center">
             {title}
           </h3>
-          <p className="text4 text-center">{subtitle}</p>
+          <p className="Dosis-Regular text4 text-center">{subtitle}</p>
         </div>
 
         <div className="space-y-6">

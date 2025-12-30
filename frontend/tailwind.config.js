@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        arvo: ['Arvo', 'serif'], // Aquí definimos 'arvo' como un nombre para tu fuente
+        dosis: ['Dosis', 'sans-serif'], // Aquí definimos 'dosis' como un nombre para tu fuente
       },
     },
   },

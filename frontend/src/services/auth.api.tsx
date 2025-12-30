@@ -53,7 +53,7 @@ export const register = async (
 ): Promise<AuthResponse | null> => {
   try {
     const response = await toast.promise(
-      axiosInterceptor.post("/auth/register", { email, password }),
+      axiosInterceptor.post("/auth/register", { email, password, isMobile: false }),
       {
         loading: "Registrando...",
         success: (res) => res.data.message || "Registro exitoso",

@@ -104,7 +104,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full mt-3 mb-6 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg cursor-pointer font-medium"
+            className="Dosis-Bold w-full mt-3 mb-6 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg cursor-pointer font-medium"
           >
             Siguiente
           </button>
@@ -173,7 +173,7 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="w-full mt-3 mb-6 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg cursor-pointer font-medium"
+            className="Dosis-Bold w-full mt-3 mb-6 text-[15px] bg-red text-white py-[12px] px-4 rounded-lg cursor-pointer font-medium"
           >
             Iniciar Sesión {" → "}
           </button>
