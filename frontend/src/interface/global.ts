@@ -343,6 +343,3 @@ export interface CHATData {
   lastUpdated?: string;
   activeRecipeId?: string;
 }
-
-
-

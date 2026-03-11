@@ -7,8 +7,7 @@ import {
   getTrendingCommunities,
 } from "@services/community.api";
 
-import { getCategoriesTag } from "@services/tag-category.api";
-import { getByCategoryId } from "@services/community-tag.api";
+import { getByCategoryId, getCategoriesTag } from "@services/community-tag.api";
 
 import type { CategoryTag, Community, CommunityTag } from "@interface/global";
 import { useNavigate, useParams } from "react-router-dom";

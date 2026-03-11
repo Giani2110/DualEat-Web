@@ -4,8 +4,8 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "@assets/images/icon/Logo_DualEat.png";
 import GooglePlay from "@assets/images/GooglePlay_Badge_Web.png";
 
-import { OUT_NAVBAR_ROUTES } from "@constants/navbar-routes";
-import { ROUTES } from "@constants/constants";
+import { OUT_NAVBAR_ROUTES } from "@/api/constants/navbar-routes";
+import { ROUTES } from "@/api/constants/constants";
 
 const Footer: React.FC = () => {
   const location = useLocation();
@@ -49,34 +49,22 @@ const Footer: React.FC = () => {
             <h3 className="text-white Dosis-Bold mb-3 text-[14px]">Links</h3>
             <ul className="space-y-2 text6 text-[12px] transition-colors duration-300 cursor-pointer">
               <li className="py-1">
-                <Link
-                  to={ROUTES.PUBLIC.HOME}
-                  className="hover:text-white!"
-                >
+                <Link to={ROUTES.PUBLIC.HOME} className="hover:text-white!">
                   Inicio
                 </Link>
               </li>
               <li className="py-1">
-                <Link
-                  to={ROUTES.AUTH.LOGIN}
-                  className="hover:text-white!"
-                >
+                <Link to={ROUTES.AUTH.LOGIN} className="hover:text-white!">
                   Login
                 </Link>
               </li>
               <li className="py-1">
-                <Link
-                  to={ROUTES.AUTH.REGISTER}
-                  className="hover:text-white!"
-                >
+                <Link to={ROUTES.AUTH.REGISTER} className="hover:text-white!">
                   Registrarse
                 </Link>
               </li>
               <li className="py-1">
-                <Link
-                  to={ROUTES.PUBLIC.BUSINESS}
-                  className="hover:text-white!"
-                >
+                <Link to={ROUTES.PUBLIC.BUSINESS} className="hover:text-white!">
                   Para negocios
                 </Link>
               </li>
@@ -111,10 +99,7 @@ const Footer: React.FC = () => {
             <h3 className="text-white Dosis-Bold mb-3 text-[14px]">Compañía</h3>
             <ul className="space-y-2 text6 transition-colors duration-300 text-[12px]">
               <li className="py-1">
-                <Link
-                  to={ROUTES.PUBLIC.ABOUT_US}
-                  className="hover:text-white!"
-                >
+                <Link to={ROUTES.PUBLIC.ABOUT_US} className="hover:text-white!">
                   Sobre nosotros
                 </Link>
               </li>

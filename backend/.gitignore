@@ -1,7 +1,0 @@
-node_modules
-.env
-package-lock.json
-/src/generated/prisma
-gcloud-key.json
-dist
-logs

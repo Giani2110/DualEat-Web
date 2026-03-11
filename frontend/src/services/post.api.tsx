@@ -1,15 +1,19 @@
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import axios from "axios";
 import toast from "react-hot-toast";
 
 import { getRecipeByName } from "./recipes.api";
 
-import type { Posts, Response, ResponseWithPagination } from "@interface/global";
+import type {
+  Posts,
+  Response,
+  ResponseWithPagination,
+} from "@interface/global";
 import type { CreatePostDTO, CreateRecipeDTO } from "@interface/global.dto";
 
 export const createPost = async (
   postData: CreatePostDTO,
-  recipeData?: CreateRecipeDTO
+  recipeData?: CreateRecipeDTO,
 ): Promise<Response | null> => {
   try {
     const formData = new FormData();
@@ -20,12 +24,12 @@ export const createPost = async (
     if (recipeData) {
       const existingRecipe = await getRecipeByName(
         recipeData.name,
-        postData.community_id
+        postData.community_id,
       );
 
       if (existingRecipe && existingRecipe.success === true) {
         toast.error(
-          "Ya tienes una receta con ese nombre, en esta misma comunidad"
+          "Ya tienes una receta con ese nombre, en esta misma comunidad",
         );
         return null;
       }
@@ -62,12 +66,12 @@ export const createPost = async (
       recipeData.steps.forEach((step, index) => {
         formData.append(
           `steps[${index}][step_number]`,
-          String(step.step_number)
+          String(step.step_number),
         );
         formData.append(`steps[${index}][description]`, step.description);
         formData.append(
           `steps[${index}][estimated_time]`,
-          String(step.estimated_time || 0)
+          String(step.estimated_time || 0),
         );
 
         if (step.image_url instanceof File) {
@@ -87,7 +91,7 @@ export const createPost = async (
         loading: recipeData ? "Creando post con receta..." : "Creando post...",
         success: (res) => res.data.message || "Post creado exitosamente",
         error: (err) => err.response?.data?.message || "Error al crear post",
-      }
+      },
     );
 
     return response.data as Response;
@@ -103,7 +107,7 @@ export const createPost = async (
 
 export const getAllPosts = async (
   page: number,
-  recipe: boolean
+  recipe: boolean,
 ): Promise<ResponseWithPagination<Posts>> => {
   try {
     const { data } = await axiosInterceptor.get("/post/", {
@@ -129,7 +133,7 @@ export const getBySlug = async (
   communitySlug: string,
   postSlug: string,
   userSlug: string,
-  sortBy?: number
+  sortBy?: number,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/post/slug", {
@@ -137,7 +141,7 @@ export const getBySlug = async (
         communitySlug,
         postSlug,
         userSlug,
-        sortBy
+        sortBy,
       },
     });
     if (response.data.success === false) {
@@ -157,13 +161,13 @@ export const getBySlug = async (
 export const createComment = async (
   post_id: string,
   content: string,
-  parent_comment_id?: string
+  parent_comment_id?: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.post("/post/comment", {
       post_id,
       content,
-      parent_comment_id
+      parent_comment_id,
     });
     return response.data as Response;
   } catch (err: unknown) {
@@ -174,4 +178,4 @@ export const createComment = async (
     }
     return null;
   }
-}
+};

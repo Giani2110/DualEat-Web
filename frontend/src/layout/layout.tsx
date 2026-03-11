@@ -11,7 +11,7 @@ import { useAuth } from "@hooks/useAuth";
 import { useDynamicTitle } from "@hooks/useDynamicTitle";
 import { useLocation, matchPath } from "react-router-dom";
 
-import { appRoutes } from "@constants/constants";
+import { appRoutes } from "@/api/constants/constants";
 import { useChat } from "@/hooks/chat/useChat";
 import { getUserChats } from "@/services/chat.api";
 
@@ -26,7 +26,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Verificar si la ruta actual coincide con alguna ruta válida
   const isValidRoute = appRoutes.some((route) =>
-    matchPath(route.path, location.pathname)
+    matchPath(route.path, location.pathname),
   );
 
   // Es 404 si estamos en /404 o si no es una ruta válida

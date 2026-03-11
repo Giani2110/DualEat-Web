@@ -1,151 +1,11 @@
 services:
-  # ===== POSTGRES =====
-  postgres:
-    image: postgres:16-alpine  # Versión específica y más liviana
-    container_name: dualeat_postgres
-    environment:
-      - POSTGRES_DB=DualEat
-      - POSTGRES_USER=DualEat
-      - POSTGRES_PASSWORD=DualEat21102504
-      - PGDATA=/var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - dualeat-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U DualEat -d DualEat"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  # ===== PGADMIN =====
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: dualeat_pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=dualeat@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=1234
-      - PGADMIN_CONFIG_SERVER_MODE=False
-      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - dualeat-network
-    restart: unless-stopped
-
-  # ===== REDIS =====
-  redis:
-    image: redis:7-alpine
-    container_name: dualeat_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - dualeat-network
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    restart: unless-stopped
-
-  # ===== REDIS UI =====
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: dualeat_redis_ui
-    ports:
-      - "8081:8081"
-    environment:
-      - REDIS_HOSTS=local:redis:6379
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - dualeat-network
-    restart: unless-stopped
-
-  # ===== OLLAMA =====
-  ollama:
-    image: ollama/ollama:latest
-    container_name: dualeat_ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-      - ./ollama_models:/ollama_models
-    networks:
-      - dualeat-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 120s
-    restart: unless-stopped
-
-  # ===== BACKEND =====
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    platform: linux/amd64
-    container_name: dualeat_backend
-    ports:
-      - "3000:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      ollama:
-        condition: service_healthy
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://DualEat:DualEat21102504@postgres:5432/DualEat
-      - FRONTEND_URL=http://localhost:5173
-      - MOBILE_URL=http://localhost:8082
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - OLLAMA_HOST=http://ollama:11434
-    env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-      - backend_logs:/app/logs  # Para logs persistentes
-    networks:
-      - dualeat-network
-    command: ["sh", "-c", "npx prisma db push --accept-data-loss && npm run dev"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
-
-  # ===== FRONTEND =====
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    platform: linux/amd64
     container_name: dualeat_frontend
     ports:
       - "5173:5173"
-    depends_on:
-      backend:
-        condition: service_healthy
     environment:
       - VITE_API_URL=http://localhost:3000
     volumes:
@@ -154,7 +14,7 @@ services:
     networks:
       - dualeat-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:5173"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -165,10 +25,4 @@ networks:
   dualeat-network:
     driver: bridge
 
-volumes:
-  postgres_data:
-  pgadmin_data:
-  redis_data:
-  ollama_data:
-  ollama_models:
-  backend_logs:
+# VITE_API_URL=http://localhost:3000 (SIN NGROK)

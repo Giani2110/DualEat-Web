@@ -17,11 +17,11 @@ import type {
   ResponseWithPagination,
 } from "@interface/global";
 
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
 import Loader from "@components/animation/Loader";
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 
 import { useCommunity } from "@hooks/useUCommunity";
 import { useAuth } from "@hooks/useAuth";
@@ -101,7 +101,7 @@ const UCommunity = () => {
       if (response && response.data.success) {
         toast.success("Preferencias actualizadas");
         setCommunity((prev) =>
-          prev ? { ...prev, receives_notifications: values } : prev
+          prev ? { ...prev, receives_notifications: values } : prev,
         );
       }
     } catch (error) {
@@ -190,7 +190,7 @@ const UCommunity = () => {
         root: null,
         rootMargin: "200px", // Cargar antes de llegar al final
         threshold: 0.1,
-      }
+      },
     );
     observer.observe(el);
 
@@ -270,8 +270,8 @@ const UCommunity = () => {
                 {community.receives_notifications === "FREQUENT"
                   ? BellFill
                   : community.receives_notifications === "RARE"
-                  ? BellIn
-                  : BellOut}
+                    ? BellIn
+                    : BellOut}
 
                 {isNotificationOpen && (
                   <div className="absolute z-50 -bottom-30 right-0 w-[160px] rounded-[10px] shadow-sm">
@@ -353,8 +353,8 @@ const UCommunity = () => {
                 community?.creator_id === user?.id
                   ? "bg-red"
                   : community?.isMember
-                  ? ""
-                  : "bg-blue"
+                    ? ""
+                    : "bg-blue"
               }`}
             >
               <span
@@ -362,15 +362,15 @@ const UCommunity = () => {
                   community?.creator_id === user?.id
                     ? "text-white"
                     : community?.isMember
-                    ? "text5"
-                    : "text-white"
+                      ? "text5"
+                      : "text-white"
                 }`}
               >
                 {community?.creator_id === user?.id
                   ? "Eres el moderador"
                   : community?.isMember
-                  ? "Se unió"
-                  : "Unirse"}
+                    ? "Se unió"
+                    : "Unirse"}
               </span>
             </button>
           </div>
@@ -415,7 +415,9 @@ const UCommunity = () => {
         </div>
 
         {/* Información de la comunidad */}
-        {community && <CommunityInfo community={community} isCommunity={true} />}
+        {community && (
+          <CommunityInfo community={community} isCommunity={true} />
+        )}
       </div>
     </section>
   );

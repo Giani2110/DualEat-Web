@@ -4,8 +4,8 @@ import { Link, useLocation } from "react-router-dom";
 import {
   NAVBAR_ROUTES,
   OUT_NAVBAR_ROUTES,
-} from "@constants/navbar-routes";
-import { ROUTES } from "@constants/constants";
+} from "@/api/constants/navbar-routes";
+import { ROUTES } from "@/api/constants/constants";
 
 import { Triangle } from "lucide-react";
 import Logo from "@assets/images/icon/Logo DualEatRed.png";
@@ -53,9 +53,7 @@ const Header: React.FC = () => {
           : "translate-y-0 opacity-100"
       } 
 
-      ${location.pathname === "/feed" && "border-b border-gray-200 bg-white" 
-         
-      }`}
+      ${location.pathname === "/feed" && "border-b border-gray-200 bg-white"}`}
     >
       <header
         className={`flex justify-between items-center px-4 sm:px-6 lg:px-8 ${

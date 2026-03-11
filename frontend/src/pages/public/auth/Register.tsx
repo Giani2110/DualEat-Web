@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 
 import AuthSection from "@/components/public/auth/AuthSection";
 
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 

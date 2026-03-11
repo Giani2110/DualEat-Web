@@ -1,5 +1,5 @@
 import axios from "axios";
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 
 import { useState, useEffect } from "react";
 
@@ -8,7 +8,7 @@ import { withMinimumDelay } from "@utils/timeUtils";
 import Loader from "@components/animation/Loader";
 import OtpInput from "@/components/public/auth/OtpInput";
 
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 import { useNavigate } from "react-router-dom";
 import { Fingerprint, Mail, RectangleEllipsis } from "lucide-react";
 
@@ -55,7 +55,7 @@ const ResetPassword = () => {
     try {
       const response = await withMinimumDelay(
         axiosInterceptor.post("/auth/password_reset", { email }),
-        1000
+        1000,
       );
 
       if (response.data?.success) {
@@ -82,7 +82,7 @@ const ResetPassword = () => {
     try {
       const response = await withMinimumDelay(
         axiosInterceptor.post("/auth/password_reset", { email }),
-        1000
+        1000,
       );
       if (!response.data?.success) {
         setError("No se pudo reenviar el código. Intenta nuevamente.");
@@ -109,7 +109,7 @@ const ResetPassword = () => {
           email,
           code,
         }),
-        1000
+        1000,
       );
 
       if (response.data?.success === true) {
@@ -143,7 +143,7 @@ const ResetPassword = () => {
           email,
           newPassword,
         }),
-        1000
+        1000,
       );
 
       if (response.data?.success) {

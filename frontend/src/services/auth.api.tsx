@@ -1,4 +1,4 @@
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -16,7 +16,7 @@ export const login = async (
   email: string,
   password: string,
   rememberMe: boolean,
-  recaptchaToken: string | null
+  recaptchaToken: string | null,
 ): Promise<AuthResponse | null> => {
   try {
     const response = await axiosInterceptor.post(
@@ -27,7 +27,7 @@ export const login = async (
         rememberMe,
         recaptchaToken,
       },
-      { withCredentials: true }
+      { withCredentials: true },
     );
 
     if (response.data?.success === false) {
@@ -49,16 +49,20 @@ export const login = async (
 
 export const register = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<AuthResponse | null> => {
   try {
     const response = await toast.promise(
-      axiosInterceptor.post("/auth/register", { email, password, isMobile: false }),
+      axiosInterceptor.post("/auth/register", {
+        email,
+        password,
+        isMobile: false,
+      }),
       {
         loading: "Registrando...",
         success: (res) => res.data.message || "Registro exitoso",
         error: (err) => err.response?.data?.message || "Error al registrar",
-      }
+      },
     );
 
     return response.data as AuthResponse;
@@ -76,7 +80,7 @@ export const completeProfile = async (
   name: string,
   foodPreferences: number[],
   communityPreferences: number[],
-  tempToken: string
+  tempToken: string,
 ) => {
   try {
     const response = await toast.promise(
@@ -88,14 +92,14 @@ export const completeProfile = async (
           communityPreferences,
           tempToken,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       ),
       {
         loading: "Completando perfil...",
         success: (res) => res.data.message || "Perfil completado exitosamente",
         error: (err) =>
           err.response?.data?.message || "Error al completar perfil",
-      }
+      },
     );
 
     return response.data as AuthResponse;
@@ -117,7 +121,7 @@ export const logout = async () => {
         loading: "Cerrando sesión...",
         success: "Sesión cerrada exitosamente",
         error: (err) => err.response?.data?.message || "Error al cerrar sesión",
-      }
+      },
     );
     return response.data;
   } catch (err: unknown) {

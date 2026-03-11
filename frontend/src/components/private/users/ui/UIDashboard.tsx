@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ROUTES } from "@/constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 
 import { useCommunity } from "@hooks/useUCommunity";
 import { useChat } from "@/hooks/chat/useChat";
@@ -8,10 +8,7 @@ import { useChat } from "@/hooks/chat/useChat";
 import "@assets/scss/private/users/users.scss";
 import { ChevronDown, Ellipsis } from "lucide-react";
 import ChatModal from "@/components/modal/ChatModal";
-import {
-  useRecent,
-  type MinimalCommunityPlus,
-} from "@/hooks/useRecent";
+import { useRecent, type MinimalCommunityPlus } from "@/hooks/useRecent";
 import type { User } from "@/interface/global";
 
 interface Props {
@@ -167,7 +164,7 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
                   >
                     {chats
                       .filter((chat) =>
-                        chat.title.toLowerCase().includes(filter.toLowerCase())
+                        chat.title.toLowerCase().includes(filter.toLowerCase()),
                       )
                       .map((chat) => {
                         const isActive = chat_id === chat.chatId;

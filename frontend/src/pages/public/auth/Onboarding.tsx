@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import AuthSection from "@/components/public/auth/AuthSection";
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 import { useAuth } from "@hooks/useAuth";
 
 import { ArrowRight, ArrowLeft } from "lucide-react";
@@ -50,7 +50,7 @@ const Onboarding = () => {
       } catch (error) {
         console.error("Error al obtener datos de onboarding:", error);
         setErrorPreferences(
-          "No se pudieron cargar las preferencias. Intenta de nuevo más tarde."
+          "No se pudieron cargar las preferencias. Intenta de nuevo más tarde.",
         );
       } finally {
         setLoadingPreferences(false);
@@ -83,7 +83,7 @@ const Onboarding = () => {
   const handleSubmit = async () => {
     if (index === 2 && (!name || preferences.length < 3)) {
       toast.error(
-        "Completá tu nombre y elegí al menos 3 preferencias (entre comida y comunidades)."
+        "Completá tu nombre y elegí al menos 3 preferencias (entre comida y comunidades).",
       );
       return;
     }
@@ -92,7 +92,7 @@ const Onboarding = () => {
 
     if (!tempToken) {
       toast.error(
-        "Token temporal no encontrado. Por favor, vuelve a registrarte."
+        "Token temporal no encontrado. Por favor, vuelve a registrarte.",
       );
       navigate(ROUTES.AUTH.REGISTER);
       return;
@@ -105,7 +105,7 @@ const Onboarding = () => {
 
     const foodPreferenceIds = preferences
       .map(
-        (prefName) => foodCategories.find((cat) => cat.name === prefName)?.id
+        (prefName) => foodCategories.find((cat) => cat.name === prefName)?.id,
       )
       .filter((id) => id !== undefined) as number[];
 
@@ -118,7 +118,7 @@ const Onboarding = () => {
         name,
         foodPreferenceIds,
         communityPreferenceIds,
-        tempToken
+        tempToken,
       );
       if (response?.success) {
         navigate(ROUTES.USER.DASHBOARD, { replace: true });
@@ -127,7 +127,7 @@ const Onboarding = () => {
       console.error("Error al enviar datos de completado de perfil:", error);
       toast.error("Error al completar el perfil. Intenta de nuevo más tarde.");
       alert(
-        `Error: ${error instanceof Error ? error.message : "Error desconocido"}`
+        `Error: ${error instanceof Error ? error.message : "Error desconocido"}`,
       );
     }
   };

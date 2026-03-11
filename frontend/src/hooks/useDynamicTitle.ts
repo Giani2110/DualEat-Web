@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 
 export const useDynamicTitle = () => {
   const location = useLocation();

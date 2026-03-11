@@ -1,7 +1,19 @@
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import type { Response } from "@interface/global";
 
 import axios from "axios";
+
+export const getCategoriesTag = async (): Promise<Response | null> => {
+  try {
+    const response = await axiosInterceptor.get("/community-tags/categories");
+    return response.data as Response;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.log(err.response?.data?.message || "Error al obtener categorias");
+    }
+    return null;
+  }
+};
 
 export const getCommunityTags = async (): Promise<Response | null> => {
   try {
@@ -16,22 +28,20 @@ export const getCommunityTags = async (): Promise<Response | null> => {
   }
 };
 
-export const getByCategoryId = async (
-  id: number
-): Promise<Response | null> => {
+export const getByCategoryId = async (id: number): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get(
       `/community-tags/tags/by-category`,
       {
         params: { id },
-      }
+      },
     );
-    
+
     return response.data as Response;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       console.log(
-        err.response?.data?.message || "Error al obtener la etiqueta"
+        err.response?.data?.message || "Error al obtener la etiqueta",
       );
     } else {
       console.log("Error desconocido");
@@ -41,7 +51,7 @@ export const getByCategoryId = async (
 };
 
 export const createCommunityTag = async (
-  data: string
+  data: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.post("/community-tags", { data });
@@ -63,7 +73,7 @@ export const createCommunityTag = async (
 
 export const updateCommunityTag = async (
   id: string,
-  data: string
+  data: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.put(`/community-tags/${id}`, {
@@ -78,7 +88,7 @@ export const updateCommunityTag = async (
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       console.log(
-        err.response?.data?.message || "Error al actualizar la etiqueta"
+        err.response?.data?.message || "Error al actualizar la etiqueta",
       );
     } else {
       console.log("Error desconocido");
@@ -88,7 +98,7 @@ export const updateCommunityTag = async (
 };
 
 export const deleteCommunityTag = async (
-  id: string
+  id: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.delete(`/community-tags/${id}`);
@@ -101,7 +111,7 @@ export const deleteCommunityTag = async (
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       console.log(
-        err.response?.data?.message || "Error al eliminar la etiqueta"
+        err.response?.data?.message || "Error al eliminar la etiqueta",
       );
     } else {
       console.log("Error desconocido");

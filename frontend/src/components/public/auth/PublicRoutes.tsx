@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 
 import LoadingScreen from "../../animation/LoadingScreen";
 

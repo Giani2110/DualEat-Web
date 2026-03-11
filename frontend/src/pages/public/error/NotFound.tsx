@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
@@ -44,10 +44,13 @@ const NotFound = () => {
         // Alternar entre visible e invisible
         dot.style.opacity = currentIndex % 2 === 0 ? "0.1" : "1";
 
-        setTimeout(() => {
-          currentIndex++;
-          blink();
-        }, durations[Math.floor(currentIndex / 2)] || 100);
+        setTimeout(
+          () => {
+            currentIndex++;
+            blink();
+          },
+          durations[Math.floor(currentIndex / 2)] || 100,
+        );
       };
 
       blink();
@@ -181,7 +184,7 @@ const NotFound = () => {
           y: number,
           row: number,
           col: number,
-          type: "inactive" | "active" | "hollow"
+          type: "inactive" | "active" | "hollow",
         ) {
           this.x = x;
           this.y = y;
@@ -230,12 +233,12 @@ const NotFound = () => {
           if (this.brightness < this.targetBrightness) {
             this.brightness = Math.min(
               this.brightness + speed,
-              this.targetBrightness
+              this.targetBrightness,
             );
           } else if (this.brightness > this.targetBrightness) {
             this.brightness = Math.max(
               this.brightness - speed,
-              this.targetBrightness
+              this.targetBrightness,
             );
           }
         }

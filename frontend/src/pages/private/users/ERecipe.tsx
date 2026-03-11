@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -21,7 +21,7 @@ import type { Recipe, ChatSessionData } from "@interface/global";
 
 import "@assets/scss/private/users/users.scss";
 import Loader from "@components/animation/Loader";
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 
 // Función para calcular el tiempo de lectura
 const calculateReadingTime = (text: string): number => {
@@ -69,7 +69,7 @@ const ERecipe = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [nutritionData, setNutritionData] = useState<NutritionData | null>(
-    null
+    null,
   );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [actualIndex, setActualIndex] = useState<number>(0);
@@ -132,7 +132,7 @@ const ERecipe = () => {
 
       try {
         const ingredientNames = recipe.ingredients.map(
-          (i) => i.ingredient?.name
+          (i) => i.ingredient?.name,
         ) as string[];
 
         const nutritionData = await getRecipeNutrition(ingredientNames);
@@ -290,7 +290,7 @@ const ERecipe = () => {
                       "d 'de' MMMM 'de' yyyy",
                       {
                         locale: es,
-                      }
+                      },
                     )}
                     className="text-[13px] text4 flex"
                   >
@@ -371,7 +371,7 @@ const ERecipe = () => {
                             >
                               <span className="Dosis-Bold">
                                 {capitalize(
-                                  String(ingredient.ingredient?.name)
+                                  String(ingredient.ingredient?.name),
                                 )}
                               </span>
                               <div className="relative flex items-center gap-3">
@@ -379,7 +379,7 @@ const ERecipe = () => {
                                   {ingredient.quantity}{" "}
                                   {pluralize(
                                     String(ingredient.unit_of_measure?.name),
-                                    Number(ingredient.quantity)
+                                    Number(ingredient.quantity),
                                   )}{" "}
                                   ({ingredient.unit_of_measure?.abbreviation})
                                 </span>
@@ -436,12 +436,9 @@ const ERecipe = () => {
                       </h2>
                       <div className="w-full h-[1px] bg-[#414141] mb-3" />
                       <ol className="list-decimal list-inside">
-                        {recipe.steps.map((step, index) =>
-
-
-                         {
+                        {recipe.steps.map((step, index) => {
                           const type = getMimeTypeFromUrl(
-                            String(step.image_url)
+                            String(step.image_url),
                           );
 
                           return (
@@ -475,9 +472,7 @@ const ERecipe = () => {
                                       )}
                                     </div>
 
-                                    <div
-                                      className="w-full min-w-[200px] flex-[0.5] flex flex-col justify-between"
-                                    >
+                                    <div className="w-full min-w-[200px] flex-[0.5] flex flex-col justify-between">
                                       {step.image_url ? (
                                         type === "video" ? (
                                           <video
@@ -513,8 +508,10 @@ const ERecipe = () => {
                                             />
                                           </a>
                                         )
-                                      ) : step.image_url !== null && (
-                                        <Loader size="4" color="black" />
+                                      ) : (
+                                        step.image_url !== null && (
+                                          <Loader size="4" color="black" />
+                                        )
                                       )}
                                     </div>
                                   </div>
@@ -655,7 +652,7 @@ const ERecipe = () => {
                                   style={{ backgroundColor: color }}
                                 />
                               </div>
-                            )
+                            ),
                           )}
                         </div>
                       </div>

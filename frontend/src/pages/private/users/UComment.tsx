@@ -13,7 +13,7 @@ import type { Comment, Community, PostFull } from "@interface/global";
 
 import CommentsCard from "@/components/private/users/cards/CommentsCard";
 import { Loader } from "lucide-react";
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 import PostActions from "@/components/private/users/ui/PostActions";
 import CommunityInfo from "@/components/private/users/ui/CommunityInfo";
 import { getCommunityBySlug } from "@/services/community.api";
@@ -53,7 +53,7 @@ const UComment = () => {
             communitySlug,
             postSlug,
             userSlug,
-            sortBy
+            sortBy,
           );
 
           if (response && response.data) {
@@ -204,7 +204,7 @@ const UComment = () => {
                 "d 'de' MMMM 'de' yyyy",
                 {
                   locale: es,
-                }
+                },
               )}
               className="text-[13px] text4 flex"
             >

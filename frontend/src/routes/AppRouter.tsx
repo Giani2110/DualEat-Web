@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { appRoutes } from "@constants/constants";
+import { appRoutes } from "@/api/constants/constants";
 import { Toaster } from "react-hot-toast";
 import { CommunityProvider } from "@context/other/CommunityProvider";
 

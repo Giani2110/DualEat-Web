@@ -3,18 +3,17 @@ FROM node:20
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json (or yarn.lock)
-# to leverage Docker's caching and install dependencies efficiently.
+# Copiar package.json y package-lock.json 
 COPY package*.json ./
 
-# Install all dependencies. This should include @vitejs/plugin-react if it's in your package.json
+# Instalar todas las dependencias
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of your application code
+# Copiar el resto del código de la aplicación
 COPY . .
 
-# Expose port 5173
+# Exponer puerto
 EXPOSE 5173
 
-# Command to run the development server
+# Iniciar la aplicación
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

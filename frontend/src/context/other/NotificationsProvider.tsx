@@ -3,7 +3,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { useSocket } from "./SocketContext";
 import { useAuth } from "@hooks/useAuth";
 
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 import type { Notification } from "@interface/global";
 

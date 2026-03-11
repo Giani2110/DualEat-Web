@@ -1,4 +1,4 @@
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import type { Response } from "@interface/global";
 
 import axios from "axios";
@@ -29,7 +29,7 @@ export const getAllUnits = async (): Promise<Response | null> => {
 
 export const getRecipeByName = async (
   name: string,
-  community_id: string
+  community_id: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/recipe/", {
@@ -45,7 +45,7 @@ export const getRecipeByName = async (
 };
 
 export const getUserRecipes = async (
-  user_id: string
+  user_id: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/recipe/user", {
@@ -62,7 +62,7 @@ export const getUserRecipes = async (
 
 export async function getIngredientNutrition(ingredient: string) {
   const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
-    ingredient
+    ingredient,
   )}&search_simple=1&action=process&json=1&page_size=100`;
 
   const { data } = await axios.get(searchUrl);
@@ -86,7 +86,7 @@ export async function getIngredientNutrition(ingredient: string) {
 
 export async function getRecipeNutrition(ingredients: string[]) {
   const results = await Promise.all(
-    ingredients.map((ing) => getIngredientNutrition(ing))
+    ingredients.map((ing) => getIngredientNutrition(ing)),
   );
 
   // Filtramos los que sí se encontraron

@@ -1,7 +1,11 @@
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 
-import type { Posts, Response, ResponseWithPagination } from "@interface/global";
+import type {
+  Posts,
+  Response,
+  ResponseWithPagination,
+} from "@interface/global";
 
 import axios from "axios";
 
@@ -13,7 +17,7 @@ export const createCommunity = async (
   iconFile: File | null,
   visibility: string,
   selectedTags: number[],
-  creatorId: string
+  creatorId: string,
 ): Promise<Response | null> => {
   try {
     const formData = new FormData();
@@ -34,7 +38,7 @@ export const createCommunity = async (
         success: (res) => res.data.message || "Comunidad creada exitosamente",
         error: (err) =>
           err.response?.data?.message || "Error al crear comunidad",
-      }
+      },
     );
     return response.data as Response;
   } catch (err: unknown) {
@@ -49,7 +53,7 @@ export const createCommunity = async (
 
 /** GET COMMUNITY (by slug) */
 export const getCommunityBySlug = async (
-  slug: string
+  slug: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/community/", {
@@ -68,7 +72,7 @@ export const getCommunityBySlug = async (
 
 /** GET COMMUNITY (by tag_url) */
 export const getCommunityByTag = async (
-  tagId: number
+  tagId: number,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get(`/community/communities/tag`, {
@@ -85,7 +89,7 @@ export const getCommunityByTag = async (
 
 /** JOIN COMMUNITY */
 export const joinCommunity = async (
-  community_id: string
+  community_id: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.post("/community/join", {
@@ -107,7 +111,7 @@ export const joinCommunity = async (
 
 /** LEAVE COMMUNITY */
 export const leaveCommunity = async (
-  community_id: string
+  community_id: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.post("/community/leave", {
@@ -145,7 +149,7 @@ export const getUserCommunities = async (): Promise<Response | null> => {
 export const getCommunityPosts = async (
   page: number,
   communityId: string,
-): Promise<ResponseWithPagination<Posts>> => { 
+): Promise<ResponseWithPagination<Posts>> => {
   try {
     const { data } = await axiosInterceptor.get("/community/posts", {
       params: { page, communityId },
@@ -153,12 +157,12 @@ export const getCommunityPosts = async (
     return data; // No es necesario el 'as' si la API siempre devuelve el tipo correcto
   } catch (err) {
     console.error("Error al obtener posts de la comunidad:", err);
-    throw err; 
+    throw err;
   }
 };
 
 export const getRecommendedCommunities = async (
-  user_id: string
+  user_id: string,
 ): Promise<Response | null> => {
   try {
     const response = await axiosInterceptor.get("/community/recommended", {

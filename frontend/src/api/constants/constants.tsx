@@ -26,8 +26,8 @@ import {
   UCommunity,
   UComment,
   UNotifications,
-  ERecipe
-} from "../pages";
+  ERecipe,
+} from "../../pages";
 
 export const ROUTES = {
   PUBLIC: {
@@ -195,7 +195,7 @@ export const appRoutes = [
       </ProtectedRoute>
     ),
   },
-   {
+  {
     path: `${ROUTES.USER.COMMUNITY}:communitySlug/recipe/:userSlug/:recipeSlug`,
     element: (
       <ProtectedRoute isBusiness={false}>

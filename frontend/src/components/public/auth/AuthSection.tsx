@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { ROUTES } from "@constants/constants";
+import { ROUTES } from "@/api/constants/constants";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "react-router-dom";
@@ -35,7 +35,7 @@ const AuthSection: React.FC<Props> = ({
   const location = useLocation();
   const images: string[] = useMemo(
     () => [Restaurant, Restaurant2, Restaurant3],
-    []
+    [],
   );
 
   const carouselTexts: string[] = [
@@ -78,7 +78,7 @@ const AuthSection: React.FC<Props> = ({
     if (imagesPreloaded) {
       const interval = setInterval(() => {
         setCurrentImageIndex(
-          (prevIndex: number) => (prevIndex + 1) % images.length
+          (prevIndex: number) => (prevIndex + 1) % images.length,
         );
       }, 5000);
       return () => clearInterval(interval);
@@ -90,7 +90,8 @@ const AuthSection: React.FC<Props> = ({
   };
 
   const handleGoogleLogin = () => {
-   window.location.href = "http://localhost:3000/api/auth/google?platform=web";
+    window.location.href = "http://localhost:3000/api/auth/google?platform=web";
+    //window.location.href = "https://5698-190-190-126-222.ngrok-free.app/api/auth/google?platform=web";
   };
 
   return (

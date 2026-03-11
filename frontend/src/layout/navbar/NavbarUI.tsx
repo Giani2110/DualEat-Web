@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { OUT_NAVBAR_ROUTES } from "@constants/navbar-routes";
-import { ROUTES } from "@constants/constants";
+import { OUT_NAVBAR_ROUTES } from "@/api/constants/navbar-routes";
+import { ROUTES } from "@/api/constants/constants";
 import { useAuth } from "@hooks/useAuth";
 import { useCommunity } from "@hooks/useUCommunity";
 import { useNotifications } from "@hooks/useNotifications";
@@ -27,10 +27,7 @@ import type { Notification } from "@interface/global";
 import { useNavigate } from "react-router-dom";
 import { formatShortTime } from "@utils/compactNumber";
 import { useChat } from "@/hooks/chat/useChat";
-import {
-  useRecent,
-  type MinimalCommunityPlus,
-} from "@/hooks/useRecent";
+import { useRecent, type MinimalCommunityPlus } from "@/hooks/useRecent";
 
 const HeaderUSER = () => {
   // ==================== HOOKS ====================
@@ -131,7 +128,7 @@ const HeaderUSER = () => {
           "/post/" +
           notification.metadata.slugs.user +
           "/" +
-          notification.metadata.slugs.post
+          notification.metadata.slugs.post,
       );
     } else {
       markAsReadSingle(notification.id);
@@ -488,7 +485,7 @@ const HeaderUSER = () => {
                       onClick={() => {
                         setSidebarOpen(false);
                         handleCommunityClick(
-                          communityInfo as MinimalCommunityPlus
+                          communityInfo as MinimalCommunityPlus,
                         );
                       }}
                       className="navlis flex-[1] rounded-[8px] cursor-pointer w-full py-[5px] px-2 hover:bg-[#e9e9e9]"
@@ -738,8 +735,8 @@ const HeaderUSER = () => {
                             notif.metadata.imageURLs.community !== undefined
                               ? notif.metadata.imageURLs.community
                               : notif.metadata.imageURLs.user !== undefined
-                              ? notif.metadata.imageURLs.user
-                              : "https://placehold.co/40x40/000000/FFFFFF.png"
+                                ? notif.metadata.imageURLs.user
+                                : "https://placehold.co/40x40/000000/FFFFFF.png"
                           }
                           alt="Imagen de la notificación"
                           className="max-w-[35px] w-full max-h-[35px] h-full object-cover rounded-full"

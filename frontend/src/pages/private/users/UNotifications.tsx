@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNotifications } from "@hooks/useNotifications";
 import { formatShortTime } from "@utils/compactNumber";
 
-import { axiosInterceptor } from "@interceptor/axios-interceptor";
+import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import { useNavigate } from "react-router-dom";
 
 import type { Notification } from "@interface/global";
@@ -34,12 +34,12 @@ const UNotifications = () => {
 
   const handleDeleteNotification = async (
     e: React.MouseEvent<HTMLButtonElement>,
-    id: string
+    id: string,
   ) => {
     e.preventDefault();
     e.stopPropagation();
     setNotificationsPaginated((prev) =>
-      prev.filter((notif) => notif.id !== id)
+      prev.filter((notif) => notif.id !== id),
     );
 
     const response = await axiosInterceptor.delete(`/notification/delete`, {
@@ -59,7 +59,7 @@ const UNotifications = () => {
 
   const handleNotificationClick = (
     e: React.MouseEvent<HTMLDivElement>,
-    notification: Notification
+    notification: Notification,
   ) => {
     e.preventDefault();
     e.stopPropagation();
@@ -75,7 +75,7 @@ const UNotifications = () => {
           "/post/" +
           notification.metadata.slugs.user +
           "/" +
-          notification.metadata.slugs.post
+          notification.metadata.slugs.post,
       );
     } else {
       markAsReadSingle(notification.id);
@@ -97,7 +97,7 @@ const UNotifications = () => {
                 markAsRead();
                 setNotifications([]);
                 setNotificationsPaginated((prev) =>
-                  prev.map((n) => ({ ...n, read: true }))
+                  prev.map((n) => ({ ...n, read: true })),
                 );
               }}
               title="Marcar notificaciones como leidas"
@@ -186,8 +186,8 @@ const UNotifications = () => {
                   notification.metadata.imageURLs.community !== undefined
                     ? notification.metadata.imageURLs.community
                     : notification.metadata.imageURLs.user !== undefined
-                    ? notification.metadata.imageURLs.user
-                    : "https://placehold.co/40x40/000000/FFFFFF.png"
+                      ? notification.metadata.imageURLs.user
+                      : "https://placehold.co/40x40/000000/FFFFFF.png"
                 }
                 className="max-w-10 max-h-10 flex-[1] object-cover border rounded-full border-[#ebebeb]"
                 alt="Imagen de perfil"
