@@ -85,7 +85,11 @@ router.get(
       console.log("✅ Cookie establecida con accessToken:", res.cookie); // --- LÓGICA DE REDIRECCIÓN AÑADIDA ---
 
       if (user.isBusiness) {
-        return res.redirect(`${process.env.FRONTEND_URL}/business/dashboard`);
+        if (user.subscription_status === "active") {
+          return res.redirect(`${process.env.FRONTEND_URL}/business/dashboard`);
+        } else {
+          return res.redirect(`${process.env.FRONTEND_URL}/business/menu`);
+        }
       } else {
         return res.redirect(`${process.env.FRONTEND_URL}/feed`);
       } // ------------------------------------

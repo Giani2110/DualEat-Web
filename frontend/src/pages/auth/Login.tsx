@@ -42,7 +42,11 @@ const Login: React.FC = () => {
       recaptchaRef.current?.reset();
 
       if (response.user.isBusiness) {
-        navigate(ROUTES.LOCAL.DASHBOARD);
+        if (response.user.subscription_status === "active") {
+          navigate(ROUTES.LOCAL.DASHBOARD);
+        } else {
+          navigate(ROUTES.LOCAL.MENU);
+        }
       } else {
         navigate(ROUTES.USER.DASHBOARD);
       }

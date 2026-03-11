@@ -1,9 +1,11 @@
-declare const __dirname: string;
+import { User } from '@prisma/client';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: UserSessionData;
+      user?: User;
     }
   }
 }
+
+export {};

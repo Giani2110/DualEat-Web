@@ -222,9 +222,9 @@ const ERecipe = () => {
       if (response?.success && response.comment) {
         const aiResponses: CommentIA[] = Array.isArray(response.comment)
           ? response.comment.map((c: CommentIA) => ({
-              text: c.text,
-              role: "ai",
-            }))
+            text: c.text,
+            role: "ai",
+          }))
           : [{ text: response.comment, role: "ai" }];
 
         setConversation((prev) => [...prev, ...aiResponses]);
@@ -282,7 +282,7 @@ const ERecipe = () => {
                 </div>
                 <span className="w-[4px] h-[4px] rounded-full bg-[#707070] mt-2" />
                 {recipe.created_at &&
-                !isNaN(new Date(recipe.created_at).getTime()) ? (
+                  !isNaN(new Date(recipe.created_at).getTime()) ? (
                   <span
                     title={format(
                       new Date(recipe.created_at),
@@ -445,11 +445,10 @@ const ERecipe = () => {
                               key={index}
                               onClick={() => setActualIndex(index)}
                               className={`text5 w-full px-2 overflow-hidden h-full flex justify-between text-[15px] border-b border-[#e0e0e0] py-3 tracking-tight group
-                              ${
-                                index === actualIndex
+                              ${index === actualIndex
                                   ? "max-h-[500px]"
                                   : "max-h-[100px] cursor-pointer hover:bg-[#b53325]"
-                              }
+                                }
                               `}
                             >
                               {actualIndex === index ? (
@@ -631,9 +630,9 @@ const ERecipe = () => {
                                 <span className="Dosis-Bold" style={{ color }}>
                                   {value && nutritionData?.total
                                     ? (
-                                        (Number(value) / nutritionData.total) *
-                                        100
-                                      ).toFixed(0)
+                                      (Number(value) / nutritionData.total) *
+                                      100
+                                    ).toFixed(0)
                                     : "0"}
                                   %
                                 </span>
@@ -718,9 +717,8 @@ const ERecipe = () => {
                       onClick={() =>
                         setExpandedIndex(isExpanded ? null : index)
                       }
-                      className={`flex cursor-pointer items-start ${
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      }`}
+                      className={`flex cursor-pointer items-start ${msg.role === "user" ? "justify-end" : "justify-start"
+                        }`}
                     >
                       {msg.role !== "user" && (
                         <img
@@ -731,11 +729,10 @@ const ERecipe = () => {
                       )}
                       {/* Burbuja de mensaje con estilos diferentes para usuario y IA */}
                       <div
-                        className={`max-w-[70%] lg:w-full p-2 rounded-[8px] bg-[#ffffffcc] shadow-md border border-[#dbdbdb] text5 text-[15px] ${
-                          msg.role === "user"
+                        className={`max-w-[70%] lg:w-full p-2 rounded-[8px] bg-[#ffffffcc] shadow-md border border-[#dbdbdb] text5 text-[15px] ${msg.role === "user"
                             ? "text-right border-[#4A4947]!"
                             : "text-left"
-                        }
+                          }
                     ${isExpanded ? "line-clamp-none" : "line-clamp-2"}
                     `}
                       >
@@ -744,7 +741,7 @@ const ERecipe = () => {
                       </div>
                       {msg.role === "user" && (
                         <img
-                          src={user.avatar_url}
+                          src={user?.avatar_url || undefined}
                           className="rounded-full max-w-7 max-h-7 ms-2"
                           alt="Imagen de usuario"
                         />

@@ -20,6 +20,7 @@ import {
   LocalReviews,
   LocalSettings,
   LocalCalendar,
+  LocalSubscription,
   UPost,
   UExplore,
   URecipes,
@@ -63,6 +64,7 @@ export const ROUTES = {
     QR: "/business/qr",
     REVIEWS: "/business/reviews",
     SETTINGS: "/business/settings",
+    SUBSCRIPTION: "/business/subscription",
   },
   LOADING: "/loading",
   ERROR: "/404",
@@ -279,6 +281,14 @@ export const appRoutes = [
     element: (
       <ProtectedRoute isBusiness={true}>
         <LocalCalendar />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.LOCAL.SUBSCRIPTION,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalSubscription />
       </ProtectedRoute>
     ),
   },

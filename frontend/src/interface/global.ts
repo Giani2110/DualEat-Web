@@ -45,6 +45,7 @@ export interface User {
   subscription_status: string;
   trial_ends_at: string;
   avatar_url: string | null; // URL de la imagen de perfil.
+  local_users?: Array<{ local_id: string | number }>;
 }
 
 /**

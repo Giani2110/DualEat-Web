@@ -39,3 +39,4 @@ export { default as LocalQR } from "../pages/local/LocalQR";
 export { default as LocalReviews } from "../pages/local/LocalReviews";
 export { default as LocalSettings } from "../pages/local/LocalSettings";
 export { default as LocalCalendar } from "../pages/local/LocalCalendar";
+export { default as LocalSubscription } from "../pages/local/LocalSubscription";

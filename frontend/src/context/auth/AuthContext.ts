@@ -1,5 +1,6 @@
 import { createContext } from "react";
-import type { User, AuthResponse } from "../../services/auth.api";
+import type { User } from "../../interface/global";
+import type { AuthResponse } from "../../services/auth.api";
 
 interface AuthContextType {
   user: User | null;
@@ -9,7 +10,7 @@ interface AuthContextType {
     password: string,
     rememberMe: boolean,
     recaptchaToken: string | null
-  ) => Promise<User | null>;
+  ) => Promise<AuthResponse | null>;
   logout: () => void;
   register: (email: string, password: string) => Promise<AuthResponse | null>;
   completeProfile: (

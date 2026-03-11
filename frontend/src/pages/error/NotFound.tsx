@@ -468,7 +468,7 @@ const NotFound = () => {
 
           {user ? (
             <img
-              src={user.avatar_url}
+              src={user.avatar_url || undefined}
               alt="Imagen de perfil"
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#707070] object-cover cursor-pointer hover:scale-105 transition-all duration-200"
             />

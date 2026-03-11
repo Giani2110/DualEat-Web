@@ -45,7 +45,7 @@ const UExplore = () => {
   const [visibleCount, setVisibleCount] = useState(4);
   const [visibleTrendingCount, setVisibleTrendingCount] = useState(4);
 
-  const renderedCommunityIds = new Set<number>();
+  const renderedCommunityIds = new Set<string>();
 
   const navigate = useNavigate();
 
@@ -65,7 +65,7 @@ const UExplore = () => {
     if (!categorySlug && user) {
       const fetchData = async () => {
         // Obtener comunidades recomendadas
-        const recommendedResponse = await getRecommendedCommunities(user.id);
+        const recommendedResponse = await getRecommendedCommunities(user.id as unknown as number);
         if (recommendedResponse && recommendedResponse?.success) {
           setRecommendedCommunities(recommendedResponse.data as Community[]);
         }
@@ -138,10 +138,9 @@ const UExplore = () => {
           <button
             type="button"
             className={` border-[#dbdbdb] p-2 text-[12px] border cursor-pointer hover:bg-[#dbdbdb] rounded-lg 
-              ${
-                !categorySlug
-                  ? "bg-red hover:bg-[#923025] text1"
-                  : "bg-white text5"
+              ${!categorySlug
+                ? "bg-red hover:bg-[#923025] text1"
+                : "bg-white text5"
               }`}
             onClick={handleAllCommunities}
           >
@@ -153,18 +152,16 @@ const UExplore = () => {
             <div
               key={tag.id}
               onClick={() => handleCommunityByTag(tag)}
-              className={`p-2 border-[#dbdbdb] border cursor-pointer hover:bg-[#dbdbdb] rounded-lg ${
-                categorySlug === tag.name.replace(/\s+/g, "_").toLowerCase()
-                  ? "bg-red hover:bg-[#923025]!"
-                  : "bg-white"
-              }`}
+              className={`p-2 border-[#dbdbdb] border cursor-pointer hover:bg-[#dbdbdb] rounded-lg ${categorySlug === tag.name.replace(/\s+/g, "_").toLowerCase()
+                ? "bg-red hover:bg-[#923025]!"
+                : "bg-white"
+                }`}
             >
               <h3
-                className={`text-[12px] ${
-                  categorySlug === tag.name.replace(/\s+/g, "_").toLowerCase()
-                    ? "text1"
-                    : "text5"
-                }`}
+                className={`text-[12px] ${categorySlug === tag.name.replace(/\s+/g, "_").toLowerCase()
+                  ? "text1"
+                  : "text5"
+                  }`}
               >
                 {tag.name}
               </h3>
@@ -180,9 +177,8 @@ const UExplore = () => {
             Recomendadas para ti
           </h3>
           <div
-            className={`overflow-hidden ${
-              hasMoreRecommended ? "h-fit" : "max-h-[300px]"
-            } `}
+            className={`overflow-hidden ${hasMoreRecommended ? "h-fit" : "max-h-[300px]"
+              } `}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recommendedCommunities.map((community) => (

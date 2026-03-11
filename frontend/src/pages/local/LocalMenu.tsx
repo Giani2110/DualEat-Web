@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useContext, useMemo, useRef } from 'react';
-import { PlusCircle, Edit, Trash2, Tag, TrendingUp, Search, Upload, FilePlus, ChevronLeft, ChevronRight, CameraOff, TrendingDown, X, Sparkles, AlertTriangle, Check, HelpCircle } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Tag, TrendingUp, Search, Upload, FilePlus, ChevronLeft, ChevronRight, CameraOff, TrendingDown, X, Sparkles, AlertTriangle, Check, HelpCircle, Lock } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AuthContext } from '../../context/auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import '../../assets/scss/users/users.scss';
 import EditFoodModal from '../../components/locals/EditFoodModal';
 import UploadMenuSection from '../../components/locals/UploadMenuSection';
@@ -48,56 +49,56 @@ interface StatPillProps {
 // Interfaces y Definición del Tour Manual
 // ----------------------------------------------------------------------
 interface Bounds {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
 }
 
 interface TourStep {
-    id: number;
-    title: string;
-    text: string;
-    selector: string;
-    placement: 'right' | 'left' | 'top' | 'bottom';
+  id: number;
+  title: string;
+  text: string;
+  selector: string;
+  placement: 'right' | 'left' | 'top' | 'bottom';
 }
 
 const TOUR_STEPS: TourStep[] = [
-    {
-        id: 1,
-        title: "Bienvenido a la Gestión de Menú",
-        text: "Aquí puede administrar, crear y organizar todos los platos de su local. El menú es el corazón de su negocio.",
-        selector: "#help-button",
-        placement: "left",
-    },
-    {
-        id: 2,
-        title: "Creación y Carga",
-        text: "Estas tarjetas permiten las tres acciones principales: crear platos manualmente, subir una foto para escanear el menú (OCR) o añadir una nueva categoría.",
-        selector: "#creation-quick-links",
-        placement: "bottom",
-    },
-    {
-        id: 3,
-        title: "Búsqueda Rápida",
-        text: "Use esta barra para buscar cualquier plato o descripción, incluso a través de categorías.",
-        selector: "#search-bar-container",
-        placement: "bottom",
-    },
-    {
-        id: 4,
-        title: "Filtro de Categorías",
-        text: "Filtre su menú haciendo clic en las categorías. Si la lista es larga, puede usar las flechas laterales para desplazarse.",
-        selector: "#categories-filter",
-        placement: "bottom",
-    },
-    {
-        id: 5,
-        title: "Lista de Platos",
-        text: "Esta es la lista principal de su menú. Cada plato muestra su precio y votos. Puede editar o eliminar un plato haciendo clic en el botón de acciones.",
-        selector: "#menu-items-section",
-        placement: "top",
-    },
+  {
+    id: 1,
+    title: "Bienvenido a la Gestión de Menú",
+    text: "Aquí puede administrar, crear y organizar todos los platos de su local. El menú es el corazón de su negocio.",
+    selector: "#help-button",
+    placement: "left",
+  },
+  {
+    id: 2,
+    title: "Creación y Carga",
+    text: "Estas tarjetas permiten las tres acciones principales: crear platos manualmente, subir una foto para escanear el menú (OCR) o añadir una nueva categoría.",
+    selector: "#creation-quick-links",
+    placement: "bottom",
+  },
+  {
+    id: 3,
+    title: "Búsqueda Rápida",
+    text: "Use esta barra para buscar cualquier plato o descripción, incluso a través de categorías.",
+    selector: "#search-bar-container",
+    placement: "bottom",
+  },
+  {
+    id: 4,
+    title: "Filtro de Categorías",
+    text: "Filtre su menú haciendo clic en las categorías. Si la lista es larga, puede usar las flechas laterales para desplazarse.",
+    selector: "#categories-filter",
+    placement: "bottom",
+  },
+  {
+    id: 5,
+    title: "Lista de Platos",
+    text: "Esta es la lista principal de su menú. Cada plato muestra su precio y votos. Puede editar o eliminar un plato haciendo clic en el botón de acciones.",
+    selector: "#menu-items-section",
+    placement: "top",
+  },
 ];
 // ----------------------------------------------------------------------
 
@@ -143,12 +144,15 @@ const LocalMenu = () => {
   const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
   const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
 
+  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean>(false);
+  const navigate = useNavigate();
+
   // ----------------------------------------------------------------------
   // Estados y Lógica del Tour Manual
   // ----------------------------------------------------------------------
-  const [currentStep, setCurrentStep] = useState(0); 
+  const [currentStep, setCurrentStep] = useState(0);
   const isTourOpen = currentStep > 0;
-  
+
   const startTour = () => setCurrentStep(1);
   const closeTour = () => setCurrentStep(0);
   const goToNextStep = () => setCurrentStep(prev => Math.min(prev + 1, TOUR_STEPS.length));
@@ -185,6 +189,24 @@ const LocalMenu = () => {
     };
     fetchUserLocal();
   }, [user, API_BASE]);
+
+  useEffect(() => {
+    const checkSub = async () => {
+      if (!localId) return;
+      try {
+        const response = await fetch(`${API_BASE}/subscriptions/local/${localId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setHasActiveSubscription(data?.status === 'active');
+        } else {
+          setHasActiveSubscription(false);
+        }
+      } catch (e) {
+        setHasActiveSubscription(false);
+      }
+    };
+    checkSub();
+  }, [localId, API_BASE]);
 
   useEffect(() => {
     const fetchFoods = async () => {
@@ -283,7 +305,7 @@ const LocalMenu = () => {
       alert('Error: No se encontró el ID del local.');
       return;
     }
-    
+
     setSelectedFood({
       id: 0,
       local_id: localId,
@@ -307,20 +329,20 @@ const LocalMenu = () => {
 
   const handleOnSave = async (food: Food) => {
     const isNewFood = food.id === 0;
-    
+
     const foodData = {
       ...food,
       // Si tiene local_menu_category_id, no enviar category_id
       category_id: food.local_menu_category_id ? undefined : food.category_id,
       local_menu_category_id: food.local_menu_category_id
     };
-    
+
     try {
       const method = isNewFood ? 'POST' : 'PUT';
       const url = isNewFood
         ? `${API_BASE}/locals/${food.local_id}/manual-menu`
         : `${API_BASE}/food/foods/${food.id}`;
-        
+
       const response = await fetch(url, {
         method: method,
         headers: {
@@ -328,11 +350,11 @@ const LocalMenu = () => {
         },
         body: JSON.stringify(foodData),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Error al ${isNewFood ? 'agregar' : 'actualizar'} el plato.`);
       }
-  
+
       const savedFood = await response.json();
       setFoods(prevFoods => {
         if (isNewFood) {
@@ -340,11 +362,11 @@ const LocalMenu = () => {
         }
         return prevFoods.map(f => (f.id === savedFood.id ? savedFood : f));
       });
-      
+
       if (food.id && food.id.toString().startsWith('temp-')) {
         setExtractedDishes(prevDishes => prevDishes.filter(dish => dish.id !== food.id));
       }
-  
+
     } catch (err) {
       console.error('Error al guardar el plato:', err);
       if (err instanceof Error) {
@@ -433,7 +455,7 @@ const LocalMenu = () => {
       setNewCategoryError('Debe seleccionar una categoría o ingresar un nombre.');
       return;
     }
-    
+
     const isDuplicate = localCategories.some(cat => cat.name.toLowerCase() === categoryNameToCreate.toLowerCase());
     if (isDuplicate) {
       setNewCategoryError('Ya existe una categoría con ese nombre.');
@@ -473,34 +495,34 @@ const LocalMenu = () => {
   const confirmDeleteCategory = async () => {
     if (!categoryToDeleteId) return;
     try {
-        const response = await fetch(`${API_BASE}/local-menu-categories/${categoryToDeleteId}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) {
-            throw new Error('Error al eliminar la categoría.');
-        }
+      const response = await fetch(`${API_BASE}/local-menu-categories/${categoryToDeleteId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar la categoría.');
+      }
 
-        setLocalCategories(prevCategories => prevCategories.filter(cat => cat.id !== categoryToDeleteId));
+      setLocalCategories(prevCategories => prevCategories.filter(cat => cat.id !== categoryToDeleteId));
 
-        setFoods(prevFoods =>
-            prevFoods.map(food => {
-                if (food.local_menu_category_id === categoryToDeleteId) {
-                    return { ...food, local_menu_category_id: undefined };
-                }
-                return food;
-            })
-        );
+      setFoods(prevFoods =>
+        prevFoods.map(food => {
+          if (food.local_menu_category_id === categoryToDeleteId) {
+            return { ...food, local_menu_category_id: undefined };
+          }
+          return food;
+        })
+      );
 
-        if (selectedCategory === categoryToDeleteId) {
-            setSelectedCategory(null);
-        }
+      if (selectedCategory === categoryToDeleteId) {
+        setSelectedCategory(null);
+      }
 
-        setShowDeleteCategoryModal(false);
-        setCategoryToDeleteId(null);
+      setShowDeleteCategoryModal(false);
+      setCategoryToDeleteId(null);
     } catch (err) {
-        console.error(err);
+      console.error(err);
     }
-};
+  };
 
   const openDeleteCategoryModal = (categoryId: number) => {
     setCategoryToDeleteId(categoryId);
@@ -510,8 +532,8 @@ const LocalMenu = () => {
   const filteredFoods = useMemo(() => {
     return foods.filter(food =>
       food.available &&
-      (selectedCategory === null || 
-        food.category_id === selectedCategory || 
+      (selectedCategory === null ||
+        food.category_id === selectedCategory ||
         food.local_menu_category_id === selectedCategory) &&
       (food.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         food.description?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -557,185 +579,185 @@ const LocalMenu = () => {
   // ----------------------------------------------------------------------
   // Componente Modal Flotante del Tour
   // ----------------------------------------------------------------------
-    const TourModal = () => {
-        const [bounds, setBounds] = useState<Bounds | null>(null);
-        const [isPositioned, setIsPositioned] = useState(false);
-        const modalRef = React.useRef<HTMLDivElement>(null);
+  const TourModal = () => {
+    const [bounds, setBounds] = useState<Bounds | null>(null);
+    const [isPositioned, setIsPositioned] = useState(false);
+    const modalRef = React.useRef<HTMLDivElement>(null);
 
-        useEffect(() => {
-            if (!activeStep) return;
+    useEffect(() => {
+      if (!activeStep) return;
 
-            const element = document.querySelector(activeStep.selector) as HTMLElement;
-            if (!element) return;
-            
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const element = document.querySelector(activeStep.selector) as HTMLElement;
+      if (!element) return;
 
-            const updateBoundsAndPosition = () => {
-                const rect = element.getBoundingClientRect();
-                
-                const padding = 10; 
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-                setBounds({
-                    top: rect.top - padding,
-                    left: rect.left - padding,
-                    width: rect.width + 2 * padding,
-                    height: rect.height + 2 * padding,
-                });
-                
-                if (modalRef.current) {
-                    let modalStyle: React.CSSProperties = { top: 0, left: 0 };
-                    
-                    const OFFSET_DISTANCE = 25; 
-                    const MODAL_WIDTH = 320; 
-                    const MODAL_HEIGHT = 180; 
+      const updateBoundsAndPosition = () => {
+        const rect = element.getBoundingClientRect();
 
-                    switch (activeStep.placement) {
-                        case 'right':
-                            modalStyle.top = rect.top + (rect.height / 2) - (MODAL_HEIGHT / 2);
-                            modalStyle.left = rect.left + rect.width + OFFSET_DISTANCE;
-                            break;
-                        case 'left':
-                            modalStyle.top = rect.top + (rect.height / 2) - (MODAL_HEIGHT / 2);
-                            modalStyle.left = rect.left - MODAL_WIDTH - OFFSET_DISTANCE;
-                            break;
-                        case 'top':
-                            modalStyle.left = rect.left + (rect.width / 2) - (MODAL_WIDTH / 2);
-                            modalStyle.top = rect.top - MODAL_HEIGHT - OFFSET_DISTANCE;
-                            break;
-                        case 'bottom':
-                            modalStyle.left = rect.left + (rect.width / 2) - (MODAL_WIDTH / 2);
-                            modalStyle.top = rect.top + rect.height + OFFSET_DISTANCE;
-                            break;
-                    }
-                    
-                    // Ajuste de límites
-                    if (modalStyle.left && (modalStyle.left as number) + MODAL_WIDTH > window.innerWidth - 20) {
-                        modalStyle.left = window.innerWidth - MODAL_WIDTH - 20;
-                    }
-                    if (modalStyle.left && (modalStyle.left as number) < 20) {
-                        modalStyle.left = 20;
-                    }
-                    if (modalStyle.top && (modalStyle.top as number) < 20) {
-                        modalStyle.top = 20;
-                    }
-                    if (modalStyle.top && (modalStyle.top as number) + MODAL_HEIGHT > window.innerHeight - 20) {
-                        modalStyle.top = window.innerHeight - MODAL_HEIGHT - 20;
-                    }
+        const padding = 10;
 
-                    // Aplicar estilos y marcar como posicionado
-                    modalRef.current.style.top = `${modalStyle.top}px`;
-                    modalRef.current.style.left = `${modalStyle.left}px`;
-                    modalRef.current.style.transform = `none`; 
-                    setIsPositioned(true);
-                }
-            };
+        setBounds({
+          top: rect.top - padding,
+          left: rect.left - padding,
+          width: rect.width + 2 * padding,
+          height: rect.height + 2 * padding,
+        });
 
-            const timeout = setTimeout(updateBoundsAndPosition, 350); 
-            
-            updateBoundsAndPosition();
-            window.addEventListener('resize', updateBoundsAndPosition);
-            window.addEventListener('scroll', updateBoundsAndPosition);
+        if (modalRef.current) {
+          let modalStyle: React.CSSProperties = { top: 0, left: 0 };
 
-            return () => {
-                clearTimeout(timeout);
-                window.removeEventListener('resize', updateBoundsAndPosition);
-                window.removeEventListener('scroll', updateBoundsAndPosition);
-                setIsPositioned(false); 
-            };
-        }, [activeStep]);
-        
-        if (!isTourOpen || !activeStep || !bounds) return null;
+          const OFFSET_DISTANCE = 25;
+          const MODAL_WIDTH = 320;
+          const MODAL_HEIGHT = 180;
 
-        const totalSteps = TOUR_STEPS.length;
-        const isFirst = activeStep.id === 1;
-        const isLast = activeStep.id === totalSteps;
+          switch (activeStep.placement) {
+            case 'right':
+              modalStyle.top = rect.top + (rect.height / 2) - (MODAL_HEIGHT / 2);
+              modalStyle.left = rect.left + rect.width + OFFSET_DISTANCE;
+              break;
+            case 'left':
+              modalStyle.top = rect.top + (rect.height / 2) - (MODAL_HEIGHT / 2);
+              modalStyle.left = rect.left - MODAL_WIDTH - OFFSET_DISTANCE;
+              break;
+            case 'top':
+              modalStyle.left = rect.left + (rect.width / 2) - (MODAL_WIDTH / 2);
+              modalStyle.top = rect.top - MODAL_HEIGHT - OFFSET_DISTANCE;
+              break;
+            case 'bottom':
+              modalStyle.left = rect.left + (rect.width / 2) - (MODAL_WIDTH / 2);
+              modalStyle.top = rect.top + rect.height + OFFSET_DISTANCE;
+              break;
+          }
+
+          // Ajuste de límites
+          if (modalStyle.left && (modalStyle.left as number) + MODAL_WIDTH > window.innerWidth - 20) {
+            modalStyle.left = window.innerWidth - MODAL_WIDTH - 20;
+          }
+          if (modalStyle.left && (modalStyle.left as number) < 20) {
+            modalStyle.left = 20;
+          }
+          if (modalStyle.top && (modalStyle.top as number) < 20) {
+            modalStyle.top = 20;
+          }
+          if (modalStyle.top && (modalStyle.top as number) + MODAL_HEIGHT > window.innerHeight - 20) {
+            modalStyle.top = window.innerHeight - MODAL_HEIGHT - 20;
+          }
+
+          // Aplicar estilos y marcar como posicionado
+          modalRef.current.style.top = `${modalStyle.top}px`;
+          modalRef.current.style.left = `${modalStyle.left}px`;
+          modalRef.current.style.transform = `none`;
+          setIsPositioned(true);
+        }
+      };
+
+      const timeout = setTimeout(updateBoundsAndPosition, 350);
+
+      updateBoundsAndPosition();
+      window.addEventListener('resize', updateBoundsAndPosition);
+      window.addEventListener('scroll', updateBoundsAndPosition);
+
+      return () => {
+        clearTimeout(timeout);
+        window.removeEventListener('resize', updateBoundsAndPosition);
+        window.removeEventListener('scroll', updateBoundsAndPosition);
+        setIsPositioned(false);
+      };
+    }, [activeStep]);
+
+    if (!isTourOpen || !activeStep || !bounds) return null;
+
+    const totalSteps = TOUR_STEPS.length;
+    const isFirst = activeStep.id === 1;
+    const isLast = activeStep.id === totalSteps;
 
 
-        return (
-            // Contenedor principal con posicionamiento FIXED (estable al scroll)
-            <div className="fixed inset-0 z-[1000] pointer-events-none">
-                
-                {/* Overlay Oscuro (Dividido en 4 partes para crear el "agujero") */}
-                <div className="absolute inset-0 bg-transparent">
-                    {/* Top Shade */}
-                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
-                        top: 0, left: 0, right: 0, height: bounds.top,
-                    }}></div>
-                    {/* Bottom Shade */}
-                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
-                        top: bounds.top + bounds.height, left: 0, right: 0, bottom: 0,
-                    }}></div>
-                    {/* Left Shade */}
-                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
-                        top: bounds.top, left: 0, width: bounds.left, height: bounds.height,
-                    }}></div>
-                    {/* Right Shade */}
-                    <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
-                        top: bounds.top, left: bounds.left + bounds.width, right: 0, height: bounds.height,
-                    }}></div>
-                </div>
+    return (
+      // Contenedor principal con posicionamiento FIXED (estable al scroll)
+      <div className="fixed inset-0 z-[1000] pointer-events-none">
 
-                {/* Contenedor del modal (usando posición fija para que se quede en pantalla) */}
-                <div 
-                    ref={modalRef} 
-                    className={`fixed z-[1001] w-80 p-0 rounded-xl shadow-2xl transition-opacity duration-200 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
-                    style={{ pointerEvents: 'auto' }}
-                >
-                    <div className="bg-gray-800 p-4 rounded-xl border border-purple-600 shadow-xl relative">
-                        {/* Botón de Cierre (Arriba a la derecha) */}
-                        <button
-                            onClick={closeTour}
-                            className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
-                            aria-label="Cerrar tutorial"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
+        {/* Overlay Oscuro (Dividido en 4 partes para crear el "agujero") */}
+        <div className="absolute inset-0 bg-transparent">
+          {/* Top Shade */}
+          <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+            top: 0, left: 0, right: 0, height: bounds.top,
+          }}></div>
+          {/* Bottom Shade */}
+          <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+            top: bounds.top + bounds.height, left: 0, right: 0, bottom: 0,
+          }}></div>
+          {/* Left Shade */}
+          <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+            top: bounds.top, left: 0, width: bounds.left, height: bounds.height,
+          }}></div>
+          {/* Right Shade */}
+          <div className="bg-gray-900/80 transition-all duration-300 fixed" style={{
+            top: bounds.top, left: bounds.left + bounds.width, right: 0, height: bounds.height,
+          }}></div>
+        </div>
 
-                        <h3 className="text-xl font-bold text-purple-400 mb-2 border-b border-gray-700 pb-2 pr-8">
-                            {activeStep.title}
-                        </h3>
-                        <p className="text-gray-300 text-sm mb-4">
-                            {activeStep.text}
-                        </p>
+        {/* Contenedor del modal (usando posición fija para que se quede en pantalla) */}
+        <div
+          ref={modalRef}
+          className={`fixed z-[1001] w-80 p-0 rounded-xl shadow-2xl transition-opacity duration-200 ${isPositioned ? 'opacity-100' : 'opacity-0'}`}
+          style={{ pointerEvents: 'auto' }}
+        >
+          <div className="bg-gray-800 p-4 rounded-xl border border-purple-600 shadow-xl relative">
+            {/* Botón de Cierre (Arriba a la derecha) */}
+            <button
+              onClick={closeTour}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
+              aria-label="Cerrar tutorial"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-                        <div className="flex justify-between items-center pt-3 border-t border-gray-700">
-                            <div className="text-xs text-purple-400 font-medium">
-                                Paso {currentStep} de {totalSteps}
-                            </div>
-                            <div className="flex space-x-2">
-                                {/* Botón Anterior */}
-                                {!isFirst && (
-                                    <button
-                                        onClick={goToPrevStep}
-                                        className="px-3 py-1 text-sm rounded-lg bg-gray-600 hover:bg-gray-700 text-white transition-colors"
-                                    >
-                                        Anterior
-                                    </button>
-                                )}
-                                
-                                {/* Botón Siguiente / Finalizar */}
-                                {!isLast ? (
-                                    <button
-                                        onClick={goToNextStep}
-                                        className="px-3 py-1 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors"
-                                    >
-                                        {isFirst ? 'Comenzar' : 'Siguiente'}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={closeTour}
-                                        className="px-3 py-1 text-sm rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors"
-                                    >
-                                        Finalizar
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <h3 className="text-xl font-bold text-purple-400 mb-2 border-b border-gray-700 pb-2 pr-8">
+              {activeStep.title}
+            </h3>
+            <p className="text-gray-300 text-sm mb-4">
+              {activeStep.text}
+            </p>
+
+            <div className="flex justify-between items-center pt-3 border-t border-gray-700">
+              <div className="text-xs text-purple-400 font-medium">
+                Paso {currentStep} de {totalSteps}
+              </div>
+              <div className="flex space-x-2">
+                {/* Botón Anterior */}
+                {!isFirst && (
+                  <button
+                    onClick={goToPrevStep}
+                    className="px-3 py-1 text-sm rounded-lg bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+                  >
+                    Anterior
+                  </button>
+                )}
+
+                {/* Botón Siguiente / Finalizar */}
+                {!isLast ? (
+                  <button
+                    onClick={goToNextStep}
+                    className="px-3 py-1 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors"
+                  >
+                    {isFirst ? 'Comenzar' : 'Siguiente'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={closeTour}
+                    className="px-3 py-1 text-sm rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors"
+                  >
+                    Finalizar
+                  </button>
+                )}
+              </div>
             </div>
-        );
-    };
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (loading) {
     return <div className="text-center text-white p-8">Cargando menú...</div>;
@@ -753,7 +775,7 @@ const LocalMenu = () => {
     <>
       {/* Componente Modal del Tour */}
       <TourModal />
-      
+
       <div className="bgFood2 min-h-screen text-white p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
           <header className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-8">
@@ -763,16 +785,16 @@ const LocalMenu = () => {
                 Crea, edita y organiza los platos de tu restaurante.
               </p>
             </div>
-             {/* Botón de Ayuda "?" */}
+            {/* Botón de Ayuda "?" */}
             <button
-                id="help-button" 
-                onClick={isTourOpen ? closeTour : startTour}
-                className={`fixed top-20 right-6 z-[1002] p-3 rounded-full 
+              id="help-button"
+              onClick={isTourOpen ? closeTour : startTour}
+              className={`fixed top-20 right-6 z-[1002] p-3 rounded-full 
                             ${isTourOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white 
                             shadow-lg transition-transform duration-300 transform hover:scale-110`}
-                title={isTourOpen ? "Cerrar Tutorial" : "Mostrar Tutorial"}
+              title={isTourOpen ? "Cerrar Tutorial" : "Mostrar Tutorial"}
             >
-                {isTourOpen ? <X className="w-6 h-6" /> : <HelpCircle className="w-6 h-6" />}
+              {isTourOpen ? <X className="w-6 h-6" /> : <HelpCircle className="w-6 h-6" />}
             </button>
           </header>
 
@@ -789,13 +811,24 @@ const LocalMenu = () => {
                 </p>
               </div>
               <div
-                className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center border border-gray-700 hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
-                onClick={() => setShowOcrModal(true)}
+                className={`rounded-xl p-6 flex flex-col items-center text-center border transition-colors duration-300 ${!hasActiveSubscription ? 'bg-gray-800/50 border-gray-700/50 cursor-pointer relative overflow-hidden' : 'bg-gray-800 border-gray-700 hover:bg-gray-700 cursor-pointer'}`}
+                onClick={() => {
+                  if (!hasActiveSubscription) {
+                    navigate('/business/subscription');
+                  } else {
+                    setShowOcrModal(true);
+                  }
+                }}
               >
-                <Upload className="w-12 h-12 text-purple-400 mb-3" />
-                <h3 className="text-lg font-semibold text-white">Subir con Foto</h3>
-                <p className="text-gray-400 text-sm mt-1">
-                  Sube una imagen de un menú para extraer los datos.
+                {!hasActiveSubscription && (
+                  <div className="absolute top-2 right-2 flex items-center bg-amber-500/20 text-amber-500 text-xs font-bold px-2 py-1 rounded border border-amber-500/30">
+                    <Lock className="w-3 h-3 mr-1" /> PRO
+                  </div>
+                )}
+                <Upload className={`w-12 h-12 mb-3 ${!hasActiveSubscription ? 'text-gray-600' : 'text-purple-400'}`} />
+                <h3 className={`text-lg font-semibold ${!hasActiveSubscription ? 'text-gray-500' : 'text-white'}`}>Subir con Foto</h3>
+                <p className={`text-sm mt-1 ${!hasActiveSubscription ? 'text-gray-600' : 'text-gray-400'}`}>
+                  {hasActiveSubscription ? 'Sube una imagen de un menú para extraer los datos.' : 'Desbloquea DualEat PRO para usar IA.'}
                 </p>
               </div>
               <div
@@ -850,11 +883,10 @@ const LocalMenu = () => {
                 >
                   <div className="flex space-x-3 py-2">
                     <button
-                      className={`flex-shrink-0 px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${
-                        selectedCategory === null
-                          ? 'bg-[#e5a657] text-white shadow-lg'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
+                      className={`flex-shrink-0 px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${selectedCategory === null
+                        ? 'bg-[#e5a657] text-white shadow-lg'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
                       onClick={() => setSelectedCategory(null)}
                     >
                       <Tag className="w-4 h-4" />
@@ -864,11 +896,10 @@ const LocalMenu = () => {
                       <div key={category.id} className="relative flex-shrink-0">
                         <button
                           type="button"
-                          className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${
-                            selectedCategory === category.id
-                              ? 'bg-[#e5a657] text-white shadow-lg'
-                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                          }`}
+                          className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 whitespace-nowrap text-sm font-medium ${selectedCategory === category.id
+                            ? 'bg-[#e5a657] text-white shadow-lg'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            }`}
                           onClick={() => setSelectedCategory(category.id)}
                         >
                           <Tag className="w-4 h-4" />
@@ -966,71 +997,71 @@ const LocalMenu = () => {
           <section className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-700 mt-8" id="menu-items-section">
             <h3 className="text-xl md:text-2xl font-bold text-white mb-6">Platos del Menú</h3>
             {loading ?
-            (
-              <div className="text-center text-gray-400 p-8">Cargando platos... 🍽️</div>
-            ) : error ?
-            (
-              <div className="text-center text-red-400 p-8">{error}</div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-                {filteredFoods.length > 0 ? (
-                  filteredFoods.map(food => (
-                    <div key={food.id} className="bg-gray-700 rounded-xl shadow-lg overflow-hidden flex flex-col hover:scale-105 transition-transform duration-300 relative group border border-gray-600">
-                      <div className="relative">
-                        {food.image_url ? (
-                          <img src={food.image_url} alt={food.name} className="w-full h-32 md:h-36 object-cover" />
-                        ) : (
-                          <div className="w-full h-32 md:h-36 bg-gray-600 flex flex-col items-center justify-center text-center text-gray-300 p-4">
-                            <CameraOff className="w-8 h-8 mb-2" />
-                            <p className="text-sm font-semibold">Recomendable</p>
-                            <p className="text-xs">Cargar Foto</p>
-                          </div>
-                        )}
-                        <div className="absolute top-2 right-2 flex space-x-2 transition-opacity">
-                          <button
-                            type="button"
-                            title="Editar Plato"
-                            className="bg-gray-900/70 backdrop-blur-sm p-2 rounded-full text-blue-400 hover:text-blue-200 transition-colors"
-                            onClick={() => handleUpdateFood(food)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            title="Eliminar Plato"
-                            className="bg-gray-900/70 backdrop-blur-sm p-2 rounded-full text-red-400 hover:text-red-200 transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFoodToHide(food);
-                              setIsConfirmModalOpen(true);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="p-4 flex-1 flex flex-col">
-                        <div className="flex-1">
-                          <h5 className="font-semibold text-white text-sm md:text-base mb-1 line-clamp-2">{food.name}</h5>
-                          <p className="text-xs text-gray-400 mb-3 line-clamp-2">{food.description}</p>
-                        </div>
-                        <div className="mt-auto">
-                          <span className="font-bold text-lg md:text-xl text-green-400 block mb-2">${(food.price || 0).toLocaleString('es-AR')}</span>
-                          <div className="flex flex-wrap gap-1">
-                            <StatPill text={`${food.votes_up} Likes`} color="bg-green-500/20 text-green-400" icon={TrendingUp} />
-                            <StatPill text={`${food.votes_down} Dislikes`} color="bg-red-500/20 text-red-400" icon={TrendingDown} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
+              (
+                <div className="text-center text-gray-400 p-8">Cargando platos... 🍽️</div>
+              ) : error ?
+                (
+                  <div className="text-center text-red-400 p-8">{error}</div>
                 ) : (
-                  <div className="col-span-full text-center text-gray-500 p-8">
-                    <p>No se encontraron platos que coincidan con la búsqueda en esta categoría.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                    {filteredFoods.length > 0 ? (
+                      filteredFoods.map(food => (
+                        <div key={food.id} className="bg-gray-700 rounded-xl shadow-lg overflow-hidden flex flex-col hover:scale-105 transition-transform duration-300 relative group border border-gray-600">
+                          <div className="relative">
+                            {food.image_url ? (
+                              <img src={food.image_url} alt={food.name} className="w-full h-32 md:h-36 object-cover" />
+                            ) : (
+                              <div className="w-full h-32 md:h-36 bg-gray-600 flex flex-col items-center justify-center text-center text-gray-300 p-4">
+                                <CameraOff className="w-8 h-8 mb-2" />
+                                <p className="text-sm font-semibold">Recomendable</p>
+                                <p className="text-xs">Cargar Foto</p>
+                              </div>
+                            )}
+                            <div className="absolute top-2 right-2 flex space-x-2 transition-opacity">
+                              <button
+                                type="button"
+                                title="Editar Plato"
+                                className="bg-gray-900/70 backdrop-blur-sm p-2 rounded-full text-blue-400 hover:text-blue-200 transition-colors"
+                                onClick={() => handleUpdateFood(food)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                title="Eliminar Plato"
+                                className="bg-gray-900/70 backdrop-blur-sm p-2 rounded-full text-red-400 hover:text-red-200 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFoodToHide(food);
+                                  setIsConfirmModalOpen(true);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="p-4 flex-1 flex flex-col">
+                            <div className="flex-1">
+                              <h5 className="font-semibold text-white text-sm md:text-base mb-1 line-clamp-2">{food.name}</h5>
+                              <p className="text-xs text-gray-400 mb-3 line-clamp-2">{food.description}</p>
+                            </div>
+                            <div className="mt-auto">
+                              <span className="font-bold text-lg md:text-xl text-green-400 block mb-2">${(food.price || 0).toLocaleString('es-AR')}</span>
+                              <div className="flex flex-wrap gap-1">
+                                <StatPill text={`${food.votes_up} Likes`} color="bg-green-500/20 text-green-400" icon={TrendingUp} />
+                                <StatPill text={`${food.votes_down} Dislikes`} color="bg-red-500/20 text-red-400" icon={TrendingDown} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center text-gray-500 p-8">
+                        <p>No se encontraron platos que coincidan con la búsqueda en esta categoría.</p>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
           </section>
         </div>
       </div>
