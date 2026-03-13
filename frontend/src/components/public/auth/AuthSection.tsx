@@ -8,6 +8,7 @@ import Restaurant from "@assets/images/auth/Restaurante.avif";
 import Restaurant2 from "@assets/images/auth/Restaurante2.avif";
 import Restaurant3 from "@assets/images/auth/Restaurante3.avif";
 import LogoDualEat from "@assets/images/icon/Logo_DualEat.png";
+import { getDeviceId } from "@/utils/device";
 
 interface Props {
   flex: string;
@@ -89,9 +90,11 @@ const AuthSection: React.FC<Props> = ({
     setCurrentImageIndex(index);
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google?platform=web";
-    //window.location.href = "https://5698-190-190-126-222.ngrok-free.app/api/auth/google?platform=web";
+  const handleGoogleLogin = async () => {
+    const deviceID = await getDeviceId();
+    const backendUrl = `http://localhost:3000/api/auth/google?platform=web&deviceId=${deviceID}`;
+
+    window.location.href = backendUrl;
   };
 
   return (

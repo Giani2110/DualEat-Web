@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AuthSection from "@/components/public/auth/AuthSection";
-import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
 import { useAuth } from "@hooks/useAuth";
@@ -9,6 +9,11 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 import "@assets/scss/public/auth/auth.scss";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getFoodCategories,
+  getTagCategories,
+} from "@/services/community-tag.api";
 
 interface FoodCategory {
   id: number;
@@ -29,35 +34,35 @@ const Onboarding = () => {
   const location = useLocation();
 
   const [name, setName] = useState<string>("");
+
   const [preferences, setPreferences] = useState<string[]>([]);
-  const [foodCategories, setFoodCategories] = useState<FoodCategory[]>([]);
-  const [communityTags, setCommunityTags] = useState<CommunityTag[]>([]);
-  const [loadingPreferences, setLoadingPreferences] = useState<boolean>(true);
-  const [errorPreferences, setErrorPreferences] = useState<string | null>(null);
+
   const [index, setIndex] = useState(1);
 
   const { completeProfile } = useAuth();
 
-  useEffect(() => {
-    const fetchOnboardingData = async () => {
-      try {
-        const response = await axiosInterceptor.get("/onboarding");
+  const { data: foodCategories = [], isLoading: loadingFood } = useQuery({
+    queryKey: ["categories", "food"],
+    queryFn: async () => {
+      const response = await getFoodCategories();
+      return response?.data || [];
+    },
+    staleTime: 1000 * 60 * 30, // 30 minutos
+  });
 
-        const fetchedData = await response.data;
+  const { data: tagCategories = [], isLoading: loadingTags } = useQuery({
+    queryKey: ["categories", "tags"],
+    queryFn: async () => {
+      const response = await getTagCategories();
+      return response?.data || [];
+    },
+    staleTime: 1000 * 60 * 30, // 30 minutos
+  });
 
-        setFoodCategories(fetchedData.foodCategories || []);
-        setCommunityTags(fetchedData.communityTags || []);
-      } catch (error) {
-        console.error("Error al obtener datos de onboarding:", error);
-        setErrorPreferences(
-          "No se pudieron cargar las preferencias. Intenta de nuevo más tarde.",
-        );
-      } finally {
-        setLoadingPreferences(false);
-      }
-    };
-    fetchOnboardingData();
-  }, []);
+  const foodC: FoodCategory[] = (foodCategories as FoodCategory[]) || [];
+  const communityC: CommunityTag[] = (tagCategories as CommunityTag[]) || [];
+
+  const isLoading = loadingFood || loadingTags;
 
   const togglePreference = (prefName: string) => {
     setPreferences((prev) => {
@@ -69,8 +74,8 @@ const Onboarding = () => {
       } else {
         updated = [...prev, prefName];
         const existsInBoth =
-          foodCategories.some((c) => c.name === prefName) &&
-          communityTags.some((t) => t.name === prefName);
+          foodC.some((c) => c.name === prefName) &&
+          communityC.some((t) => t.name === prefName);
 
         if (existsInBoth && !updated.includes(prefName)) {
           updated.push(prefName);
@@ -104,13 +109,11 @@ const Onboarding = () => {
     }
 
     const foodPreferenceIds = preferences
-      .map(
-        (prefName) => foodCategories.find((cat) => cat.name === prefName)?.id,
-      )
+      .map((prefName) => foodC.find((cat) => cat.name === prefName)?.id)
       .filter((id) => id !== undefined) as number[];
 
     const communityPreferenceIds = preferences
-      .map((prefName) => communityTags.find((tag) => tag.name === prefName)?.id)
+      .map((prefName) => communityC.find((tag) => tag.name === prefName)?.id)
       .filter((id) => id !== undefined) as number[];
 
     try {
@@ -123,12 +126,9 @@ const Onboarding = () => {
       if (response?.success) {
         navigate(ROUTES.USER.DASHBOARD, { replace: true });
       }
-    } catch (error: unknown) {
-      console.error("Error al enviar datos de completado de perfil:", error);
+    } catch (e) {
+      console.log(e);
       toast.error("Error al completar el perfil. Intenta de nuevo más tarde.");
-      alert(
-        `Error: ${error instanceof Error ? error.message : "Error desconocido"}`,
-      );
     }
   };
 
@@ -178,10 +178,8 @@ const Onboarding = () => {
               </div>
             </div>
 
-            {loadingPreferences ? (
+            {isLoading ? (
               <p>Cargando preferencias...</p>
-            ) : errorPreferences ? (
-              <p className="text-red-500">{errorPreferences}</p>
             ) : (
               <div className="flex cat-block flex-col gap-6 mt-4">
                 {index === 1 && (
@@ -190,7 +188,7 @@ const Onboarding = () => {
                       Categorías de Comida
                     </h3>
                     <div className="scroll grid-cols-2 md:grid-cols-3 gap-2">
-                      {foodCategories.map((category) => (
+                      {foodC.map((category) => (
                         <button
                           key={`food-cat-${category.id}`}
                           type="button"
@@ -209,13 +207,13 @@ const Onboarding = () => {
                   </div>
                 )}
 
-                {index === 2 && communityTags.length > 0 && (
+                {index === 2 && communityC.length > 0 && (
                   <div>
                     <h3 className="underline text-[14.5px] mb-3 text5">
                       Tags de Comunidad
                     </h3>
                     <div className="scroll grid-cols-2 md:grid-cols-3 gap-2 ">
-                      {communityTags.map((tag) => (
+                      {communityC.map((tag) => (
                         <button
                           key={`comm-tag-${tag.id}`}
                           type="button"

@@ -9,11 +9,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 
 import "@assets/scss/public/auth/auth.scss";
+import { getDeviceId } from "@/utils/device";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -23,6 +25,8 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleNext = async () => {
+    const deviceId = await getDeviceId();
+    
     if (!email || !password || !confirmPassword) {
       toast.error("Por favor, completa todos los campos.");
       return;
@@ -33,13 +37,13 @@ const Register = () => {
     }
 
     try {
-      const responseData = await register(email, password);
+      const responseData = await register(email.trim(), password.trim(), deviceId);
 
       if (responseData?.success && responseData.next_step) {
         navigate(responseData.next_step);
       }
-    } catch (err) {
-      console.error("Error al registrar el paso 1:", err);
+    } catch (e) {
+      console.log("Error al registrar el paso 1:", e);
       toast.error("No se pudo conectar con el servidor. Intenta de nuevo.");
     }
   };

@@ -12,20 +12,24 @@ export interface AuthResponse {
   user?: User;
 }
 
+// --- 1. INICIO DE SESIÓN ---
+// ===================================
 export const login = async (
-  email: string,
-  password: string,
-  rememberMe: boolean,
-  recaptchaToken: string | null,
+  e: string,
+  p: string,
+  r: boolean,
+  rt: string | null,
+  d: string,
 ): Promise<AuthResponse | null> => {
   try {
     const response = await axiosInterceptor.post(
       "/auth/login",
       {
-        email,
-        password,
-        rememberMe,
-        recaptchaToken,
+        email: e,
+        password: p,
+        remember: r,
+        recaptcha: rt,
+        deviceId: d,
       },
       { withCredentials: true },
     );
@@ -47,16 +51,19 @@ export const login = async (
   }
 };
 
+// --- 2. REGISTRO ---
+// ===================================
 export const register = async (
-  email: string,
-  password: string,
+  e: string,
+  p: string,
+  d: string,
 ): Promise<AuthResponse | null> => {
   try {
     const response = await toast.promise(
       axiosInterceptor.post("/auth/register", {
-        email,
-        password,
-        isMobile: false,
+        email: e,
+        password: p,
+        deviceId: d,
       }),
       {
         loading: "Registrando...",
@@ -76,6 +83,8 @@ export const register = async (
   }
 };
 
+// --- 3. COMPLETAR PERFIL ---
+// ===================================
 export const completeProfile = async (
   name: string,
   foodPreferences: number[],
@@ -113,6 +122,8 @@ export const completeProfile = async (
   }
 };
 
+// --- 4. CERRAR SESIÓN ---
+// ===================================
 export const logout = async () => {
   try {
     const response = await toast.promise(
@@ -133,6 +144,8 @@ export const logout = async () => {
   }
 };
 
+// --- 5. OBTENER DATOS DEL USUARIO ---
+// ===================================
 export const getMe = async () => {
   try {
     const response = await axiosInterceptor.get("/auth/me", {

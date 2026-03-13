@@ -21,56 +21,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   //const location = useLocation();
   const navigate = useNavigate();
 
+  // --- 1. LOGIN (Email, Password, RememberMe, RecaptchaToken, DeviceId) ---
+  // ===========================================
   const login = async (
-    email: string,
-    password: string,
-    rememberMe: boolean,
-    recaptchaToken: string | null
+    e: string,
+    p: string,
+    r: boolean,
+    rt: string | null,
+    d: string,
   ) => {
     setLoading(true);
     try {
-      const response = await authLogin(
-        email,
-        password,
-        rememberMe,
-        recaptchaToken
-      );
+      const response = await authLogin(e, p, r, rt, d);
       if (response?.success && response.user) {
         setUser(response.user);
-        if (rememberMe) {
-          localStorage.setItem("rememberMe", "true");
-        }
       }
       return response;
-    } catch (error) {
+    } catch (e) {
       setUser(null);
-      throw error;
+      throw e;
     } finally {
       setLoading(false);
     }
   };
 
+  // --- 2. REGISTER (Email, Password, DeviceId) ---
+  // ===========================================
   const register = async (
-    email: string,
-    password: string
+    e: string,
+    p: string,
+    d: string,
   ): Promise<AuthResponse | null> => {
     setLoading(true);
     try {
-      const response = await authRegister(email, password);
+      const response = await authRegister(e, p, d);
       return response;
-    } catch (error) {
-      console.error("Error during registration:", error);
-      throw error;
+    } catch (e) {
+      console.error("Error during registration:", e);
+      throw e;
     } finally {
       setLoading(false);
     }
   };
 
+  // --- 3. COMPLETE PROFILE (Name, FoodPreferences, CommunityPreferences, TempToken) ---
+  // ===========================================
   const completeProfile = async (
-    name: string,
-    foodPreferences: number[],
-    communityPreferences: number[],
-    tempToken: string
+    n: string,
+    fPreferences: number[],
+    cPreferences: number[],
+    tt: string,
   ): Promise<AuthResponse | null> => {
     setLoading(true);
 
@@ -79,12 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const [responseData] = await Promise.all([
-        authCompleteProfile(
-          name,
-          foodPreferences,
-          communityPreferences,
-          tempToken
-        ),
+        authCompleteProfile(n, fPreferences, cPreferences, tt),
         minimumDelay,
       ]);
 
@@ -95,9 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       return responseData;
-    } catch (error) {
+    } catch (e) {
       setUser(null);
-      throw error;
+      throw e;
     } finally {
       setLoading(false);
     }
@@ -106,13 +101,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async () => {
     const response = await authLogout();
     if (response?.success) {
-      localStorage.removeItem("rememberMe");
       setUser(null);
     }
   };
 
-   useEffect(() => {
-    const fetchUser = async () => { 
+  useEffect(() => {
+    const fetchUser = async () => {
       setLoading(true);
       try {
         const userData = await withMinimumDelay(getMe(), 0);
@@ -128,7 +122,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!user) {
       fetchUser();
     }
-    
   }, [user, navigate]);
 
   const value = { user, loading, login, logout, register, completeProfile };

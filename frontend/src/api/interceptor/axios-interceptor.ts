@@ -1,5 +1,5 @@
 import axios from "axios";
-import { appConfig } from "../config/AplicationConfig";
+import { appConfig } from "@/api/config/AplicationConfig";
 
 export const axiosInterceptor = axios.create({
   baseURL: appConfig.API_URL,

@@ -1,12 +1,15 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
 import { ROUTES } from "@/api/constants/constants";
 import AuthSection from "@/components/public/auth/AuthSection";
 
+import { Turnstile } from "@marsidev/react-turnstile";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
+
 import toast from "react-hot-toast";
+import { getDeviceId } from "@/utils/device";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,22 +20,27 @@ const Login = () => {
   const [step, setStep] = useState(1);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
-  const { login } = useAuth();
+  const recaptchaRef = useRef<TurnstileInstance>(null);
 
-  console.log("reCAPTCHA token:", recaptchaToken);
+  const { login } = useAuth();
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!recaptchaToken) {
-      toast.error("Por favor, completa el reCAPTCHA antes de continuar.");
+      recaptchaRef.current?.execute();
       return;
     }
 
-    const response = await login(email, password, rememberMe, recaptchaToken);
+    await performLogin(recaptchaToken);
+  };
+
+  const performLogin = async (token: string) => {
+    const deviceId = await getDeviceId();
+    const response = await login(email.trim(), password.trim(), rememberMe, token, deviceId);
 
     if (response === null) {
+      toast.error("Error al iniciar sesión");
       setRecaptchaToken(null);
       recaptchaRef.current?.reset();
     }
@@ -46,8 +54,6 @@ const Login = () => {
       } else {
         navigate(ROUTES.USER.DASHBOARD);
       }
-
-      console.log("Inicio de sesión exitoso:", response);
     }
   };
 
@@ -161,14 +167,30 @@ const Login = () => {
               </button>
             </div>
             {/* reCAPTCHA */}
-            <ReCAPTCHA
+            <Turnstile
               ref={recaptchaRef}
-              sitekey="6LcEHaYrAAAAAOD2H4YUWk_9AiJsgtAdbHI1usz1"
-              onChange={(token) => setRecaptchaToken(token)}
-              onExpired={() => setRecaptchaToken(null)}
-              theme="light"
-              size="normal"
-              className="recaptcha-scale mt-5"
+              siteKey="0x4AAAAAACny8xDMqyxHHXxu"
+              options={{
+                theme: "light",
+                size: "invisible",
+                execution: "execute",
+              }}
+              onSuccess={(token) => {
+                setRecaptchaToken(token);
+
+                if (password.trim() !== "") {
+                  performLogin(token);
+                }
+              }}
+              onError={(e) => {
+                console.log(e);
+                toast.error("Error validando seguridad. Intenta de nuevo.");
+              }}
+              onExpire={() => {
+                setRecaptchaToken(null);
+                recaptchaRef.current?.reset();
+              }}
+              className="mt-5"
             />
           </div>
           <button
