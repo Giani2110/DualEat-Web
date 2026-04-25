@@ -8,6 +8,7 @@ export { default as TermsConditions } from "./public/legal/TermsConditions";
 // Auth
 export { default as Login } from "./public/auth/Login";
 export { default as Register } from "./public/auth/Register";
+export { default as RegisterLocal } from "./public/auth/RegisterLocal";
 export { default as Onboarding } from "./public/auth/Onboarding";
 export { default as ResetPassword } from "./public/auth/ResetPassword";
 
@@ -15,6 +16,8 @@ export { default as ResetPassword } from "./public/auth/ResetPassword";
 export { default as AdminBusinessCreation } from "./private/admin/AdminBusinessCreation";
 export { default as AdminFoodCategories } from "./private/admin/AdminFoodCategories";
 export { default as AdminLocals } from "./private/admin/AdminLocals";
+export { default as AdminUsers } from "./private/admin/AdminUsers";
+export { default as AdminDashboard } from "./private/admin/AdminDashboard";
 
 // Components
 export { default as ProtectedRoute } from "@/components/public/auth/ProtectedRoutes";

@@ -1,10 +1,11 @@
 import React from 'react';
 import { useState, useEffect, useContext, useCallback } from 'react';
-import { AuthContext } from '@context/auth/AuthContext'; 
+import { AuthContext } from '@context/auth/AuthContext';
 import { AlertCircle, Save, Clock, MapPin, Image, Upload, Trash, Tag, CheckCircle, Store, Phone, Mail, X, Plus, ChevronDown } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'; 
-import L from 'leaflet'; 
-import 'leaflet/dist/leaflet.css'; 
+import ConfirmModal from '@/components/modal/ConfirmModal';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // ====================================================================
 // 1. INTERFACES Y CONSTANTES
@@ -20,7 +21,7 @@ interface ScheduleItem {
 }
 
 interface Local {
-    id: string; 
+    id: string;
     name: string;
     description: string | null;
     address: string | null;
@@ -28,8 +29,8 @@ interface Local {
     email: string | null;
     image_url: string | null;
     categorias_menu: string[] | null;
-    latitude: number | null; 
-    longitude: number | null; 
+    latitude: number | null;
+    longitude: number | null;
 }
 
 interface LocalSettingsData {
@@ -40,9 +41,9 @@ interface LocalSettingsData {
     phone: string;
     email: string;
     image_url: string | null;
-    categorias_menu: string[]; 
-    latitude: number | null; 
-    longitude: number | null; 
+    categorias_menu: string[];
+    latitude: number | null;
+    longitude: number | null;
 }
 
 interface AuthUser {
@@ -58,7 +59,7 @@ const DAY_MAP: Record<DayOfWeek, string> = {
     MARTES: 'Martes',
     MIERCOLES: 'Miércoles',
     JUEVES: 'Jueves',
-VIERNES: 'Viernes',
+    VIERNES: 'Viernes',
     SABADO: 'Sábado',
     DOMINGO: 'Domingo',
 };
@@ -119,48 +120,48 @@ const ErrorAlert: React.FC<{ message: string }> = ({ message }) => (
 
 const InputField = ({ id, name, label, value, onChange, type = 'text', required = false, placeholder = '', icon, disabled = false, onClick, readOnly = false, onKeyDown }: any) => (
     <div className="space-y-2">
-      <label htmlFor={id} className="block text-sm font-semibold text-gray-300">
-        {label} {required && <span className="text-red-400">*</span>}
-      </label>
-      <div className="relative group">
-        {icon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors pointer-events-none">
-            {icon}
-          </div>
-        )}
-        <input
-          type={type}
-          id={id}
-          name={name}
-          value={value || ''}
-          onChange={onChange}
-          onClick={onClick} 
-          onKeyDown={onKeyDown} 
-          readOnly={readOnly} 
-          required={required}
-          placeholder={placeholder}
-          disabled={disabled}
-          className={`w-full ${icon ? 'pl-12' : 'pl-4'} pr-4 py-3.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-gray-700/70 transition-all disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm ${readOnly || onClick ? 'cursor-pointer' : ''}`}
-        />
-      </div>
+        <label htmlFor={id} className="block text-sm font-semibold text-gray-300">
+            {label} {required && <span className="text-red-400">*</span>}
+        </label>
+        <div className="relative group">
+            {icon && (
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors pointer-events-none">
+                    {icon}
+                </div>
+            )}
+            <input
+                type={type}
+                id={id}
+                name={name}
+                value={value || ''}
+                onChange={onChange}
+                onClick={onClick}
+                onKeyDown={onKeyDown}
+                readOnly={readOnly}
+                required={required}
+                placeholder={placeholder}
+                disabled={disabled}
+                className={`w-full ${icon ? 'pl-12' : 'pl-4'} pr-4 py-3.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-gray-700/70 transition-all disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm ${readOnly || onClick ? 'cursor-pointer' : ''}`}
+            />
+        </div>
     </div>
 );
 
 const TextareaField = ({ id, name, label, value, onChange, placeholder = '', disabled = false }: any) => (
     <div className="space-y-2">
-      <label htmlFor={id} className="block text-sm font-semibold text-gray-300">
-        {label}
-      </label>
-      <textarea
-        id={id}
-        name={name}
-        value={value || ''}
-        onChange={onChange}
-        rows={3}
-        placeholder={placeholder}
-        disabled={disabled}
-        className="w-full px-4 py-3.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-gray-700/70 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
-      ></textarea>
+        <label htmlFor={id} className="block text-sm font-semibold text-gray-300">
+            {label}
+        </label>
+        <textarea
+            id={id}
+            name={name}
+            value={value || ''}
+            onChange={onChange}
+            rows={3}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="w-full px-4 py-3.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-gray-700/70 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+        ></textarea>
     </div>
 );
 
@@ -178,7 +179,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({
     handleScheduleChange,
     isUpdatingAny,
 }) => {
-    
+
     const [openDay, setOpenDay] = useState<DayOfWeek | null>(null);
 
     const getScheduleForDay = (day: DayOfWeek): ScheduleItem | undefined => {
@@ -202,13 +203,13 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({
             setOpenDay(day);
         }
     };
-    
+
     const toggleDropdown = (day: DayOfWeek) => {
         if (getScheduleForDay(day)) {
-               setOpenDay(openDay === day ? null : day);
+            setOpenDay(openDay === day ? null : day);
         }
     }
-    
+
     return (
         <div className="space-y-4 pt-4">
             <h3 className="text-xl font-bold text-white mb-4">Configuración de Horarios</h3>
@@ -216,17 +217,15 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({
                 const currentSchedule = getScheduleForDay(day);
                 const isActive = !!currentSchedule;
                 const isDayOpen = openDay === day;
-                
+
                 const dayScheduleSummary = isActive ? `${currentSchedule!.open_time} - ${currentSchedule!.close_time}` : 'Cerrado';
 
                 return (
-                    <div key={day} className={`border rounded-xl overflow-hidden transition-all duration-200 ${
-                        isActive ? 'border-gray-600/50 bg-gray-700/20' : 'border-gray-700/30'
-                    }`}>
-                        <div 
-                            className={`flex items-center justify-between p-4 transition-colors cursor-pointer ${
-                                isActive ? 'hover:bg-gray-700/30' : 'hover:bg-gray-700/10'
-                            }`}
+                    <div key={day} className={`border rounded-xl overflow-hidden transition-all duration-200 ${isActive ? 'border-gray-600/50 bg-gray-700/20' : 'border-gray-700/30'
+                        }`}>
+                        <div
+                            className={`flex items-center justify-between p-4 transition-colors cursor-pointer ${isActive ? 'hover:bg-gray-700/30' : 'hover:bg-gray-700/10'
+                                }`}
                             onClick={() => toggleDropdown(day)}
                         >
                             <div className="flex items-center space-x-3">
@@ -235,22 +234,20 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({
                                     onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); toggleDay(day); }}
                                     disabled={isUpdatingAny}
                                     title={isActive ? "Desactivar Día" : "Activar Día"}
-                                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-semibold transition-all shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                                        isActive 
-                                            ? 'bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white' 
-                                            : 'bg-gradient-to-br from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
-                                    }`}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-semibold transition-all shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isActive
+                                        ? 'bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white'
+                                        : 'bg-gradient-to-br from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
+                                        }`}
                                 >
                                     {isActive ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                                 </button>
                                 <span className="font-semibold text-white">{DAY_MAP[day]}</span>
                             </div>
                             <div className="flex items-center space-x-3">
-                                <span className={`text-sm font-medium px-3 py-1.5 rounded-lg ${
-                                    isActive 
-                                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
-                                        : 'text-gray-500 italic'
-                                }`}>
+                                <span className={`text-sm font-medium px-3 py-1.5 rounded-lg ${isActive
+                                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                    : 'text-gray-500 italic'
+                                    }`}>
                                     {dayScheduleSummary}
                                 </span>
                                 {isActive && (
@@ -320,7 +317,7 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
             const state = address.state;
 
             let display = '';
-            
+
             if (street) {
                 display = street;
                 if (houseNumber) {
@@ -336,7 +333,7 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
                 display += `, ${city}`;
             }
             if (state && !display.includes(state)) {
-                 display += `, ${state}`;
+                display += `, ${state}`;
             }
             return display;
 
@@ -357,6 +354,7 @@ interface MapLocationSelectorProps {
     onClose: () => void;
     onSaveLocation: (newAddress: string, lat: number, lng: number) => void;
     isSaving: boolean;
+    setConfirmModal: React.Dispatch<React.SetStateAction<any>>;
 }
 
 interface MapHandlerProps {
@@ -369,12 +367,12 @@ interface MapCentererProps {
 }
 
 const customIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
 });
 
 const MapCenterer: React.FC<MapCentererProps> = ({ position }) => {
@@ -392,38 +390,39 @@ const MapCenterer: React.FC<MapCentererProps> = ({ position }) => {
 
 const MapHandler: React.FC<MapHandlerProps> = ({ setSelectedPosition, setTempAddress }) => {
     useMapEvents({
-        async click(e: L.LeafletMouseEvent) { 
+        async click(e: L.LeafletMouseEvent) {
             const { lat, lng } = e.latlng;
             setSelectedPosition({ lat, lng });
-            
+
             const newAddress = await reverseGeocode(lat, lng);
-            setTempAddress(newAddress); 
+            setTempAddress(newAddress);
         },
     });
     return null;
 }
 
 const MapLocationSelector: React.FC<MapLocationSelectorProps> = ({
-    address, 
+    address,
     currentLat,
     currentLng,
     isOpen,
     onClose,
     onSaveLocation,
     isSaving,
+    setConfirmModal,
 }) => {
     const DEFAULT_LAT: number = -34.6037;
     const DEFAULT_LNG: number = -58.3816;
-    
+
     const [tempAddress, setTempAddress] = useState(address);
     const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(
         currentLat !== null && currentLng !== null ? { lat: currentLat, lng: currentLng } : null
     );
-    
+
     const initialLat = currentLat ?? DEFAULT_LAT;
     const initialLng = currentLng ?? DEFAULT_LNG;
     const mapCenter: [number, number] = selectedPosition ? [selectedPosition.lat, selectedPosition.lng] : [initialLat, initialLng];
-    
+
     const debouncedGeocode = useCallback(
         debounce(async (searchAddress: string) => {
             if (searchAddress.length > 5) {
@@ -438,24 +437,30 @@ const MapLocationSelector: React.FC<MapLocationSelectorProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            setSelectedPosition(currentLat !== null && currentLng !== null 
-                ? { lat: currentLat, lng: currentLng } 
+            setSelectedPosition(currentLat !== null && currentLng !== null
+                ? { lat: currentLat, lng: currentLng }
                 : null
             );
             setTempAddress(address);
         }
-    }, [isOpen, currentLat, currentLng, address]); 
+    }, [isOpen, currentLat, currentLng, address]);
 
     const handleAddressChangeAndGeocode = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newAddress = e.target.value;
         setTempAddress(newAddress);
-        
+
         debouncedGeocode(newAddress);
     };
 
     const handleSave = async () => {
         if (!selectedPosition) {
-            alert('Por favor, haz clic en el mapa o busca una dirección para seleccionar una ubicación.');
+            setConfirmModal({
+                isOpen: true,
+                title: 'Ubicación Requerida',
+                message: 'Por favor, haz clic en el mapa o busca una dirección para seleccionar una ubicación.',
+                type: 'warning',
+                onConfirm: () => setConfirmModal((prev: any) => ({ ...prev, isOpen: false })),
+            });
             return;
         }
 
@@ -484,21 +489,21 @@ const MapLocationSelector: React.FC<MapLocationSelectorProps> = ({
                 </div>
 
                 <div className="p-6 flex-grow overflow-y-auto space-y-4">
-                                        
-                    <InputField 
+
+                    <InputField
                         id="map-final-address" name="map-final-address" label="Dirección (El mapa se actualiza al escribir)"
-                        value={tempAddress} 
-                        onChange={handleAddressChangeAndGeocode} 
+                        value={tempAddress}
+                        onChange={handleAddressChangeAndGeocode}
                         placeholder="Escribe la calle, número y ciudad"
                         disabled={isSaving}
-                        readOnly={false} 
+                        readOnly={false}
                     />
-                    
+
                     <div className="h-96 w-full rounded-xl overflow-hidden border-2 border-gray-600/50">
-                        <MapContainer 
-                            center={mapCenter as L.LatLngExpression} 
-                            zoom={currentLat ? 16 : 13} 
-                            scrollWheelZoom={true} 
+                        <MapContainer
+                            center={mapCenter as L.LatLngExpression}
+                            zoom={currentLat ? 16 : 13}
+                            scrollWheelZoom={true}
                             className="h-full w-full"
                         >
                             <TileLayer
@@ -506,18 +511,18 @@ const MapLocationSelector: React.FC<MapLocationSelectorProps> = ({
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
                             <MapCenterer position={mapCenter} />
-                            <MapHandler setSelectedPosition={setSelectedPosition} setTempAddress={setTempAddress} /> 
+                            <MapHandler setSelectedPosition={setSelectedPosition} setTempAddress={setTempAddress} />
 
                             {selectedPosition && (
                                 <Marker position={[selectedPosition.lat, selectedPosition.lng] as L.LatLngExpression} icon={customIcon as any} />
                             )}
                         </MapContainer>
                     </div>
-                    
+
                     <div className="p-4 bg-gray-700/50 rounded-lg border border-gray-600/50">
                         <p className="font-semibold text-white mb-2">Coordenadas Finales:</p>
                         <p className="text-sm text-gray-300 break-all">
-                             {selectedPosition ? `Latitud: ${selectedPosition.lat.toFixed(6)}, Longitud: ${selectedPosition.lng.toFixed(6)}` : 'N/A - Fija la ubicación para guardar'}
+                            {selectedPosition ? `Latitud: ${selectedPosition.lat.toFixed(6)}, Longitud: ${selectedPosition.lng.toFixed(6)}` : 'N/A - Fija la ubicación para guardar'}
                         </p>
                     </div>
                 </div>
@@ -527,11 +532,10 @@ const MapLocationSelector: React.FC<MapLocationSelectorProps> = ({
                         type="button"
                         onClick={handleSave}
                         disabled={isSaving || !selectedPosition}
-                        className={`w-full py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center space-x-2 shadow-lg ${
-                            isSaving || !selectedPosition
-                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                : 'bg-green-600 hover:bg-green-700 text-white transform hover:scale-[1.01] active:scale-[0.99]'
-                        }`}
+                        className={`w-full py-3 rounded-xl font-bold text-lg transition-all flex items-center justify-center space-x-2 shadow-lg ${isSaving || !selectedPosition
+                            ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                            : 'bg-green-600 hover:bg-green-700 text-white transform hover:scale-[1.01] active:scale-[0.99]'
+                            }`}
                     >
                         {isSaving ? (
                             <>
@@ -556,8 +560,8 @@ const MapLocationSelector: React.FC<MapLocationSelectorProps> = ({
 // ====================================================================
 
 function debounce<T extends (...args: any[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
-    let timeout: NodeJS.Timeout | null;
-    return function(...args: Parameters<T>) {
+    let timeout: ReturnType<typeof setTimeout> | null;
+    return function (...args: Parameters<T>) {
         if (timeout) {
             clearTimeout(timeout);
         }
@@ -569,22 +573,37 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number): (
 
 const LocalSettings = () => {
     const authContext = useContext(AuthContext) as AuthContextType;
-    const user = authContext?.user; 
-    
+    const user = authContext?.user;
+
     const [localId, setLocalId] = useState<string | null>(null);
     const [local, setLocal] = useState<LocalSettingsData | null>(null);
-    const [schedules, setSchedules] = useState<ScheduleItem[]>([]); 
+    const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
     const [currentSection, setCurrentSection] = useState<SectionKey>('general');
-    
+
     const [loading, setLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    
+
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [showMapModal, setShowMapModal] = useState(false); 
+    const [showMapModal, setShowMapModal] = useState(false);
+
+    // Integrated unified confirm modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'danger' | 'warning' | 'success';
+        onConfirm: () => void;
+        confirmText?: string;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'warning',
+        onConfirm: () => { },
+    });
 
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -593,7 +612,7 @@ const LocalSettings = () => {
             setError('Error: El ID del local no está disponible.');
             return;
         }
-        
+
         setIsUploading(true);
         setError(null);
         setSuccessMessage(null);
@@ -602,7 +621,7 @@ const LocalSettings = () => {
             const formData = new FormData();
             formData.append('image', file);
 
-            const res = await fetch(`${API_BASE}/settings/upload-local-image/${localId}`, { 
+            const res = await fetch(`${API_BASE}/local/settings/upload-image/${localId}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -624,7 +643,7 @@ const LocalSettings = () => {
             setTimeout(() => setError(null), 7000);
         }
     };
-    
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -632,60 +651,63 @@ const LocalSettings = () => {
             e.target.value = '';
         }
     };
-    
+
     const handleRemoveImage = () => {
-        setShowDeleteModal(true);
+        setConfirmModal({
+            isOpen: true,
+            title: 'Eliminar Imagen',
+            message: '¿Estás seguro de que deseas eliminar la imagen actual?',
+            type: 'danger',
+            onConfirm: confirmRemoveImage,
+            confirmText: 'Eliminar'
+        });
     };
 
     const confirmRemoveImage = () => {
         if (local) {
-          setLocal({ ...local, image_url: '' });
-          setSuccessMessage('Imagen eliminada. ¡Recordá guardar la configuración para confirmar!');
-          setShowDeleteModal(false);
+            setLocal({ ...local, image_url: '' });
+            setSuccessMessage('Imagen eliminada. ¡Recordá guardar la configuración para confirmar!');
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
         }
     };
 
-    const cancelRemoveImage = () => {
-        setShowDeleteModal(false);
-    };
-    
     const handleAddressInputClick = () => {
         if (!isUpdatingAny) {
             setShowMapModal(true);
         }
     };
-    
+
     const handleSaveLocation = (newAddress: string, lat: number, lng: number) => {
         if (local) {
-            setLocal({ ...local, address: newAddress, latitude: lat, longitude: lng }); 
+            setLocal({ ...local, address: newAddress, latitude: lat, longitude: lng });
             setSuccessMessage('Ubicación y Coordenadas seleccionadas. ¡Recordá guardar la configuración general!');
         }
         setShowMapModal(false);
     };
-    
+
     useEffect(() => {
         const fetchUserLocal = async () => {
-          if (!user?.id) {
-            setLoading(false);
-            setError('Error: Usuario no autenticado.');
-            return;
-          }
-          setLoading(true);
-          setError(null);
-          try {
-            const res = await fetch(`${API_BASE}/users/${user.id}/local`);
-            const data = await res.json();
-            if (data?.id) {
-              setLocalId(data.id);
-            } else {
-              setError('No se encontró un local asociado a este usuario.');
+            if (!user?.id) {
+                setLoading(false);
+                setError('Error: Usuario no autenticado.');
+                return;
             }
-          } catch (err) {
-            console.error(err);
-            setError('Error al obtener el local del usuario.');
-          } finally {
-            setLoading(false); 
-          }
+            setLoading(true);
+            setError(null);
+            try {
+                const res = await fetch(`${API_BASE}/users/${user.id}/local`);
+                const data = await res.json();
+                if (data?.id) {
+                    setLocalId(data.id);
+                } else {
+                    setError('No se encontró un local asociado a este usuario.');
+                }
+            } catch (err) {
+                console.error(err);
+                setError('Error al obtener el local del usuario.');
+            } finally {
+                setLoading(false);
+            }
         };
         fetchUserLocal();
     }, [user, API_BASE]);
@@ -697,7 +719,7 @@ const LocalSettings = () => {
             setError(null);
             setSuccessMessage(null);
             try {
-                const localRes = await fetch(`${API_BASE}/settings/${localId}`); 
+                const localRes = await fetch(`${API_BASE}/local/settings/${localId}`);
 
                 if (!localRes.ok) {
                     let errorMessage = `Error ${localRes.status}: No se pudo cargar la configuración general.`;
@@ -707,11 +729,11 @@ const LocalSettings = () => {
                     } catch (parseError) { }
                     throw new Error(errorMessage);
                 }
-          
+
                 const localData: Local = await localRes.json();
 
                 setLocal({
-                    id: localData.id, 
+                    id: localData.id,
                     name: localData.name,
                     description: localData.description ?? '',
                     address: localData.address ?? '',
@@ -719,21 +741,20 @@ const LocalSettings = () => {
                     email: localData.email ?? '',
                     image_url: localData.image_url,
                     categorias_menu: localData.categorias_menu ?? [],
-                    latitude: localData.latitude ?? null, 
-                    longitude: localData.longitude ?? null, 
+                    latitude: localData.latitude ?? null,
+                    longitude: localData.longitude ?? null,
                 });
-                
-                const scheduleRes = await fetch(`${API_BASE}/settings/${localId}/schedule`);
-                if (scheduleRes.ok) {
-                    const schedulesData: ScheduleItem[] = await scheduleRes.json();
-                    setSchedules(schedulesData); 
+
+                // Los horarios ya vienen incluidos en la respuesta de getSettings
+                if ((localData as any).schedules) {
+                    setSchedules((localData as any).schedules);
                 } else {
                     setSchedules([]);
                 }
 
             } catch (err: any) {
                 console.error("Error de carga:", err);
-                setError(err.message || 'Error al cargar los datos del local.'); 
+                setError(err.message || 'Error al cargar los datos del local.');
             } finally {
                 setLoading(false);
             }
@@ -746,12 +767,12 @@ const LocalSettings = () => {
         if (name === 'address') return;
         setLocal(prev => prev ? { ...prev, [name]: value } : null);
     };
-    
+
     const handleScheduleChange = (day: DayOfWeek, field: 'open_time' | 'close_time', value: string) => {
         setSchedules(prevSchedules => {
             const existingSchedule = prevSchedules.find(s => s.day_of_week === day);
             if (existingSchedule) {
-                return prevSchedules.map(s => 
+                return prevSchedules.map(s =>
                     s.day_of_week === day ? { ...s, [field]: value } : s
                 );
             } else {
@@ -772,25 +793,25 @@ const LocalSettings = () => {
             name: local!.name, description: local!.description, address: local!.address,
             phone: local!.phone, email: local!.email, image_url: local!.image_url,
             categorias_menu: local!.categorias_menu,
-            latitude: local!.latitude, 
-            longitude: local!.longitude, 
+            latitude: local!.latitude,
+            longitude: local!.longitude,
         };
         try {
-            const res = await fetch(`${API_BASE}/settings/${local!.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend) });
+            const res = await fetch(`${API_BASE}/local/settings/${local!.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend) });
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `Error ${res.status}: Falló la actualización general.`);
             }
             return res.json();
         } catch (err: any) {
-            throw new Error(`Error en Configuración General: ${err.message}`); 
+            throw new Error(`Error en Configuración General: ${err.message}`);
         }
     };
-    
+
     const updateLocalSchedule = async () => {
         const validSchedules = schedules.filter(s => s.open_time && s.close_time);
         try {
-            const res = await fetch(`${API_BASE}/settings/${localId}/schedule`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(validSchedules) });
+            const res = await fetch(`${API_BASE}/local/settings/${localId}/schedule`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(validSchedules) });
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `Error ${res.status}: Falló la actualización de horarios.`);
@@ -806,11 +827,11 @@ const LocalSettings = () => {
             throw new Error(`Error en Horarios: ${err.message}`);
         }
     };
-    
+
     const handleUnifiedSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!local || !local.id || isUpdatingAny) return; 
-        
+        if (!local || !local.id || isUpdatingAny) return;
+
         setIsUpdating(true);
         setError(null);
         setSuccessMessage(null);
@@ -831,7 +852,7 @@ const LocalSettings = () => {
     };
 
     const isUpdatingAny = isUpdating || isUploading;
-    
+
     // ====================================================================
     // 5. RENDERS DE SECCIONES (Funciones para renderizar cada panel)
     // ====================================================================
@@ -839,25 +860,25 @@ const LocalSettings = () => {
     const renderGeneralSection = () => (
         <div className="space-y-6 animate-in fade-in duration-300">
             <h2 className="text-2xl font-bold text-white mb-4">Información y Contacto</h2>
-            <InputField id="name" name="name" label="Nombre del Local" value={local!.name} onChange={handleInputChange} required placeholder="Ej: La Esquina del Sabor" icon={<Store className="w-4 h-4" />} disabled={isUpdatingAny}/>
-            <TextareaField id="description" name="description" label="Descripción Corta" value={local!.description} onChange={handleInputChange} placeholder="Describe tu local" disabled={isUpdatingAny}/>
+            <InputField id="name" name="name" label="Nombre del Local" value={local!.name} onChange={handleInputChange} required placeholder="Ej: La Esquina del Sabor" icon={<Store className="w-4 h-4" />} disabled={isUpdatingAny} />
+            <TextareaField id="description" name="description" label="Descripción Corta" value={local!.description} onChange={handleInputChange} placeholder="Describe tu local" disabled={isUpdatingAny} />
 
             <div className="pt-6 border-t border-gray-700/30 space-y-5">
                 <h3 className="text-xl font-bold text-gray-200 flex items-center space-x-2"><MapPin className="w-5 h-5 text-blue-400" /><span>Ubicación y Contacto</span></h3>
-                
+
                 <div className="space-y-2">
                     <label htmlFor="address" className="block text-sm font-semibold text-gray-300">
                         Dirección Completa <span className="text-gray-500 font-normal">(Click para establecer ubicación exacta)</span>
                     </label>
                     <div className="relative group">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors pointer-events-none"><MapPin className="w-4 h-4" /></div>
-                        <input type="text" id="address" name="address" value={local!.address || ''} onChange={handleInputChange} onClick={handleAddressInputClick} readOnly={true} required placeholder="Toca aquí para seleccionar en el mapa" disabled={isUpdatingAny} className={`w-full pl-12 pr-4 py-3.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-gray-700/70 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}/>
+                        <input type="text" id="address" name="address" value={local!.address || ''} onChange={handleInputChange} onClick={handleAddressInputClick} readOnly={true} required placeholder="Toca aquí para seleccionar en el mapa" disabled={isUpdatingAny} className={`w-full pl-12 pr-4 py-3.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-gray-700/70 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`} />
                     </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <InputField id="phone" name="phone" label="Teléfono" value={local!.phone} onChange={handleInputChange} type="tel" placeholder="+XX XXXX XXXX" icon={<Phone className="w-4 h-4" />} disabled={isUpdatingAny}/>
-                    <InputField id="email" name="email" label="Email" value={local!.email} onChange={handleInputChange} type="email" placeholder="contacto@local.com" icon={<Mail className="w-4 h-4" />} disabled={isUpdatingAny}/>
+                    <InputField id="phone" name="phone" label="Teléfono" value={local!.phone} onChange={handleInputChange} type="tel" placeholder="+XX XXXX XXXX" icon={<Phone className="w-4 h-4" />} disabled={isUpdatingAny} />
+                    <InputField id="email" name="email" label="Email" value={local!.email} onChange={handleInputChange} type="email" placeholder="contacto@local.com" icon={<Mail className="w-4 h-4" />} disabled={isUpdatingAny} />
                 </div>
             </div>
         </div>
@@ -869,7 +890,7 @@ const LocalSettings = () => {
             {local!.image_url ? (
                 <div className="relative group max-w-md mx-auto">
                     <div className="aspect-video rounded-2xl overflow-hidden border-2 border-gray-600/30 shadow-2xl">
-                        <img src={local!.image_url} alt="Local" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                        <img src={local!.image_url} alt="Local" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     </div>
                     <button type="button" onClick={handleRemoveImage} disabled={isUpdatingAny} className="absolute top-3 right-3 p-2.5 bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-xl text-white transition-all duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50 shadow-lg cursor-pointer" title="Eliminar Imagen"><Trash className="w-5 h-5" /></button>
                 </div>
@@ -880,22 +901,22 @@ const LocalSettings = () => {
             )}
             <label className={`block max-w-md mx-auto py-4 px-6 rounded-xl font-bold text-center cursor-pointer transition-all shadow-lg ${isUploading || isUpdatingAny ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'}`}>
                 {isUploading ? (<span className="flex items-center justify-center space-x-3"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div><span>Subiendo imagen...</span></span>) : (<span className="flex items-center justify-center space-x-3"><Upload className="w-5 h-5" /><span>{local!.image_url ? 'Cambiar Imagen' : 'Subir Imagen'}</span></span>)}
-                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isUpdatingAny}/>
+                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isUpdatingAny} />
             </label>
         </div>
     );
 
     const renderScheduleSection = () => (
         <div className="animate-in fade-in duration-300">
-            <ScheduleManager 
+            <ScheduleManager
                 schedules={schedules}
-                setSchedules={setSchedules} 
+                setSchedules={setSchedules}
                 handleScheduleChange={handleScheduleChange}
                 isUpdatingAny={isUpdatingAny}
             />
         </div>
     );
-    
+
     const renderSection = () => {
         switch (currentSection) {
             case 'general':
@@ -908,41 +929,26 @@ const LocalSettings = () => {
                 return null;
         }
     };
-    
+
     // ====================================================================
     // 6. RENDERIZADO PRINCIPAL
     // ====================================================================
-    
+
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="relative w-16 h-16 mx-auto mb-6"><div className="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div><div className="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin"></div></div><p className="text-gray-300 font-medium">Cargando configuración...</p></div></div>
+        <div className="BGLocal min-h-screen flex items-center justify-center"><div className="text-center"><div className="relative w-16 h-16 mx-auto mb-6"><div className="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div><div className="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin"></div></div><p className="text-gray-300 font-medium">Cargando configuración...</p></div></div>
     );
 
     if (error && !local) return (
-        <div className="min-h-screen flex items-center justify-center p-6"><div className="text-center p-8 bg-gradient-to-br from-gray-800/80 to-gray-800/50 rounded-2xl shadow-2xl border border-red-700/30 text-red-400 backdrop-blur-sm max-w-md"><div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4"><AlertCircle className="w-8 h-8 text-red-500" /></div><p className="font-bold text-xl mb-2">Error al cargar la configuración</p><p className="text-gray-300">{error}</p></div></div>
+        <div className="BGLocal min-h-screen flex items-center justify-center p-6"><div className="text-center p-8 bg-gradient-to-br from-gray-800/80 to-gray-800/50 rounded-2xl shadow-2xl border border-red-700/30 text-red-400 backdrop-blur-sm max-w-md"><div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4"><AlertCircle className="w-8 h-8 text-red-500" /></div><p className="font-bold text-xl mb-2">Error al cargar la configuración</p><p className="text-gray-300">{error}</p></div></div>
     );
-    
+
     if (!local) return (
-        <div className="min-h-screen flex items-center justify-center"><p className="text-xl text-gray-400 font-medium">No se encontraron datos del local</p></div>
+        <div className="BGLocal min-h-screen flex items-center justify-center"><p className="text-xl text-gray-400 font-medium">No se encontraron datos del local</p></div>
     );
 
     return (
-        <div className="min-h-screen text-white relative">
-            {/* Modal de eliminación */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-                        <div className="flex items-center space-x-3 mb-4"><div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center"><AlertCircle className="w-6 h-6 text-red-400" /></div><h3 className="text-xl font-bold text-white">¿Eliminar imagen?</h3></div>
-                        <p className="text-gray-300 mb-6">Esta acción quitará la imagen actual del local. Deberás guardar la configuración para confirmar los cambios.</p>
-                        <div className="flex space-x-3">
-                            <button onClick={cancelRemoveImage} className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-semibold transition-colors cursor-pointer">Cancelar</button>
-                            <button onClick={confirmRemoveImage} className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors cursor-pointer">Eliminar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
-            {/* Modal del Mapa */}
-            <LocalSettings.MapLocationSelector 
+        <div className="BGLocal min-h-screen text-white relative">
+            <MapLocationSelector
                 address={local.address}
                 currentLat={local.latitude}
                 currentLng={local.longitude}
@@ -950,10 +956,21 @@ const LocalSettings = () => {
                 onClose={() => setShowMapModal(false)}
                 onSaveLocation={handleSaveLocation}
                 isSaving={isUpdatingAny}
+                setConfirmModal={setConfirmModal}
             />
-            
+
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal((prev: any) => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                confirmText={confirmModal.confirmText}
+            />
+
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-                
+
                 {/* 🌟 ENCBEZADO ALINEADO CON QR.tsx 🌟 */}
                 <header className="pt-12 pb-8">
                     {/* Alineación similar al QR (pt-12, mb-2, pb-8) */}
@@ -965,7 +982,7 @@ const LocalSettings = () => {
                 {error && <ErrorAlert message={error} />}
 
                 <form onSubmit={handleUnifiedSubmit} className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    
+
                     {/* Panel de Navegación Lateral (Columna 1) */}
                     <div className="lg:col-span-1 space-y-2 bg-gray-800/50 p-4 rounded-xl self-start sticky top-4">
                         {SECTIONS.map((section) => {
@@ -976,11 +993,10 @@ const LocalSettings = () => {
                                     key={section.key}
                                     type="button"
                                     onClick={() => setCurrentSection(section.key)}
-                                    className={`w-full text-left flex items-center p-4 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${
-                                        isActive 
-                                            ? 'bg-blue-600/30 text-blue-300 shadow-lg border border-blue-600/50' 
-                                            : 'text-gray-300 hover:bg-gray-700/50'
-                                    }`}
+                                    className={`w-full text-left flex items-center p-4 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${isActive
+                                        ? 'bg-blue-600/30 text-blue-300 shadow-lg border border-blue-600/50'
+                                        : 'text-gray-300 hover:bg-gray-700/50'
+                                        }`}
                                     disabled={isUpdatingAny}
                                 >
                                     <IconComponent className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -989,23 +1005,22 @@ const LocalSettings = () => {
                             );
                         })}
                     </div>
-                    
+
                     {/* Contenido de la Sección Activa y Botón de Guardar (Columna 2) */}
                     <div className="lg:col-span-3 space-y-8">
                         {/* Contenido de la sección */}
                         <div className="bg-gray-800/50 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-700/50 min-h-[600px]">
                             {renderSection()}
                         </div>
-                        
+
                         {/* 🌟 BOTÓN DE GUARDAR EN EL FLUJO NORMAL (NO STICKY) 🌟 */}
                         <button
                             type="submit"
                             disabled={isUpdatingAny}
-                            className={`w-full py-5 px-6 rounded-2xl font-bold text-lg shadow-2xl transition-all flex items-center justify-center space-x-3 cursor-pointer ${
-                                isUpdatingAny
-                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                    : 'bg-green-600 hover:bg-green-700 text-white transform hover:scale-[1.01] active:scale-[0.99]'
-                            }`}
+                            className={`w-full py-5 px-6 rounded-2xl font-bold text-lg shadow-2xl transition-all flex items-center justify-center space-x-3 cursor-pointer ${isUpdatingAny
+                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700 text-white transform hover:scale-[1.01] active:scale-[0.99]'
+                                }`}
                         >
                             {isUpdating ? (
                                 <>

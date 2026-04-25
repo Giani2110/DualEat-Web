@@ -26,7 +26,7 @@ const Register = () => {
 
   const handleNext = async () => {
     const deviceId = await getDeviceId();
-    
+
     if (!email || !password || !confirmPassword) {
       toast.error("Por favor, completa todos los campos.");
       return;
@@ -55,15 +55,18 @@ const Register = () => {
       title="Crear cuenta"
       subtitle="Completa tus datos para comenzar tus artes culinarias"
       children2={
-        <div className="text-center text-[15px] flex items-center justify-center mt-6 gap-3">
-          <span className="text4">¿Ya tienes cuenta?</span>
-          <Link
-            to={ROUTES.AUTH.LOGIN}
-            className="text5 underline cursor-pointer hover:text-red-600 font-bold"
-          >
-            Inicia sesión en DualEat
-          </Link>
-        </div>
+        <>
+
+          <div className="text-center text-[15px] flex items-center justify-center mt-3 gap-3 pb-4">
+            <span className="text4">¿Tienes un local?</span>
+            <Link
+              to={ROUTES.AUTH.REGISTER_LOCAL}
+              className="text5 underline cursor-pointer hover:text-red-600 font-bold"
+            >
+              Regístralo ahora
+            </Link>
+          </div>
+        </>
       }
       background="right-background"
       Dform="Dform-right"

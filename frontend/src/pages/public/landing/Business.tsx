@@ -1,91 +1,9 @@
-import { useState } from "react";
-import { Mail, MessageCircle } from "lucide-react";
-import axios from "axios";
+import { Mail, MessageCircle, Store, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import DownloadSectionBG from "@components/shared/DownloadSectionBG";
 
-// Define la interfaz para el estado del formulario para un tipado estricto
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  businessName: string;
-  businessLocation: string;
-  visitTime: string;
-  message: string;
-  newsletter: boolean;
-}
-
 const LandingBusiness = () => {
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    phone: "",
-    businessName: "",
-    businessLocation: "",
-    visitTime: "",
-    message: "",
-    newsletter: false,
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({
-    message: "",
-    type: "",
-  });
-
-  // Tipado para el evento de cambio de input
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-    }));
-  };
-
-  // Tipado para el evento de envío del formulario
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatusMessage({ message: "", type: "" });
-
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/contact/business",
-        formData
-      );
-
-      if (response.status === 200) {
-        setStatusMessage({
-          message: "¡Gracias por contactarnos! Te responderemos pronto.",
-          type: "success",
-        });
-        // Limpiar el formulario después del envío exitoso
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          businessName: "",
-          businessLocation: "",
-          visitTime: "",
-          message: "",
-          newsletter: false,
-        });
-      }
-    } catch (error) {
-      console.error("Error al enviar el formulario:", error);
-      setStatusMessage({
-        message:
-          "Ocurrió un error. Por favor, intenta de nuevo o contáctanos por mail.",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bgLanding">
@@ -130,170 +48,53 @@ const LandingBusiness = () => {
           </div>
         </div>
 
-        {/* Right Column - Form */}
-        <div className="bg-white p-8 rounded-lg min-h-[800px] w-full shadow-sm hover:shadow-xl transition-all duration-300">
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6 h-full flex flex-col justify-evenly"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                  placeholder="Nombre completo"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Mail
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                  placeholder="tu@mail.com"
-                  required
-                />
-              </div>
+        {/* Right Column - CTA */}
+        <div className="bg-white p-10 rounded-2xl w-full shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col justify-center relative overflow-hidden group">
+          <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-red-50 rounded-full blur-3xl opacity-50 group-hover:bg-red-100 transition-colors duration-500"></div>
+
+          <div className="relative z-10 flex flex-col items-center text-center space-y-8 my-auto">
+            <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center transform rotate-3 group-hover:rotate-6 transition-transform duration-300 shadow-sm border border-red-100">
+              <Store className="w-10 h-10 text-red" />
             </div>
 
-            <div>
-              <label
-                htmlFor="businessName"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Nombre del Local
-              </label>
-              <input
-                type="text"
-                id="businessName"
-                name="businessName"
-                value={formData.businessName}
-                onChange={handleInputChange}
-                className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                placeholder="Nombre del negocio"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="businessLocation"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Lugar del local
-                </label>
-                <input
-                  type="text"
-                  id="businessLocation"
-                  name="businessLocation"
-                  value={formData.businessLocation}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                  placeholder="Ubicación del negocio"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Teléfono
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                  placeholder="Teléfono de contacto"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Mensaje
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full px-3 py-3 border text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                placeholder="Contanos sobre tu negocio..."
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="newsletter"
-                name="newsletter"
-                checked={formData.newsletter}
-                onChange={handleInputChange}
-                className="w-4 h-4 text-red-500 border-gray-300 rounded focus:ring-red-500 transition-all duration-200"
-              />
-              <label
-                htmlFor="newsletter"
-                className="text-sm font-medium text-gray-700"
-              >
-                Deseo recibir información de DualEat
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full text-white py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-102 hover:shadow-lg
-              ${
-                loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-red cursor-pointer"
-              }`}
-            >
-              {loading ? "Enviando..." : "Enviar"}
-            </button>
-            {statusMessage.message && (
-              <p
-                className={`text-center mt-4 text-sm font-medium ${
-                  statusMessage.type === "success"
-                    ? "text-green-500"
-                    : "text-red-500"
-                }`}
-              >
-                {statusMessage.message}
+            <div className="space-y-4">
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+                Empezá a vender con nosotros
+              </h2>
+              <p className="text-gray-500 text-lg max-w-md mx-auto leading-relaxed">
+                El proceso de registro es rápido, simple y 100% online. Configurá tu menú y comenzá a recibir pedidos hoy mismo.
               </p>
-            )}
-          </form>
+            </div>
+
+            <div className="flex flex-col w-full max-w-sm space-y-4 text-left bg-gray-50 p-6 rounded-xl border border-gray-100">
+              <div className="flex items-center space-x-3 text-gray-700">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="font-medium text-sm">Registro gratuito y sin compromiso</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-700">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="font-medium text-sm">Panel para gestionar tu menú</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-700">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="font-medium text-sm">Funciones dedicadas para impulsar tu negocio</span>
+              </div>
+            </div>
+
+            <Link
+              to="/signup/locals"
+              className="w-full max-w-sm group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white transition-all duration-300 bg-red border border-transparent rounded-xl hover:bg-red-700 hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+            >
+              <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
+              <span className="relative flex items-center gap-2">
+                Registrar mi local
+                <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
+          </div>
         </div>
       </main>
-      {/* Sección Inferior - Parte específica de LandingBusiness */}
+
       <section className="mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden mb-10">
         <DownloadSectionBG
           background="bg-gradient-to-b from-[#232526] to-[#414345]"

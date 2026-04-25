@@ -60,14 +60,41 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       setUnreadCount((prev) => prev + 1);
     };
 
+    const onLocalNew = (data: any) => {
+      const customNotif: Notification = {
+        id: "local_notif_" + Date.now(),
+        message: data.message,
+        metadata: {
+          title: data.title,
+        },
+        created_at: new Date().toISOString(),
+      } as Notification;
+
+      setNotifications((prev) => [customNotif, ...prev]);
+      setUnreadCount((prev) => prev + 1);
+
+      // Opcional: mostrar un toast inmediato para el local
+      toast.success(`${data.title}: ${data.message}`, { duration: 4000 });
+    };
+
     socket.on("new_community_post", onNew);
     socket.on("new_comment", onNew);
+
+    if (user?.isBusiness) {
+      socket.on("new_category_local", onLocalNew);
+      socket.on("new_review_local", onLocalNew);
+    }
 
     return () => {
       socket.off("new_community_post", onNew);
       socket.off("new_comment", onNew);
+
+      if (user?.isBusiness) {
+        socket.off("new_category_local", onLocalNew);
+        socket.off("new_review_local", onLocalNew);
+      }
     };
-  }, [socket]);
+  }, [socket, user]);
 
   // Marcar todas como leídas
   const markAsRead = async () => {

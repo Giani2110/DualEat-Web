@@ -233,10 +233,13 @@ const Dashboard = () => {
       try {
         const [ordersRes, topFoodsRes, earningsRes, reviewsRes, subscriptionRes] = await Promise.allSettled([
           fetch(`${API_BASE}/order/locals/${localId}/orders`),
+
           fetch(`${API_BASE}/local/statistics/${localId}/top-foods?from=${fromDate}&to=${toDate}`),
           fetch(`${API_BASE}/local/statistics/${localId}/monthly-earnings?from=${fromDate}&to=${toDate}`),
-          fetch(`${API_BASE}/local/locals/${localId}/reviews`),
-          fetch(`${API_BASE}/subscriptions/local/${localId}`),
+
+          fetch(`${API_BASE}/review/locals/${localId}/reviews`),
+
+          fetch(`${API_BASE}/subscription/local/${localId}`),
         ]);
 
         let newStats = { ...stats };
@@ -472,11 +475,11 @@ const Dashboard = () => {
                     color: 'white',
                     fontSize: '12px'
                   }}
-                  labelFormatter={(label: string) => label ?
+                  labelFormatter={(label: any) => label ?
                     `Mes: ${label}` : ''}
-                  formatter={(value: number, _name: string, props: any) => {
-                    if (props.payload.isPlaceholder) return ['', ''];
-                    return [`Ingreso total\n${formatCurrencyShort(value)}`, ''];
+                  formatter={(value: any, _name: any, props: any) => {
+                    if (props?.payload?.isPlaceholder) return ['', ''];
+                    return [`Ingreso total\n${formatCurrencyShort(Number(value))}`, ''];
                   }}
                 />
                 <Area
@@ -727,7 +730,7 @@ const Dashboard = () => {
   // Renderizado (Loading, Error, y Contenido Principal)
   // ----------------------------------------------------------------------
   if (loading || (!subscriptionChecked && !error)) return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div className="BGLocal min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
         <p className="text-gray-400">Cargando dashboard...</p>
@@ -735,7 +738,7 @@ const Dashboard = () => {
     </div>
   );
   if (error) return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="BGLocal min-h-screen flex items-center justify-center">
       <div className="text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-red-700 text-red-400">
         <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
         <p className="font-semibold text-lg mb-2">Error al cargar el panel de control</p>
@@ -746,7 +749,7 @@ const Dashboard = () => {
 
   if (subscriptionChecked && !hasActiveSubscription) {
     return (
-      <div className="bgFood2 min-h-screen text-white flex items-center justify-center p-4">
+      <div className="BGLocal min-h-screen text-white flex items-center justify-center p-4">
         <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-lg text-center border border-gray-700">
           <div className="bg-amber-500/10 p-4 rounded-full inline-block mb-4 border border-amber-500/20">
             <Lock className="w-12 h-12 text-amber-500" />
@@ -765,7 +768,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="bgFood2 min-h-screen text-white relative">
+    <div className="BGLocal min-h-screen text-white relative">
 
       {/* Componente Modal del Tour */}
       <TourModal />

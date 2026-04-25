@@ -37,7 +37,7 @@ const UploadMenuSection = ({ localId, onSuccess, onDishesExtracted }: UploadMenu
     formData.append('menuImage', file);
 
     try {
-      const response = await fetch(`${API_BASE}/local/${localId}/menu-upload`, {
+      const response = await fetch(`${API_BASE}/menu/local/${localId}/menu-upload`, {
         method: 'POST',
         body: formData,
       });

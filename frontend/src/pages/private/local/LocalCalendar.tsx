@@ -200,9 +200,9 @@ const LocalCalendar = () => {
       const endOfMonth = new Date(year, month + 1, 7).toISOString();
 
       const [eventsRes, notesRes, subscriptionRes] = await Promise.allSettled([
-        fetch(`${API_BASE}/calendar/local/${id}/events?start=${startOfMonth}&end=${endOfMonth}`),
-        fetch(`${API_BASE}/calendar/local/${id}/notes`),
-        fetch(`${API_BASE}/subscriptions/local/${id}`),
+        fetch(`${API_BASE}/local/agenda/local/${id}/events?start=${startOfMonth}&end=${endOfMonth}`),
+        fetch(`${API_BASE}/local/agenda/local/${id}/notes`),
+        fetch(`${API_BASE}/subscription/local/${localId}`),
       ]);
 
       if (subscriptionRes.status === 'fulfilled') {
@@ -306,7 +306,7 @@ const LocalCalendar = () => {
     const { type, id } = confirmationDetails;
 
     setLoading(true);
-    const endpoint = type === 'event' ? `/calendar/events/${id}` : `/calendar/notes/${id}`;
+    const endpoint = type === 'event' ? `/local/agenda/events/${id}` : `/local/agenda/notes/${id}`;
 
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE' });
@@ -328,7 +328,7 @@ const LocalCalendar = () => {
   const toggleEventStatus = async (event: LocalEvent, newStatus: LocalEvent['status'], closeModal?: () => void) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/calendar/events/${event.id}`, {
+      const res = await fetch(`${API_BASE}/local/agenda/events/${event.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -350,7 +350,7 @@ const LocalCalendar = () => {
   const toggleNoteCompletion = async (note: LocalNote) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/calendar/notes/${note.id}`, {
+      const res = await fetch(`${API_BASE}/local/agenda/notes/${note.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_completed: !note.is_completed }),
@@ -367,7 +367,7 @@ const LocalCalendar = () => {
   const toggleNotePin = async (note: LocalNote) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/calendar/notes/${note.id}`, {
+      const res = await fetch(`${API_BASE}/local/agenda/notes/${note.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_pinned: !note.is_pinned }),
@@ -634,13 +634,11 @@ const LocalCalendar = () => {
         body.description = content;
         if (endTime) body.end_time = endTime;
 
-        endpoint = isEditing ? `/calendar/events/${item?.id}` : '/calendar/events';
-        method = isEditing ? 'PUT' : 'POST';
+        endpoint = isEditing ? `/local/agenda/events/${item?.id}` : '/local/agenda/events'; method = isEditing ? 'PUT' : 'POST';
       } else {
         body.content = content;
         if (dueDate) body.due_date = dueDate;
-
-        endpoint = isEditing ? `/calendar/notes/${item?.id}` : '/calendar/notes';
+        endpoint = isEditing ? `/local/agenda/notes/${item?.id}` : '/local/agenda/notes';
         method = isEditing ? 'PUT' : 'POST';
       }
 
@@ -943,7 +941,7 @@ const LocalCalendar = () => {
   };
 
   if (loading || (!subscriptionChecked && !error)) return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div className="BGLocal min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
         <p className="text-gray-400">Cargando calendario...</p>
@@ -952,7 +950,7 @@ const LocalCalendar = () => {
   );
 
   if (error) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+    <div className="BGLocal min-h-screen flex items-center justify-center">
       <div className="text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-red-700 text-red-400">
         <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
         <p className="font-semibold text-lg mb-2">Error al cargar la aplicación de calendario</p>
@@ -963,7 +961,7 @@ const LocalCalendar = () => {
 
   if (subscriptionChecked && !hasActiveSubscription) {
     return (
-      <div className="bgFood2 min-h-screen text-white flex items-center justify-center p-4">
+      <div className="BGLocal min-h-screen text-white flex items-center justify-center p-4">
         <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-lg text-center border border-gray-700">
           <div className="bg-amber-500/10 p-4 rounded-full inline-block mb-4 border border-amber-500/20">
             <Lock className="w-12 h-12 text-amber-500" />
@@ -982,7 +980,7 @@ const LocalCalendar = () => {
   }
 
   return (
-    <div className="bgFood2 min-h-screen text-white relative">
+    <div className="BGLocal min-h-screen text-white relative">
 
       {/* Componente Modal del Tour */}
       <TourModal />

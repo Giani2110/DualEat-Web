@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import '@assets/scss/private/users/users.scss';
 import EditFoodModal from "../../../components/private/locals/EditFoodModal"
 import UploadMenuSection from "../../../components/private/locals/UploadMenuSection"
+import ConfirmModal from '@/components/modal/ConfirmModal';
 import React from 'react';
 
 // ----------------------------------------------------------------------
@@ -120,9 +121,23 @@ const LocalMenu = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [foodToHide, setFoodToHide] = useState<Food | null>(null);
   const [showOcrModal, setShowOcrModal] = useState(false);
+
+  // Integrated unified confirm modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'success';
+    onConfirm: () => void;
+    confirmText?: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    onConfirm: () => { },
+  });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -138,11 +153,7 @@ const LocalMenu = () => {
   const [extractedDishes, setExtractedDishes] = useState<any[]>([]);
 
   const [showCreateCategoryModal, setShowCreateCategoryModal] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryError, setNewCategoryError] = useState<string | null>(null);
-
-  const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
-  const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(null);
 
   const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -194,7 +205,8 @@ const LocalMenu = () => {
     const checkSub = async () => {
       if (!localId) return;
       try {
-        const response = await fetch(`${API_BASE}/subscriptions/local/${localId}`);
+        // CORREGIDO: /subscription en lugar de /subscriptions
+        const response = await fetch(`${API_BASE}/subscription/local/${localId}`);
         if (response.ok) {
           const data = await response.json();
           setHasActiveSubscription(data?.status === 'active');
@@ -208,21 +220,27 @@ const LocalMenu = () => {
     checkSub();
   }, [localId, API_BASE]);
 
+  // 1. OBTENER PLATOS
   useEffect(() => {
     const fetchFoods = async () => {
       if (!localId) return;
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_BASE}/food/local/${localId}/foods`);
+        const response = await fetch(`${API_BASE}/menu/local/${localId}/foods`);
         if (!response.ok) {
           throw new Error('Error al cargar los platos del menú.');
         }
         const data = await response.json();
-        setFoods(data);
+
+        // Extracción segura del Array
+        const items = Array.isArray(data) ? data : (data?.data || []);
+        setFoods(items);
+
       } catch (err) {
         console.error(err);
         setError('No se pudo cargar el menú. Intente de nuevo.');
+        setFoods([]);
       } finally {
         setLoading(false);
       }
@@ -230,55 +248,62 @@ const LocalMenu = () => {
     fetchFoods();
   }, [localId, API_BASE]);
 
+  // 2. OBTENER CATEGORÍAS DEL LOCAL
   useEffect(() => {
     const fetchLocalCategories = async () => {
       if (!localId) return;
       try {
-        const response = await fetch(`${API_BASE}/local-menu-categories/local/${localId}`);
+        const response = await fetch(`${API_BASE}/food-categories/local/${localId}`);
         if (!response.ok) {
           throw new Error('Error al cargar las categorías del local.');
         }
         const data = await response.json();
-        setLocalCategories(data);
+
+        // Extracción segura del Array
+        const items = Array.isArray(data) ? data : (data?.data || []);
+        setLocalCategories(items);
+
       } catch (err) {
         console.error(err);
-        setError('Error al cargar las categorías. Intente de nuevo.');
+        setLocalCategories([]);
       }
     };
     fetchLocalCategories();
   }, [localId, API_BASE]);
 
+  // 3. OBTENER CATEGORÍAS PREESTABLECIDAS
   useEffect(() => {
     const fetchPredefinedCategories = async () => {
       try {
-        const response = await fetch(`${API_BASE}/admin/food-categories`);
+        const response = await fetch(`${API_BASE}/food-categories/categories`);
         if (!response.ok) {
           throw new Error('Error al cargar las categorías preestablecidas.');
         }
         const data = await response.json();
-        setPredefinedCategories(data);
+
+        // Extracción segura del Array
+        const items = Array.isArray(data) ? data : (data?.data || []);
+        setPredefinedCategories(items);
+
       } catch (err) {
         console.error(err);
+        setPredefinedCategories([]);
       }
     };
     fetchPredefinedCategories();
   }, [API_BASE]);
 
   useEffect(() => {
-    if (isModalOpen || isConfirmModalOpen || showOcrModal || showCreateCategoryModal || showDeleteCategoryModal || isTourOpen) {
+    if (isModalOpen || confirmModal.isOpen || showOcrModal || showCreateCategoryModal || isTourOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isModalOpen, isConfirmModalOpen, showOcrModal, showCreateCategoryModal, showDeleteCategoryModal, isTourOpen]);
+  }, [isModalOpen, confirmModal.isOpen, showOcrModal, showCreateCategoryModal, isTourOpen]);
 
-  const handleHideFood = async () => {
-    if (!foodToHide) return;
+  const handleHideFood = async (foodId: number) => {
     try {
-      const response = await fetch(`${API_BASE}/food/foods/${foodToHide.id}`, {
+      const response = await fetch(`${API_BASE}/menu/foods/${foodId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -295,14 +320,20 @@ const LocalMenu = () => {
     } catch (err) {
       console.error(err);
     } finally {
-      setIsConfirmModalOpen(false);
-      setFoodToHide(null);
+      setConfirmModal(prev => ({ ...prev, isOpen: false }));
     }
   };
 
   const handleAddFood = () => {
     if (!localId) {
-      alert('Error: No se encontró el ID del local.');
+      setConfirmModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'No se encontró el ID del local.',
+        type: 'danger',
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false })),
+        confirmText: 'Entendido'
+      });
       return;
     }
 
@@ -332,7 +363,6 @@ const LocalMenu = () => {
 
     const foodData = {
       ...food,
-      // Si tiene local_menu_category_id, no enviar category_id
       category_id: food.local_menu_category_id ? undefined : food.category_id,
       local_menu_category_id: food.local_menu_category_id
     };
@@ -340,8 +370,8 @@ const LocalMenu = () => {
     try {
       const method = isNewFood ? 'POST' : 'PUT';
       const url = isNewFood
-        ? `${API_BASE}/locals/${food.local_id}/manual-menu`
-        : `${API_BASE}/food/foods/${food.id}`;
+        ? `${API_BASE}/menu/locals/${food.local_id}/manual-menu`
+        : `${API_BASE}/menu/foods/${food.id}`;
 
       const response = await fetch(url, {
         method: method,
@@ -355,12 +385,21 @@ const LocalMenu = () => {
         throw new Error(`Error al ${isNewFood ? 'agregar' : 'actualizar'} el plato.`);
       }
 
-      const savedFood = await response.json();
+      // 1. Obtenemos la respuesta del backend
+      const rawData = await response.json();
+
+      // 2. Extraemos el plato real (por si el backend lo devuelve dentro de "data")
+      const savedFood = rawData.data ? rawData.data : rawData;
+
+      // 3. Actualizamos el estado con una validación de seguridad extrema
       setFoods(prevFoods => {
+        // Nos aseguramos 100% de que sea un array
+        const safePrevFoods = Array.isArray(prevFoods) ? prevFoods : [];
+
         if (isNewFood) {
-          return [...prevFoods, savedFood];
+          return [...safePrevFoods, savedFood];
         }
-        return prevFoods.map(f => (f.id === savedFood.id ? savedFood : f));
+        return safePrevFoods.map(f => (f.id === savedFood.id ? savedFood : f));
       });
 
       if (food.id && food.id.toString().startsWith('temp-')) {
@@ -369,11 +408,15 @@ const LocalMenu = () => {
 
     } catch (err) {
       console.error('Error al guardar el plato:', err);
-      if (err instanceof Error) {
-        alert(`Hubo un error al guardar el plato: ${err.message}.`);
-      } else {
-        alert('Hubo un error al guardar el plato.');
-      }
+      const errorMsg = err instanceof Error ? err.message : 'Hubo un error al guardar el plato.';
+      setConfirmModal({
+        isOpen: true,
+        title: 'Error al guardar',
+        message: errorMsg,
+        type: 'danger',
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false })),
+        confirmText: 'Cerrar'
+      });
     } finally {
       setIsModalOpen(false);
       setSelectedFood(null);
@@ -382,7 +425,14 @@ const LocalMenu = () => {
 
   const handleExtractedDishes = (dishes: any[]) => {
     if (dishes.length === 0) {
-      alert('No se encontraron platos extraídos.');
+      setConfirmModal({
+        isOpen: true,
+        title: 'OCR - Sin resultados',
+        message: 'No se encontraron platos en la imagen escaneada.',
+        type: 'warning',
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false })),
+        confirmText: 'Volver a intentar'
+      });
     }
     setExtractedDishes(dishes);
     setShowOcrModal(false);
@@ -390,25 +440,43 @@ const LocalMenu = () => {
 
   const handleSaveAllExtractedDishes = async () => {
     if (!localId) {
-      alert('Error: ID del local no encontrado.');
+      setConfirmModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'ID del local no encontrado.',
+        type: 'danger',
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false })),
+      });
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE}/locals/${localId}/manual-menu/bulk`, {
+      const response = await fetch(`${API_BASE}/menu/locals/${localId}/manual-menu/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ dishes: extractedDishes }),
       });
+
       if (!response.ok) {
         throw new Error('Error al guardar los platos extraídos.');
       }
 
       const savedDishes = await response.json();
-      setFoods([...foods, ...savedDishes.data]);
-      setExtractedDishes([]);
+
+      // 1. Extraemos los platos nuevos asegurándonos 100% de que sea un Array
+      const newDishes = Array.isArray(savedDishes.data)
+        ? savedDishes.data
+        : (Array.isArray(savedDishes) ? savedDishes : []);
+
+      // 2. Actualizamos el estado de React de forma segura
+      setFoods(prevFoods => {
+        const safePrevFoods = Array.isArray(prevFoods) ? prevFoods : [];
+        return [...safePrevFoods, ...newDishes];
+      });
+
+      setExtractedDishes([]); // Limpiamos la lista de revisión
     } catch (error: any) {
       console.error("Error al guardar los platos extraídos:", error);
       setError(error.message);
@@ -438,27 +506,22 @@ const LocalMenu = () => {
       return;
     }
 
-    let categoryNameToCreate: string;
-    let iconUrl: string | null = null;
-
-    if (selectedPredefinedCategory) {
-      const selectedCat = predefinedCategories.find(cat => cat.id.toString() === selectedPredefinedCategory);
-      if (!selectedCat) {
-        setNewCategoryError('Categoría preestablecida no encontrada.');
-        return;
-      }
-      categoryNameToCreate = selectedCat.name;
-      iconUrl = selectedCat.icon_url;
-    } else if (newCategoryName.trim() !== '') {
-      categoryNameToCreate = newCategoryName.trim();
-    } else {
-      setNewCategoryError('Debe seleccionar una categoría o ingresar un nombre.');
+    if (!selectedPredefinedCategory) {
+      setNewCategoryError('Debe seleccionar una categoría de la lista.');
       return;
     }
 
+    const selectedCat = predefinedCategories.find(cat => cat.id.toString() === selectedPredefinedCategory);
+    if (!selectedCat) {
+      setNewCategoryError('Categoría seleccionada no encontrada.');
+      return;
+    }
+
+    const categoryNameToCreate = selectedCat.name;
     const isDuplicate = localCategories.some(cat => cat.name.toLowerCase() === categoryNameToCreate.toLowerCase());
+
     if (isDuplicate) {
-      setNewCategoryError('Ya existe una categoría con ese nombre.');
+      setNewCategoryError('Ya tienes esta categoría en tu menú.');
       return;
     }
 
@@ -466,70 +529,79 @@ const LocalMenu = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/local-menu-categories`, {
+      const response = await fetch(`${API_BASE}/food-categories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: categoryNameToCreate,
+          category_id: selectedPredefinedCategory,
           local_id: localId,
-          icon_url: iconUrl,
         }),
       });
       if (!response.ok) {
-        throw new Error('Error al crear la categoría.');
+        throw new Error('Error al vincular la categoría.');
       }
-      const createdCategory = await response.json();
-      setLocalCategories(prevCategories => [...prevCategories, createdCategory]);
-      setNewCategoryName('');
+
+      const updatedLocal = await response.json();
+      // El backend devuelve el local con sus categorías (según mi refactor en el servicio)
+      setLocalCategories(updatedLocal.categories || []);
+
       setSelectedPredefinedCategory('');
       setShowCreateCategoryModal(false);
       setLoading(false);
     } catch (err) {
       console.error(err);
-      setNewCategoryError('Hubo un error al crear la categoría. Por favor, inténtalo de nuevo.');
+      setNewCategoryError('Hubo un error al vincular la categoría.');
       setLoading(false);
     }
   };
 
 
-  const confirmDeleteCategory = async () => {
-    if (!categoryToDeleteId) return;
+  const confirmDeleteCategory = async (categoryId: number) => {
     try {
-      const response = await fetch(`${API_BASE}/local-menu-categories/${categoryToDeleteId}`, {
+      // CORREGIDO: /food-categories en lugar de /local-menu-categories
+      const response = await fetch(`${API_BASE}/food-categories/local/${localId}/${categoryId}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
         throw new Error('Error al eliminar la categoría.');
       }
 
-      setLocalCategories(prevCategories => prevCategories.filter(cat => cat.id !== categoryToDeleteId));
+      setLocalCategories(prevCategories => prevCategories.filter(cat => cat.id !== categoryId));
 
       setFoods(prevFoods =>
         prevFoods.map(food => {
-          if (food.local_menu_category_id === categoryToDeleteId) {
+          if (food.local_menu_category_id === categoryId) {
             return { ...food, local_menu_category_id: undefined };
           }
           return food;
         })
       );
 
-      if (selectedCategory === categoryToDeleteId) {
+      if (selectedCategory === categoryId) {
         setSelectedCategory(null);
       }
-
-      setShowDeleteCategoryModal(false);
-      setCategoryToDeleteId(null);
     } catch (err) {
       console.error(err);
+    } finally {
+      setConfirmModal(prev => ({ ...prev, isOpen: false }));
     }
   };
 
   const openDeleteCategoryModal = (categoryId: number) => {
-    setCategoryToDeleteId(categoryId);
-    setShowDeleteCategoryModal(true);
+    setConfirmModal({
+      isOpen: true,
+      title: 'Eliminar Categoría',
+      message: '¿Estás seguro de que deseas eliminar esta categoría? Esta acción es irreversible.',
+      type: 'danger',
+      onConfirm: () => confirmDeleteCategory(categoryId),
+      confirmText: 'Eliminar'
+    });
   };
 
   const filteredFoods = useMemo(() => {
+    // 👇 AGREGA ESTA LÍNEA EXACTAMENTE AQUÍ 👇
+    if (!Array.isArray(foods)) return [];
+
     return foods.filter(food =>
       food.available &&
       (selectedCategory === null ||
@@ -776,7 +848,7 @@ const LocalMenu = () => {
       {/* Componente Modal del Tour */}
       <TourModal />
 
-      <div className="bgFood2 min-h-screen text-white p-4 md:p-6">
+      <div className="BGLocal min-h-screen text-white p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
           <header className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-8">
             <div>
@@ -1032,8 +1104,14 @@ const LocalMenu = () => {
                                 className="bg-gray-900/70 backdrop-blur-sm p-2 rounded-full text-red-400 hover:text-red-200 transition-colors"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setFoodToHide(food);
-                                  setIsConfirmModalOpen(true);
+                                  setConfirmModal({
+                                    isOpen: true,
+                                    title: 'Confirmar Eliminación',
+                                    message: '¿Estás seguro de que quieres ELIMINAR este plato?',
+                                    type: 'danger',
+                                    onConfirm: () => handleHideFood(food.id),
+                                    confirmText: 'Eliminar'
+                                  });
                                 }}
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -1075,63 +1153,6 @@ const LocalMenu = () => {
         />
       )}
 
-      {isConfirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-md"
-            onClick={() => setIsConfirmModalOpen(false)}
-          />
-          <div className="relative w-full max-w-sm rounded-3xl bg-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in overflow-hidden">
-            <div className="p-2 bg-gradient-to-r from-[#B53325] to-[#d94a36]" />
-            <div className="relative flex items-center justify-between p-6 border-b border-gray-700/50">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-r from-[#B53325] to-[#d94a36] rounded-xl">
-                  <Trash2 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                    Confirmar Eliminación
-                  </h2>
-                </div>
-              </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setIsConfirmModalOpen(false)}
-                className="group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200"
-              >
-                <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
-              </button>
-            </div>
-            <div className="p-6 text-center">
-              <p className="text-gray-300 mb-6">
-                ¿Estás seguro de que quieres ELIMINAR este plato?
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setIsConfirmModalOpen(false)}
-                  className="px-6 py-3 bg-gray-600/20 hover:bg-gray-600/30 text-gray-300 hover:text-white rounded-xl transition-all duration-200 font-semibold border border-gray-600/30 hover:border-gray-500/50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleHideFood}
-                  className="group relative overflow-hidden px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  <div className="flex items-center justify-center space-x-2">
-                    <Trash2 className="w-5 h-5" />
-                    <span>Confirmar Eliminación</span>
-                  </div>
-                  <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {showOcrModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -1162,7 +1183,7 @@ const LocalMenu = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
-            onClick={() => { setShowCreateCategoryModal(false); setNewCategoryName(''); setSelectedPredefinedCategory(''); setNewCategoryError(null); }}
+            onClick={() => { setShowCreateCategoryModal(false); setSelectedPredefinedCategory(''); setNewCategoryError(null); }}
           />
           <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in">
             <div className="relative flex items-center justify-between p-6 border-b border-gray-700/50">
@@ -1179,57 +1200,49 @@ const LocalMenu = () => {
               <button
                 type="button"
                 title='Cerrar'
-                onClick={() => { setShowCreateCategoryModal(false); setNewCategoryName(''); setSelectedPredefinedCategory(''); setNewCategoryError(null); }}
+                onClick={() => { setShowCreateCategoryModal(false); setSelectedPredefinedCategory(''); setNewCategoryError(null); }}
                 className="group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200"
               >
                 <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
               </button>
             </div>
             <div className="p-6">
-              <label htmlFor="predefined-category" className="block text-gray-400 text-sm font-semibold mb-2">
-                Elegir de una lista
+              <label htmlFor="predefined-category" className="block text-gray-700 text-sm font-bold mb-3">
+                Selecciona una Categoría
               </label>
-              <select
-                id="predefined-category"
-                value={selectedPredefinedCategory}
-                onChange={(e) => { setSelectedPredefinedCategory(e.target.value); setNewCategoryName(''); }}
-                disabled={!!newCategoryName.trim()}
-                className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e5a657] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
-              >
-                <option value="">-- Seleccionar --</option>
-                {predefinedCategories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-              <div className="flex items-center my-4">
-                <div className="flex-grow border-t border-gray-600"></div>
-                <span className="flex-shrink mx-4 text-gray-500 text-sm">o</span>
-                <div className="flex-grow border-t border-gray-600"></div>
+              <div className="relative group">
+                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" />
+                <select
+                  id="predefined-category"
+                  value={selectedPredefinedCategory}
+                  onChange={(e) => setSelectedPredefinedCategory(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border-2 border-gray-100 text-gray-700 outline-none focus:border-purple-200 focus:bg-white transition-all appearance-none cursor-pointer"
+                >
+                  <option value="">-- Elegir de la lista --</option>
+                  {predefinedCategories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <PlusCircle className="w-4 h-4 text-gray-400" />
+                </div>
               </div>
-              <label htmlFor="new-category" className="block text-gray-400 text-sm font-semibold mb-2">
-                Crear una nueva
-              </label>
-              <input
-                type="text"
-                id="new-category"
-                placeholder="Nombre de la categoría"
-                value={newCategoryName}
-                onChange={(e) => { setNewCategoryName(e.target.value); setSelectedPredefinedCategory(''); }}
-                disabled={!!selectedPredefinedCategory}
-                className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e5a657] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
-              />
+
               {newCategoryError && (
-                <p className="mt-2 text-red-400 text-sm font-semibold">{newCategoryError}</p>
+                <p className="mt-3 text-red-500 text-sm font-medium flex items-center gap-1">
+                  <AlertTriangle className="w-4 h-4" />
+                  {newCategoryError}
+                </p>
               )}
-              <div className="flex justify-end mt-6">
+              <div className="flex justify-end mt-8">
                 <button
                   onClick={handleCreateLocalCategory}
-                  disabled={loading || (!selectedPredefinedCategory && !newCategoryName.trim())}
-                  className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg transition-colors hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  disabled={loading || !selectedPredefinedCategory}
+                  className="w-full py-4 bg-purple-600 text-white font-bold rounded-xl transition-all hover:bg-purple-700 shadow-lg shadow-purple-200 active:scale-95 disabled:bg-gray-200 disabled:shadow-none disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Creando...' : 'Crear Categoría'}
+                  {loading ? 'Procesando...' : 'Añadir Categoría al Menú'}
                 </button>
               </div>
             </div>
@@ -1237,60 +1250,15 @@ const LocalMenu = () => {
         </div>
       )}
 
-      {showDeleteCategoryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-md"
-            onClick={() => setShowDeleteCategoryModal(false)}
-          />
-          <div className="relative w-full max-w-sm rounded-3xl bg-gray-900 shadow-2xl border border-gray-700/50 animate-modal-in overflow-hidden">
-            <div className="p-2 bg-gradient-to-r from-red-500 to-red-600" />
-            <div className="relative flex items-center justify-between p-6 border-b border-gray-700/50">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-r from-red-500 to-red-600 rounded-xl">
-                  <Trash2 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                    Confirmar Eliminación
-                  </h2>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowDeleteCategoryModal(false)}
-                className="group p-2 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200"
-              >
-                <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
-              </button>
-            </div>
-            <div className="p-6 text-center">
-              <p className="text-gray-300 mb-6">
-                ¿Estás seguro de que deseas eliminar esta categoría? Esta acción es irreversible.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteCategoryModal(false)}
-                  className="px-6 py-3 bg-gray-600/20 hover:bg-gray-600/30 text-gray-300 hover:text-white rounded-xl transition-all duration-200 font-semibold border border-gray-600/30 hover:border-gray-500/50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmDeleteCategory}
-                  className="group relative overflow-hidden px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  <div className="flex items-center justify-center space-x-2">
-                    <Trash2 className="w-5 h-5" />
-                    <span>Confirmar Eliminación</span>
-                  </div>
-                  <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        confirmText={confirmModal.confirmText}
+      />
 
       <style>{`
         .scrollbar-hide {

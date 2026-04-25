@@ -14,7 +14,9 @@ const PublicRoute: React.FC<RouteProps> = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.isBusiness === false) {
+    if (user?.role === "ADMIN") {
+      navigate({ pathname: ROUTES.ADMIN.DASHBOARD }, { replace: true });
+    } else if (user?.isBusiness === false) {
       navigate({ pathname: ROUTES.USER.DASHBOARD }, { replace: true });
     } else if (user?.isBusiness === true) {
       navigate({ pathname: ROUTES.LOCAL.DASHBOARD }, { replace: true });

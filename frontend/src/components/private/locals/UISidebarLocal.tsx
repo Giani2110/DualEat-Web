@@ -65,7 +65,7 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
 
   const subscriptionItem = {
     id: "subscription",
-    label: "Suscripción",
+    label: "Pase PRO",
     icon: CreditCard,
     path: "/business/subscription",
   };

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Zap, Clock, CheckCircle, Send, X, AlertCircle } from 'lucide-react';
+import { Zap, Clock, CheckCircle, Send, X, AlertCircle, Loader2 } from 'lucide-react';
 import { AuthContext } from '@context/auth/AuthContext';
 
 interface Plan {
@@ -25,17 +25,31 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const plans: Plan[] = [
     {
         id: 'LOCAL_MONTHLY',
-        name: 'Plan Mensual PRO',
+        name: 'Pase Mensual PRO',
         price: 100000,
-        displayPrice: '$100.000 ARS / mes',
-        duration: '1 Mes',
+        displayPrice: '$100.000 ARS',
+        duration: '1 Mes de Acceso',
         features: [
-            'Dashboard con estadísticas avanzadas',
-            'Calendario organizativo del local',
-            'Sube fotos de tu menú y la IA (OCR) las detectará',
-            'Soporte dedicado'
+            'Dashboard de estadísticas básico',
+            'Calendario organizativo',
+            'Carga de menú por IA (OCR)',
+            'Soporte estándar'
         ],
-        color: 'border-amber-500',
+        color: 'border-amber-500/30',
+    },
+    {
+        id: 'LOCAL_ANNUAL',
+        name: 'Pase Anual ELITE',
+        price: 1000000,
+        displayPrice: '$1.000.000 ARS',
+        duration: '12 Meses Full',
+        features: [
+            'Todo lo del plan Mensual',
+            'Soporte Prioritario 24/7',
+            '¡Ahorras 2 meses completos!'
+        ],
+        color: 'border-yellow-500',
+        discount: 'MÁS POPULAR'
     }
 ];
 
@@ -59,7 +73,7 @@ const SubscriptionPlansModal: React.FC<SubscriptionPlansModalProps> = ({ isOpen,
         setError(null);
 
         try {
-            const response = await fetch(`${API_BASE}/subscriptions/local-checkout`, {
+            const response = await fetch(`${API_BASE}/subscription/local-checkout`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -110,7 +124,7 @@ const SubscriptionPlansModal: React.FC<SubscriptionPlansModalProps> = ({ isOpen,
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-6 items-stretch max-w-md mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch max-w-4xl mx-auto">
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
@@ -137,9 +151,12 @@ const SubscriptionPlansModal: React.FC<SubscriptionPlansModalProps> = ({ isOpen,
                                 <Zap className={`w-6 h-6 ${plan.id === 'LOCAL_ANNUAL' ? 'text-amber-500' : 'text-blue-400'}`} />
                             </div>
 
-                            <p className="text-3xl font-extrabold text-white mb-6">
-                                {plan.displayPrice}
-                            </p>
+                            <div className="mb-6">
+                                <p className="text-4xl font-black text-white">
+                                    {plan.displayPrice}
+                                </p>
+                                <p className="text-gray-500 text-xs mt-1 uppercase tracking-widest font-bold">Pago único manual</p>
+                            </div>
 
                             <ul className="space-y-2 mb-6 text-gray-300 text-sm flex-grow">
                                 {plan.features.map((feature, index) => (
@@ -164,11 +181,14 @@ const SubscriptionPlansModal: React.FC<SubscriptionPlansModalProps> = ({ isOpen,
                             >
                                 {loading && plan.id === selectedPlan?.id ? (
                                     <>
-                                        <Send className="w-4 h-4 mr-2 animate-pulse" />
-                                        Iniciando Pago...
+                                        <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                                        Iniciando...
                                     </>
                                 ) : (
-                                    'Comprar Plan Seleccionado'
+                                    <>
+                                        {plan.id === 'LOCAL_ANNUAL' ? <Zap className="w-5 h-5 mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+                                        Adquirir {plan.name.split(' ')[1]}
+                                    </>
                                 )}
                             </button>
                         </div>

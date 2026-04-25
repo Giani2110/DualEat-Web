@@ -9,8 +9,8 @@ import React from 'react';
 // Interfaces de Datos
 // ----------------------------------------------------------------------
 interface QrResponse {
-  qrCodeDataUrl: string;
-  message: string;
+    qrCodeDataUrl: string;
+    message: string;
 }
 
 interface Bounds {
@@ -72,13 +72,13 @@ const LocalQR = () => {
     const [localName, setLocalName] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
+
     // ----------------------------------------------------------------------
     // Estados y Lógica del Tour Manual
     // ----------------------------------------------------------------------
-    const [currentStep, setCurrentStep] = useState(0); 
+    const [currentStep, setCurrentStep] = useState(0);
     const isTourOpen = currentStep > 0;
-    
+
     const startTour = () => setCurrentStep(1);
     const closeTour = () => setCurrentStep(0);
     const goToNextStep = () => setCurrentStep(prev => Math.min(prev + 1, TOUR_STEPS.length));
@@ -90,57 +90,57 @@ const LocalQR = () => {
 
     useEffect(() => {
         const fetchUserLocal = async () => {
-        if (!user) {
-            setLoading(false);
-            setError('Usuario no autenticado');
-            return;
-        }
-        try {
-            const res = await fetch(`${API_BASE}/users/${user.id}/local`);
-            if (!res.ok) throw new Error('No se pudo obtener el local para este usuario.');
-
-            const data = await res.json();
-            if (data?.id) {
-            setLocalId(data.id);
-            setLocalName(data.name);
-            } else {
-            setError('No se encontró un local asociado a este usuario.');
+            if (!user) {
+                setLoading(false);
+                setError('Usuario no autenticado');
+                return;
             }
-        } catch (err) {
-            console.error(err);
-            setError('Error al obtener el local del usuario.');
-        } finally {
-            setLoading(false);
-        }
+            try {
+                const res = await fetch(`${API_BASE}/users/${user.id}/local`);
+                if (!res.ok) throw new Error('No se pudo obtener el local para este usuario.');
+
+                const data = await res.json();
+                if (data?.id) {
+                    setLocalId(data.id);
+                    setLocalName(data.name);
+                } else {
+                    setError('No se encontró un local asociado a este usuario.');
+                }
+            } catch (err) {
+                console.error(err);
+                setError('Error al obtener el local del usuario.');
+            } finally {
+                setLoading(false);
+            }
         };
         fetchUserLocal();
     }, [user, API_BASE]);
 
     useEffect(() => {
         const fetchQrCode = async () => {
-        if (!localId) return;
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(`${API_BASE}/qr/${localId}`);
-            if (!response.ok) throw new Error('Error al cargar el código QR.');
+            if (!localId) return;
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch(`${API_BASE}/local/tools/qr/${localId}`);
+                if (!response.ok) throw new Error('Error al cargar el código QR.');
 
-            const data: QrResponse = await response.json();
-            setQrDataUrl(data.qrCodeDataUrl);
-        } catch (err) {
-            console.error(err);
-            setError('No se pudo cargar el código QR. Intente de nuevo.');
-        } finally {
-            setLoading(false);
-        }
+                const data: QrResponse = await response.json();
+                setQrDataUrl(data.qrCodeDataUrl);
+            } catch (err) {
+                console.error(err);
+                setError('No se pudo cargar el código QR. Intente de nuevo.');
+            } finally {
+                setLoading(false);
+            }
         };
         fetchQrCode();
     }, [localId, API_BASE]);
 
     const downloadQr = (format: 'png' | 'jpg') => {
         if (!qrDataUrl || !localName) {
-        setError('No se pudo generar el nombre del archivo.');
-        return;
+            setError('No se pudo generar el nombre del archivo.');
+            return;
         }
         const sanitizedLocalName = localName.trim().toLowerCase().replace(/ /g, '_').replace(/[^a-z0-9_]/g, '');
         const link = document.createElement('a');
@@ -164,13 +164,13 @@ const LocalQR = () => {
 
             const element = document.querySelector(activeStep.selector) as HTMLElement;
             if (!element) return;
-            
+
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             const updateBoundsAndPosition = () => {
                 const rect = element.getBoundingClientRect();
-                
-                const padding = 10; 
+
+                const padding = 10;
 
                 setBounds({
                     top: rect.top - padding,
@@ -178,14 +178,14 @@ const LocalQR = () => {
                     width: rect.width + 2 * padding,
                     height: rect.height + 2 * padding,
                 });
-                
+
                 if (modalRef.current) {
                     let modalStyle: React.CSSProperties = { top: 0, left: 0 };
-                    
-                    const OFFSET_DISTANCE = 25; 
-                    const MODAL_WIDTH = 320; 
+
+                    const OFFSET_DISTANCE = 25;
+                    const MODAL_WIDTH = 320;
                     const MODAL_HEIGHT = 200; // Altura ajustada
-                    
+
                     switch (activeStep.placement) {
                         case 'right':
                             modalStyle.top = rect.top + (rect.height / 2) - (MODAL_HEIGHT / 2);
@@ -204,7 +204,7 @@ const LocalQR = () => {
                             modalStyle.top = rect.top + rect.height + OFFSET_DISTANCE;
                             break;
                     }
-                    
+
                     // Ajuste de límites (para evitar que se salga de la pantalla)
                     if (modalStyle.left && (modalStyle.left as number) + MODAL_WIDTH > window.innerWidth - 20) {
                         modalStyle.left = window.innerWidth - MODAL_WIDTH - 20;
@@ -222,13 +222,13 @@ const LocalQR = () => {
                     // Aplicar estilos y marcar como posicionado
                     modalRef.current.style.top = `${modalStyle.top}px`;
                     modalRef.current.style.left = `${modalStyle.left}px`;
-                    modalRef.current.style.transform = `none`; 
+                    modalRef.current.style.transform = `none`;
                     setIsPositioned(true);
                 }
             };
 
-            const timeout = setTimeout(updateBoundsAndPosition, 350); 
-            
+            const timeout = setTimeout(updateBoundsAndPosition, 350);
+
             updateBoundsAndPosition();
             window.addEventListener('resize', updateBoundsAndPosition);
             window.addEventListener('scroll', updateBoundsAndPosition);
@@ -237,10 +237,10 @@ const LocalQR = () => {
                 clearTimeout(timeout);
                 window.removeEventListener('resize', updateBoundsAndPosition);
                 window.removeEventListener('scroll', updateBoundsAndPosition);
-                setIsPositioned(false); 
+                setIsPositioned(false);
             };
         }, [activeStep]);
-        
+
         if (!isTourOpen || !activeStep || !bounds) return null;
 
         const totalSteps = TOUR_STEPS.length;
@@ -251,7 +251,7 @@ const LocalQR = () => {
         return (
             // Contenedor principal con posicionamiento FIXED (estable al scroll)
             <div className="fixed inset-0 z-[1000] pointer-events-none">
-                
+
                 {/* Overlay Oscuro (Dividido en 4 partes para crear el "agujero") */}
                 <div className="absolute inset-0 bg-transparent">
                     {/* Top Shade */}
@@ -273,9 +273,9 @@ const LocalQR = () => {
                 </div>
 
                 {/* Contenedor del modal (usando posición fija para que se quede en pantalla) */}
-                <div 
-                    ref={modalRef} 
-                    className={`fixed z-[1001] w-80 p-0 rounded-xl shadow-2xl transition-opacity duration-200 ${isPositioned ? 'opacity-100' : 'opacity-0'}`} 
+                <div
+                    ref={modalRef}
+                    className={`fixed z-[1001] w-80 p-0 rounded-xl shadow-2xl transition-opacity duration-200 ${isPositioned ? 'opacity-100' : 'opacity-0'}`}
                     style={{ pointerEvents: 'auto' }}
                 >
                     <div className="bg-gray-800 p-4 rounded-xl border border-purple-600 shadow-xl relative">
@@ -309,7 +309,7 @@ const LocalQR = () => {
                                         Anterior
                                     </button>
                                 )}
-                                
+
                                 {/* Botón Siguiente / Finalizar */}
                                 {!isLast ? (
                                     <button
@@ -341,10 +341,10 @@ const LocalQR = () => {
 
     if (error) {
         return (
-        <div className="text-center text-red-400 p-4 bg-gray-800 rounded-xl">
-            <AlertTriangle className="inline mr-2" />
-            {error}
-        </div>
+            <div className="text-center text-red-400 p-4 bg-gray-800 rounded-xl">
+                <AlertTriangle className="inline mr-2" />
+                {error}
+            </div>
         );
     }
 
@@ -354,7 +354,7 @@ const LocalQR = () => {
 
     return (
         <div className="BGLocal min-h-screen text-white p-4 md:p-6">
-            
+
             {/* Componente Modal del Tour */}
             <TourModal />
 
@@ -368,7 +368,7 @@ const LocalQR = () => {
                     </div>
                     {/* Botón de Ayuda "?" */}
                     <button
-                        id="help-button" 
+                        id="help-button"
                         onClick={isTourOpen ? closeTour : startTour}
                         className={`fixed top-20 right-6 z-[1002] p-3 rounded-full 
                                 ${isTourOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white 
@@ -381,11 +381,11 @@ const LocalQR = () => {
 
                 <section className="bg-gray-800 rounded-xl p-6 md:p-8 shadow-lg border border-gray-700 mb-8 flex flex-col items-center text-center">
                     <QrCode className="w-16 h-16 text-blue-400 mb-4" />
-                    
+
                     <h3 className="text-2xl font-semibold text-white mb-2" id="qr-card-title">
                         Tu Código QR Personalizado
                     </h3>
-                    
+
                     <p className="text-gray-400 text-sm mb-6 max-w-lg">
                         Este código QR único enlaza directamente al menú digital de tu local.
                         Puedes imprimirlo para que tus clientes lo escaneen fácilmente.
@@ -408,7 +408,7 @@ const LocalQR = () => {
                             className="flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors 
                                             bg-gray-900 cursor-pointer hover:bg-gray-700 text-white 
                                             disabled:bg-gray-600 disabled:cursor-not-allowed"
-                            >
+                        >
                             <Download size={20} />
                             <span>Descargar PNG</span>
                         </button>
@@ -419,7 +419,7 @@ const LocalQR = () => {
                             className="flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors 
                                             bg-gray-900 cursor-pointer hover:bg-gray-700 text-white 
                                             disabled:bg-gray-600 disabled:cursor-not-allowed"
-                            >
+                        >
                             <Download size={20} />
                             <span>Descargar JPG</span>
                         </button>

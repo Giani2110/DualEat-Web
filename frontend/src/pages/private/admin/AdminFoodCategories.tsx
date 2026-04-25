@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FaEdit, FaTrash, FaPlus, FaSave, FaSearch } from 'react-icons/fa';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { axiosInterceptor as axios } from "@/api/interceptor/axios-interceptor";
+import { FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaLayerGroup } from "react-icons/fa";
+import { AnimatePresence, motion } from "framer-motion";
+import ConfirmModal from "@/components/modal/ConfirmModal";
 
 interface FoodCategory {
   id: number;
@@ -11,16 +12,43 @@ interface FoodCategory {
   icon_url: string | null;
 }
 
-const categoryTypes = [
-  'Tipos_de_comida',
-  'Estilos_o_dietas',
-  'Origen_y_cultura',
-];
+const categoryTypes = ["Tipos_de_comida", "Estilos_o_dietas", "Origen_y_cultura"];
+
+const typeConfig: Record<string, { label: string; dotColor: string; bg: string; text: string; border: string }> = {
+  Tipos_de_comida: {
+    label: "Tipo de Comida",
+    dotColor: "#f59e0b",
+    bg: "#fffbeb",
+    text: "#b45309",
+    border: "#fde68a",
+  },
+  Estilos_o_dietas: {
+    label: "Estilo / Dieta",
+    dotColor: "#10b981",
+    bg: "#ecfdf5",
+    text: "#047857",
+    border: "#a7f3d0",
+  },
+  Origen_y_cultura: {
+    label: "Origen & Cultura",
+    dotColor: "#8b5cf6",
+    bg: "#f5f3ff",
+    text: "#6d28d9",
+    border: "#ddd6fe",
+  },
+};
+
+// Only treat icon_url as emoji if it actually starts with an emoji character
+const isEmoji = (str: string | null): boolean => {
+  if (!str) return false;
+  const emojiRegex = /^\p{Emoji}/u;
+  return emojiRegex.test(str.trim()) && str.trim().length <= 8;
+};
 
 const AdminFoodCategories = () => {
   const [categories, setCategories] = useState<FoodCategory[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState<{ 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [formData, setFormData] = useState<{
     id: number | null;
     name: string;
     tipo: string;
@@ -28,249 +56,470 @@ const AdminFoodCategories = () => {
     icon_url: string | null;
   }>({
     id: null,
-    name: '',
+    name: "",
     tipo: categoryTypes[0],
-    description: '',
-    icon_url: ''
+    description: "",
+    icon_url: "",
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [message, setMessage] = useState("");
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [confirmData, setConfirmData] = useState<{
+    isOpen: boolean;
+    categoryId: number | null;
+  }>({ isOpen: false, categoryId: null });
 
-  const API_URL = 'http://localhost:3000/admin/food-categories';
+  const API_URL = "/admin/food-categories";
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  useEffect(() => { fetchCategories(); }, []);
 
   const fetchCategories = async () => {
     try {
       setLoading(true);
       const response = await axios.get(API_URL);
-      setCategories(response.data);
-    } catch (error) {
-      setMessage('Error al cargar las categorías.');
+      setCategories(response.data.data || []);
+    } catch {
+      showMsg("Error al cargar las categorías. Verifica tu conexión.");
     } finally {
       setLoading(false);
     }
   };
 
+  const showMsg = (msg: string) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(""), 6000);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleOpenCreateForm = () => {
-    setFormData({ id: null, name: '', tipo: categoryTypes[0], description: '', icon_url: '' });
-    setShowForm(true);
+    setFormData({ id: null, name: "", tipo: categoryTypes[0], description: "", icon_url: "" });
+    setShowDrawer(true);
   };
 
-  const handleOpenEditForm = (category: FoodCategory) => {
-    setFormData({ ...category });
-    setShowForm(true);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
+  const handleOpenEditForm = (cat: FoodCategory) => {
+    setFormData({ ...cat });
+    setShowDrawer(true);
   };
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.tipo.trim()) {
-      setMessage('El nombre y el tipo son obligatorios.');
+      showMsg("El nombre y el tipo son obligatorios.");
       return;
     }
     setLoading(true);
     try {
       if (formData.id) {
-        const response = await axios.put(`${API_URL}/${formData.id}`, formData);
-        setCategories(categories.map(cat => (cat.id === formData.id ? response.data : cat)));
-        setMessage('Categoría actualizada exitosamente.');
+        const res = await axios.put(`${API_URL}/${formData.id}`, formData);
+        setCategories(categories.map((c) => (c.id === formData.id ? res.data : c)));
+        showMsg("Categoría actualizada correctamente.");
       } else {
-        const response = await axios.post(API_URL, formData);
-        setCategories([...categories, response.data]);
-        setMessage('Categoría creada exitosamente.');
+        const res = await axios.post(API_URL, formData);
+        setCategories([...categories, res.data]);
+        showMsg("Categoría creada exitosamente.");
       }
-      setShowForm(false);
-    } catch (error) {
-      setMessage(`Error al guardar la categoría.`);
+      setShowDrawer(false);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || "Error al guardar la categoría.";
+      showMsg(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteCategory = async (id: number) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta categoría?')) return;
+  const handleDelete = async () => {
+    if (!confirmData.categoryId) return;
     try {
       setLoading(true);
-      await axios.delete(`${API_URL}/${id}`);
-      setCategories(categories.filter(cat => cat.id !== id));
-      setMessage('Categoría eliminada exitosamente.');
-    } catch (error) {
-      setMessage('Error al eliminar la categoría.');
+      await axios.delete(`${API_URL}/${confirmData.categoryId}`);
+      setCategories(categories.filter((c) => c.id !== confirmData.categoryId));
+      showMsg("Categoría eliminada.");
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || "Error al eliminar la categoría.";
+      showMsg(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
+      setConfirmData({ isOpen: false, categoryId: null });
     }
   };
 
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (category.description && category.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filtered = categories.filter((c) => {
+    const q = searchTerm.toLowerCase();
+    return (
+      c.name.toLowerCase().includes(q) ||
+      c.tipo.toLowerCase().includes(q) ||
+      (c.description?.toLowerCase().includes(q) ?? false)
+    );
+  });
 
   return (
-    <div className="relative w-full min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-8">Gestor de Categorías</h1>
+    <>
+      <style>{`
+        .fca * { box-sizing: border-box; }
 
-      {/* Main Control Panel */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-        <div className="relative w-full md:w-1/3">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por nombre, tipo o descripción..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 transition"
-          />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        .fca-row { transition: background 0.12s; }
+        .fca-row:hover { background: #f9f9f9; }
+        .fca-row:hover .fca-acts { opacity: 1; transform: translateX(0); }
+        .fca-acts {
+          opacity: 0; transform: translateX(6px);
+          transition: opacity 0.15s, transform 0.15s;
+          display: flex; align-items: center; gap: 6px; justify-content: flex-end;
+        }
+
+        .fca-search {
+          width: 100%; padding: 10px 14px 10px 38px;
+          border: 1.5px solid #e5e7eb; border-radius: 10px;
+          font-size: 14px; background: white; color: #111; outline: none;
+          transition: border-color 0.15s;
+        }
+        .fca-search::placeholder { color: #c4c4c4; }
+        .fca-search:focus { border-color: #111; }
+
+        .fca-add {
+          display: inline-flex; align-items: center; gap: 7px;
+          padding: 9px 17px; background: #111; color: white;
+          border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+          cursor: pointer; transition: background 0.13s, transform 0.1s; white-space: nowrap;
+        }
+        .fca-add:hover { background: #2d2d2d; transform: translateY(-1px); }
+
+        .fca-th { font-size: 11px; font-weight: 700; color: #c4c4c4; letter-spacing: 0.08em; text-transform: uppercase; }
+
+        .fca-icon {
+          width: 40px; height: 40px; border-radius: 10px;
+          background: #f5f5f5; border: 1px solid #ececec;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 20px; flex-shrink: 0;
+        }
+
+        .fca-chip {
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 3px 9px 3px 7px; border-radius: 99px;
+          font-size: 11px; font-weight: 600; border: 1px solid; white-space: nowrap;
+        }
+        .fca-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+        .fca-ebtn, .fca-dbtn {
+          width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid;
+          background: white; display: flex; align-items: center; justify-content: center;
+          cursor: pointer; font-size: 11px; transition: all 0.13s;
+        }
+        .fca-ebtn { border-color: #e5e7eb; color: #888; }
+        .fca-ebtn:hover { background: #111; border-color: #111; color: white; }
+        .fca-dbtn { border-color: #fecaca; color: #ef4444; }
+        .fca-dbtn:hover { background: #ef4444; border-color: #ef4444; color: white; }
+
+        .fca-lbl {
+          display: block; font-size: 11px; font-weight: 700;
+          letter-spacing: 0.07em; text-transform: uppercase; color: #aaa; margin-bottom: 6px;
+        }
+        .fca-inp {
+          width: 100%; padding: 10px 13px; border: 1.5px solid #e5e7eb;
+          border-radius: 10px; font-size: 14px; color: #111; background: #fafafa;
+          outline: none; transition: border-color 0.13s, background 0.13s;
+        }
+        .fca-inp:focus { border-color: #111; background: white; }
+        .fca-inp::placeholder { color: #d1d5db; }
+
+        .fca-save {
+          width: 100%; padding: 12px; background: #111; color: white;
+          border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+          cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+          transition: background 0.13s;
+        }
+        .fca-save:hover:not(:disabled) { background: #2d2d2d; }
+        .fca-save:disabled { background: #d1d5db; cursor: not-allowed; }
+
+        .fca-cancel {
+          width: 100%; padding: 10px; background: transparent;
+          border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 13px;
+          font-weight: 500; color: #888; cursor: pointer; transition: border-color 0.13s;
+        }
+        .fca-cancel:hover { border-color: #bbb; }
+
+        .fca-toast {
+          position: fixed; bottom: 22px; right: 22px; z-index: 9999;
+          padding: 11px 16px; border-radius: 10px; font-size: 13px; font-weight: 500;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.11);
+          display: flex; align-items: center; gap: 8px; max-width: 290px;
+        }
+        .fca-tok { background: #111; color: white; }
+        .fca-terr { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+        @keyframes fca-spin { to { transform: rotate(360deg); } }
+        .fca-spin {
+          width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+          border-top-color: white; border-radius: 50%; animation: fca-spin 0.6s linear infinite;
+        }
+      `}</style>
+
+      <div className="fca" style={{ minHeight: "100vh", background: "#f9f9f8" }}>
+
+        {/* HEADER */}
+        <div style={{
+          background: "white", borderBottom: "1px solid #f0f0f0",
+          padding: "20px 28px", display: "flex", alignItems: "center",
+          justifyContent: "space-between", gap: 16,
+        }}>
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c4c4c4", marginBottom: 2 }}>
+              Administración
+            </p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111", margin: 0 }}>
+              Categorías Culinarias
+            </h1>
+          </div>
+          <button className="fca-add" onClick={handleOpenCreateForm}>
+            <FaPlus style={{ fontSize: 10 }} /> Nueva categoría
+          </button>
         </div>
-        <button
-          onClick={handleOpenCreateForm}
-          className="mt-4 md:mt-0 px-6 py-3 bg-[#b53325] text-white rounded-full font-bold shadow-lg hover:bg-red-700 transition flex items-center gap-2"
-        >
-          <FaPlus /> Nueva Categoría
-        </button>
-      </div>
 
-      {/* Messages */}
-      {message && (
-        <div className={`text-center p-3 rounded-lg font-semibold mb-4 ${message.startsWith('Error') ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`}>
-          {message}
-        </div>
-      )}
+        {/* CONTENT */}
+        <div style={{ padding: "22px 28px" }}>
 
-      {/* Category Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <AnimatePresence>
-          {filteredCategories.map((category) => (
-            <motion.div
-              key={category.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 relative group flex flex-col justify-between"
-            >
-              <div className="flex-grow">
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-4xl">{category.icon_url}</span>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-800">{category.name}</h3>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">{category.tipo.replace(/_/g, ' ')}</p>
-                  </div>
+          {/* Search */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+            <div style={{ position: "relative", flex: "1 1 auto", maxWidth: 360 }}>
+              <FaSearch style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#ccc", fontSize: 12 }} />
+              <input className="fca-search" type="text" value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar categoría..." />
+            </div>
+            <span style={{ fontSize: 12, color: "#c4c4c4", marginLeft: "auto" }}>
+              {filtered.length} {filtered.length === 1 ? "resultado" : "resultados"}
+            </span>
+          </div>
+
+          {/* Table */}
+          <div style={{ background: "white", border: "1.5px solid #efefef", borderRadius: 14, overflow: "hidden" }}>
+
+            {/* Head */}
+            <div style={{
+              display: "grid", gridTemplateColumns: "52px 1fr 155px minmax(0,1.4fr) 72px",
+              padding: "10px 20px", background: "#fafafa", borderBottom: "1px solid #f0f0f0",
+            }}>
+              {["", "Nombre", "Tipo", "Descripción", ""].map((h, i) => (
+                <span key={i} className="fca-th">{h}</span>
+              ))}
+            </div>
+
+            {/* Rows */}
+            <AnimatePresence>
+              {filtered.map((cat, idx) => {
+                const cfg = typeConfig[cat.tipo] ?? {
+                  label: cat.tipo.replace(/_/g, " "),
+                  dotColor: "#9ca3af", bg: "#f9fafb", text: "#374151", border: "#e5e7eb",
+                };
+                return (
+                  <motion.div
+                    key={cat.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ delay: idx * 0.02, duration: 0.16 }}
+                    className="fca-row"
+                    style={{
+                      display: "grid", gridTemplateColumns: "52px 1fr 155px minmax(0,1.4fr) 72px",
+                      alignItems: "center", padding: "12px 20px",
+                      borderBottom: idx < filtered.length - 1 ? "1px solid #f5f5f5" : "none",
+                    }}
+                  >
+                    {/* Icon — fallback to 🍽️ if icon_url is not a real emoji */}
+                    <div>
+                      <div className="fca-icon">
+                        {isEmoji(cat.icon_url) ? cat.icon_url : "🍽️"}
+                      </div>
+                    </div>
+
+                    {/* Name — only once */}
+                    <div style={{ paddingLeft: 2 }}>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111" }}>
+                        {cat.name}
+                      </p>
+                    </div>
+
+                    {/* Type */}
+                    <div>
+                      <span className="fca-chip" style={{ background: cfg.bg, color: cfg.text, borderColor: cfg.border }}>
+                        <span className="fca-dot" style={{ background: cfg.dotColor }} />
+                        {cfg.label}
+                      </span>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <p style={{ margin: 0, fontSize: 13, color: "#bbb", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {cat.description || "—"}
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="fca-acts">
+                      <button className="fca-ebtn" onClick={() => handleOpenEditForm(cat)} title="Editar"><FaEdit /></button>
+                      <button className="fca-dbtn" onClick={() => setConfirmData({ isOpen: true, categoryId: cat.id })} title="Eliminar"><FaTrash /></button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            {/* Empty */}
+            {filtered.length === 0 && !loading && (
+              <div style={{ padding: "52px 24px", textAlign: "center" }}>
+                <div style={{ width: 56, height: 56, borderRadius: 14, background: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                  <FaLayerGroup style={{ fontSize: 22, color: "#d1d5db" }} />
                 </div>
-                <p className="text-sm text-gray-600 mb-4">{category.description}</p>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#555", marginBottom: 4 }}>
+                  {searchTerm ? "Sin resultados" : "Sin categorías aún"}
+                </p>
+                <p style={{ fontSize: 13, color: "#bbb", marginBottom: 18 }}>
+                  {searchTerm ? "Probá con otro término" : "Creá tu primera categoría para comenzar"}
+                </p>
+                {searchTerm
+                  ? <button className="fca-add" style={{ margin: "0 auto" }} onClick={() => setSearchTerm("")}>Limpiar</button>
+                  : <button className="fca-add" style={{ margin: "0 auto" }} onClick={handleOpenCreateForm}><FaPlus style={{ fontSize: 10 }} /> Crear</button>
+                }
               </div>
-              
-              <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button
-                  onClick={() => handleOpenEditForm(category)}
-                  className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition"
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => handleDeleteCategory(category.id)}
-                  className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-      {filteredCategories.length === 0 && !loading && (
-        <div className="text-center text-gray-500 mt-12 text-lg">No se encontraron categorías.</div>
-      )}
+            )}
 
-      {/* Floating Form Modal */}
+            {loading && filtered.length === 0 && (
+              <div style={{ padding: "44px 24px", display: "flex", justifyContent: "center" }}>
+                <div style={{ width: 22, height: 22, border: "2px solid #e5e7eb", borderTopColor: "#111", borderRadius: "50%", animation: "fca-spin 0.6s linear infinite" }} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* MODALS */}
+      <ConfirmModal
+        isOpen={confirmData.isOpen}
+        onClose={() => setConfirmData({ isOpen: false, categoryId: null })}
+        onConfirm={handleDelete}
+        title="Eliminar Categoría"
+        message="¿Estás seguro de que deseas eliminar esta categoría permanentemente? Esta acción es irreversible."
+        type="danger"
+        confirmText="Eliminar"
+      />
+
+      {/* TOAST */}
       <AnimatePresence>
-        {showForm && (
+        {message && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={handleCloseForm}
+            initial={{ opacity: 0, y: 10, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6 }}
+            className={`fca-toast ${message.includes("Error") ? "fca-terr" : "fca-tok"}`}
           >
-            <motion.div
-              initial={{ y: -50, scale: 0.9 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: -50, scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md"
-            >
-              <h2 className="text-2xl font-bold mb-6 text-center">{formData.id ? 'Editar Categoría' : 'Crear Nueva Categoría'}</h2>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Nombre de la categoría"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                />
-                <select
-                  name="tipo"
-                  value={formData.tipo}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                >
-                  {categoryTypes.map((tipo) => (
-                    <option key={tipo} value={tipo}>{tipo.replace(/_/g, ' ')}</option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md">
-                  <span className="text-2xl">{formData.icon_url}</span>
-                  <input
-                    type="text"
-                    name="icon_url"
-                    value={formData.icon_url || ''}
-                    onChange={handleInputChange}
-                    placeholder="Icono (ej. 🍔)"
-                    className="flex-1 focus:outline-none"
-                  />
-                </div>
-                <textarea
-                  name="description"
-                  value={formData.description || ''}
-                  onChange={handleInputChange}
-                  placeholder="Descripción de la categoría"
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                />
-              </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <button
-                  onClick={handleCloseForm}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-full font-semibold hover:bg-gray-400 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="px-4 py-2 bg-green-500 text-white rounded-full font-semibold hover:bg-green-600 transition disabled:bg-gray-400 flex items-center gap-2"
-                >
-                  <FaSave /> {formData.id ? 'Guardar Cambios' : 'Crear Categoría'}
-                </button>
-              </div>
-            </motion.div>
+            <span>{message.includes("Error") ? "⚠️" : "✓"}</span>
+            {message}
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+
+      {/* DRAWER */}
+      <AnimatePresence>
+        {showDrawer && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowDrawer(false)}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.18)", backdropFilter: "blur(2px)", zIndex: 40 }}
+            />
+            <motion.div
+              initial={{ x: "100%", opacity: 0.5 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 28, stiffness: 220 }}
+              style={{
+                position: "fixed", top: 0, right: 0, height: "100%",
+                width: "100%", maxWidth: 420, background: "white",
+                boxShadow: "-4px 0 32px rgba(0,0,0,0.08)", zIndex: 50,
+                display: "flex", flexDirection: "column",
+              }}
+            >
+              {/* Drawer head */}
+              <div style={{ padding: "20px 24px", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#bbb", marginBottom: 2 }}>
+                    {formData.id ? "Editar" : "Crear"}
+                  </p>
+                  <h2 style={{ fontSize: 19, fontWeight: 700, color: "#111", margin: 0 }}>
+                    {formData.id ? "Modificar categoría" : "Nueva categoría"}
+                  </h2>
+                </div>
+                <button onClick={() => setShowDrawer(false)} style={{ width: 30, height: 30, borderRadius: 8, border: "1.5px solid #e5e7eb", background: "white", color: "#aaa", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
+                  <FaTimes />
+                </button>
+              </div>
+
+              {/* Drawer body */}
+              <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 18 }}>
+
+                {/* Icon preview */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#fafafa", borderRadius: 12, border: "1.5px solid #f0f0f0" }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: "white", border: "1.5px solid #ececec", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
+                    {isEmoji(formData.icon_url) ? formData.icon_url : "🍽️"}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="fca-lbl">Icono (emoji)</label>
+                    <input className="fca-inp" type="text" name="icon_url"
+                      value={formData.icon_url || ""} onChange={handleInputChange} placeholder="Ej. 🍔" />
+                  </div>
+                </div>
+
+                {/* Name */}
+                <div>
+                  <label className="fca-lbl">Nombre</label>
+                  <input className="fca-inp" type="text" name="name"
+                    value={formData.name} onChange={handleInputChange} placeholder="Ej. Hamburguesas Veganas" />
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label className="fca-lbl">Tipo</label>
+                  <div style={{ position: "relative" }}>
+                    <select className="fca-inp" name="tipo" value={formData.tipo} onChange={handleInputChange}
+                      style={{ appearance: "none", paddingRight: 32, cursor: "pointer" }}>
+                      {categoryTypes.map((t) => (
+                        <option key={t} value={t}>{typeConfig[t]?.label ?? t.replace(/_/g, " ")}</option>
+                      ))}
+                    </select>
+                    <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "#bbb", pointerEvents: "none", fontSize: 11 }}>▾</span>
+                  </div>
+                  {formData.tipo && typeConfig[formData.tipo] && (
+                    <div style={{ marginTop: 8 }}>
+                      <span className="fca-chip" style={{ background: typeConfig[formData.tipo].bg, color: typeConfig[formData.tipo].text, borderColor: typeConfig[formData.tipo].border }}>
+                        <span className="fca-dot" style={{ background: typeConfig[formData.tipo].dotColor }} />
+                        {typeConfig[formData.tipo].label}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="fca-lbl">Descripción <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "#d1d5db" }}>— opcional</span></label>
+                  <textarea className="fca-inp" name="description"
+                    value={formData.description || ""} onChange={handleInputChange}
+                    placeholder="Describe esta categoría..." rows={4} style={{ resize: "none" }} />
+                </div>
+              </div>
+
+              {/* Drawer footer */}
+              <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0", display: "flex", flexDirection: "column", gap: 8 }}>
+                <button className="fca-save" onClick={handleSave} disabled={loading}>
+                  {loading ? <div className="fca-spin" /> : (formData.id ? "Guardar cambios" : "Crear categoría")}
+                </button>
+                <button className="fca-cancel" onClick={() => setShowDrawer(false)}>Cancelar</button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

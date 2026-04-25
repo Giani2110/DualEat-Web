@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Image, Search, X, Globe, Lock } from "lucide-react";
 import RCrop from "../shared/ReactCrop";
 import toast from "react-hot-toast";
+import ConfirmModal from "./ConfirmModal";
 import type { CategoryTag, CommunityTag } from "@interface/global";
 
 import { generateSlug } from "@utils/sluglify";
@@ -52,6 +53,22 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
   const [step, setStep] = useState<"1" | "2" | "3" | "4">("1");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  // Integrated unified confirm modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'success';
+    onConfirm: () => void;
+    confirmText?: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    onConfirm: () => { },
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -132,33 +149,33 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
     setError("");
     setLoading(true);
 
-   const timeout = setTimeout(async () => {
-    try {
-      if (name.length >= 3) {
-        // --- 1. Generar el SLUG a partir del 'name' ---
-        const communitySlug = generateSlug(name);
+    const timeout = setTimeout(async () => {
+      try {
+        if (name.length >= 3) {
+          // --- 1. Generar el SLUG a partir del 'name' ---
+          const communitySlug = generateSlug(name);
 
-        // Si el slug resultante es muy corto o solo guiones, podrías añadir una validación aquí
-        if (communitySlug.length < 3) return; 
+          // Si el slug resultante es muy corto o solo guiones, podrías añadir una validación aquí
+          if (communitySlug.length < 3) return;
 
-        // --- 2. Cambiar la llamada al servicio a buscar por SLUG ---
-        const community = await getCommunityBySlug(communitySlug); 
-        
-        if (community) {
-          setError("La comunidad ya existe");
-        } else {
-          setError("");
+          // --- 2. Cambiar la llamada al servicio a buscar por SLUG ---
+          const community = await getCommunityBySlug(communitySlug);
+
+          if (community) {
+            setError("La comunidad ya existe");
+          } else {
+            setError("");
+          }
         }
+      } catch (error) {
+        console.error("Error fetching community:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching community:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, 1000);
+    }, 1000);
 
-  return () => clearTimeout(timeout);
-}, [name]);
+    return () => clearTimeout(timeout);
+  }, [name]);
 
   useEffect(() => {
     const fetchCommunityTags = async () => {
@@ -218,9 +235,13 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
     if (file.size > maxSizeBytes) {
-      alert(
-        `El archivo supera los ${maxSizeMB}MB. Por favor, subí uno más liviano.`
-      );
+      setConfirmModal({
+        isOpen: true,
+        title: "Archivo demasiado grande",
+        message: `El archivo supera los ${maxSizeMB}MB. Por favor, subí uno más liviano.`,
+        type: "warning",
+        onConfirm: () => setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+      });
       return;
     }
 
@@ -261,11 +282,10 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                     type="text"
                     id="community-name"
                     placeholder="Nombre de la comunidad"
-                    className={`peer w-full text-[14px] text5 px-4 pb-4 pt-6 rounded-[20px] bg-[#faf5f0] focus:border-2 placeholder-transparent focus:outline-none  ${
-                      name.length < 3
+                    className={`peer w-full text-[14px] text5 px-4 pb-4 pt-6 rounded-[20px] bg-[#faf5f0] focus:border-2 placeholder-transparent focus:outline-none  ${name.length < 3
                         ? "border-[red]"
                         : "focus:border-[#e5a657]"
-                    }`}
+                      }`}
                     onChange={(e) => setName(e.target.value)}
                     value={name}
                     maxLength={21}
@@ -282,11 +302,10 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                   </label>
 
                   <div
-                    className={`flex gap-10 px-3 mt-3 ${
-                      name.length < 3 || error || loading
+                    className={`flex gap-10 px-3 mt-3 ${name.length < 3 || error || loading
                         ? "justify-between"
                         : "justify-end"
-                    }`}
+                      }`}
                   >
                     {name.length < 3 ? (
                       <span className="text-[12px] text6">
@@ -323,22 +342,20 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                   <label
                     htmlFor="community-description"
                     className={`absolute left-5 text-[#707070] cursor-text transition-all duration-300
-                ${
-                  description
-                    ? "top-[10px] text-[12px]"
-                    : "top-[20px] text-[13px]"
-                }
+                ${description
+                        ? "top-[10px] text-[12px]"
+                        : "top-[20px] text-[13px]"
+                      }
                 peer-focus:top-[10px] peer-focus:text-[12px] 
                 `}
                   >
                     Descripción <span className="text-red">*</span>
                   </label>
                   <div
-                    className={`flex gap-10 px-3 mt-1 ${
-                      description.length > 500
+                    className={`flex gap-10 px-3 mt-1 ${description.length > 500
                         ? "justify-between"
                         : "justify-end"
-                    }`}
+                      }`}
                   >
                     {description.length > 500 && (
                       <span className="text-[12px] text6">
@@ -489,11 +506,11 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                           bannerPreview === null
                             ? { backgroundColor: "#e5a657" }
                             : {
-                                backgroundImage: `url(${bannerPreview})`,
-                                backgroundSize: "cover",
-                                backgroundRepeat: "no-repeat",
-                                backgroundPosition: "center",
-                              }
+                              backgroundImage: `url(${bannerPreview})`,
+                              backgroundSize: "cover",
+                              backgroundRepeat: "no-repeat",
+                              backgroundPosition: "center",
+                            }
                         }
                       />
                       <div className="leading-6 tracking-tight items-center flex flex-wrap gap-4 px-5 pt-5">
@@ -612,11 +629,10 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                                 key={tag.id}
                                 type="button"
                                 onClick={() => handleTagToggle(tag.id)}
-                                className={`px-3 py-1.5 rounded-full cursor-pointer text-[12px] transition-colors border ${
-                                  selectedTags.includes(tag.id)
+                                className={`px-3 py-1.5 rounded-full cursor-pointer text-[12px] transition-colors border ${selectedTags.includes(tag.id)
                                     ? "bg-[#e5a657] text-white border-[#e5a657]"
                                     : "bg-gray-100 text-[#707070] border-gray-200 hover:bg-gray-200"
-                                }`}
+                                  }`}
                               >
                                 {tag.name}
                               </button>
@@ -648,9 +664,8 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
             <div className="flex flex-col">
               <div
                 onClick={() => setVisibility("public")}
-                className={`flex gap-2 items-center rounded-[2px] cursor-pointer px-5 py-4 ${
-                  visibility === "public" ? "bg-gray-100" : ""
-                }`}
+                className={`flex gap-2 items-center rounded-[2px] cursor-pointer px-5 py-4 ${visibility === "public" ? "bg-gray-100" : ""
+                  }`}
               >
                 {visibility === "public" ? (
                   <Globe
@@ -679,9 +694,8 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
               </div>
               <div
                 onClick={() => setVisibility("private")}
-                className={`flex gap-2 items-center rounded-[2px] cursor-pointer px-5 py-4 ${
-                  visibility === "private" ? "bg-gray-100" : ""
-                }`}
+                className={`flex gap-2 items-center rounded-[2px] cursor-pointer px-5 py-4 ${visibility === "private" ? "bg-gray-100" : ""
+                  }`}
               >
                 {visibility === "private" ? (
                   <Lock
@@ -715,9 +729,8 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
 
         {!croppingTarget && (
           <div
-            className={`w-full flex justify-between items-center px-5 ${
-              step === "1" ? "mt-0" : "mt-10"
-            }`}
+            className={`w-full flex justify-between items-center px-5 ${step === "1" ? "mt-0" : "mt-10"
+              }`}
           >
             <StepDots step={parseInt(step)} />
 
@@ -734,11 +747,10 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
                 onClick={() => (step === "4" ? handleSubmit() : onNext())}
                 type="button"
                 // Apply a disabled class and the disabled attribute
-                className={`text-[13px] text1 tracking-tight bg-yellow px-5 py-2 rounded-[40px] ${
-                  isButtonDisabled()
+                className={`text-[13px] text1 tracking-tight bg-yellow px-5 py-2 rounded-[40px] ${isButtonDisabled()
                     ? "brightness-90 opacity-50 cursor-not-allowed"
                     : "brightness-100 opacity-100 cursor-pointer"
-                }`}
+                  }`}
                 disabled={isButtonDisabled()}
               >
                 {step !== "4" ? "Siguiente" : "Crear comunidad"}
@@ -746,6 +758,16 @@ const CommunityModal: React.FC<Props> = ({ onClose, user }) => {
             </div>
           </div>
         )}
+
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          type={confirmModal.type}
+          confirmText={confirmModal.confirmText}
+        />
       </div>
     </div>
   );
