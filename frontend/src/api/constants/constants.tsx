@@ -1,6 +1,7 @@
 import {
   Login,
   Register,
+  RegisterLocal,
   Onboarding,
   ResetPassword,
   LandingHome,
@@ -14,12 +15,15 @@ import {
   AdminBusinessCreation,
   AdminFoodCategories,
   AdminLocals,
+  AdminDashboard,
+  AdminUsers,
   LocalDashboard,
   LocalMenu,
   LocalQR,
   LocalReviews,
   LocalSettings,
   LocalCalendar,
+  LocalSubscription,
   UPost,
   UExplore,
   URecipes,
@@ -28,6 +32,8 @@ import {
   UNotifications,
   ERecipe,
 } from "../../pages";
+
+import AdminLayout from "@/layout/admin/AdminLayout";
 
 export const ROUTES = {
   PUBLIC: {
@@ -40,6 +46,7 @@ export const ROUTES = {
   AUTH: {
     LOGIN: "/login",
     REGISTER: "/signup",
+    REGISTER_LOCAL: "/signup/locals",
     ONBOARDING: "/onboarding",
     RESET_PASSWORD: "/password_recovery",
   },
@@ -55,6 +62,8 @@ export const ROUTES = {
     BUSINESS_CREATION: "/admin/business-creation",
     FOOD_CATEGORIES: "/admin/food-categories",
     LOCALS: "/admin/locals",
+    USERS: "/admin/users",
+    DASHBOARD: "/admin/dashboard",
   },
   LOCAL: {
     DASHBOARD: "/business/dashboard",
@@ -63,6 +72,7 @@ export const ROUTES = {
     QR: "/business/qr",
     REVIEWS: "/business/reviews",
     SETTINGS: "/business/settings",
+    SUBSCRIPTION: "/business/subscription",
   },
   LOADING: "/loading",
   ERROR: "/404",
@@ -125,6 +135,14 @@ export const appRoutes = [
     element: (
       <PublicRoute>
         <Register />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: ROUTES.AUTH.REGISTER_LOCAL,
+    element: (
+      <PublicRoute>
+        <RegisterLocal />
       </PublicRoute>
     ),
   },
@@ -213,9 +231,11 @@ export const appRoutes = [
   },
 
   // Admin
-  { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <AdminBusinessCreation /> },
-  { path: ROUTES.ADMIN.FOOD_CATEGORIES, element: <AdminFoodCategories /> },
-  { path: ROUTES.ADMIN.LOCALS, element: <AdminLocals /> },
+  { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <ProtectedRoute isAdmin><AdminLayout><AdminBusinessCreation /></AdminLayout></ProtectedRoute> },
+  { path: ROUTES.ADMIN.FOOD_CATEGORIES, element: <ProtectedRoute isAdmin><AdminLayout><AdminFoodCategories /></AdminLayout></ProtectedRoute> },
+  { path: ROUTES.ADMIN.LOCALS, element: <ProtectedRoute isAdmin><AdminLayout><AdminLocals /></AdminLayout></ProtectedRoute> },
+  { path: ROUTES.ADMIN.USERS, element: <ProtectedRoute isAdmin><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute> },
+  { path: ROUTES.ADMIN.DASHBOARD, element: <ProtectedRoute isAdmin><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute> },
 
   // Local
   {
@@ -279,6 +299,15 @@ export const appRoutes = [
     element: (
       <ProtectedRoute isBusiness={true}>
         <LocalCalendar />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: ROUTES.LOCAL.SUBSCRIPTION,
+    element: (
+      <ProtectedRoute isBusiness={true}>
+        <LocalSubscription />
       </ProtectedRoute>
     ),
   },

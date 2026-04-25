@@ -55,6 +55,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       return <>{children}</>;
     }
 
+    if (user.role === "ADMIN") {
+      return <>{children}</>;
+    }
+
     if (user.isBusiness === false) {
       return <UIDashboard user={user}>{children}</UIDashboard>;
     }
@@ -65,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <>
-      {user && !is404 ? <HeaderUSER /> : !is404 && !user && <Navbar />}
+      {user && !is404 && user.role !== "ADMIN" ? <HeaderUSER /> : !is404 && !user && <Navbar />}
       {renderContent()}
       {!loading && !user && <Footer />}
     </>

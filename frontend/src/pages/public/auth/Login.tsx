@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
@@ -11,6 +11,11 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import toast from "react-hot-toast";
 import { getDeviceId } from "@/utils/device";
 
+const turnstileOptions = {
+  theme: "light" as const,
+  size: "invisible" as const,
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -22,13 +27,43 @@ const Login = () => {
 
   const recaptchaRef = useRef<TurnstileInstance>(null);
 
+  const turnstileCallbacks = useRef({
+    onSuccess: (_token: string) => { },
+    onError: (_e: any) => { },
+    onExpire: () => { },
+  });
+
+  useEffect(() => {
+    turnstileCallbacks.current = {
+      onSuccess: (token: string) => {
+        setRecaptchaToken(token);
+        toast.dismiss("security");
+        if (password.trim() !== "") {
+          performLogin(token);
+        }
+      },
+      onError: (e: any) => {
+        console.log(e);
+        toast.error("Error validando seguridad. Intenta de nuevo.");
+      },
+      onExpire: () => {
+        setRecaptchaToken(null);
+        recaptchaRef.current?.reset();
+      },
+    };
+  });
+
+  const handleSuccess = useCallback((token: string) => turnstileCallbacks.current.onSuccess(token), []);
+  const handleError = useCallback((e: any) => turnstileCallbacks.current.onError(e), []);
+  const handleExpire = useCallback(() => turnstileCallbacks.current.onExpire(), []);
+
   const { login } = useAuth();
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!recaptchaToken) {
-      recaptchaRef.current?.execute();
+      toast("Validando seguridad, un momento...", { icon: "🔒", id: "security" });
       return;
     }
 
@@ -36,24 +71,31 @@ const Login = () => {
   };
 
   const performLogin = async (token: string) => {
-    const deviceId = await getDeviceId();
-    const response = await login(email.trim(), password.trim(), rememberMe, token, deviceId);
+    try {
+      const deviceId = await getDeviceId();
+      const response = await login(email.trim(), password.trim(), rememberMe, token, deviceId);
 
-    if (response === null) {
-      toast.error("Error al iniciar sesión");
-      setRecaptchaToken(null);
-      recaptchaRef.current?.reset();
-    }
+      if (response?.success && response.user) {
+        setRecaptchaToken(null);
+        recaptchaRef.current?.reset();
 
-    if (response?.success && response.user) {
-      setRecaptchaToken(null);
-      recaptchaRef.current?.reset();
+        const { user } = response;
 
-      if (response.user.isBusiness) {
-        navigate(ROUTES.LOCAL.DASHBOARD);
-      } else {
-        navigate(ROUTES.USER.DASHBOARD);
+        if (user.role === "ADMIN") {
+          navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
+        } else if (user.isBusiness) {
+          if (user.subscription_status === "active") {
+            navigate(ROUTES.LOCAL.DASHBOARD, { replace: true });
+          } else {
+            navigate(ROUTES.LOCAL.MENU, { replace: true });
+          }
+        } else {
+          navigate(ROUTES.USER.DASHBOARD, { replace: true });
+        }
       }
+    } catch (error) {
+      console.error("Error in performLogin:", error);
+      toast.error("Ocurrió un error inesperado al iniciar sesión.");
     }
   };
 
@@ -170,26 +212,10 @@ const Login = () => {
             <Turnstile
               ref={recaptchaRef}
               siteKey="0x4AAAAAACny8xDMqyxHHXxu"
-              options={{
-                theme: "light",
-                size: "invisible",
-                execution: "execute",
-              }}
-              onSuccess={(token) => {
-                setRecaptchaToken(token);
-
-                if (password.trim() !== "") {
-                  performLogin(token);
-                }
-              }}
-              onError={(e) => {
-                console.log(e);
-                toast.error("Error validando seguridad. Intenta de nuevo.");
-              }}
-              onExpire={() => {
-                setRecaptchaToken(null);
-                recaptchaRef.current?.reset();
-              }}
+              options={turnstileOptions}
+              onSuccess={handleSuccess}
+              onError={handleError}
+              onExpire={handleExpire}
               className="mt-5"
             />
           </div>

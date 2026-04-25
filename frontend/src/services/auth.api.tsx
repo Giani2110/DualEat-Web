@@ -22,7 +22,7 @@ export const login = async (
   d: string,
 ): Promise<AuthResponse | null> => {
   try {
-    const response = await axiosInterceptor.post(
+    const { data } = await axiosInterceptor.post<AuthResponse>(
       "/auth/login",
       {
         email: e,
@@ -34,19 +34,16 @@ export const login = async (
       { withCredentials: true },
     );
 
-    if (response.data?.success === false) {
-      toast.error(response.data.message);
+    if (data && data.success) {
+      toast.success(data.message || "Inicio de sesión exitoso");
+      return data;
+    } else {
+      toast.error(data?.message || "Error al iniciar sesión");
       return null;
-    } else {
-      toast.success(response.data.message);
-      return response.data.user;
     }
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      toast.error(err.response?.data?.message || "Error al iniciar sesión");
-    } else {
-      toast.error("Error desconocido");
-    }
+  } catch (err: any) {
+    const errorMsg = err.response?.data?.message || "Error al iniciar sesión";
+    toast.error(errorMsg);
     return null;
   }
 };

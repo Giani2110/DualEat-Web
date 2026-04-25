@@ -1,54 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FaEdit, FaTrash, FaSave, FaSearch } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { axiosInterceptor as axios } from '@/api/interceptor/axios-interceptor';
+import {
+  FaEdit,
+  FaTrash,
+  FaSearch,
+  FaTimes,
+  FaStore,
+  FaMapMarkerAlt,
+  FaEnvelope,
+  FaCheckCircle,
+  FaImage
+} from 'react-icons/fa';
 import { AnimatePresence, motion } from 'framer-motion';
+import ConfirmModal from '@/components/modal/ConfirmModal';
 
 interface Local {
-  id: number;
+  id: string;
+  slug: string;
   name: string;
   description: string | null;
-  address: string | null;
+  address: string;
   phone: string | null;
   email: string | null;
+  type_local: string;
   image_url: string;
-  opening_time: string | null;
-  closing_time: string | null;
-  business_id: number;
+  latitude: number;
+  longitude: number;
+  average_rating: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const AdminLocals = () => {
   const [locals, setLocals] = useState<Local[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState<{ 
-    id: number | null;
-    name: string;
-    description: string | null;
-    address: string | null;
-    phone: string | null;
-    email: string | null;
-    image_url: string;
-    opening_time: string | null;
-    closing_time: string | null;
-    business_id: number | null;
-  }>({
-    id: null,
+  const [formData, setFormData] = useState<Partial<Local>>({
+    id: '',
     name: '',
     description: '',
     address: '',
     phone: '',
     email: '',
     image_url: '',
-    opening_time: null,
-    closing_time: null,
-    business_id: null,
+    type_local: 'Restaurante',
+    latitude: -34.6037,
+    longitude: -58.3816,
+    active: false,
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [confirmData, setConfirmData] = useState<{
+    isOpen: boolean;
+    localId: string | null;
+  }>({ isOpen: false, localId: null });
 
-  // URL corregida para que coincida con la ruta de tu servidor Express
-  const API_URL = 'http://localhost:3000/api/admin/locals';
-  const placeholderImageUrl = 'https://via.placeholder.com/400';
+  const API_URL = '/admin/locals';
+  const placeholderImageUrl = 'https://placehold.co/600x400/png?text=DualEat+Local';
 
   useEffect(() => {
     fetchLocals();
@@ -60,56 +69,80 @@ const AdminLocals = () => {
       const response = await axios.get(API_URL);
       setLocals(response.data);
     } catch (error) {
-      setMessage('Error al cargar los locales.');
+      showMsg('Error al cargar los locales.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const showMsg = (msg: string) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(''), 3500);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (e.target.type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleOpenEditForm = (local: Local) => {
     setFormData({ ...local, image_url: local.image_url || '' });
-    setShowForm(true);
+    setShowDrawer(true);
   };
 
-  const handleCloseForm = () => {
-    setShowForm(false);
+  const handleCloseDrawer = () => {
+    setShowDrawer(false);
   };
 
   const handleSave = async () => {
-    if (!formData.name.trim() || !formData.business_id) {
-      setMessage('El nombre y el ID del negocio son obligatorios.');
+    if (!formData.name?.trim()) {
+      showMsg('El nombre es obligatorio.');
       return;
     }
     setLoading(true);
     try {
-      // Actualizar local existente
-      const response = await axios.put(`${API_URL}/${formData.id}`, formData);
+      // Solo enviamos los campos sanitizados (aunque el backend ya lo hace, ayudamos al frontend)
+      const dataToSave = {
+        name: formData.name,
+        description: formData.description,
+        address: formData.address,
+        phone: formData.phone,
+        email: formData.email,
+        type_local: formData.type_local,
+        image_url: formData.image_url,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        active: formData.active,
+      };
+
+      const response = await axios.put(`${API_URL}/${formData.id}`, dataToSave);
       setLocals(locals.map(local => (local.id === formData.id ? response.data : local)));
-      setMessage('Local actualizado exitosamente.');
-      setShowForm(false);
+      showMsg('Local actualizado exitosamente.');
+      setShowDrawer(false);
     } catch (error: any) {
-      setMessage(`Error al guardar el local: ${error.message}`);
+      showMsg(`Error al guardar el local: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteLocal = async (id: number) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este local?')) return;
+  const handleDeleteLocal = async () => {
+    if (!confirmData.localId) return;
     try {
       setLoading(true);
-      await axios.delete(`${API_URL}/${id}`);
-      setLocals(locals.filter(local => local.id !== id));
-      setMessage('Local eliminado exitosamente.');
+      await axios.delete(`${API_URL}/${confirmData.localId}`);
+      setLocals(locals.filter(local => local.id !== confirmData.localId));
+      showMsg('Local eliminado exitosamente.');
     } catch (error) {
-      setMessage('Error al eliminar el local.');
+      showMsg('Error al eliminar el local.');
     } finally {
       setLoading(false);
+      setConfirmData({ isOpen: false, localId: null });
     }
   };
 
@@ -121,152 +154,323 @@ const AdminLocals = () => {
   );
 
   return (
-    <div className="relative w-full min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-8">Gestor de Locales</h1>
-
-      {/* Panel de control principal */}
-      <div className="flex flex-col md:flex-row justify-center items-center mb-8">
-        <div className="relative w-full md:w-1/3">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por nombre, dirección o email..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 transition"
-          />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+    <div className="min-h-screen bg-[#f9f9f8]">
+      {/* HEADER */}
+      <div className="bg-white border-b border-[#f0f0f0] px-8 py-5 flex items-center justify-between sticky top-0 z-10">
+        <div>
+          <p className="text-[10px] font-bold tracking-widest uppercase text-[#c4c4c4] mb-0.5">
+            Administración
+          </p>
+          <h1 className="text-2xl font-bold text-[#111] m-0">
+            Gestión de Locales
+          </h1>
+        </div>
+        <div className="text-sm font-medium text-gray-500">
+          {filteredLocals.length} locales encontrados
         </div>
       </div>
 
-      {/* Mensajes de estado */}
-      {message && (
-        <div className={`text-center p-3 rounded-lg font-semibold mb-4 ${message.startsWith('Error') ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`}>
-          {message}
+      <div className="p-8">
+        {/* SEARCH BAR */}
+        <div className="mb-8 flex justify-center">
+          <div className="relative w-full max-w-xl">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por nombre, dirección o email..."
+              className="w-full pl-12 pr-4 py-3 bg-white border border-[#e5e7eb] rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all shadow-sm"
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
         </div>
-      )}
 
-      {/* Grid de tarjetas de locales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <AnimatePresence>
-          {filteredLocals.map((local) => (
-            <motion.div
-              key={local.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 relative group flex flex-col justify-between"
-            >
-              <div className="flex-grow">
-                <img 
-                  src={local.image_url || placeholderImageUrl} 
-                  alt={local.name} 
-                  className="w-full h-40 object-cover rounded-md mb-4" 
-                />
-                <h3 className="text-xl font-bold text-gray-800">{local.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{local.address}</p>
-                <p className="text-xs text-gray-500">{local.description}</p>
-              </div>
-              
-              <div className="flex justify-end gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button
-                  onClick={() => handleOpenEditForm(local)}
-                  className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition"
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => handleDeleteLocal(local.id)}
-                  className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        {/* TILES CONTAINER */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AnimatePresence mode='popLayout'>
+            {filteredLocals.map((local) => (
+              <motion.div
+                key={local.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="group bg-white rounded-2xl shadow-sm border border-[#efefef] overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              >
+                <div className="relative h-44 overflow-hidden">
+                  <img
+                    src={local.image_url || placeholderImageUrl}
+                    alt={local.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute top-3 right-3">
+                    <span className={`px-3 py-1 text-[10px] font-bold rounded-full border ${local.active
+                      ? 'bg-green-50 text-green-600 border-green-200'
+                      : 'bg-amber-50 text-amber-600 border-amber-200'
+                      }`}>
+                      {local.active ? 'ACTIVO' : 'PENDIENTE'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-bold text-[#111] truncate">{local.name}</h3>
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-xs text-gray-500">
+                      <FaMapMarkerAlt className="mr-2 text-gray-300 flex-shrink-0" />
+                      <span className="truncate">{local.address}</span>
+                    </div>
+                    {local.email && (
+                      <div className="flex items-center text-xs text-gray-500">
+                        <FaEnvelope className="mr-2 text-gray-300 flex-shrink-0" />
+                        <span className="truncate">{local.email}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-400 line-clamp-2 min-h-[32px] mb-6">
+                    {local.description || 'Sin descripción disponible.'}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-[#f5f5f5]">
+                    <div className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded">
+                      {local.type_local || 'RESTAURANTE'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleOpenEditForm(local)}
+                        className="p-2.5 text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"
+                        title="Editar Local"
+                      >
+                        <FaEdit size={16} />
+                      </button>
+                      <button
+                        onClick={() => setConfirmData({ isOpen: true, localId: local.id })}
+                        className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                        title="Eliminar Local"
+                      >
+                        <FaTrash size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {filteredLocals.length === 0 && !loading && (
+          <div className="py-20 flex flex-col items-center justify-center text-center">
+            <div className="w-20 h-20 bg-white rounded-3xl shadow-sm border border-[#efefef] flex items-center justify-center mb-6">
+              <FaStore className="text-gray-200 text-4xl" />
+            </div>
+            <h3 className="text-xl font-bold text-[#555] mb-2">No se encontraron locales</h3>
+            <p className="text-gray-400 text-sm">Prueba ajustando tu búsqueda o filtros.</p>
+          </div>
+        )}
       </div>
-      {filteredLocals.length === 0 && !loading && (
-        <div className="text-center text-gray-500 mt-12 text-lg">No se encontraron locales.</div>
-      )}
 
-      {/* Formulario flotante (modal) */}
+      {/* DRAWER / SIDE PANEL */}
       <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={handleCloseForm}
-          >
+        {showDrawer && (
+          <>
             <motion.div
-              initial={{ y: -50, scale: 0.9 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: -50, scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md space-y-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseDrawer}
+              className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[100]"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-full max-w-[480px] bg-white shadow-[-8px_0_40px_rgba(0,0,0,0.1)] z-[101] flex flex-col"
             >
-              <h2 className="text-2xl font-bold mb-6 text-center">Editar Local</h2>
-              
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Nombre del local"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-              <input
-                type="text"
-                name="address"
-                value={formData.address || ''}
-                onChange={handleInputChange}
-                placeholder="Dirección"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-              <input
-                type="text"
-                name="image_url"
-                value={formData.image_url || ''}
-                onChange={handleInputChange}
-                placeholder="URL de la imagen"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-              <input
-                type="text"
-                name="business_id"
-                value={formData.business_id || ''}
-                onChange={handleInputChange}
-                placeholder="ID del negocio asociado"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                disabled // Deshabilitamos la edición de este campo para evitar errores
-              />
-              <textarea
-                name="description"
-                value={formData.description || ''}
-                onChange={handleInputChange}
-                placeholder="Descripción del local"
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-
-              <div className="flex justify-end gap-2 mt-6">
+              <div className="px-8 py-6 border-b border-[#f0f0f0] flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#c4c4c4] mb-1">
+                    Edición de Local
+                  </p>
+                  <h2 className="text-xl font-bold text-[#111]">Modificar Detalles</h2>
+                </div>
                 <button
-                  onClick={handleCloseForm}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-full font-semibold hover:bg-gray-400 transition"
+                  onClick={handleCloseDrawer}
+                  className="w-10 h-10 flex items-center justify-center border border-[#e5e7eb] rounded-xl text-gray-400 hover:bg-gray-50 transition-colors"
                 >
-                  Cancelar
+                  <FaTimes />
                 </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+                {/* Visual Preview */}
+                <div className="p-4 bg-[#fafafa] border border-[#f0f0f0] rounded-2xl flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
+                    <img
+                      src={formData.image_url || placeholderImageUrl}
+                      alt="Vista previa"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-[10px] font-bold uppercase text-gray-400 mb-1 block">URL de Imagen</label>
+                    <div className="relative">
+                      <FaImage className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
+                      <input
+                        type="text"
+                        name="image_url"
+                        value={formData.image_url || ''}
+                        onChange={handleInputChange}
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                        className="w-full pl-10 pr-3 py-2 text-sm bg-white border border-[#e5e7eb] rounded-xl outline-none focus:border-red-500 transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main Fields */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-bold uppercase text-gray-400 mb-1.5 block">Nombre del Local</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name || ''}
+                      onChange={handleInputChange}
+                      placeholder="Ej: DualEat Burger"
+                      className="w-full px-4 py-2.5 bg-[#fafafa] border border-[#e5e7eb] rounded-xl outline-none focus:bg-white focus:border-red-500 transition-all font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold uppercase text-gray-400 mb-1.5 block">Tipo de Local</label>
+                    <div className="relative">
+                      <select
+                        name="type_local"
+                        value={formData.type_local || 'Restaurante'}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 bg-[#fafafa] border border-[#e5e7eb] rounded-xl outline-none focus:bg-white focus:border-red-500 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="Restaurante">Restaurante</option>
+                        <option value="Bar">Bar</option>
+                        <option value="Café">Café</option>
+                        <option value="Pizzería">Pizzería</option>
+                        <option value="Heladería">Heladería</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">▼</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-gray-400 mb-1.5 block">Dirección</label>
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address || ''}
+                        onChange={handleInputChange}
+                        placeholder="Calle 123..."
+                        className="w-full px-4 py-2.5 bg-[#fafafa] border border-[#e5e7eb] rounded-xl outline-none focus:bg-white focus:border-red-500 transition-all text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase text-gray-400 mb-1.5 block">Teléfono</label>
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone || ''}
+                        onChange={handleInputChange}
+                        placeholder="+54 11..."
+                        className="w-full px-4 py-2.5 bg-[#fafafa] border border-[#e5e7eb] rounded-xl outline-none focus:bg-white focus:border-red-500 transition-all text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Estado Tostado / Switch */}
+                  <div className={`p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between ${formData.active
+                    ? 'bg-green-50/50 border-green-100'
+                    : 'bg-amber-50/50 border-amber-100'
+                    }`}>
+                    <div>
+                      <h4 className={`text-sm font-bold ${formData.active ? 'text-green-700' : 'text-amber-700'}`}>
+                        {formData.active ? 'Local Aprobado' : 'Aprobación Pendiente'}
+                      </h4>
+                      <p className="text-[11px] text-gray-500">¿Habilitar el local para el público?</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="active"
+                        checked={formData.active}
+                        onChange={handleInputChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold uppercase text-gray-400 mb-1.5 block">Descripción</label>
+                    <textarea
+                      name="description"
+                      value={formData.description || ''}
+                      onChange={handleInputChange}
+                      placeholder="Cuéntanos más sobre el local..."
+                      rows={4}
+                      className="w-full px-4 py-3 bg-[#fafafa] border border-[#e5e7eb] rounded-xl outline-none focus:bg-white focus:border-red-500 transition-all text-sm resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-8 py-6 border-t border-[#f0f0f0] bg-gray-50/50 space-y-3">
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="px-4 py-2 bg-green-500 text-white rounded-full font-semibold hover:bg-green-600 transition disabled:bg-gray-400 flex items-center gap-2"
+                  className="w-full h-12 bg-[#111] text-white rounded-xl font-bold hover:bg-[#2d2d2d] transition-colors disabled:bg-gray-400 flex items-center justify-center gap-2"
                 >
-                  <FaSave /> Guardar Cambios
+                  {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FaCheckCircle />}
+                  Guardar Cambios
+                </button>
+                <button
+                  onClick={handleCloseDrawer}
+                  className="w-full h-12 bg-white text-gray-500 rounded-xl font-bold border border-[#e5e7eb] hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
                 </button>
               </div>
             </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={confirmData.isOpen}
+        onClose={() => setConfirmData({ isOpen: false, localId: null })}
+        onConfirm={handleDeleteLocal}
+        title="Eliminar Local"
+        message="¿Estás seguro de que quieres eliminar este local de forma permanente?"
+        type="danger"
+        confirmText="Eliminar"
+      />
+
+      {/* TOAST MESSAGE */}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 font-semibold text-sm ${message.includes('Error') ? 'bg-red-600 text-white' : 'bg-black text-white'
+              }`}
+          >
+            {message.includes('Error') ? '⚠️' : '✓'}
+            {message}
           </motion.div>
         )}
       </AnimatePresence>

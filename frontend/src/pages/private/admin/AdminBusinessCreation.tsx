@@ -1,10 +1,27 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { axiosInterceptor as axios } from "@/api/interceptor/axios-interceptor";
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  User,
+  Store,
+  Mail,
+  Lock,
+  MapPin,
+  Phone,
+  Image as ImageIcon,
+  FileText,
+  ArrowRight,
+  Sparkles,
+  Building2
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/api/constants/constants';
+import ConfirmModal from '@/components/modal/ConfirmModal';
 
-const AdminBusinessCreation  = () => {
+const AdminBusinessCreation = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userData: { name: '', email: '', password: '' },
-    businessData: { name: '' },
     localData: {
       name: '',
       description: '',
@@ -12,24 +29,38 @@ const AdminBusinessCreation  = () => {
       phone: '',
       email: '',
       image_url: '',
+      type_local: 'Restaurante',
+      latitude: -34.6037,
+      longitude: -58.3816,
       categorias_menu: [''],
     },
   });
-  const [message, setMessage] = useState('');
+
   const [loading, setLoading] = useState(false);
+  const [successData, setSuccessData] = useState<any>(null);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'success';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    onConfirm: () => { },
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
-    // Lógica mejorada para manejar todos los campos de forma clara
-    if (['name', 'email', 'password'].includes(name)) { 
+
+    if (['name', 'email', 'password'].includes(name)) {
       setFormData(prev => ({ ...prev, userData: { ...prev.userData, [name]: value } }));
-    } else if (name === 'businessName') {
-      setFormData(prev => ({ ...prev, businessData: { ...prev.businessData, name: value } }));
-    } else if (name === 'localName') { // <-- CORRECCIÓN: Maneja explícitamente el nombre del local
+    } else if (name === 'localName') {
       setFormData(prev => ({ ...prev, localData: { ...prev.localData, name: value } }));
     } else {
-      // Maneja el resto de los campos de localData
       setFormData(prev => ({ ...prev, localData: { ...prev.localData, [name]: value } }));
     }
   };
@@ -37,179 +68,266 @@ const AdminBusinessCreation  = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('Creando negocio...');
 
     try {
-      const response = await axios.post('http://localhost:3000/admin/business', formData);
-      setMessage(`Éxito: ${response.data.message}`);
-      setFormData({
-        userData: { name: '', email: '', password: '' },
-        businessData: { name: '' },
-        localData: {
-          name: '',
-          description: '',
-          address: '',
-          phone: '',
-          email: '',
-          image_url: '',
-          categorias_menu: [''],
-        },
-      });
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        setMessage(`Error: ${error.response.data.message}`);
-      } else {
-        setMessage('Error al conectar con el servidor.');
+      const response = await axios.post('/admin/business', formData);
+      if (response.data.success || response.status === 201) {
+        setSuccessData(response.data.data);
+        setConfirmModal({
+          isOpen: true,
+          title: '¡Creación Exitosa!',
+          message: 'El usuario, el negocio y el local han sido creados correctamente. ¿Deseas ir a la lista de locales o seguir editando?',
+          type: 'success',
+          onConfirm: () => navigate(ROUTES.ADMIN.LOCALS),
+        });
       }
+    } catch (error: any) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'Error en la creación',
+        message: error.response?.data?.message || 'Ocurrió un error al intentar crear el negocio.',
+        type: 'danger',
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false })),
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0 }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-8 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Crear Nuevo Negocio</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-gray-50 p-6 rounded-md">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Datos del Usuario Dueño</h2>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.userData.name}
-                onChange={handleInputChange}
-                placeholder="Nombre completo"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-              />
-            </div>
-            <div className='mt-4'>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.userData.email}
-                onChange={handleInputChange}
-                placeholder="Email del dueño"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1 mt-4">Contraseña</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.userData.password}
-                onChange={handleInputChange}
-                placeholder="Contraseña"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-              />
-            </div>
-          </div>
-          <div className="bg-gray-50 p-6 rounded-md">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Datos del Negocio y Local</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">Nombre del negocio</label>
-                <input
-                  type="text"
-                  id="businessName"
-                  name="businessName"
-                  value={formData.businessData.name}
+    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="max-w-4xl mx-auto"
+      >
+        {/* Header */}
+        <div className="text-center mb-12">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-[#b53325] to-[#E5A657] rounded-3xl shadow-xl mb-6 transform -rotate-3"
+          >
+            <Building2 className="w-8 h-8 text-white" />
+          </motion.div>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-3">Alta Manual de Negocio</h1>
+          <p className="text-gray-500 text-lg">Configuración rápida de dueños y establecimientos.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Card 1: Dueño */}
+          <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 opacity-50" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-red-100 rounded-2xl">
+                  <User className="w-5 h-5 text-red-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">Información del Dueño</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputGroup
+                  label="Nombre Completo"
+                  id="name"
+                  name="name"
+                  value={formData.userData.name}
                   onChange={handleInputChange}
-                  placeholder="Nombre del negocio"
+                  icon={<User className="w-5 h-5" />}
+                  placeholder="Ej: Juan Pérez"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
+                />
+                <InputGroup
+                  label="Correo Electrónico"
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.userData.email}
+                  onChange={handleInputChange}
+                  icon={<Mail className="w-5 h-5" />}
+                  placeholder="juan@ejemplo.com"
+                  required
+                />
+                <InputGroup
+                  label="Contraseña Temporal"
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.userData.password}
+                  onChange={handleInputChange}
+                  icon={<Lock className="w-5 h-5" />}
+                  placeholder="••••••••"
+                  required
                 />
               </div>
-              <div>
-                <label htmlFor="localName" className="block text-sm font-medium text-gray-700 mb-1">Nombre del local</label>
-                <input
-                  type="text"
+            </div>
+          </motion.div>
+
+          {/* Card 2: Negocio & Local */}
+          <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-50 rounded-full -mr-16 -mt-16 opacity-50" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-yellow-100 rounded-2xl">
+                  <Store className="w-5 h-5 text-yellow-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">Detalles del Establecimiento</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputGroup
+                  label="Nombre del Local"
                   id="localName"
                   name="localName"
                   value={formData.localData.name}
                   onChange={handleInputChange}
-                  placeholder="Nombre del local"
+                  icon={<Store className="w-5 h-5" />}
+                  placeholder="Ej: DualEat Central"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
                 />
-              </div>
-              <div className="md:col-span-2">
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Dirección del local</label>
-                <input
-                  type="text"
-                  id="address"
-                  name="address"
-                  value={formData.localData.address}
+                <InputGroup
+                  label="Tipo de Local"
+                  id="type_local"
+                  name="type_local"
+                  value={formData.localData.type_local}
                   onChange={handleInputChange}
-                  placeholder="Dirección completa"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
+                  icon={<Building2 className="w-5 h-5" />}
+                  placeholder="Ej: Restaurante, Bar, etc."
+                  required
                 />
-              </div>
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                <input
-                  type="tel"
+                <div className="md:col-span-2">
+                  <InputGroup
+                    label="Dirección"
+                    id="address"
+                    name="address"
+                    value={formData.localData.address}
+                    onChange={handleInputChange}
+                    icon={<MapPin className="w-5 h-5" />}
+                    placeholder="Calle Falsa 123, Ciudad"
+                  />
+                </div>
+                <InputGroup
+                  label="Teléfono"
                   id="phone"
                   name="phone"
+                  type="tel"
                   value={formData.localData.phone}
                   onChange={handleInputChange}
-                  placeholder="Teléfono del local"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
+                  icon={<Phone className="w-5 h-5" />}
+                  placeholder="+54 9 11 ..."
                 />
-              </div>
-              <div>
-                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">URL de la imagen</label>
-                <input
-                  type="url"
+                <InputGroup
+                  label="URL Imagen (Banner)"
                   id="imageUrl"
                   name="image_url"
                   value={formData.localData.image_url}
                   onChange={handleInputChange}
+                  icon={<ImageIcon className="w-5 h-5" />}
                   placeholder="https://..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
                 />
-              </div>
-              <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.localData.description}
-                  onChange={handleInputChange}
-                  rows={3}
-                  placeholder="Descripción del local"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
-                />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Descripción del Local</label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-4 text-gray-400">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.localData.description}
+                      onChange={handleInputChange}
+                      rows={4}
+                      placeholder="Breve reseña del local..."
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition-all text-gray-700 resize-none shadow-inner"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 px-4 rounded-md font-semibold text-white transition transform ${
-              loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#b53325] hover:bg-red-700 active:scale-95'
-            }`}
-          >
-            {loading ? 'Creando...' : 'Crear Negocio'}
-          </button>
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full group relative py-5 px-6 rounded-3xl font-black text-xl shadow-2xl transition-all flex items-center justify-center space-x-3 overflow-hidden ${loading ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#b53325] hover:bg-black text-white hover:shadow-red-200/50'
+                }`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-yellow-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+              {loading ? (
+                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Crear Negocio Completo</span>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </motion.div>
         </form>
-        {message && (
-          <p className={`mt-6 text-center text-sm font-medium ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>
-            {message}
-          </p>
-        )}
-      </div>
+
+        <AnimatePresence>
+          {successData && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mt-8 p-6 bg-green-50 rounded-3xl border border-green-100 flex items-center gap-4"
+            >
+              <div className="p-3 bg-green-100 rounded-2xl">
+                <Sparkles className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-green-800 font-bold">¡Sistema Listo!</p>
+                <p className="text-green-600 text-sm">El negocio se ha configurado con éxito.</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        confirmText="Continuar a Locales"
+      />
     </div>
   );
 };
+
+const InputGroup = ({ label, icon, ...props }: any) => (
+  <div className="space-y-2">
+    <label htmlFor={props.id} className="block text-sm font-bold text-gray-700 ml-1">
+      {label} {props.required && <span className="text-red-500">*</span>}
+    </label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-500 transition-colors">
+        {icon}
+      </div>
+      <input
+        {...props}
+        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition-all text-gray-800 shadow-inner"
+      />
+    </div>
+  </div>
+);
 
 export default AdminBusinessCreation;

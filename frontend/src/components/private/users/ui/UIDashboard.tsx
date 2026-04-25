@@ -116,7 +116,7 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
                 type="text"
               />
               <div
-                typeof="button"
+
                 onClick={() => {
                   setStarted(false);
                   setConversation([]);
@@ -143,24 +143,22 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
               <div className="mx-2 mt-5 flex flex-col justify-between h-full min-h-screen">
                 <div className="flex-1">
                   <div
-                    typeof="button"
+
                     onClick={() => setIsOpen(!isOpen)}
                     className="flex justify-between items-center cursor-pointer hover:bg-[#F8F8F8] p-1.5 rounded-[5px]"
                   >
                     <p className="Dosis-Bold text5 text-[15px]">Chats</p>
                     <ChevronDown
                       size={18}
-                      className={`text5 transition-transform duration-200 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
+                      className={`text5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </div>
 
                   {/** Chats */}
                   <div
-                    className={`flex flex-col gap-1.5 mt-2 overflow-y-auto scroll2 pe-3 ${
-                      isOpen ? "max-h-[400px] min-h-[300px]" : "max-h-0"
-                    }`}
+                    className={`flex flex-col gap-1.5 mt-2 overflow-y-auto scroll2 pe-3 ${isOpen ? "max-h-[400px] min-h-[300px]" : "max-h-0"
+                      }`}
                   >
                     {chats
                       .filter((chat) =>
@@ -173,16 +171,14 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
                         return (
                           <div
                             key={chat.chatId}
-                            className={`cursor-pointer flex justify-between items-center hover:bg-[#E9E9E9] px-2 py-1 rounded-[5px] transition-all duration-100 ${
-                              isActive ? "bg-yellow" : ""
-                            }`}
+                            className={`cursor-pointer flex justify-between items-center hover:bg-[#E9E9E9] px-2 py-1 rounded-[5px] transition-all duration-100 ${isActive ? "bg-yellow" : ""
+                              }`}
                             onClick={() => setChatID(chat.chatId)}
                             ref={isOptionsOpen ? divRef : null}
                           >
                             <p
-                              className={`text-[14px] ${
-                                isActive ? "text1" : "text5"
-                              }`}
+                              className={`text-[14px] ${isActive ? "text1" : "text5"
+                                }`}
                             >
                               {chat.title}
                             </p>
@@ -191,19 +187,17 @@ const UIDashboard: React.FC<Props> = ({ children, user }) => {
                                 e.stopPropagation();
                                 setOpenOptions(chat.chatId);
                               }}
-                              className={` group p-1 rounded-full relative ${
-                                isActive
-                                  ? "hover:bg-[#fff]"
-                                  : "hover:bg-[#4A4947]"
-                              }`}
+                              className={` group p-1 rounded-full relative ${isActive
+                                ? "hover:bg-[#fff]"
+                                : "hover:bg-[#4A4947]"
+                                }`}
                             >
                               <Ellipsis
                                 size={14}
-                                className={`rotate-90 flex-shrink-0 ${
-                                  isActive
-                                    ? "text1 group-hover:text-[#2F2F2F]!"
-                                    : "text5 group-hover:text-[#fff]!"
-                                }`}
+                                className={`rotate-90 flex-shrink-0 ${isActive
+                                  ? "text1 group-hover:text-[#2F2F2F]!"
+                                  : "text5 group-hover:text-[#fff]!"
+                                  }`}
                               />
 
                               {/** Opciones de chat */}

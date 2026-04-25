@@ -10,12 +10,14 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   onlyTempToken?: boolean;
   isBusiness?: boolean;
+  isAdmin?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   onlyTempToken = false,
   isBusiness,
+  isAdmin,
 }) => {
   const location = useLocation();
   const { user, loading } = useAuth();
@@ -37,6 +39,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (!user) {
     return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
+  }
+
+  if (isAdmin && user.role !== "ADMIN") {
+    return <Navigate to={ROUTES.PUBLIC.HOME} replace />;
   }
 
   if (isBusiness === true && user.isBusiness === false) {

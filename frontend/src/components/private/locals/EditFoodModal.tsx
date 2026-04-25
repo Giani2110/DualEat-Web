@@ -46,13 +46,13 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
+
     let typedValue: string | number | null = value;
     if (name === 'price') {
       typedValue = parseFloat(value);
       if (isNaN(typedValue)) typedValue = 0;
     }
-    
+
     // Actualizar para manejar category_id como local_menu_category_id
     if (name === 'category_id') {
       const categoryId = parseInt(value, 10);
@@ -71,7 +71,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
       }
       return;
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: typedValue
@@ -81,28 +81,28 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     try {
       setLoading(true);
       setError(null);
-  
+
       const formData = new FormData();
       formData.append('image', file);
-  
-      const response = await fetch(`${API_BASE}/food/upload-image`, {
+
+      const response = await fetch(`${API_BASE}/menu/upload-image`, {
         method: 'POST',
         body: formData,
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error al subir la imagen al servidor.');
       }
-  
+
       const { url } = await response.json();
-  
+
       setFormData(prev => ({ ...prev, image_url: url }));
-  
+
     } catch (err: any) {
       console.error('Error al subir la imagen:', err);
       setError(`No se pudo subir la imagen: ${err.message || 'Error de red.'}`);
@@ -135,15 +135,15 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData?.name || !formData.price || !formData.local_menu_category_id) {
       setError('Por favor, completa todos los campos requeridos.');
       return;
     }
-  
+
     onSave(formData as Food);
   };
-  
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop con desenfoque */}
@@ -188,11 +188,10 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
             {/* Sección de carga de imagen */}
             <div className="text-center space-y-6">
               <div
-                className={`relative mx-auto w-64 h-64 rounded-2xl border-2 border-dashed transition-all duration-300 overflow-hidden group ${
-                  dragActive
-                    ? 'border-[#B53325] bg-[#B53325]/10 scale-105'
-                    : 'border-gray-600 hover:border-gray-500'
-                }`}
+                className={`relative mx-auto w-64 h-64 rounded-2xl border-2 border-dashed transition-all duration-300 overflow-hidden group ${dragActive
+                  ? 'border-[#B53325] bg-[#B53325]/10 scale-105'
+                  : 'border-gray-600 hover:border-gray-500'
+                  }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}

@@ -121,7 +121,7 @@ const AuthSection: React.FC<Props> = ({
         <div className="space-y-6">
           {children}
 
-          {location.pathname !== ROUTES.AUTH.ONBOARDING && (
+          {location.pathname !== ROUTES.AUTH.ONBOARDING && location.pathname !== ROUTES.AUTH.REGISTER_LOCAL && (
             <>
               <div className="flex w-full items-center justify-around mb-5 mt-6">
                 <div className="w-[35%] border-t border-gray-300"></div>
@@ -229,11 +229,10 @@ const AuthSection: React.FC<Props> = ({
                   type="button"
                   key={index}
                   onClick={() => handleDotClick(index)}
-                  className={`h-1 ${
-                    currentImageIndex === index
+                  className={`h-1 ${currentImageIndex === index
                       ? "w-[45px] bg-white rounded-full"
                       : "w-[30px] cursor-pointer rounded-full bg-gray-400 opacity-60"
-                  } transition-all duration-300`}
+                    } transition-all duration-300`}
                   aria-label={`Ir a la diapositiva ${index + 1}`}
                 ></button>
               ))}

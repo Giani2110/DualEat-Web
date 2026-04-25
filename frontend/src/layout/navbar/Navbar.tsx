@@ -37,30 +37,17 @@ const Header: React.FC = () => {
     return null;
   }
 
-  const transparentPages = [
-    ROUTES.PUBLIC.ABOUT_US,
-    ROUTES.PUBLIC.CHANGELOG,
-    ROUTES.PUBLIC.TERMS,
-  ];
 
-  const isTransparentPage = transparentPages.includes(location.pathname);
 
   return (
     <div
-      className={`fixed top-0 w-full z-50 pt-[40px] pb-[25px] ${
-        hideHeader && location.pathname !== "/feed"
-          ? "-translate-y-full opacity-0"
-          : "translate-y-0 opacity-100"
-      } 
-
-      ${location.pathname === "/feed" && "border-b border-gray-200 bg-white"}`}
+      className={`fixed top-0 w-full z-50 pt-6 transition-all duration-300 ${hideHeader && location.pathname !== "/feed"
+        ? "-translate-y-full opacity-0"
+        : "translate-y-0 opacity-100"
+        }`}
     >
       <header
-        className={`flex justify-between items-center px-4 sm:px-6 lg:px-8 ${
-          isTransparentPage
-            ? "bg-white rounded-[15px] py-[11px] max-w-[65%] mx-auto mt-12"
-            : "max-w-[75%] mx-auto"
-        }`}
+        className={`flex justify-between items-center px-6 py-2 bg-white shadow-sm border border-gray-100 rounded-2xl mx-auto w-[92%] sm:w-[85%] lg:w-[75%] max-w-7xl transition-all duration-300`}
       >
         <Link
           to={ROUTES.PUBLIC.HOME}
@@ -77,9 +64,8 @@ const Header: React.FC = () => {
               key={route.label}
               to={route.path}
               className={`text4 hover:text-[#b53325]! transition-all duration-200
-              ${
-                location.pathname === route.path ? "text-[#b53325]!" : "text4"
-              }`}
+              ${location.pathname === route.path ? "text-[#b53325]!" : "text4"
+                }`}
             >
               {route.label}
             </Link>

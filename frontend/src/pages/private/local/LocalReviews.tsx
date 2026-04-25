@@ -45,7 +45,7 @@ const StarRatingDistribution = ({ data, totalReviews }: StarRatingDistributionPr
               <div key={index} className="flex items-center space-x-3">
                 <div className="flex items-center w-24 flex-shrink-0">
                   <span className="text-sm font-medium text-gray-300">{item.label.split(' ')[0]}</span>
-                  <div className="w-4 h-4 text-amber-300 fill-current ml-1" /> 
+                  <div className="w-4 h-4 text-amber-300 fill-current ml-1" />
                   <span className="text-sm font-medium text-gray-300">{item.label.split(' ')[1]}</span>
                 </div>
                 <div className="flex-1">
@@ -161,8 +161,8 @@ const LocalReviews = () => {
 
       try {
         const [reviewsRes, foodsRes] = await Promise.allSettled([
-          fetch(`${API_BASE}/locals/${localId}/reviews`),
-          fetch(`${API_BASE}/food/local/${localId}/foods`),
+          fetch(`${API_BASE}/review/locals/${localId}/reviews`),
+          fetch(`${API_BASE}/menu/local/${localId}/foods`),
         ]);
 
         if (reviewsRes.status === 'fulfilled' && reviewsRes.value.ok) {
@@ -221,7 +221,7 @@ const LocalReviews = () => {
     const totalReviews = reviews.length;
     const totalRatingSum = reviews.reduce((sum, review) => sum + (review.rating ?? 0), 0);
     const averageRating = totalReviews > 0 ? totalRatingSum / totalReviews : 0;
-    
+
     const ratingDistribution = [5, 4, 3, 2, 1].map(star => {
       const count = reviews.filter(review => review.rating === star).length;
       return {

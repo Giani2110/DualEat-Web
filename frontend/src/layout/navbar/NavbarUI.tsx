@@ -12,12 +12,6 @@ import {
   X,
   ChevronUp,
   LogOut,
-  Home,
-  Users,
-  ClipboardList,
-  MessageSquare,
-  QrCode,
-  Settings,
   ChevronDown,
 } from "lucide-react";
 import LogoYellow from "@assets/images/icon/Logo DualEatYellow.png";
@@ -52,43 +46,9 @@ const HeaderUSER = () => {
   const [recentsOpen, setRecentsOpen] = useState(true);
 
   // ==================== REFS ====================
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ==================== CONSTANTES ====================
-  // Items del menú para usuarios business
-  const menuItems = [
-    {
-      label: "Dashboard",
-      icon: Home,
-      path: ROUTES.LOCAL.DASHBOARD,
-    },
-    {
-      label: "Calendario",
-      icon: Users,
-      path: ROUTES.LOCAL.CALENDAR,
-    },
-    {
-      label: "Menú",
-      icon: ClipboardList,
-      path: ROUTES.LOCAL.MENU,
-    },
-    {
-      label: "QR",
-      icon: QrCode,
-      path: ROUTES.LOCAL.QR,
-    },
-    {
-      id: "reviews",
-      label: "Reseñas",
-      icon: MessageSquare,
-      path: ROUTES.LOCAL.REVIEWS,
-    },
-    {
-      label: "Configuración",
-      icon: Settings,
-      path: ROUTES.LOCAL.SETTINGS,
-    },
-  ];
 
   // Colores dinámicos según tipo de usuario
   const headerBgColor = user?.isBusiness ? "bg-gray-900" : "bg-[#fdfdfd]";
@@ -124,11 +84,11 @@ const HeaderUSER = () => {
       markAsReadSingle(notification.id);
       navigate(
         "/c/" +
-          notification.metadata.slugs.community +
-          "/post/" +
-          notification.metadata.slugs.user +
-          "/" +
-          notification.metadata.slugs.post,
+        notification.metadata.slugs.community +
+        "/post/" +
+        notification.metadata.slugs.user +
+        "/" +
+        notification.metadata.slugs.post,
       );
     } else {
       markAsReadSingle(notification.id);
@@ -148,11 +108,6 @@ const HeaderUSER = () => {
   };
 
   // ==================== UTILIDADES ====================
-  // Verificar si una ruta está activa
-  const isActiveRoute = (path: string) => {
-    return location.pathname === path;
-  };
-
   // Obtener label de navegación según pathname
   const getNavLabel = (pathname: string): string => {
     if (pathname.startsWith(ROUTES.USER.DASHBOARD)) return "Inicio";
@@ -179,74 +134,7 @@ const HeaderUSER = () => {
   }
 
   // ==================== CONTENIDO DEL SIDEBAR ====================
-  const sidebarContent = user?.isBusiness ? (
-    <>
-      {/* Información del usuario */}
-      <div className="flex items-center space-x-3 p-4 border-b border-[#dbdbdb]">
-        <div className=" flex items-center justify-center">
-          <img
-            src={
-              user.avatar_url
-                ? user.avatar_url
-                : "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
-            }
-            alt="Avatar"
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[16px] text-white truncate Dosis-Bold">
-            {user?.name || "Usuario"}
-          </p>
-          <p className="text-[13.5px] text-gray-300 truncate capitalize">
-            {user?.subscription_status}
-          </p>
-        </div>
-      </div>
-
-      {/* Items del menú */}
-      <div className="flex-1 py-4">
-        <nav className="space-y-2 px-3">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = isActiveRoute(item.path);
-
-            return (
-              <Link
-                key={item.id}
-                to={item.path}
-                title={item.label}
-                className={`group flex items-center text-sm transition-all duration-200 rounded-[5px] px-[8px] py-[7px]
-                    
-                    ${
-                      isActive
-                        ? "bg-[#B53325] text-white shadow-md"
-                        : "text-gray-400 hover:bg-gray-700 hover:text-white"
-                    }`}
-              >
-                <Icon
-                  size={20}
-                  className={`flex-shrink-0 transition-colors ${
-                    isActive
-                      ? "text-white"
-                      : "text-gray-500 group-hover:text-white"
-                  }`}
-                />
-
-                <span className="ml-3 truncate">{item.label}</span>
-
-                {isActive && (
-                  <div className="ml-auto">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-    </>
-  ) : (
+  const sidebarContent = (
     // Sidebar para usuarios regulares
     <>
       <div className="flex flex-col gap-1 h-full">
@@ -265,11 +153,10 @@ const HeaderUSER = () => {
           )}
 
           <div
-            className={`navlis ms-2 w-full rounded-[5px] text5 cursor-pointer px-[8px] py-[5px]  ${
-              location.pathname === ROUTES.USER.DASHBOARD
-                ? "bg-[#e4e4e4] Dosis-Bold hover:bg-[#e9e9e9]"
-                : "ms-3 hover:bg-[#f8f8f8]"
-            } `}
+            className={`navlis ms-2 w-full rounded-[5px] text5 cursor-pointer px-[8px] py-[5px]  ${location.pathname === ROUTES.USER.DASHBOARD
+              ? "bg-[#e4e4e4] Dosis-Bold hover:bg-[#e9e9e9]"
+              : "ms-3 hover:bg-[#f8f8f8]"
+              } `}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -305,11 +192,10 @@ const HeaderUSER = () => {
           )}
 
           <div
-            className={`navlis ms-2 w-full rounded-[5px] text5 cursor-pointer px-[8px] py-[5px]  ${
-              location.pathname === ROUTES.USER.EXPLORE
-                ? "bg-[#e4e4e4] Dosis-Bold hover:bg-[#e9e9e9]"
-                : "ms-3 hover:bg-[#f8f8f8]"
-            } `}
+            className={`navlis ms-2 w-full rounded-[5px] text5 cursor-pointer px-[8px] py-[5px]  ${location.pathname === ROUTES.USER.EXPLORE
+              ? "bg-[#e4e4e4] Dosis-Bold hover:bg-[#e9e9e9]"
+              : "ms-3 hover:bg-[#f8f8f8]"
+              } `}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -346,11 +232,10 @@ const HeaderUSER = () => {
           )}
 
           <div
-            className={`navlis ms-2 w-full rounded-[5px] text5 cursor-pointer px-[8px] py-[5px]  ${
-              location.pathname === ROUTES.USER.RECIPES
-                ? "bg-[#e4e4e4] Dosis-Bold hover:bg-[#e9e9e9]"
-                : "ms-3 hover:bg-[#f8f8f8]"
-            } `}
+            className={`navlis ms-2 w-full rounded-[5px] text5 cursor-pointer px-[8px] py-[5px]  ${location.pathname === ROUTES.USER.RECIPES
+              ? "bg-[#e4e4e4] Dosis-Bold hover:bg-[#e9e9e9]"
+              : "ms-3 hover:bg-[#f8f8f8]"
+              } `}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -388,9 +273,8 @@ const HeaderUSER = () => {
               <ChevronUp
                 size={18}
                 color="#333333"
-                className={`transition-transform duration-300 ${
-                  recentsOpen ? "rotate-0" : "rotate-180"
-                } `}
+                className={`transition-transform duration-300 ${recentsOpen ? "rotate-0" : "rotate-180"
+                  } `}
               />
             </div>
             {recentsOpen && (
@@ -438,9 +322,8 @@ const HeaderUSER = () => {
               <ChevronUp
                 size={18}
                 color="#333333"
-                className={`transition-transform duration-300 ${
-                  communityOpen ? "rotate-0" : "rotate-180"
-                } `}
+                className={`transition-transform duration-300 ${communityOpen ? "rotate-0" : "rotate-180"
+                  } `}
               />
             </div>
 
@@ -513,7 +396,6 @@ const HeaderUSER = () => {
           {/* Chats */}
           <div className={`px-2 ${chatsOpen ? "flex-[0.5]" : "flex-0"}`}>
             <div
-              typeof="button"
               onClick={() => setChatsOpen(!chatsOpen)}
               className="-full flex items-center justify-between mb-2 mt-4 px-2 cursor-pointer hover:bg-[#f8f8f8] py-2 rounded-[5px]"
             >
@@ -522,16 +404,14 @@ const HeaderUSER = () => {
               </p>
               <ChevronDown
                 size={18}
-                className={`text5 transition-transform duration-200 ${
-                  chatsOpen ? "rotate-180" : ""
-                }`}
+                className={`text5 transition-transform duration-200 ${chatsOpen ? "rotate-180" : ""
+                  }`}
               />
             </div>
             <div
               tabIndex={-1}
-              className={`flex flex-col gap-1.5 mt-2 overflow-y-auto scroll2 pe-3 mb-5 ${
-                chatsOpen ? "max-h-[150px]" : "max-h-0"
-              }`}
+              className={`flex flex-col gap-1.5 mt-2 overflow-y-auto scroll2 pe-3 mb-5 ${chatsOpen ? "max-h-[150px]" : "max-h-0"
+                }`}
             >
               {chats.map((chat) => {
                 return (
@@ -561,26 +441,18 @@ const HeaderUSER = () => {
     >
       {/* ========== LADO IZQUIERDO ========== */}
       <div className="flex items-center flex-[1]">
-        {/* Botón hamburguesa */}
-        <button
-          type="button"
-          title="Menu"
-          tabIndex={-1}
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`mr-8 p-[6px] cursor-pointer rounded-[5px] transition-colors duration-200 border  ${
-            user?.isBusiness
-              ? "hover:bg-gray-800 border-[#333333] hover:border-white"
-              : "border-[#dbdbdb] hover:border-[#e5a657] hover:bg-gray-100"
-          }`}
-        >
-          <Menu
-            className={`w-[18px] h-[18px] ${
-              user?.isBusiness
-                ? "text-gray-200 group-hover:text-white"
-                : "text5 group-hover:text-white"
-            }`}
-          />
-        </button>
+        {/* Botón hamburguesa (solo para usuarios regulares) */}
+        {!user?.isBusiness && (
+          <button
+            type="button"
+            title="Menu"
+            tabIndex={-1}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="mr-8 p-[6px] cursor-pointer rounded-[5px] transition-colors duration-200 border border-[#dbdbdb] hover:border-[#e5a657] hover:bg-gray-100"
+          >
+            <Menu className="w-[18px] h-[18px] text5 group-hover:text-white" />
+          </button>
+        )}
 
         {/* Logo y título */}
         <Link
@@ -653,11 +525,10 @@ const HeaderUSER = () => {
           <button
             type="button"
             onClick={() => toggleNotifications()}
-            className={`relative py-[6px] px-2 border cursor-pointer group hover:bg-gray-800 rounded-[5px] transition-colors duration-200 ${
-              user?.isBusiness
-                ? "border-[#333333] text-[#fff] hover:border-white"
-                : "border-[#dbdbdb] text-[#878787] hover:text-[#fff]"
-            }`}
+            className={`relative py-[6px] px-2 border cursor-pointer group hover:bg-gray-800 rounded-[5px] transition-colors duration-200 ${user?.isBusiness
+              ? "border-[#333333] text-[#fff] hover:border-white"
+              : "border-[#dbdbdb] text-[#878787] hover:text-[#fff]"
+              }`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -694,16 +565,14 @@ const HeaderUSER = () => {
               {/* Header del dropdown */}
               <div
                 className={`p-4 border-b 
-              ${
-                user?.isBusiness
-                  ? "bg-[#101828] border-[#dbdbdb]"
-                  : "bg-gray-50 border-gray-200"
-              }`}
+              ${user?.isBusiness
+                    ? "bg-[#101828] border-[#dbdbdb]"
+                    : "bg-gray-50 border-gray-200"
+                  }`}
               >
                 <h3
-                  className={`text-sm Dosis-Bold ${
-                    user?.isBusiness ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`text-sm Dosis-Bold ${user?.isBusiness ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   Notificaciones
                 </h3>
@@ -743,10 +612,10 @@ const HeaderUSER = () => {
                         />
                       )}
                       <div>
-                        <p className="text-[14px] text5 Dosis-Bold">
-                          {notif.metadata?.title}
+                        <p className={`text-[14px] Dosis-Bold ${user?.isBusiness ? "text-white" : "text5"}`}>
+                          {notif.metadata?.title || "Notificación DualEat"}
                         </p>
-                        <p className="text-[13px] text4">{notif.message}</p>
+                        <p className={`text-[13px] ${user?.isBusiness ? "text-gray-300" : "text4"}`}>{notif.message}</p>
                       </div>
                       <span className="text-[13px] text-gray-500">
                         {formatShortTime(new Date(notif.created_at))}
@@ -785,19 +654,17 @@ const HeaderUSER = () => {
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className={`fixed inset-0 z-20 ${
-            user?.isBusiness ? "bg-[#101828]/30" : "bg-[#F6F8FA]/30"
-          }`}
+          className={`fixed inset-0 z-20 ${user?.isBusiness ? "bg-[#101828]/30" : "bg-[#F6F8FA]/30"
+            }`}
         />
       )}
 
       {sidebarOpen && (
         <div
           className={` rounded-tr-[15px] rounded-br-[15px] fixed top-0 left-0 h-full w-[280px] md:w-[320px] z-50
-            ${
-              user?.isBusiness
-                ? "bg-[#101828] border-r border-[#707070] shadow-[0px_0px_10px_0px_rgba(135,135,135,0.2)]"
-                : "bg-[#ffffff] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.3)]"
+            ${user?.isBusiness
+              ? "bg-[#101828] border-r border-[#707070] shadow-[0px_0px_10px_0px_rgba(135,135,135,0.2)]"
+              : "bg-[#ffffff] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.3)]"
             }
             `}
         >
@@ -815,11 +682,10 @@ const HeaderUSER = () => {
                 className="p-2 cursor-pointer rounded-lg transition-colors duration-200 hover:bg-gray-200"
               >
                 <X
-                  className={`w-[15px] h-[15px] ${
-                    user?.isBusiness
-                      ? "text-gray-400 group-hover:text-white"
-                      : "text-black group-hover:text-white"
-                  }`}
+                  className={`w-[15px] h-[15px] ${user?.isBusiness
+                    ? "text-gray-400 group-hover:text-white"
+                    : "text-black group-hover:text-white"
+                    }`}
                 />
               </button>
             </div>
@@ -833,11 +699,10 @@ const HeaderUSER = () => {
                   type="button"
                   onClick={() => handleLogout()}
                   className={`navlis w-full rounded-[8px] group cursor-pointer p-2 transition-all duration-200
-                  ${
-                    user?.isBusiness
+                  ${user?.isBusiness
                       ? "text-gray-400 hover:bg-red-900/40 hover:text-red-400"
                       : "hover:bg-[#b53325] "
-                  }`}
+                    }`}
                 >
                   <LogOut
                     className={`flex-shrink-0 text-[#b53325] group-hover:text-white transition-colors`}
@@ -847,11 +712,10 @@ const HeaderUSER = () => {
                   />
                   <span
                     className={`ml-3 text-left text-[14px] whitespace-nowrap
-                    ${
-                      user?.isBusiness
+                    ${user?.isBusiness
                         ? "group-hover:text-red-400! text1"
                         : "group-hover:text-white! text4"
-                    }`}
+                      }`}
                   >
                     Cerrar sesión
                   </span>
