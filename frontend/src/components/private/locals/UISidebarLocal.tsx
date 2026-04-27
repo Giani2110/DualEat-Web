@@ -42,6 +42,13 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
       label: "Menú",
       icon: ClipboardList,
       path: "/business/menu",
+
+    },
+    {
+      id: "employees",
+      label: "Empleados",
+      icon: Users,
+      path: "/business/employees",
     },
     {
       id: "qr",
@@ -61,6 +68,7 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
       icon: Settings,
       path: "/business/settings",
     },
+
   ];
 
   const subscriptionItem = {

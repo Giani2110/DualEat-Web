@@ -42,5 +42,5 @@ export { default as LocalQR } from "./private/local/LocalQR";
 export { default as LocalReviews } from "./private/local/LocalReviews";
 export { default as LocalSettings } from "./private/local/LocalSettings";
 export { default as LocalCalendar } from "./private/local/LocalCalendar";
-
+export { default as LocalEmployees } from "./private/local/LocalEmployees";
 export { default as LocalSubscription } from "./private/local/LocalSubscription";

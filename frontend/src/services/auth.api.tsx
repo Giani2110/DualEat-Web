@@ -30,6 +30,7 @@ export const login = async (
         remember: r,
         recaptcha: rt,
         deviceId: d,
+        platform: 'web',
       },
       { withCredentials: true },
     );
