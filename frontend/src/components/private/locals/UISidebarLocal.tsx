@@ -10,6 +10,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
+import { LocalSupportWidget } from "../../../components/support/LocalSupportWidget";
 
 interface BusinessSidebarProps {
   children: React.ReactNode;
@@ -220,6 +221,7 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
         </div>
       </div>
       <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? "pl-16" : "pl-64"}`}>{children}</div>
+      <LocalSupportWidget />
     </div>
   );
 };

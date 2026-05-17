@@ -34,6 +34,8 @@ import {
   ERecipe,
 } from "../../pages";
 
+import { AdminSupportTickets } from "@/pages/private/admin/SupportTickets";
+
 import AdminLayout from "@/layout/admin/AdminLayout";
 
 export const ROUTES = {
@@ -65,6 +67,7 @@ export const ROUTES = {
     LOCALS: "/admin/locals",
     USERS: "/admin/users",
     DASHBOARD: "/admin/dashboard",
+    SUPPORT_TICKETS: "/admin/support-tickets",
   },
   LOCAL: {
     DASHBOARD: "/business/dashboard",
@@ -238,6 +241,7 @@ export const appRoutes = [
   { path: ROUTES.ADMIN.LOCALS, element: <ProtectedRoute isAdmin><AdminLayout><AdminLocals /></AdminLayout></ProtectedRoute> },
   { path: ROUTES.ADMIN.USERS, element: <ProtectedRoute isAdmin><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute> },
   { path: ROUTES.ADMIN.DASHBOARD, element: <ProtectedRoute isAdmin><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute> },
+  { path: ROUTES.ADMIN.SUPPORT_TICKETS, element: <ProtectedRoute isAdmin><AdminLayout><AdminSupportTickets /></AdminLayout></ProtectedRoute> },
 
   // Local
   {

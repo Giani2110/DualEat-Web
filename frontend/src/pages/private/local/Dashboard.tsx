@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useContext, useMemo } from 'react';
+import { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { Star, DollarSign, ShoppingBag, Clock, Sun, Package, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, TrendingUp, HelpCircle, X, Lock } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AuthContext } from '@/context/auth/AuthContext';
+import { useSocket } from '@context/other/SocketContext';
 import { AreaChart, XAxis, YAxis, Tooltip, Area, ResponsiveContainer, Dot } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import '@assets/scss/private/users/users.scss';
@@ -116,10 +117,37 @@ const TOUR_STEPS: TourStep[] = [
   },
 ];
 
+const parseArray = <T,>(raw: any): T[] => {
+  if (Array.isArray(raw)) return raw;
+  if (raw && Array.isArray(raw.data)) return raw.data;
+  return [];
+};
+
+const isToday = (dateString: string): boolean => {
+  const today = new Date();
+  const orderDate = new Date(dateString);
+  return (
+    orderDate.getDate() === today.getDate() &&
+    orderDate.getMonth() === today.getMonth() &&
+    orderDate.getFullYear() === today.getFullYear()
+  );
+};
+
+const calculateTodayRevenueFromOrders = (orders: any[]): number => {
+  return orders
+    .filter(order => {
+      if (!isToday(order.created_at)) return false;
+      const s = order.status?.toUpperCase();
+      return s === 'PAID' || s === 'COMPLETED' || s === 'READY';
+    })
+    .reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+};
+
 const Dashboard = () => {
   const authContext = useContext(AuthContext);
   const user = authContext?.user;
-  const [localId, setLocalId] = useState<number | null>(null);
+  const { socket } = useSocket();
+  const [localId, setLocalId] = useState<string | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
     totalRevenue: 0,
@@ -159,33 +187,13 @@ const Dashboard = () => {
   const [topFoodsPage, setTopFoodsPage] = useState(0);
   const [ordersPage, setOrdersPage] = useState(0);
 
+  const [earningsRange, setEarningsRange] = useState<'week' | 'month' | '6months' | 'year'>('week');
+  const [previousPeriodEarnings, setPreviousPeriodEarnings] = useState<number>(0);
+  const [earningsLoading, setEarningsLoading] = useState(false);
+
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-  const parseArray = <T,>(raw: any): T[] => {
-    if (Array.isArray(raw)) return raw;
-    if (raw && Array.isArray(raw.data)) return raw.data;
-    return [];
-  };
 
-  const isToday = (dateString: string): boolean => {
-    const today = new Date();
-    const orderDate = new Date(dateString);
-    return (
-      orderDate.getDate() === today.getDate() &&
-      orderDate.getMonth() === today.getMonth() &&
-      orderDate.getFullYear() === today.getFullYear()
-    );
-  };
-
-  const calculateTodayRevenueFromOrders = (orders: Order[]): number => {
-    return orders
-      .filter(order =>
-        isToday(order.created_at) &&
-        (order.status === 'confirmed' || order.status === 'preparing' ||
-          order.status === 'ready' || order.status === 'delivered')
-      )
-      .reduce((sum, order) => sum + (order.total ?? 0), 0);
-  };
 
   // ----------------------------------------------------------------------
   // Efectos de Autenticación y Carga de Datos
@@ -220,92 +228,199 @@ const Dashboard = () => {
     fetchUserLocal();
   }, [user, API_BASE]);
 
+  const fetchDashboardData = useCallback(async (silent = false) => {
+    if (!localId) return;
+    if (!silent) setLoading(true);
+    setError(null);
+
+    const currentYear = new Date().getFullYear();
+    const fromDate = `${currentYear}-01-01T00:00:00Z`;
+    const toDate = `${currentYear}-12-31T23:59:59Z`;
+
+    try {
+      const [ordersRes, topFoodsRes, reviewsRes, subscriptionRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/order/locals/${localId}/orders`),
+
+        fetch(`${API_BASE}/local/statistics/${localId}/top-foods?from=${fromDate}&to=${toDate}`),
+
+        fetch(`${API_BASE}/review/locals/${localId}/reviews`),
+
+        fetch(`${API_BASE}/subscription/local/${localId}`),
+      ]);
+
+      let newStats = {
+        totalOrders: 0,
+        totalRevenue: 0,
+        averageRating: 0,
+        totalReviews: 0,
+        totalTodayRevenue: 0,
+      };
+
+      if (subscriptionRes.status === 'fulfilled') {
+        if (subscriptionRes.value.ok) {
+          const subData = await subscriptionRes.value.json();
+          setHasActiveSubscription(subData?.status === 'active');
+        } else {
+          setHasActiveSubscription(false);
+        }
+      }
+      setSubscriptionChecked(true);
+
+      if (ordersRes.status === 'fulfilled' && ordersRes.value.ok) {
+        const orders: Order[] = parseArray<Order>(await ordersRes.value.json());
+        setRecentOrders(orders);
+        newStats.totalOrders = orders.length;
+        newStats.totalRevenue = orders
+          .filter(o => {
+            const s = o.status?.toUpperCase();
+            return s === 'PAID' || s === 'COMPLETED';
+          })
+          .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+        newStats.totalTodayRevenue = calculateTodayRevenueFromOrders(orders);
+      }
+
+      if (topFoodsRes.status === 'fulfilled' && topFoodsRes.value.ok) {
+        const topFoodsData = await topFoodsRes.value.json();
+        const parsedTopFoods: TopFood[] = parseArray(topFoodsData.top_foods);
+        setTopFoods(parsedTopFoods);
+      }
+
+      if (reviewsRes.status === 'fulfilled' && reviewsRes.value.ok) {
+        const reviewsData: LocalReview[] = parseArray<LocalReview>(await reviewsRes.value.json());
+        setReviews(reviewsData);
+        if (reviewsData.length > 0) {
+          const avgRating = reviewsData.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviewsData.length;
+          newStats.averageRating = Math.round(avgRating * 10) / 10;
+          newStats.totalReviews = reviewsData.length;
+        }
+      }
+
+      setStats(newStats);
+    } catch (err) {
+      setError('Error al cargar los datos del dashboard.');
+    } finally {
+      setLoading(false);
+    }
+  }, [localId, API_BASE]);
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (!localId) return;
-      setLoading(true);
-      setError(null);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
-      const currentYear = new Date().getFullYear();
-      const fromDate = `${currentYear}-01-01T00:00:00Z`;
-      const toDate = `${currentYear}-12-31T23:59:59Z`;
+  const fetchEarnings = useCallback(async (silent = false) => {
+    if (!localId) return;
+    if (!silent) setEarningsLoading(true);
 
-      try {
-        const [ordersRes, topFoodsRes, earningsRes, reviewsRes, subscriptionRes] = await Promise.allSettled([
-          fetch(`${API_BASE}/order/locals/${localId}/orders`),
+    try {
+      const today = new Date();
+      let fromDate = new Date();
+      let prevFromDate = new Date();
+      let prevToDate = new Date();
+      let groupBy = 'month';
 
-          fetch(`${API_BASE}/local/statistics/${localId}/top-foods?from=${fromDate}&to=${toDate}`),
-          fetch(`${API_BASE}/local/statistics/${localId}/monthly-earnings?from=${fromDate}&to=${toDate}`),
+      switch (earningsRange) {
+        case 'week':
+          fromDate.setDate(today.getDate() - 7);
+          prevToDate = new Date(fromDate);
+          prevFromDate.setDate(today.getDate() - 14);
+          groupBy = 'day';
+          break;
+        case 'month':
+          fromDate.setMonth(today.getMonth() - 1);
+          prevToDate = new Date(fromDate);
+          prevFromDate.setMonth(today.getMonth() - 2);
+          groupBy = 'day';
+          break;
+        case '6months':
+          fromDate.setMonth(today.getMonth() - 6);
+          prevToDate = new Date(fromDate);
+          prevFromDate.setMonth(today.getMonth() - 12);
+          groupBy = 'month';
+          break;
+        case 'year':
+        default:
+          fromDate.setFullYear(today.getFullYear() - 1);
+          prevToDate = new Date(fromDate);
+          prevFromDate.setFullYear(today.getFullYear() - 2);
+          groupBy = 'month';
+          break;
+      }
 
-          fetch(`${API_BASE}/review/locals/${localId}/reviews`),
+      const fromStr = fromDate.toISOString();
+      const toStr = today.toISOString();
 
-          fetch(`${API_BASE}/subscription/local/${localId}`),
-        ]);
+      // 1. Fetch current period
+      const res = await fetch(`${API_BASE}/local/statistics/${localId}/monthly-earnings?from=${fromStr}&to=${toStr}&groupBy=${groupBy}`);
+      // 2. Fetch previous period
+      const prevRes = await fetch(`${API_BASE}/local/statistics/${localId}/monthly-earnings?from=${prevFromDate.toISOString()}&to=${prevToDate.toISOString()}&groupBy=${groupBy}`);
 
-        let newStats = { ...stats };
+      if (prevRes.ok) {
+        const prevRawData = await prevRes.json();
+        const prevParsedData = parseArray(prevRawData);
+        const prevTotal = prevParsedData.reduce((sum: number, e: any) => sum + (Number(e.ganancia) || 0), 0);
+        setPreviousPeriodEarnings(prevTotal);
+      } else {
+        setPreviousPeriodEarnings(0);
+      }
+      if (res.ok) {
+        const rawData = await res.json();
+        const parsedData = parseArray(rawData).filter((e: any) => e.ganancia && e.ganancia > 0);
 
-        if (subscriptionRes.status === 'fulfilled') {
-          if (subscriptionRes.value.ok) {
-            const subData = await subscriptionRes.value.json();
-            setHasActiveSubscription(subData?.status === 'active');
-          } else {
-            setHasActiveSubscription(false);
+        const formatted = parsedData.map((e: any) => {
+          let label = e.period;
+          if (groupBy === 'day') {
+            const [y, m, d] = e.period.split("-");
+            label = new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString("es-AR", { day: 'numeric', month: 'short' });
+          } else if (groupBy === 'month') {
+            const [y, m] = e.period.split("-");
+            label = new Date(Number(y), Number(m) - 1).toLocaleDateString("es-AR", { month: 'short', year: '2-digit' });
+          } else if (groupBy === 'year') {
+            label = e.period;
           }
-        }
-        setSubscriptionChecked(true);
+          return {
+            month: label, // We keep the key 'month' to avoid changing the recharts config below
+            sortKey: e.period,
+            total_earnings: e.ganancia ?? 0,
+            total_orders: e.pedidos ?? 0,
+          };
+        });
 
-        if (ordersRes.status === 'fulfilled' && ordersRes.value.ok) {
-          const orders: Order[] = parseArray<Order>(await ordersRes.value.json());
-          setRecentOrders(orders);
-          newStats.totalOrders = orders.length;
-          newStats.totalRevenue = orders.reduce((sum, o) => sum + (o.total ?? 0), 0);
-          newStats.totalTodayRevenue = calculateTodayRevenueFromOrders(orders);
-        }
+        setMonthlyEarnings(formatted.sort((a: any, b: any) => a.sortKey.localeCompare(b.sortKey)));
+      }
+    } catch (err) {
+      console.error("Error fetching earnings", err);
+    } finally {
+      setEarningsLoading(false);
+    }
+  }, [localId, API_BASE, earningsRange]);
 
-        if (topFoodsRes.status === 'fulfilled' && topFoodsRes.value.ok) {
-          const topFoodsData = await topFoodsRes.value.json();
-          const parsedTopFoods: TopFood[] = parseArray(topFoodsData.top_foods);
-          setTopFoods(parsedTopFoods);
-        }
+  useEffect(() => {
+    fetchEarnings();
+  }, [fetchEarnings]);
 
-        if (earningsRes.status === 'fulfilled' && earningsRes.value.ok) {
-          const rawEarningsData = await earningsRes.value.json();
-          const formattedEarnings = parseArray(rawEarningsData)
-            .filter((e: any) => e.ganancia && e.ganancia > 0)
-            .map((e: any) => {
-              const [year, month] = e.mes.split("-");
-              return {
-                month: new Date(Number(year), Number(month) - 1).toLocaleDateString("es-AR", {
-                  month: "short",
-                }),
-                total_earnings: e.ganancia ?? 0,
-                total_orders: e.pedidos ?? 0,
-              };
-            });
-          setMonthlyEarnings(formattedEarnings.sort((a, b) => new Date(`2000-${a.month}-01`).getTime() - new Date(`2000-${b.month}-01`).getTime()));
-        }
+  // ⚡️ Reactividad en tiempo real vía WebSockets para recargar estadísticas, órdenes, gráfico y reseñas
+  useEffect(() => {
+    if (!socket || !localId) return;
 
-        if (reviewsRes.status === 'fulfilled' && reviewsRes.value.ok) {
-          const reviewsData: LocalReview[] = parseArray<LocalReview>(await reviewsRes.value.json());
-          setReviews(reviewsData);
-          if (reviewsData.length > 0) {
-            const avgRating = reviewsData.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviewsData.length;
-            newStats.averageRating = Math.round(avgRating * 10) / 10;
-            newStats.totalReviews = reviewsData.length;
-          }
-        }
-
-        setStats(newStats);
-      } catch (err) {
-        setError('Error al cargar los datos del dashboard.');
-        console.error(err);
-      } finally {
-        setLoading(false);
+    const handleRealTimeUpdate = (data: any) => {
+      // Validar si el evento corresponde al local activo
+      if (data && String(data.localId) === String(localId)) {
+        console.log(`[Socket] Actualización en vivo recibida. Recargando Dashboard...`);
+        fetchDashboardData(true);
+        fetchEarnings(true);
       }
     };
 
-    fetchDashboardData();
-  }, [localId, API_BASE]);
+    socket.on("new_order_local", handleRealTimeUpdate);
+    socket.on("order_status_updated", handleRealTimeUpdate);
+    socket.on("new_review_local", handleRealTimeUpdate);
+
+    return () => {
+      socket.off("new_order_local", handleRealTimeUpdate);
+      socket.off("order_status_updated", handleRealTimeUpdate);
+      socket.off("new_review_local", handleRealTimeUpdate);
+    };
+  }, [socket, localId, fetchDashboardData, fetchEarnings]);
 
   // ----------------------------------------------------------------------
   // Lógica de Paginación y Helpers
@@ -398,15 +513,14 @@ const Dashboard = () => {
   );
 
   const EarningsCard = useMemo(() => {
-    const totalYearRevenue = monthlyEarnings.reduce((sum, month) => sum + (month.total_earnings ?? 0), 0);
-
-    const currentMonthData = monthlyEarnings.length > 0 ? monthlyEarnings[monthlyEarnings.length - 1] : null;
-    const prevMonthData = monthlyEarnings.length > 1 ? monthlyEarnings[monthlyEarnings.length - 2] : null;
+    const totalRevenue = monthlyEarnings.reduce((sum, item) => sum + (item.total_earnings ?? 0), 0);
 
     let growthPercentage = 0;
-    if (currentMonthData && prevMonthData && prevMonthData.total_earnings > 0) {
-      growthPercentage
-        = ((currentMonthData.total_earnings - prevMonthData.total_earnings) / prevMonthData.total_earnings) * 100;
+    if (previousPeriodEarnings > 0) {
+      growthPercentage = ((totalRevenue - previousPeriodEarnings) / previousPeriodEarnings) * 100;
+    } else if (totalRevenue > 0) {
+      // If previous was 0 but we have revenue now, growth is functionally 100% (or infinite, we cap it at 100% for display)
+      growthPercentage = 100;
     }
 
     const isPositiveGrowth = growthPercentage >= 0;
@@ -434,18 +548,31 @@ const Dashboard = () => {
         data-tour-id="earnings-chart"
       >
         <div className="relative z-10">
-          <p className="text-lg text-gray-300 font-semibold mb-2">Promedio de ventas totales</p>
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-lg text-gray-300 font-semibold">Ganancias Totales</p>
+            <select
+              value={earningsRange}
+              onChange={(e) => setEarningsRange(e.target.value as any)}
+              className="bg-gray-800 text-sm text-gray-300 border border-gray-600 rounded-lg px-3 py-1 outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="week">Última Semana</option>
+              <option value="month">Último Mes</option>
+              <option value="6months">Últimos 6 Meses</option>
+              <option value="year">Este Año</option>
+            </select>
+          </div>
           <div className="flex items-end mb-4">
-            <h2 className="text-4xl lg:text-5xl font-bold mr-4">{formatCurrency(totalYearRevenue)}</h2>
+            <h2 className="text-4xl lg:text-5xl font-bold mr-4">{formatCurrency(totalRevenue)}</h2>
             {monthlyEarnings.length > 1 && (
               <div className="flex items-center text-sm">
                 <span className={`flex items-center px-2 py-1 rounded-full ${isPositiveGrowth ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                   <TrendingUp className={`w-4 h-4 mr-1 ${!isPositiveGrowth && 'rotate-180'}`} />
                   {growthText}%
                 </span>
-                <p className="ml-2 text-gray-400 text-sm">vs el mes anterior</p>
+                <p className="ml-2 text-gray-400 text-sm">vs período anterior</p>
               </div>
             )}
+            {earningsLoading && <span className="ml-4 text-sm text-gray-400 animate-pulse">Cargando...</span>}
           </div>
           {monthlyEarnings.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
@@ -476,7 +603,7 @@ const Dashboard = () => {
                     fontSize: '12px'
                   }}
                   labelFormatter={(label: any) => label ?
-                    `Mes: ${label}` : ''}
+                    `${label}` : ''}
                   formatter={(value: any, _name: any, props: any) => {
                     if (props?.payload?.isPlaceholder) return ['', ''];
                     return [`Ingreso total\n${formatCurrencyShort(Number(value))}`, ''];
@@ -532,7 +659,7 @@ const Dashboard = () => {
         </div>
       </div>
     );
-  }, [monthlyEarnings]);
+  }, [monthlyEarnings, earningsRange, earningsLoading, previousPeriodEarnings]);
 
   const createEmptySlots = (currentItems: number, maxItems: number) => {
     const emptySlots = maxItems - currentItems;

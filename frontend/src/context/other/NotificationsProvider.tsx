@@ -58,6 +58,11 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     const onNew = (notification: Notification) => {
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
+      
+      // Mostrar toast general para nuevas notificaciones
+      if (notification.message) {
+        toast.success(notification.message, { duration: 4000 });
+      }
     };
 
     const onLocalNew = (data: any) => {
@@ -79,6 +84,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     socket.on("new_community_post", onNew);
     socket.on("new_comment", onNew);
+    socket.on("new_notification", onNew);
 
     if (user?.isBusiness) {
       socket.on("new_category_local", onLocalNew);
@@ -88,6 +94,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       socket.off("new_community_post", onNew);
       socket.off("new_comment", onNew);
+      socket.off("new_notification", onNew);
 
       if (user?.isBusiness) {
         socket.off("new_category_local", onLocalNew);

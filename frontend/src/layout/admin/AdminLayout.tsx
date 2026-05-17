@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/api/constants/constants';
-import { LayoutDashboard, Store, Coffee, PlusCircle, LogOut, Menu, X, Users } from 'lucide-react';
+import { LayoutDashboard, Store, Coffee, PlusCircle, LogOut, Menu, X, Users, HeadphonesIcon } from 'lucide-react';
 import { useAuth } from '@hooks/useAuth';
 
 interface AdminLayoutProps {
@@ -19,6 +19,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { name: 'Usuarios', href: ROUTES.ADMIN.USERS, icon: Users },
         { name: 'Categorías de Comida', href: ROUTES.ADMIN.FOOD_CATEGORIES, icon: Coffee },
         { name: 'Alta Manual', href: ROUTES.ADMIN.BUSINESS_CREATION, icon: PlusCircle },
+        { name: 'Soporte', href: ROUTES.ADMIN.SUPPORT_TICKETS, icon: HeadphonesIcon },
     ];
 
     return (
