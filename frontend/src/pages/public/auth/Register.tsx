@@ -12,9 +12,10 @@ import "@assets/scss/public/auth/auth.scss";
 import { getDeviceId } from "@/utils/device";
 
 const Register = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
+  const [visible, setVisible] = useState({
+      password: false,
+      confirm: false,
+  });
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -101,7 +102,7 @@ const Register = () => {
           <div className="relative">
             <input
               required
-              type={showPassword ? "text" : "password"}
+              type={visible.password ? "text" : "password"}
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setPassword(e.target.value)
@@ -111,10 +112,10 @@ const Register = () => {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setVisible({...visible, password: !visible.password})}
               className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {visible.password ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
@@ -126,7 +127,7 @@ const Register = () => {
           <div className="relative">
             <input
               required
-              type={showConfirmPassword ? "text" : "password"}
+              type={visible.confirm ? "text" : "password"}
               value={confirmPassword}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setConfirmPassword(e.target.value)
@@ -136,10 +137,10 @@ const Register = () => {
             />
             <button
               type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              onClick={() => setVisible({...visible, confirm: !visible.confirm})}
               className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
-              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {visible.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
