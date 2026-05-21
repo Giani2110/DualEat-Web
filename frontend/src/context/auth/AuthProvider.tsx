@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     e: string,
     p: string,
     d: string,
-  ): Promise<AuthResponse | null> => {
+  ) => {
     setLoading(true);
     try {
       const response = await authRegister(e, p, d);

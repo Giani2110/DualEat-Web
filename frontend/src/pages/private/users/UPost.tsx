@@ -3,24 +3,31 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@hooks/useAuth";
 import { getUserCommunities } from "@services/community.api";
 import {
-  Search,
-  ChevronDown,
-  Images,
   Trash2,
-  CircleAlert,
   FileImage,
+  ChevronsUpDown,
 } from "lucide-react";
 import IngredientsCard from "@/components/private/users/post/IngredientsCard";
 import InstructionCard from "@/components/private/users/post/InstructionsCard";
+
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
 
 import { createPost } from "@services/post.api";
 
 import toast from "react-hot-toast";
 
-import type { CreatePostDTO, CreateRecipeDTO } from "@interface/global.dto";
+import type {
+  CreatePostDTO,
+  CreateRecipeDTO,
+  UploadableFile,
+} from "@interface/global.dto";
 import type { Community } from "@interface/global";
 
 import "@assets/scss/private/users/users.scss";
+import { CustomToolbar } from "@/components/shared/EditorToolbar";
 
 type UserCommunityEntry = {
   community: Community;
@@ -51,13 +58,18 @@ const UPost = () => {
   // ===========================================
   const { user } = useAuth();
 
-  // ===========================================
-  // ESTADOS PRINCIPALES
-  // ===========================================
+  const fileInputRef = useRef<any>(null);
+
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [value, setValue] = useState<"Text" | "Image">("Text");
-  const [recipe, setRecipe] = useState<boolean>(false);
+
+  const [images, setImages] = useState<UploadableFile[]>([]);
+  const [video, setVideo] = useState<UploadableFile | null>(null);
+
+  const [community, setCommunity] = useState<Community | null>(null);
+
+  const [withRecipe, setWithRecipe] = useState(false);
+
   const [step, setStep] = useState<"1" | "2">("1");
 
   // ===========================================
@@ -66,8 +78,6 @@ const UPost = () => {
   const [joinedCommunities, setJoinedCommunities] = useState<
     UserCommunityEntry[]
   >([]);
-  const [selected, setSelected] = useState<Community | null>(null);
-  const [button, setButton] = useState<boolean>(false);
 
   // ===========================================
   // ESTADOS DE RECETA
@@ -112,55 +122,16 @@ const UPost = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // ===========================================
-  // REFERENCIAS
-  // ===========================================
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const additionalInputRef = useRef<HTMLInputElement>(null);
-
-  // ===========================================
   // VALORES CALCULADOS
   // ===========================================
   const totalEstimatedTime = instructions.reduce(
     (acc, curr) => acc + (curr.estimated_time || 0),
-    0
+    0,
   );
-
-  // ===========================================
-  // FUNCIONES AUXILIARES
-  // ===========================================
-  const focusInput = () => {
-    inputRef.current?.focus();
-  };
-
-  const handleAddMoreImages = () => {
-    additionalInputRef.current?.click();
-  };
-
-  // ===========================================
-  // MANEJO DE ARCHIVOS
-  // ===========================================
-  const handleFiles = (files: File[]) => {
-    const validFiles = files.filter((file) =>
-      ["image/", "video/mp4"].some((type) => file.type.startsWith(type))
-    );
-
-    if (filePreviews.length + validFiles.length > 10) {
-      toast.error("No puedes subir más de 10 archivos.");
-      return;
-    } else {
-      const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
-
-      setUploadedFiles((prev) => [...prev, ...validFiles]);
-      setFilePreviews((prev) => [...prev, ...newPreviews]);
-
-      console.log("Archivos seleccionados:", validFiles);
-    }
-  };
 
   const handleRecipeImage = (files: File[]) => {
     const validFiles = files.filter((file) =>
-      ["image/"].some((type) => file.type.startsWith(type))
+      ["image/"].some((type) => file.type.startsWith(type)),
     );
 
     const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
@@ -187,42 +158,22 @@ const UPost = () => {
   };
 
   // ===========================================
-  // NAVEGACIÓN DE IMÁGENES
-  // ===========================================
-  const nextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === filePreviews.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? filePreviews.length - 1 : prev - 1
-    );
-  };
-
-  // ===========================================
   // MANEJO DEL FORMULARIO
   // ===========================================
   const handlePost = () => {
-    if (!selected) {
+    if (!community) {
       toast.error("Debes seleccionar una comunidad");
       return;
     }
 
-    if (recipe && title && content && selected) {
+    if (withRecipe && title && content && community) {
       setStep("2");
     }
   };
 
   const handleSubmit = async () => {
-    if (!selected) {
+    if (!community) {
       toast.error("Debes seleccionar una comunidad");
-      return;
-    }
-
-    if (!value) {
-      toast.error("Debes elegir si es Texto o Imagen");
       return;
     }
 
@@ -252,7 +203,7 @@ const UPost = () => {
           content,
           image_urls: uploadedFiles,
           type: "recipe",
-          community_id: selected.id,
+          community_id: community.id,
         };
 
         const recipePayload: CreateRecipeDTO = {
@@ -282,15 +233,13 @@ const UPost = () => {
         if (!title.trim()) throw new Error("El título es obligatorio");
         if (!content.trim())
           throw new Error("El contenido o una imagen es obligatorio");
-        if (value === "Image" && uploadedFiles.length === 0)
-          throw new Error("Debes subir al menos una imagen o video");
 
         const postPayload: CreatePostDTO = {
           title,
           content,
           image_urls: uploadedFiles,
           type: "post",
-          community_id: selected.id,
+          community_id: community.id,
         };
 
         await createPost(postPayload);
@@ -302,9 +251,99 @@ const UPost = () => {
     }
   };
 
-  // ===========================================
-  // EFFECTS
-  // ===========================================
+  const customCSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap');
+
+  .ProseMirror p {
+    font-family: 'Dosis', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    color: #2F2F2F;
+    line-height: 1.5;
+    margin-top: 0;
+  }
+
+  .ProseMirror p.is-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: #707070; 
+    font-size: 16px;
+    font-family: 'Dosis', sans-serif;
+    pointer-events: none;
+    height: 0;
+    float: left;
+  }
+
+  .ProseMirror a {
+    color: #3578e4; 
+    text-decoration: underline;
+  }
+
+  .ProseMirror ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ProseMirror ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ProseMirror li {
+    margin-bottom: 0.25rem;
+  }
+
+  .ProseMirror h1 {
+    font-size: 1.25em;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-family: 'Dosis', sans-serif;
+  }
+
+  .ProseMirror strong {
+    font-weight: 700;
+  }
+
+  .ProseMirror s {
+    text-decoration: line-through;
+  }
+  `;
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Image.configure({ inline: true, allowBase64: true }),
+      Placeholder.configure({
+        placeholder: "Empieza a escribir...",
+      }),
+    ],
+
+    onUpdate: ({ editor }) => {
+      setContent(editor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: "prose focus:outline-none p-4 text-[var(--text-5)] text-[16px]",
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (editor) {
+      const style = document.createElement("style");
+      style.textContent = customCSS;
+      document.head.appendChild(style);
+
+      return () => {
+        document.head.removeChild(style);
+      };
+    }
+  }, [editor]);
+
+  console.log("Contenido del editor:", editor?.getHTML());
 
   // Fetch comunidades del usuario
   useEffect(() => {
@@ -320,25 +359,8 @@ const UPost = () => {
     fetchCommunities();
   }, [user]);
 
-  // Cerrar dropdown al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setButton(false);
-      }
-    };
-
-    if (button) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [button]);
+  console.log("Images: ", images);
+  console.log("Video: ", video);
 
   // ===========================================
   // RENDER
@@ -349,162 +371,58 @@ const UPost = () => {
             PASO 1 - CONTENIDO IZQUIERDO
             =========================================== */}
       {step === "1" && (
-        <div className="w-[50%]">
-          <h2 className="text-[24px] text5 tracking-tight Dosis-Bold mb-4">
+        <div className="w-full">
+          <h1 className="text-[28px] text3 tracking-tight Dosis-Bold mb-4">
             Crear post
-          </h2>
+          </h1>
 
           {/* SELECTOR DE COMUNIDADES */}
-          <div ref={dropdownRef} className="relative inline-block">
-            {button ? (
-              <div
-                onClick={focusInput}
-                className="flex items-center gap-3 bg-[#f3f3f3] border-2 border-[#0078D7] focus:outline-none px-5 py-2 rounded-[40px] cursor-text w-[300px]"
-              >
-                <Search size={20} className="text-[#0078D7]" />
-                <input
-                  ref={inputRef}
-                  className="tracking-tight placeholder:text-[15px] placeholder:text4 outline-none"
-                  type="search"
-                  placeholder="Seleccionar comunidad"
-                />
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setButton(true)}
-                className="bg-[#f3f3f3] border-2 border-[#e5a657] px-5 py-2 rounded-[40px] cursor-pointer w-fit"
-              >
-                {selected ? (
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={selected.image_url || ""}
-                      alt=""
-                      className="w-6 h-6 rounded-full"
-                    />
-                    <span className="text-[15px] text5 tracking-tight">
-                      {selected.name}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <img
-                      src="https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
-                      alt="Imagen de la comunidad default"
-                      className="w-7 h-7 rounded-full"
-                    />
-                    <span className="text-[15px] text4 tracking-tight">
-                      Seleccionar comunidad
-                    </span>
-                    <ChevronDown size={18} className="text-[#333333]" />
-                  </div>
-                )}
-              </button>
-            )}
+          <button
+            type="button"
+            className="flex items-center gap-x-2.5 bgsemi-white border border-[#e5a657] px-4 py-2 rounded-full cursor-pointer w-fit"
+          >
+            <img
+              src={
+                (community && community.image_url) ||
+                "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
+              }
+              alt=""
+              className="w-5 h-5 rounded-full"
+            />
+            <span className="text-[14px] text4 tracking-tight">
+              {(community && community.name) || "Seleccionar comunidad"}
+            </span>
 
-            {/* LISTADO DE COMUNIDADES */}
-            {button && (
-              <div className="absolute bg-white shadow-xl/20 rounded-[10px] top-full mt-3 ms-8 w-[300px] z-10">
-                {joinedCommunities.map((entry) => (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setButton(!button);
-                      setSelected(entry.community);
-                    }}
-                    key={entry.community.id}
-                    className="px-4 py-2 text-[15px] text5 tracking-tight cursor-pointer text-left w-full hover:bg-gray-100"
-                  >
-                    <div className="flex items-center gap-5">
-                      <img
-                        src={entry.community.image_url || ""}
-                        alt="Imagen de la comunidad"
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <div>
-                        {entry.community.name}
-                        <p className="text-[13px] text4">
-                          {entry.community.total_members} miembros
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* SELECTOR DE TIPO DE POST */}
-          <div className="mt-10 flex items-start gap-5 text-[16px] Dosis-Bold text5 tracking-tight">
-            <button
-              onClick={() => setValue("Text")}
-              className="flex flex-col hover:bg-[#dbdbdb] cursor-pointer px-4 pt-2 rounded-[5px] items-center gap-2"
-              type="button"
-            >
-              <span className={`${value === "Text" && "Dosis-Bold"}`}>
-                Texto
-              </span>
-              <span
-                className={`h-[4px] ${
-                  value === "Text" && "rounded-full w-[90%] bg-[#e5a657]"
-                }`}
-              />
-            </button>
-            <button
-              onClick={() => setValue("Image")}
-              className="flex hover:bg-[#dbdbdb] cursor-pointer px-4 pt-2 flex-col rounded-[5px] items-center gap-2"
-              type="button"
-            >
-              <span className={`${value === "Image" && "Dosis-Bold"}`}>
-                Imágenes y video
-              </span>
-              <span
-                className={`h-[4px] ${
-                  value === "Image" && "rounded-full w-[90%] bg-[#e5a657]"
-                }`}
-              />
-            </button>
-            <button
-              onClick={() => setRecipe(!recipe)}
-              className={`flex hover:bg-[#dbdbdb] cursor-pointer px-3 py-2 pb-3 flex-col rounded-[5px] items-center gap-2 ${
-                recipe &&
-                "rounded-[5px] border-[#e5a657] border-dashed border-2"
-              }`}
-              type="button"
-            >
-              <span className={`${recipe && "Dosis-Bold"}`}>¿Receta?</span>
-            </button>
-          </div>
+            <ChevronsUpDown size={16} className="text-[#333333]" />
+          </button>
 
           {/* FORMULARIO PRINCIPAL */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (recipe) {
+              if (withRecipe) {
                 handlePost();
               } else {
                 handleSubmit();
               }
             }}
-            className="flex flex-col"
+            className="flex flex-col gap-y-6"
           >
-            {/* INPUT TÍTULO */}
             <div className="relative mt-8">
               <input
                 type="text"
-                id="title"
-                placeholder="Correo electrónico"
-                className="peer w-full border text-[15px] text5 px-4 pb-2 pt-6 rounded-[8px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
+                placeholder="Título"
+                className="peer w-full border text-[14px] text5 px-4 pb-2 pt-6 rounded-[20px] border-[#707070] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={300}
                 required
               />
               <label
                 htmlFor="title"
-                className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
+                className={`absolute left-4 text4 tracking-wide cursor-text transition-all duration-300 ${
                   title
                     ? "top-2 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
-                    : "top-4 text-[15px] peer-focus:top-2 peer-focus:text-[12px]"
+                    : "top-4 text-[16px] peer-focus:top-2 peer-focus:text-[12px]"
                 }`}
               >
                 Título
@@ -512,264 +430,41 @@ const UPost = () => {
               </label>
             </div>
 
-            <div className="flex justify-end text4 text-[12px] tracking-tight me-4 mt-2">
-              {title.length}/300
-            </div>
-
-            {/* ÁREA DE SUBIDA DE IMÁGENES */}
-            {value === "Image" && filePreviews.length === 0 && (
-              <>
-                <div className="relative mt-8">
-                  <div
-                    className={`border-2 border-dashed rounded-[20px] p-12 text-center transition-all duration-300 bg-gray-50/50 ${
-                      isDragOver
-                        ? "border-[#e5a657] bg-orange-50"
-                        : "border-[#dbdbdb] hover:border-[#e5a657]"
-                    }`}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setIsDragOver(true);
-                    }}
-                    onDragLeave={() => setIsDragOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragOver(false);
-                      const files = Array.from(e.dataTransfer.files);
-                      handleFiles(files);
-                    }}
-                  >
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                        <svg
-                          className="w-6 h-6 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-[14px] text-gray-600 font-medium">
-                          Arrastrar y soltar imágenes, o
-                        </p>
-                        <button
-                          type="button"
-                          className="text-[14px] cursor-pointer text-[#e5a657] hover:text-[#d4941f] font-medium underline mt-1"
-                          onClick={() => {
-                            const input = document.getElementById("file-input");
-                            if (input) input.click();
-                          }}
-                        >
-                          seleccionar archivos
-                        </button>
-                      </div>
-                    </div>
-
-                    <input
-                      aria-label="file-input"
-                      id="file-input"
-                      type="file"
-                      accept="image/*,video/mp4"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => {
-                        const files = e.target.files;
-                        if (files) {
-                          handleFiles(Array.from(files));
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-                {uploadedFiles.length === 0 && (
-                  <div className="flex gap-2 items-center mt-3 ms-4">
-                    <CircleAlert size={20} className="text-[#b53325]" />
-                    <p className="text-[12px] text-gray-500">
-                      Añade un archivo multimedia.
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-
             {/* PREVIEW DE IMÁGENES CON SLIDER */}
-            {filePreviews.length > 0 && (
-              <div className="mt-6">
-                <div className="w-full aspect-[6/3] mt-3 overflow-hidden rounded-[20px] relative">
-                  {/* Fondo borroso */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-30"
-                    style={{
-                      backgroundImage: `url(${filePreviews[currentImageIndex]})`,
-                    }}
-                  />
-
-                  {/* Imagen principal */}
-                  <img
-                    className="w-full h-full object-contain relative z-10"
-                    alt={`Preview ${currentImageIndex + 1}`}
-                    src={filePreviews[currentImageIndex]}
-                  />
-
-                  {/* Flechas de navegación */}
-                  {filePreviews.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={prevImage}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center cursor-pointer justify-center transition-colors duration-200"
-                        title="Imagen anterior"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 19l-7-7 7-7"
-                          />
-                        </svg>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={nextImage}
-                        className="absolute cursor-pointer right-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors duration-200"
-                        title="Siguiente imagen"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-
-                  {/* Botón para añadir más imágenes */}
-                  <div className="absolute top-3 left-3 z-20">
-                    <button
-                      type="button"
-                      onClick={handleAddMoreImages}
-                      className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-[40px] hover:bg-[#4A4947] bg-black/70 text-white text-[12px]"
-                    >
-                      <Images size={16} />
-                      Añadir
-                    </button>
-                  </div>
-
-                  {/* Input oculto para archivos adicionales */}
-                  <input
-                    aria-label="file-input"
-                    ref={additionalInputRef}
-                    type="file"
-                    accept="image/*,video/mp4"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => {
-                      const files = e.target.files;
-                      if (files) {
-                        handleFiles(Array.from(files));
-                      }
-                    }}
-                  />
-
-                  {/* Botón para eliminar imagen actual */}
-                  <button
-                    type="button"
-                    onClick={() => removeFile(currentImageIndex)}
-                    className="absolute top-3 right-3 z-20 w-9 h-9 cursor-pointer hover:bg-[#4A4947] bg-black/70 text-white rounded-full flex items-center justify-center transition-colors duration-200"
-                    title="Eliminar imagen"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-
-                  {/* Contador de imágenes */}
-                  <div className="absolute bottom-2 right-2 z-20 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                    {currentImageIndex + 1} / {filePreviews.length}
-                  </div>
-
-                  {/* Nombre del archivo */}
-                  <div className="absolute bottom-2 left-2 z-20 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                    {uploadedFiles[currentImageIndex]?.name}
-                  </div>
-
-                  {/* Indicadores de posición (dots) */}
-                  {filePreviews.length > 1 && (
-                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-                      {filePreviews.map((_, index) => (
-                        <button
-                          title="Indicador de posición"
-                          key={index}
-                          type="button"
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                            index === currentImageIndex
-                              ? "bg-white"
-                              : "bg-white/50"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            
 
             {/* INPUT CONTENIDO */}
-            <div className="relative mt-8">
-              <textarea
-                id="content"
-                placeholder="Cuerpo de texto..."
-                className="peer w-full border text-[14px] text5 px-4 pb-2 pt-6 rounded-[8px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
-                onChange={(e) => setContent(e.target.value)}
-                maxLength={3000}
-                required
+            <div className="border border-[#707070] rounded-[20px] overflow-hidden flex flex-col resize-y min-h-[100px] max-h-[250px]">
+              <CustomToolbar
+                editor={editor}
+                images={images}
+                video={video}
+                setImages={setImages}
+                setVideo={setVideo}
               />
-              <label
-                htmlFor="content"
-                className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
-                  content
-                    ? "top-2 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
-                    : "top-5 text-[15px] peer-focus:top-2 peer-focus:text-[12px]"
-                }`}
-              >
-                Cuerpo de texto
-                <span className="text-red">*</span>
-              </label>
+
+              <div className="flex-grow overflow-y-auto">
+                <EditorContent
+                  editor={editor}
+                  className="cursor-text h-full outline-none text-[16px]"
+                  onClick={() => editor?.commands.focus()}
+                />
+              </div>
+
+              <input type="file" ref={fileInputRef} className="hidden" />
             </div>
 
             {/* BOTÓN DE PUBLICACIÓN */}
-            <div className="mt-5 flex justify-end">
+            <div className="flex justify-end">
               <button
                 type="submit"
-                className={`flex items-center px-5 py-2 rounded-[40px] text-white text-[14px] ${
-                  !content ||
-                  !title ||
-                  (value === "Image" && uploadedFiles.length === 0)
-                    ? "cursor-not-allowed opacity-50 bg-black/70"
-                    : "pointer-events-auto cursor-pointer opacity-100 bg-[#0A449B] hover:bg-[#05357e]"
+                className={`flex items-center px-4 py-1.5 Dosis-Bold rounded-full text-[16px] ${
+                  !content || !title
+                    ? "cursor-not-allowed opacity-50 bg-gray text3"
+                    : "pointer-events-auto cursor-pointer opacity-100 bg-yellow hover:bg-[#05357e] text1"
                 }`}
               >
-                {recipe ? "Siguiente" : "Publicar"}
+                {withRecipe ? "Siguiente" : "Publicar"}
               </button>
             </div>
           </form>
@@ -973,3 +668,7 @@ const UPost = () => {
 };
 
 export default UPost;
+
+/** (value === "Image" && uploadedFiles.length === 0)
+                    ? "cursor-not-allowed opacity-50 bg-black/70"
+                    : "pointer-events-auto cursor-pointer opacity-100 bg-[#0A449B] hover:bg-[#05357e]" */

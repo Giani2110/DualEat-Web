@@ -24,3 +24,9 @@ export interface CreateRecipeDTO {
     estimated_time?: string;
   }[];
 }
+
+
+export type UploadableFile = {
+  file: File;    
+  uri: string; 
+};

@@ -8,7 +8,6 @@ import { useNotifications } from "@hooks/useNotifications";
 import {
   Search,
   Plus,
-  Menu,
   X,
   ChevronUp,
   LogOut,
@@ -55,8 +54,6 @@ const HeaderUSER = () => {
   const headerBorderColor = user?.isBusiness
     ? "border-gray-700"
     : "border-[#e5a657]";
-  const textColor = user?.isBusiness ? "text-white" : "text-yellow";
-
   // ==================== EFECTOS ====================
   // Detectar scroll
 
@@ -105,26 +102,6 @@ const HeaderUSER = () => {
   // Cerrar sesión
   const handleLogout = () => {
     logout();
-  };
-
-  // ==================== UTILIDADES ====================
-  // Obtener label de navegación según pathname
-  const getNavLabel = (pathname: string): string => {
-    if (pathname.startsWith(ROUTES.USER.DASHBOARD)) return "Inicio";
-    if (pathname.startsWith(ROUTES.USER.EXPLORE)) return "Explorar";
-    if (pathname.startsWith(ROUTES.USER.RECIPES)) return "Recetas";
-    if (pathname.startsWith(ROUTES.USER.COMMUNITY)) return "Comunidad";
-    if (pathname.startsWith(ROUTES.USER.NOTIFICATIONS)) return "Notificaciones";
-    if (pathname.startsWith(ROUTES.USER.CREATE_POST)) return "Post";
-
-    if (pathname.startsWith(ROUTES.LOCAL.DASHBOARD)) return "Dashboard";
-    if (pathname.startsWith(ROUTES.LOCAL.CALENDAR)) return "Calendario";
-    if (pathname.startsWith(ROUTES.LOCAL.MENU)) return "Menú";
-    if (pathname.startsWith(ROUTES.LOCAL.QR)) return "QR";
-    if (pathname.startsWith(ROUTES.LOCAL.REVIEWS)) return "Reseñas";
-    if (pathname.startsWith(ROUTES.LOCAL.SETTINGS)) return "Ajustes";
-
-    return "";
   };
 
   // ==================== RENDERIZADO CONDICIONAL ====================
@@ -441,18 +418,7 @@ const HeaderUSER = () => {
     >
       {/* ========== LADO IZQUIERDO ========== */}
       <div className="flex items-center flex-[1]">
-        {/* Botón hamburguesa (solo para usuarios regulares) */}
-        {!user?.isBusiness && (
-          <button
-            type="button"
-            title="Menu"
-            tabIndex={-1}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="mr-8 p-[6px] cursor-pointer rounded-[5px] transition-colors duration-200 border border-[#dbdbdb] hover:border-[#e5a657] hover:bg-gray-100"
-          >
-            <Menu className="w-[18px] h-[18px] text5 group-hover:text-white" />
-          </button>
-        )}
+
 
         {/* Logo y título */}
         <Link
@@ -465,12 +431,7 @@ const HeaderUSER = () => {
             src={user?.isBusiness ? LogoWhite : LogoYellow}
             alt="Logo"
           />
-          <span
-            className={`ml-4 text-[16px] Dosis-Bold ${textColor}
-            `}
-          >
-            {getNavLabel(location.pathname)}
-          </span>
+
         </Link>
       </div>
 
