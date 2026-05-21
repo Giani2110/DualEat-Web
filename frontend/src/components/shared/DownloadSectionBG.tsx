@@ -10,146 +10,202 @@ interface Props {
 const DownloadSectionBG: React.FC<Props> = ({ background, background2 }) => {
   return (
     <section className={`${background} rounded-3xl h-[400px] overflow-hidden relative`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
-        {/* Contenido Izquierdo */}
-        <div className="md:w-[60%] text-center md:text-left mb-12 md:mb-8 z-10">
-          <h1 className="text-[30px] Dosis-Bold text-white leading-[50px] mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col md:flex-row items-center justify-between">
+
+        {/* Left Column - Content */}
+        <div className="md:w-[50%] lg:w-[55%] text-center md:text-left pt-12 md:pt-0 z-10">
+          <h1 className="text-[28px] md:text-[32px] Dosis-Bold text-white leading-tight mb-4">
             Descargá DualEat y descubrí un mundo lleno de sabores
           </h1>
-          <p className="text-[16px] leading-[27px] tracking-[-0.4px] text-white mb-7 max-w-[700px]">
+          <p className="text-[14px] md:text-[15px] leading-relaxed text-white/90 mb-6 max-w-[550px] font-light">
             Descubrí restaurantes, bares y cafeterías que se adaptan a tus
             gustos. Con DualEat, encontrás espacios únicos y comunidades
             gastronómicas que reflejan tu estilo y paladar. Explorá, valorá y
             viví nuevas experiencias en cada salida.
           </p>
-          <div className="flex justify-center md:justify-start animate-fade-in-up delay-200">
-            <a href="#">
-                <img
-                  src={GooglePlay}
-                  alt="Google Play"
-                  className="w-[165px] h-[50px]"
-                />
-              </a>
+          <div className="flex justify-center md:justify-start">
+            <a href="#" className="hover:scale-105 transition-transform duration-300 inline-block">
+              <img
+                src={GooglePlay}
+                alt="Google Play"
+                className="w-[150px] h-[45px] object-contain"
+              />
+            </a>
           </div>
         </div>
 
-        {/* Contenido Derecho - Mockup del Móvil */}
-        <div className="md:w-[30%] flex justify-center md:justify-end z-10">
-          <div className="relative border border-white w-72 h-[450px] bg-gray-800 rounded-3xl shadow-2xl flex items-center justify-center p-2 transform rotate-3 scale-105 transition-all duration-500 ease-out hover:rotate-0 hover:scale-110">
-            {/* Pantalla del teléfono */}
-            <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
-              {/* Barra de estado simulada */}
-              <div
-                className={`absolute top-0 left-0 right-0 h-10 ${background2} flex items-center justify-between px-4 text-white text-xs font-semibold rounded-t-2xl`}
-              >
-                <span>9:41</span>
-                <div className="flex items-center space-x-1">
-                  <div className="flex space-x-1">
-                    <div className="w-1 h-1 bg-white rounded-full"></div>
-                    <div className="w-1 h-1 bg-white rounded-full"></div>
-                    <div className="w-1 h-1 bg-white rounded-full"></div>
-                    <div className="w-1 h-1 bg-white rounded-full"></div>
-                  </div>
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z" />
-                  </svg>
+        {/* Right Column - Overlapping Dynamic CSS Mockups */}
+        <div className="md:w-[50%] lg:w-[45%] h-full relative hidden md:flex items-center justify-center z-10 select-none">
+
+          {/* Welcome Phone Mockup (Left Phone) */}
+          <div className="absolute right-[125px] lg:right-[150px] bottom-[-20px] w-[215px] h-[375px] bg-[#0A0A0A] rounded-[28px] border-[5px] border-[#1C1C1E] shadow-2xl overflow-hidden -rotate-6 transition-all duration-300 hover:rotate-0 hover:scale-105 hover:z-30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] group/welcome cursor-pointer">
+            {/* Screen Content */}
+            <div className="w-full h-full relative bg-gradient-to-b from-[#1c1c1c] via-[#2d1210] to-[#0d0d0d] flex flex-col justify-between p-3 pb-4">
+
+              {/* Status Bar */}
+              <div className="flex justify-between items-center text-[7px] text-white/50 font-semibold px-2">
+                <span>12:30</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/50"></span>
+                  <span className="w-2.5 h-1.5 border border-white/50 rounded-sm"></span>
                 </div>
               </div>
 
-              {/* Contenido de la App Simulada */}
-              <div className="pt-10 h-full flex flex-col">
-                {/* Red top section */}
-                <div className={`h-32 ${background2} flex-none relative`}>
-                  {/* Watermark Logo */}
-                  <div className="absolute inset-0 flex items-center justify-center z-0">
-                    <img
-                      className="object-contain w-24 h-24 opacity-30"
-                      src={Logo}
-                      alt="DualEat Logo Watermark"
-                    />
+              {/* Centered logo watermark */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none z-0">
+                <img src={Logo} className="w-28 h-28 object-contain" alt="Watermark" />
+              </div>
+
+              {/* Screen Content Form */}
+              <div className="z-10 flex flex-col items-center mt-auto">
+                <h3 className="text-white text-[14px] font-bold Dosis-Bold text-center leading-tight">
+                  Bienvenido/a a DualEat
+                </h3>
+                <p className="text-[#bdbdbd] text-[8.5px] text-center mt-2 leading-normal px-2 font-light">
+                  Sumergite en un universo de alta gastronomía: una experiencia culinaria diseñada para deleitar tus sentidos.
+                </p>
+
+                {/* Google Button */}
+                <div className="mt-5 bg-[#212121] w-full py-2.5 rounded-full items-center flex justify-center gap-1.5 shadow-md border border-white/5 hover:bg-[#2c2c2c] transition-colors">
+                  <img
+                    src="https://img.icons8.com/fluency/48/google-logo.png"
+                    className="w-3.5 h-3.5"
+                    alt="Google"
+                  />
+                  <span className="text-white text-[8px] font-bold">
+                    Iniciar Sesión con Google
+                  </span>
+                </div>
+
+                {/* Email Button */}
+                <div className="mt-2.5 bg-[#b53325] w-full py-2.5 rounded-full items-center flex justify-center gap-1.5 shadow-md hover:bg-[#923025] transition-colors">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-white text-[8px] font-bold">
+                    Iniciar Sesión con email
+                  </span>
+                </div>
+
+                {/* Footer Link */}
+                <p className="text-center text-[7.5px] text-[#bdbdbd] mt-4 font-light">
+                  ¿Todavía no tienes una cuenta?{" "}
+                  <span className="text-white font-bold">Regístrate</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Phone Speaker/Camera Notch */}
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-[#0A0A0A] rounded-b-xl flex items-center justify-center gap-1 z-50">
+              <div className="w-4 h-[1.5px] bg-[#2C2C2E] rounded-full"></div>
+              <div className="w-[3px] h-[3px] bg-[#2C2C2E] rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Login Phone Mockup (Right Phone, Overlapping) */}
+          <div className="absolute right-[20px] bottom-[-45px] w-[215px] h-[375px] bg-[#0A0A0A] rounded-[28px] border-[5px] border-[#1C1C1E] shadow-2xl overflow-hidden rotate-3 transition-all duration-300 hover:rotate-0 hover:scale-105 hover:z-30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] group/login cursor-pointer">
+            {/* Screen Content */}
+            <div className="w-full h-full relative bg-gradient-to-b from-[#280a08] via-[#1a1a1a] to-[#0f0f0f] flex flex-col justify-between p-3">
+
+              {/* Status Bar */}
+              <div className="flex justify-between items-center text-[7px] text-white/50 font-semibold px-2">
+                <span>12:31</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/50"></span>
+                  <span className="w-2.5 h-1.5 border border-white/50 rounded-sm"></span>
+                </div>
+              </div>
+
+              {/* Login Banner (Top Half) */}
+              <div className="mt-2 flex flex-col justify-start">
+                <div className="flex items-center justify-between px-1">
+                  <svg className="w-3.5 h-3.5 text-white/60 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span className="text-[7.5px] text-[#bdbdbd] font-light">
+                    ¿No tienes cuenta? <span className="text-white font-bold">Regístrate</span>
+                  </span>
+                </div>
+
+                {/* Dynamic Brand Logo center */}
+                <div className="flex items-center justify-center gap-1 mt-6">
+                  <img src={Logo} className="w-[18px] h-[18px] object-contain" alt="Logo" />
+                  <span className="text-white text-[13px] font-bold tracking-tight Dosis-Bold">DualEat</span>
+                </div>
+              </div>
+
+              {/* Bottom Sheet Card */}
+              <div className="bg-[#1A1A1A] border-t border-white/5 rounded-t-[20px] px-3 pt-3.5 pb-4 mt-auto flex flex-col gap-2 w-[calc(100%+24px)] -mx-3 z-10">
+                <div className="text-center mb-1">
+                  <h4 className="text-[12px] font-bold text-white Dosis-Bold tracking-tight">Iniciar sesión</h4>
+                  <p className="text-[7.5px] text-gray-400 font-light mt-0.5">
+                    Conéctate con tu comida, como nunca antes
+                  </p>
+                </div>
+
+                {/* Simulated inputs */}
+                <div className="flex flex-col gap-1.5">
+                  {/* Email */}
+                  <div className="flex flex-col">
+                    <span className="text-[6.5px] text-[#bdbdbd] mb-0.5 pl-1 font-semibold">Email</span>
+                    <div className="border border-white/10 rounded-lg px-2 py-1 bg-black/40 text-[8px] text-white font-light flex items-center">
+                      user@dualeat.com
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="flex flex-col">
+                    <span className="text-[6.5px] text-[#bdbdbd] mb-0.5 pl-1 font-semibold">Contraseña</span>
+                    <div className="border border-white/10 rounded-lg px-2 py-1 bg-black/40 text-[8px] text-white/40 tracking-widest flex items-center justify-between">
+                      <span>••••••••</span>
+                      <svg className="w-2.5 h-2.5 text-[#bdbdbd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
-                {/* White section */}
-                <div className="bg-white px-6 py-10 flex-1 rounded-t-3xl relative -mt-8">
-                  {/* Logo */}
-                  <div
-                    className={`absolute ${background2} top-12 left-1/2 -translate-x-1/2 w-36 h-12 sm:w-40 sm:h-12 flex items-center justify-center shadow-lg rounded-full`}
-                  >
-                    <img className="w-6 h-6" src={Logo} alt="Logo" />
-                  </div>
+                {/* Forgot Link */}
+                <span className="text-[7px] text-white font-bold text-right pr-1 cursor-pointer hover:underline">
+                  ¿Olvidaste tu contraseña?
+                </span>
 
-                  {/* Content below logo */}
-                  <div className="text-center pt-24">
-                    <h2 className="text-gray-800 font-bold text-lg mb-2">
-                      Inicia sesión en DualEat
-                    </h2>
-                    <p className="text-gray-500 text-sm mb-8 italic">
-                      "Conectate con tu comida, como nunca antes"
-                    </p>
+                {/* Action button */}
+                <div className="mt-1 bg-[#b53325] hover:bg-[#923025] w-full py-1.5 rounded-full items-center flex justify-center shadow-md transition-colors">
+                  <span className="text-white text-[8px] font-bold">Iniciar Sesión</span>
+                </div>
 
-                    {/* Social buttons */}
-                    <div className="flex justify-center space-x-6">
-                      {/* Google */}
-                      <button
-                        type="button"
-                        title="Descargar en Google Play"
-                        className="flex items-center justify-center w-12 h-12 border-2 border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                      >
-                        <svg className="w-6 h-6" viewBox="0 0 24 24">
-                          <path
-                            fill="#4285F4"
-                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                          />
-                          <path
-                            fill="#34A853"
-                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                          />
-                          <path
-                            fill="#FBBC05"
-                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                          />
-                          <path
-                            fill="#EA4335"
-                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                          />
-                        </svg>
-                      </button>
+                {/* Divider */}
+                <div className="flex items-center my-1">
+                  <div className="flex-1 h-[0.5px] bg-white/10"></div>
+                  <span className="mx-2 text-[6px] text-white/30">**</span>
+                  <div className="flex-1 h-[0.5px] bg-white/10"></div>
+                </div>
 
-                      {/* Apple */}
-                      <button
-                        type="button"
-                        title="Descargar en Apple Store"
-                        className="flex items-center justify-center w-12 h-12 border-2 border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                      >
-                        <svg
-                          className="w-6 h-6"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+                {/* Google Button */}
+                <div className="bg-[#f5f5f5] border border-gray-300 w-full py-1.5 rounded-full items-center flex justify-center gap-1 shadow-sm hover:bg-gray-100 transition-colors">
+                  <img
+                    src="https://img.icons8.com/fluency/48/google-logo.png"
+                    className="w-3 h-3"
+                    alt="Google Logo"
+                  />
+                  <span className="text-gray-700 text-[7.5px] font-bold">
+                    Iniciar sesión con Google
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Altavoz y cámara */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-2 bg-gray-700 rounded-full"></div>
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 mt-3 w-3 h-3 bg-gray-600 rounded-full"></div>
-
-            {/* Botones laterales */}
-            <div className="absolute left-0 top-1/4 w-1 h-10 bg-gray-700 rounded-l-sm"></div>
-            <div className="absolute right-0 top-1/3 w-1 h-14 bg-gray-700 rounded-r-sm"></div>
-            <div className="absolute right-0 top-1/2 w-1 h-14 bg-gray-700 rounded-r-sm"></div>
+            {/* Phone Speaker/Camera Notch */}
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-[#0A0A0A] rounded-b-xl flex items-center justify-center gap-1 z-50">
+              <div className="w-4 h-[1.5px] bg-[#2C2C2E] rounded-full"></div>
+              <div className="w-[3px] h-[3px] bg-[#2C2C2E] rounded-full"></div>
+            </div>
           </div>
+
         </div>
+
       </div>
     </section>
   );

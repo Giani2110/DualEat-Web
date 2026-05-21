@@ -31,7 +31,7 @@ const AboutUs = () => {
                 <p className="text4 textABT">
                   Pensamos en cada tipo de usuario: foodies, clientes y
                   cocineros caseros. Cada función está hecha para resolver
-                  necesidades reales y mejorar la experiencia.
+                  necesidades y mejorar la experiencia.
                 </p>
 
                 <h3 className="text5 Dosis-Bold titleABT">
@@ -57,8 +57,8 @@ const AboutUs = () => {
                 </h3>
                 <p className="text4 textABT">
                   Buscamos que los locales crezcan de forma sostenible,
-                  brindándoles visibilidad, estadísticas y herramientas simples
-                  para fidelizar clientes.
+                  brindándoles visibilidad, estadísticas y herramientas para
+                  atraer nuevos clientes.
                 </p>
               </div>
             </div>
@@ -75,7 +75,7 @@ const AboutUs = () => {
                 Ser la aplicación gastronómica líder en conectar experiencias
                 culinarias tanto en locales como en el hogar, transformando la
                 forma en que las personas descubren, ordenan y comparten comida
-                en Latinoamérica.
+                en Argentina.
               </p>
             </div>
 
@@ -84,10 +84,9 @@ const AboutUs = () => {
               <h2 className="text-[28px] Dosis-Bold mb-3">Misión</h2>
               <p className="text4 textABT">
                 Brindar una plataforma integral que permita a los negocios
-                gastronómicos y cocineros a los amantes de la cocina,
-                facilitando la tecnología, comunidad y gamificación para hacer
-                de cada comida una experiencia personalizada, accesible y
-                memorable.
+                gastronómicos y amantes de la cocina, facilitando la tecnología
+                y comunidad para hacer de cada comida una experiencia
+                personalizada, accesible y memorable.
               </p>
             </div>
           </div>
