@@ -1,345 +1,570 @@
-/**
- * @interface Response
- * Define la estructura estándar para las respuestas de la API.
- * Siempre incluye un booleano de éxito y permite opcionalmente un mensaje
- * y un objeto de datos genérico (T).
- */
+type Role = "USER" | "ADMIN";
+
+type SuscriptionStatus = "ACTIVE" | "INACTIVE" | "TRIAL" | "CANCELED";
+
 export interface Response<T = unknown> {
   success: boolean;
+  status: number;
   message?: string;
   data?: T;
 }
 
+export interface AuthResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  token?: string;
+  user?: User;
+}
+
 export interface ResponseWithPagination<T = unknown> {
   success: boolean;
-  pagination: PaginationInfo;
+  status: number;
+  message?: string;
   data?: T;
+  pagination?: PaginationInfo;
 }
 
-// Tipos derivados para modularidad y reutilización
-export type MinimalUser = Pick<User, "id" | "name" | "slug" | "avatar_url">;
-export type MinimalCommunity = Pick<Community, "slug" | "image_url" | "name">;
+export interface ChatSessionResponse {
+  chat: ChatSession;
+  recipes: Recipe[] | null;
+  search_query: "SEARCH" | "CHAT";
+}
 
-/**
- * @interface PaginationInfo
- * Contiene metadatos para la paginación de listas largas.
- */
-export interface PaginationInfo {
-  page: number; // Página actual.
-  limit: number; // Límite de ítems por página.
+export interface UploadResponse {
+  post_images: string[];
+  main_image: string;
+  step_images: string[];
+}
+
+interface PaginationInfo {
+  page: number;
   hasMore: boolean;
-  total: number; // Total de ítems disponibles (en toda la colección).
-  totalPages: number; // Total de páginas.
-  hasNext: boolean; // Indica si hay una página siguiente.
-  hasPrev: boolean; // Indica si hay una página anterior.
 }
 
-/**
- * @interface User
- * Representa la información completa de un usuario autenticado.
- * NOTA: El 'id' está definido como 'string', lo que es común para CUIDs/UUIDs.
- */
 export interface User {
   id: string;
-  name: string;
   slug: string;
+  name: string;
   email: string;
-  role: string;
+  avatar_url:
+    | string
+    | "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png";
+  role: Role;
+  active: boolean;
+  verified: boolean;
   provider: string;
   isBusiness: boolean;
-  active: boolean;
-  subscription_status: string;
-  trial_ends_at: string;
-  avatar_url: string | null; // URL de la imagen de perfil.
+  suscription_status: SuscriptionStatus;
+  trial_ends_at: Date | null;
+  workplaces: Workplace[];
+
+  created_at: Date;
+  updated_at: Date;
 }
 
-/**
- * @interface CategoryTag
- * Representa una categoría general (ej. 'Comida Rápida', 'Vegetariano').
- */
-export interface CategoryTag {
-  id: number;
-  name: string;
-  description?: string | null;
-  icon_url?: string;
-}
-
-/**
- * @interface CommunityTag
- * Representa una etiqueta asignada a una comunidad, relacionada con una CategoryTag.
- */
-export interface CommunityTag {
-  id: number;
-  active: boolean;
-  category_id: number;
-  name: string;
-  category: CategoryTag; // Objeto de la categoría relacionada.
-}
-
-/**
- * @interface Community
- * Representa la información detallada de una comunidad o grupo.
- */
-export interface Community {
+export interface Workplace {
   id: string;
   name: string;
   slug: string;
-  description: string | null;
-  image_url: string | null;
-  theme_color: string | null;
-  visibility: string | null;
-  creator_id: string;
-  total_members: number;
-  tags: CommunityTag[];
-  isMember: boolean;
-  receives_notifications: string | null;
-  created_at: string;
-  updated_at: string;
+  role: "admin" | "staff";
 }
 
-/**
- * @interface Ingredient
- * Representa un ingrediente básico en la base de datos.
- */
-export interface Ingredient {
-  id: number;
-  name: string;
-  description: string | null;
+interface NotificationMetadata {
+  title: string | null; // Titulo del post o comunidad
+  slug: string | null; // Slug
+  image_urls: string[] | null; // Imagenes URL
+  target_name: string | null; // Nombre del objetivo para una acción (ej. Nombre del restaurante)
 }
 
-/**
- * @interface UnitOfMeasure
- * Representa una unidad de medida para los ingredientes (ej. 'gramos', 'ml').
- */
-export interface UnitOfMeasure {
-  id: number;
-  name: string;
-  abbreviation: string | null;
-}
-
-/**
- * @interface RecipeIngredient
- * Define la relación entre una receta y un ingrediente (línea de la receta).
- */
-export interface RecipeIngredient {
-  id: number;
-  recipe_id: number;
-  ingredient_id: number;
-  quantity: string; 
-  unit_of_measure_id: number;
-  notes: string;
-  ingredient?: Ingredient;
-  unit_of_measure?: UnitOfMeasure;
-}
-
-/**
- * @interface RecipeStep
- * Define un paso individual dentro de la preparación de una receta.
- */
-export interface RecipeStep {
-  id: number;
-  recipe_id: number;
-  step_number: number;
-  description: string;
-  image_url: string | null;
-  estimated_time: number; 
-}
-
-/**
- * @interface Recipe
- * La estructura principal de una receta.
- */
-export interface Recipe {
-  id: string; // Identificador único de la receta.
-  user: MinimalUser;
-  slug: string;
-  name: string;
-  description: string;
-  total_time: number;
-  main_image: string;
-  created_at: string;
-  updated_at: string;
-  ingredients: RecipeIngredient[];
-  steps: RecipeStep[];
-  posts: Posts[]; 
-}
-
-/**
- * @interface Posts
- * Representa una publicación dentro de una comunidad.
- */
-export interface Posts {
-  id: string;
-  user_id: string;
-  community_id: string;
-  title: string;
-  content: string;
-  image_urls: string[];
-  type: "post" | "recipe";
-  slug: string;
-  recipe_id: string | null;
-  votes_up: number;
-  votes_down: number;
-  total_comments: number;
-  created_at: string;
-  updated_at: string;
-  edited: boolean;
-  active: boolean;
-  user: MinimalUser;
-  recipe: {
-    id: string;
-    name: string;
-    slug: string;
-    main_image: string | null;
-    total_time: number | null;
-    _count: {
-      steps: number;
-      ingredients: number;
-    };
-  };
-  community: MinimalCommunity;
-  userVote: string | null;
-  hasVoted: boolean | null;
-}
-
-export interface PostFull {
-  id: string;
-  slug: string;
-  title: string;
-  content: string;
-  image_urls: string[];
-  type: "post" | "recipe";
-  votes_up: number;
-  votes_down: number;
-  total_comments: number;
-  created_at: string;
-  updated_at: string;
-  edited: boolean;
-  active: boolean;
-  user_id: string;
-  community_id: string;
-  recipe_id: string | null;
-  userVote: "up" | "down" | null;
-  hasVoted: boolean | null;
-
-  user: {
-    id: string;
-    slug: string;
-    name: string;
-    email: string;
-    avatar_url: string;
-    role: "user" | "admin";
-    active: boolean;
-    provider: string;
-    is_business: boolean;
-    subscription_status: "active" | "inactive";
-    trial_ends_at: string | null;
-    created_at: string;
-    updated_at: string;
-  };
-
-  community: {
-    id: string;
-    slug: string;
-    name: string;
-    description: string;
-    image_url: string;
-    theme_color: string;
-    visibility: "public" | "private";
-    total_members: number;
-    creator_id: string;
-    created_at: string;
-    updated_at: string;
-    active: boolean;
-  };
-
-  recipe: Recipe | null;
-
-  comments: Comment[];
-}
-
-/**
- * @interface Comment
- * Representa un comentario dentro de una publicación.
- */
-
-export interface Comment {
-  id: string;
-  user_id: string;
-  post_id: string;
-  parent_comment_id: string | null;
-  content: string;
-  votes_up: number;
-  votes_down: number;
-  created_at: string;
-  updated_at: string;
-  edited: boolean;
-  active: boolean;
-  user: {
-    id: string;
-    name: string;
-    slug: string;
-    avatar_url: string | null;
-  };
-  userVote: string | null;
-  replies: Comment[];
-}
-
-/**
- * @interface Notification
- * Representa una notificación de usuario.
- * */
 export interface Notification {
   id: string;
   user_id: string;
-  content_type: string;
-  content_id: string;
+  content_type: NotificationContentType;
+  content_id?: string;
+
   metadata: NotificationMetadata;
-  created_at: string;
+
+  message: string;
   read: boolean;
-  message: string;
+  deleted: boolean;
+  created_at: string;
+
+  user: User;
 }
 
-/**
- * @interface NotificationMetadata
- * Define la estructura de los metadatos de una notificación.
- */
-export interface NotificationMetadata {
-  title: string;
-  message: string;
-  type: "post" | "comment";
-  imageURLs: {
-    user?: string;
-    community?: string;
-    post?: string;
-  };
-  slugs: {
-    community?: string;
-    user?: string;
-    post?: string;
-  };
-  //imageURLs: string[]; // 1ro usuario, 2do comunidad
-  //slugs: string[]; // 1ro comunidad, 2do usuario del post, 3ro post
+export interface Local {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  phone: string | null;
+  email: string | null;
+  type_local: string; // Hacer type
+  address: string;
+  image_url: string;
+  latitude: number;
+  longitude: number;
+  average_rating: number;
+
+  promotions?: Promotion[];
+  schedules?: Schedules[];
+  categories?: FoodCategory[];
+
+  _count?: { reviews?: number; orders?: number; foods?: number };
 }
 
-export interface ChatMetadata {
-  chatId: string;
+export interface LocalReview {
+  id: string;
+  user: User;
+  user_id: string;
+  local: Local;
+  local_id: string;
+  rating: number;
+  comment?: string;
+  created_at: Date;
+  updated_at: Date;
+
+  order?: Order;
+  order_id?: string;
+
+  total?: number;
+}
+
+export interface Food {
+  id: string;
+  local_id: string;
+  local: Local;
+  category_id: number;
+  category: FoodCategory;
+  name: string;
+  description?: string;
+  price: number;
+  image_url: string;
+  available: boolean;
+  votes_up: number;
+  votes_down: number;
+  created_at?: Date;
+  updated_at?: Date;
+  promotions?: Promotion;
+  order_items: OrderItem[];
+}
+
+export interface Promotion {
+  id: string;
+  description: string | null;
+  discount_pct: number | null;
+  local_id: string;
+  food_id: string | null;
   title: string;
-  activeRecipeId?: string;
+  starts_at: Date | null;
+  ends_at: Date | null;
+  active: boolean;
+}
+
+export type OrderStatus =
+  | "PENDING"
+  | "PAID"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "READY";
+
+export interface Order {
+  id: string;
+  user: User;
+  user_id: string;
+  local: Local;
+  local_id: string;
+  total: number;
+  status: OrderStatus;
+  payment_method?: string;
+  created_at: Date;
+  updated_at: Date;
+
+  short_code?: string;
+  delivery_date?: Date;
+  notes?: string | null;
+
+  order_items: OrderItem[];
+  review?: LocalReview;
+
+  _count?: { order_items?: number };
+}
+
+export interface OrderItem {
+  id: string;
+  order: Order;
+  order_id: string;
+  food: Food;
+  food_id: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+}
+
+export interface Schedules {
+  id: string;
+  day_of_week: DayOfWeek;
+  open_time: string;
+  close_time: string;
+  local_id: string;
+}
+
+export interface FoodCategory {
+  id: number;
+  name: string;
+  tipo: string;
+  icon_url: string | null;
+
+  foods?: Food[];
+}
+
+export interface CommunityTag {
+  id: number;
+  name: string;
+  active: boolean;
+
+  category: TagCategory;
+  communities: Community[];
+
+  //user_preferences: UserPreference[];
+}
+
+export interface TagCategory {
+  id: number;
+  slug: string;
+  name: string;
+  description?: string;
+  icon_url?: string;
+
+  communityTags: CommunityTag[];
+}
+
+export interface Community {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  image_url: string | "https://placehold.co/100x100";
+  banner_url: string | "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultBanner.jpg";
+
+  total_members: number;
+
+  creator: User;
+  creator_id: string;
+
+  created_at: Date;
+  updated_at: Date;
+  active: boolean;
+
+  posts: Post[];
+  members: CommunityMember[];
+
+  tags: CommunityTag[];
+
+  isMember?: boolean;
+  receives_notifications?: NotificationFrequency;
+}
+
+export interface CommunityMember {
+  id: string;
+  user: User;
+  user_id: string;
+  community: Community;
+  community_id: string;
+
+  receives_notifications: NotificationFrequency;
+  is_moderator: boolean;
+
+  joined_at: Date;
+  updated_at: Date;
+}
+
+export type NotificationFrequency = "ALWAYS" | "NONE";
+
+export type NotificationContentType =
+  | "POST"
+  | "COMMENT"
+  | "LOCAL"
+  | "ORDER"
+  | "COMMUNITY";
+
+export type ContentType = "POST" | "COMMENT";
+
+export type VoteType = "UP" | "DOWN";
+
+export interface Vote {
+  id: number;
+  user: User;
+  user_id: string;
+  content_type: ContentType;
+  content_id: string;
+
+  vote_type: VoteType;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Post {
+  id: string;
+  slug: string;
+
+  user: User;
+  user_id: string;
+
+  community: Community;
+  community_id: string;
+
+  title: string;
+  content: string;
+  image_urls: string[];
+
+  votes_up: number;
+  votes_down: number;
+  total_comments: number;
+
+  created_at: Date;
+  updated_at: Date;
+  edited: boolean;
+  active: boolean;
+
+  comments: PostComment[];
+  recipe: Recipe | null;
+  recipe_id: string | null;
+
+  user_vote?: VoteType | null;
+  has_voted?: boolean;
+
+  _count?: { comments?: number };
+}
+
+export interface PostComment {
+  id: string;
+  user: User;
+  user_id: string;
+
+  post: Post;
+  post_id: string;
+  parent_comment: PostComment | null;
+  parent_comment_id: string | null;
+
+  reply_to_user: User | null;
+  reply_to_user_id: string | null;
+
+  content: string;
+
+  votes_up: number;
+  votes_down: number;
+  total_comments: number;
+
+  created_at: Date;
+  updated_at: Date;
+  active: boolean;
+
+  user_vote?: VoteType | null;
+  has_voted?: boolean;
+
+  replies: PostComment[];
+
+  _count?: { replies?: number };
+}
+
+export interface Recipe {
+  id: string;
+  slug: string;
+  user: User;
+  user_id: string;
+
+  name: string;
+  description: string;
+  total_time: number | null;
+  main_image: string | "https://placehold.co/400x400";
+
+  created_at: Date;
+  updated_at: Date;
+
+  ingredients: RecipeIngredient[];
+  steps: RecipeStep[];
+  posts: Post[];
+
+  votes_up?: number;
+  votes_down?: number;
+
+  _count?: { ingredients?: number; steps?: number };
+}
+
+export interface RecipeStep {
+  id: string;
+  recipe: Recipe;
+  recipe_id: string;
+  step_number: number;
+  description: string;
+  image_url: string | null;
+  estimated_time: number | null;
+}
+
+export interface RecipeIngredient {
+  id: string;
+  recipe: Recipe;
+  recipe_id: string;
+
+  ingredient: Ingredient;
+  ingredient_id: string;
+
+  quantity: string;
+  unit: Unit;
+  notes: string | null;
+}
+
+export interface Ingredient {
+  id: string;
+  name: string;
+  description: string | null;
+
+  calories: number;
+  proteins: number;
+  carbs: number;
+  fat: number;
+  
+  recipe_ingredients: RecipeIngredient[];
+}
+
+export enum Unit {
+  GRAMOS = "GRAMOS",
+  KILOGRAMOS = "KILOGRAMOS",
+  MILILITROS = "MILILITROS",
+  LITROS = "LITROS",
+  CUCHARADITA = "CUCHARADITA",
+  CUCHARADA = "CUCHARADA",
+  TAZA = "TAZA",
+  UNIDAD = "UNIDAD",
+  PIZCA = "PIZCA",
+  PAQUETE = "PAQUETE",
+  OPCIONAL = "OPCIONAL",
+}
+
+export const UnitList: Unit[] = [
+  Unit.GRAMOS,
+  Unit.KILOGRAMOS,
+  Unit.MILILITROS,
+  Unit.LITROS,
+  Unit.CUCHARADITA,
+  Unit.CUCHARADA,
+  Unit.TAZA,
+  Unit.UNIDAD,
+  Unit.PIZCA,
+  Unit.PAQUETE,
+  Unit.OPCIONAL,
+];
+
+export const UnitNames: Record<Unit, { abbreviation: string; name: string }> = {
+  [Unit.GRAMOS]: {
+    abbreviation: "gr",
+    name: "gramos",
+  },
+  [Unit.KILOGRAMOS]: {
+    abbreviation: "kg",
+    name: "kilogramos",
+  },
+  [Unit.MILILITROS]: {
+    abbreviation: "ml",
+    name: "mililitros",
+  },
+  [Unit.LITROS]: {
+    abbreviation: "l",
+    name: "litros",
+  },
+  [Unit.CUCHARADITA]: {
+    abbreviation: "cdta",
+    name: "cucharaditas",
+  },
+  [Unit.CUCHARADA]: {
+    abbreviation: "cda",
+    name: "cucharadas",
+  },
+  [Unit.TAZA]: {
+    abbreviation: "tza",
+    name: "tazas",
+  },
+  [Unit.UNIDAD]: {
+    abbreviation: "ud",
+    name: "unidades",
+  },
+  [Unit.PIZCA]: {
+    abbreviation: "pizca",
+    name: "pizcas",
+  },
+  [Unit.PAQUETE]: {
+    abbreviation: "paq",
+    name: "paquetes",
+  },
+  [Unit.OPCIONAL]: {
+    abbreviation: "opc",
+    name: "opcional",
+  },
+};
+
+export interface NutritionData {
+  total_ingredients: number;
+  avg_calories: number;
+  avg_proteins: number;
+  avg_carbs: number;
+  avg_fat: number;
+  total: number;
+}
+
+export type DayOfWeek =
+  | "LUNES"
+  | "MARTES"
+  | "MIERCOLES"
+  | "JUEVES"
+  | "VIERNES"
+  | "SABADO"
+  | "DOMINGO";
+
+export type QRTypes = {
+  LOCAL: "local";
+  ORDER: "order";
+  PROMOTION: "promotion"; // Coupon
+  USER: "user";
+};
+
+export type QROrderItem = {
+  id: string; // food_id
+  q: number; // quantity
+};
+
+export type QROrderPayload = {
+  t: "order";
+  oi: string | "create"; // order_id
+  l: string; // local_id
+  u: string; // user_id
+  i: QROrderItem[]; // items del carrito
+  c?: string; // Código de acceso
+};
+
+export type QRUserPayload = {
+  t: "user";
+  s: string; // slug
+};
+
+export type QRLocalPayload = {
+  t: "local";
+  s: string; // Slug
+};
+
+export type QRData = QROrderPayload | QRUserPayload | QRLocalPayload;
+
+export interface ChatSession {
+  chat_id: string;
+  title: string;
   createdAt: string;
-  lastUpdated: string;
+  lastActivity: string;
+  messages: ChatSessionData[];
+  recipe_id?: string;
 }
 
 export interface ChatSessionData {
   text: string;
   role: "USER" | "IA";
-}
-
-export interface CHATData {
-  chatId?: string;
-  title?: string;
-  messages: ChatSessionData[];
-  createdAt?: string;
-  lastUpdated?: string;
-  activeRecipeId?: string;
 }

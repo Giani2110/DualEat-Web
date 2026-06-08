@@ -1,5 +1,4 @@
 import React from "react";
-import { Instagram, Twitter } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Logo from "@assets/images/icon/Logo_DualEat.png";
 import GooglePlay from "@assets/images/GooglePlay_Badge_Web.png";
@@ -24,7 +23,7 @@ const Footer: React.FC = () => {
               <div className="w-7 h-7 rounded-full flex items-center justify-center">
                 <img src={Logo} alt="Logo" />
               </div>
-              <span className="ml-2 text-[16px] Dosis-Bold">DualEat</span>
+              <span className="ml-2 text-[16px] font-bold">DualEat</span>
             </div>
             <p className="text6 text-[13px] leading-[27px] tracking-[-0.4px]">
               Una nueva forma de descubrir, cocinar y compartir experiencias
@@ -46,7 +45,7 @@ const Footer: React.FC = () => {
 
           {/* Links */}
           <div>
-            <h3 className="text-white Dosis-Bold mb-3 text-[14px]">Links</h3>
+            <h3 className="text-white font-bold mb-3 text-[14px]">Links</h3>
             <ul className="space-y-2 text6 text-[12px] transition-colors duration-300 cursor-pointer">
               <li className="py-1">
                 <Link to={ROUTES.PUBLIC.HOME} className="hover:text-white!">
@@ -73,7 +72,7 @@ const Footer: React.FC = () => {
 
           {/* Recursos */}
           <div>
-            <h3 className="text-white Dosis-Bold mb-3 text-[14px]">Recursos</h3>
+            <h3 className="text-white font-bold mb-3 text-[14px]">Recursos</h3>
             <ul className="space-y-2 text6 text-[12px] transition-colors duration-300 cursor-pointer">
               <li className="py-1">
                 <span className=" hover:text-white!">Documentos de ayuda</span>
@@ -96,7 +95,7 @@ const Footer: React.FC = () => {
 
           {/* Compañía y redes */}
           <div>
-            <h3 className="text-white Dosis-Bold mb-3 text-[14px]">Compañía</h3>
+            <h3 className="text-white font-bold mb-3 text-[14px]">Compañía</h3>
             <ul className="space-y-2 text6 transition-colors duration-300 text-[12px]">
               <li className="py-1">
                 <Link to={ROUTES.PUBLIC.ABOUT_US} className="hover:text-white!">
@@ -107,32 +106,6 @@ const Footer: React.FC = () => {
                 <Link to={ROUTES.PUBLIC.TERMS} className="hover:text-white!">
                   Términos y condiciones
                 </Link>
-              </li>
-              <li className="py-1">
-                <div className="flex flex-col space-x-3 mt-3">
-                  <div className="flex items-center space-x-3">
-                    <a
-                      href="https://instagram.com/DualEat"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text6 hover:text-white! transition-colors text-[12px]"
-                    >
-                      Instagram
-                    </a>
-                    <Instagram className="w-[14px] h-[14px]" />
-                  </div>
-                  <div className="flex items-center space-x-3 mt-3">
-                    <a
-                      href="https://twitter.com/DualEat"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text6 hover:text-white! transition-colors text-[12px]"
-                    >
-                      Twitter
-                    </a>
-                    <Twitter className="w-[14px] h-[14px]" />
-                  </div>
-                </div>
               </li>
             </ul>
           </div>

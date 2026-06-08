@@ -8,7 +8,7 @@ import {
 import { ROUTES } from "@/api/constants/constants";
 
 import { Triangle } from "lucide-react";
-import Logo from "@assets/images/icon/Logo DualEatRed.png";
+import Logo from "@assets/images/icon/Logo_DualEatRed.png";
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -37,14 +37,13 @@ const Header: React.FC = () => {
     return null;
   }
 
-
-
   return (
     <div
-      className={`fixed top-0 w-full z-50 pt-6 transition-all duration-300 ${hideHeader && location.pathname !== "/feed"
-        ? "-translate-y-full opacity-0"
-        : "translate-y-0 opacity-100"
-        }`}
+      className={`fixed top-0 w-full z-50 pt-6 transition-all duration-300 ${
+        hideHeader && location.pathname !== "/feed"
+          ? "-translate-y-full opacity-0"
+          : "translate-y-0 opacity-100"
+      }`}
     >
       <header
         className={`flex justify-between items-center px-6 py-2 bg-white shadow-sm border border-gray-100 rounded-2xl mx-auto w-[92%] sm:w-[85%] lg:w-[75%] max-w-7xl transition-all duration-300`}
@@ -54,7 +53,7 @@ const Header: React.FC = () => {
           className="flex items-center cursor-pointer"
         >
           <img className="w-[35px] h-[35px]" src={Logo} alt="Logo" />
-          <span className="ml-3 text-[17px] text1 Dosis-Bold text-red tracking-tighter">
+          <span className="ml-3 text-[17px] text1 font-bold text-red tracking-tighter">
             DualEat
           </span>
         </Link>
@@ -64,8 +63,9 @@ const Header: React.FC = () => {
               key={route.label}
               to={route.path}
               className={`text4 hover:text-[#b53325]! transition-all duration-200
-              ${location.pathname === route.path ? "text-[#b53325]!" : "text4"
-                }`}
+              ${
+                location.pathname === route.path ? "text-[#b53325]!" : "text4"
+              }`}
             >
               {route.label}
             </Link>

@@ -1,4 +1,6 @@
-import type { MinimalUser } from "./global";
+import type { User } from "./global";
+
+type MinimalUser = Pick<User, "id" | "name" | "slug" | "avatar_url">;
 
 export interface SupportTicket {
   id: string;
