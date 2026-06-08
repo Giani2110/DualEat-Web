@@ -57,7 +57,7 @@ export default function ImagesCarousel({
 
   return (
     <div className="mt-6">
-      <div className="w-full aspect-[6/2] overflow-hidden rounded-[20px] relative">
+      <div className="w-full aspect-[6/2] overflow-hidden rounded-[10px] relative">
         {/* Fondo borroso */}
         <div
           className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-30"

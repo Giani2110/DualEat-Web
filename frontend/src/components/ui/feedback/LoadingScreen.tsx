@@ -1,16 +1,8 @@
-import React from 'react';
+import Logo from '@assets/images/icon/Logo_DualEatBlack.png';
 
-import Logo from '@assets/images/icon/Logo DualEatBlack.png';
-
-interface LoadingScreenProps {
-  isVisible: boolean;
-}
-
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ isVisible }) => {
-  if (!isVisible) return null;
-
+export default function LoadingScreen() {
   return (
-    <div className="fixed BGUser w-[100%] h-[100vh] bg-[#fcfcfc] z-[1000]">
+    <main className="fixed BGUser w-[100%] h-[100vh] bg-[#fcfcfc] z-[1000]">
       <div className="flex flex-col items-center">
         <div className="relative h-14 flex items-center justify-center">
           <img src={Logo} alt="Logo DualEat" className="w-15 h-15 absolute top-[200px] z-10" />
@@ -19,8 +11,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isVisible }) => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
-
-export default LoadingScreen;

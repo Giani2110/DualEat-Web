@@ -10,7 +10,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
-import { LocalSupportWidget } from "../../../components/support/LocalSupportWidget";
+import { LocalSupportWidget } from "../../ui/buttons/LocalSupportWidget";
 
 interface BusinessSidebarProps {
   children: React.ReactNode;

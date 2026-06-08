@@ -1,21 +1,19 @@
 import React from "react";
 interface LoaderProps {
-  color?: "white" | "black" | "gray-500" | "yellow" | "red"; 
-  size?:  "4" | "6" | "8" | "10" | "12"; 
+  color: string;
+  size: number;
 }
 
-const Loader: React.FC<LoaderProps> = ({ color = "white", size = "4" }) => {
+const Loader: React.FC<LoaderProps> = ({ color = "white", size = 6 }) => {
   return (
     <div
+      style={{ width: `${size}px`, height: `${size}px`, color }}
       className={`
         animate-spin
         inline-block
-        w-${size}
-        h-${size}
         border-4
         border-current
         border-t-transparent
-        text-${color}
         rounded-full
       `}
       role="status"

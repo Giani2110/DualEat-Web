@@ -4,7 +4,7 @@ import { useAuth } from "@hooks/useAuth";
 
 import { ROUTES } from "@/api/constants/constants";
 
-import LoadingScreen from "../../animation/LoadingScreen";
+import LoadingScreen from "@components/ui/feedback/LoadingScreen";
 
 interface RouteProps {
   children: React.ReactNode;
@@ -24,7 +24,7 @@ const PublicRoute: React.FC<RouteProps> = ({ children }) => {
   }, [user, navigate]);
 
   if (loading || user) {
-    return <LoadingScreen isVisible={true} />;
+    return <LoadingScreen />;
   }
 
   return <>{children}</>;

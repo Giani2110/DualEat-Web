@@ -4,38 +4,25 @@ import { useAuth } from "@hooks/useAuth";
 
 import { ROUTES } from "@/api/constants/constants";
 
-import LoadingScreen from "../../animation/LoadingScreen";
+import LoadingScreen from "@components/ui/feedback/LoadingScreen";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  onlyTempToken?: boolean;
   isBusiness?: boolean;
   isAdmin?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
-  onlyTempToken = false,
   isBusiness,
   isAdmin,
 }) => {
-  const location = useLocation();
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <LoadingScreen isVisible={true} />;
+    return <LoadingScreen />;
   }
-
-  const queryParams = new URLSearchParams(location.search);
-  const tokenFromUrl = queryParams.get("tempToken");
-
-  if (onlyTempToken) {
-    return tokenFromUrl ? (
-      <>{children}</>
-    ) : (
-      <Navigate to={ROUTES.AUTH.LOGIN} replace />
-    );
-  }
+  // usar UseNavigate
 
   if (!user) {
     return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
