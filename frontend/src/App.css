@@ -1,6 +1,7 @@
+@import "@fontsource-variable/outfit/wght.css";
 @import "tailwindcss";
-@import 'react-image-crop/dist/ReactCrop.css';
 
 body {
-    font-family: 'Dosis', sans-serif;
+  font-family: "Outfit Variable", sans-serif;
+  font-weight: 300;
 }

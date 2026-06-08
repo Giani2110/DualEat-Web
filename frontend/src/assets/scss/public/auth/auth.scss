@@ -1,47 +1,3 @@
-/* Auth Section (login) */
-.left-background {
-  border-bottom-right-radius: 70px;
-  border-top-right-radius: 70px;
-  background-size: cover;
-}
-
-.Dform {
-  border-bottom-right-radius: 225px;
-  border-top-right-radius: 225px;
-  max-width: 450px;
-  background-color: rgba(51, 51, 51, 0.8);
-  min-height: 540px;
-}
-
-.back {
-  background-color: #f1f1f1;
-  filter: contrast(0.8);
-}
-
-/* Auth Section (register) */
-.right-background {
-  border-bottom-left-radius: 40px;
-  border-top-left-radius: 40px;
-  background-size: cover;
-}
-
-.Dform-right {
-  border-bottom-left-radius: 225px;
-  border-top-left-radius: 225px;
-  max-width: 450px;
-  background-color: rgba(51, 51, 51, 0.8);
-  min-height: 540px;
-}
-
-/* Onboarding */
-.bgsemi-black:hover {
-  background-color: black;
-}
-
-.cat-block:hover {
-  background-color: rgba(236, 236, 236, 0.082);
-}
-
 .scroll {
   height: 150px;
   overflow-y: auto;
@@ -100,11 +56,4 @@
 .bgAnimation > div {
   position: relative;
   z-index: 1;
-}
-
-
-/* reCAPTCHA */
-.recaptcha-scale {
-  transform: scale(0.90);
-  transform-origin: 0 0;
 }
