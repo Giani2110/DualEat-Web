@@ -4,9 +4,8 @@ import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import { useState, useEffect } from "react";
 
 import { X, Eye, EyeOff } from "lucide-react";
-import { withMinimumDelay } from "@utils/timeUtils";
-import Loader from "@components/animation/Loader";
-import OtpInput from "@/components/public/auth/OtpInput";
+import Loader from "@/components/ui/feedback/Loader";
+import OtpInput from "@/components/ui/inputs/OtpInput";
 
 import { ROUTES } from "@/api/constants/constants";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +33,7 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: number;
     if (resendCooldown > 0) {
       timer = setInterval(() => {
         setResendCooldown((prev) => prev - 1);
@@ -53,10 +52,9 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset", { email }),
-        1000,
-      );
+      const response = await axiosInterceptor.post("/auth/password_reset", {
+        email,
+      });
 
       if (response.data?.success) {
         setStep("code");
@@ -80,10 +78,9 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset", { email }),
-        1000,
-      );
+      const response = await axiosInterceptor.post("/auth/password_reset", {
+        email,
+      });
       if (!response.data?.success) {
         setError("No se pudo reenviar el código. Intenta nuevamente.");
       } else {
@@ -104,12 +101,12 @@ const ResetPassword = () => {
     setError("");
     setLoading(true);
     try {
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset/validate-code", {
+      const response = await axiosInterceptor.post(
+        "/auth/password_reset/validate-code",
+        {
           email,
           code,
-        }),
-        1000,
+        },
       );
 
       if (response.data?.success === true) {
@@ -138,12 +135,12 @@ const ResetPassword = () => {
         return;
       }
 
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset/reset", {
+      const response = await axiosInterceptor.post(
+        "/auth/password_reset/reset",
+        {
           email,
           newPassword,
-        }),
-        1000,
+        },
       );
 
       if (response.data?.success) {
@@ -203,7 +200,7 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 Dosis-Bold mb-2">
+                  <h2 className="text-[31px] text2 font-bold mb-2">
                     Restablecer contraseña
                   </h2>
                   <p className="text4 text-[15px] leading-[21px]">
@@ -237,7 +234,7 @@ const ResetPassword = () => {
                 <button
                   type="submit"
                   disabled={!email}
-                  className={`w-full Dosis-Bold py-3 rounded-[50px] transition
+                  className={`w-full font-bold py-3 rounded-[50px] transition
                     ${
                       !email
                         ? "bg-red brightness-50 cursor-not-allowed text-white/60"
@@ -266,12 +263,12 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 Dosis-Bold mb-2">
+                  <h2 className="text-[31px] text2 font-bold mb-2">
                     Te enviamos un código
                   </h2>
                   <p className="text4 text-[15px] leading-[21px] my-5">
                     Enviamos un código de confirmación a
-                    <span className="Dosis-Bold text1 ms-1">{email}</span>.
+                    <span className="font-bold text1 ms-1">{email}</span>.
                   </p>
                   <p className="text4 text-[15px] leading-[21px]">
                     Consulta tu correo para obtener tu código de confirmación.
@@ -292,7 +289,7 @@ const ResetPassword = () => {
                     <button
                       type="button"
                       onClick={handleResendCode}
-                      className={`Dosis-Bold text2 ms-1 cursor-pointer underline underline-offset-1 ${
+                      className={`font-bold text2 ms-1 cursor-pointer underline underline-offset-1 ${
                         resendCooldown > 0
                           ? "opacity-50 cursor-not-allowed"
                           : ""
@@ -310,14 +307,14 @@ const ResetPassword = () => {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full Dosis-Bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
+                    className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full font-bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
                   >
                     {loading ? <Loader color="white" size="4" /> : "Atrás"}
                   </button>
                 ) : (
                   <button
                     type="submit"
-                    className="bg-red border border-[#888888] text1 hover:brightness-90 w-full Dosis-Bold py-3 cursor-pointer rounded-[50px] transition-all duration-300"
+                    className="bg-red border border-[#888888] text1 hover:brightness-90 w-full font-bold py-3 cursor-pointer rounded-[50px] transition-all duration-300"
                   >
                     {loading ? (
                       <Loader color="white" size="4" />
@@ -342,7 +339,7 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 Dosis-Bold mb-2">
+                  <h2 className="text-[31px] text2 font-bold mb-2">
                     Elige una contraseña nueva
                   </h2>
                   <p className="text4 text-[15px] leading-[21px]">
@@ -424,7 +421,7 @@ const ResetPassword = () => {
 
                 <button
                   type="submit"
-                  className={`w-full bg-red text1 Dosis-Bold py-3 cursor-pointer rounded-[50px]`}
+                  className={`w-full bg-red text1 font-bold py-3 cursor-pointer rounded-[50px]`}
                 >
                   {loading ? (
                     <div className="flex items-center justify-center">

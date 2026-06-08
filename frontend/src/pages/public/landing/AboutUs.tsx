@@ -5,7 +5,7 @@ const AboutUs = () => {
     <div className="min-h-screen bgsemi-white pt-[15px]">
       <div className="rounded-[20px] mx-4 bg-gradient-to-r from-[#ED213A] to-[#93291E] text-white h-[400px] relative">
         <div className="max-w-screen-2xl mx-auto text-center pt-[160px]">
-          <h1 className="text-[45px] Dosis-Bold mb-4">Sobre nosotros</h1>
+          <h1 className="text-[45px] font-bold mb-4">Sobre nosotros</h1>
           <p className="text-[17px] max-w-2xl mx-auto leading-[32px] tracking-[-0.4px]">
             Apasionados por la comida, la tecnología y las experiencias simples
             pero memorables.
@@ -19,12 +19,12 @@ const AboutUs = () => {
         <div className="bg-gray py-[100px] px-8 rounded-[20px]">
           <div className="max-w-[70%] mx-auto">
             <div className="grid grid-cols-2 justify-center">
-              <h2 className="text-[26px] Dosis-Bold">Nuestros principios</h2>
+              <h2 className="text-[26px] font-bold">Nuestros principios</h2>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-x-20">
               <div>
-                <h3 className="text5 Dosis-Bold titleABT">
+                <h3 className="text5 font-bold titleABT">
                   Diseñar con foco en las personas, negocios, foodies y
                   cocineros caseros
                 </h3>
@@ -34,7 +34,7 @@ const AboutUs = () => {
                   necesidades y mejorar la experiencia.
                 </p>
 
-                <h3 className="text5 Dosis-Bold titleABT">
+                <h3 className="text5 font-bold titleABT">
                   Ser inclusivos y accesibles
                 </h3>
                 <p className="text4 textABT">
@@ -44,7 +44,7 @@ const AboutUs = () => {
               </div>
 
               <div>
-                <h3 className="text5 Dosis-Bold titleABT">
+                <h3 className="text5 font-bold titleABT">
                   Priorizar lo que agrega valor
                 </h3>
                 <p className="text4 textABT">
@@ -52,7 +52,7 @@ const AboutUs = () => {
                   implementamos herramientas útiles, simples y relevantes para
                   el día a día.
                 </p>
-                <h3 className="text5 Dosis-Bold titleABT">
+                <h3 className="text5 font-bold titleABT">
                   Impulsar a los negocios gastronómicos
                 </h3>
                 <p className="text4 textABT">
@@ -70,7 +70,7 @@ const AboutUs = () => {
           <div className="grid lg:grid-cols-2 gap-10 max-w-[70%] mx-auto">
             {/* Vision */}
             <div>
-              <h2 className="text-[28px] Dosis-Bold mb-3">Visión</h2>
+              <h2 className="text-[28px] font-bold mb-3">Visión</h2>
               <p className="text4 textABT">
                 Ser la aplicación gastronómica líder en conectar experiencias
                 culinarias tanto en locales como en el hogar, transformando la
@@ -81,7 +81,7 @@ const AboutUs = () => {
 
             {/* Mission */}
             <div className="lg:text-right">
-              <h2 className="text-[28px] Dosis-Bold mb-3">Misión</h2>
+              <h2 className="text-[28px] font-bold mb-3">Misión</h2>
               <p className="text4 textABT">
                 Brindar una plataforma integral que permita a los negocios
                 gastronómicos y amantes de la cocina, facilitando la tecnología

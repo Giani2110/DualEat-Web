@@ -20,20 +20,22 @@ export { default as AdminUsers } from "./private/admin/AdminUsers";
 export { default as AdminDashboard } from "./private/admin/AdminDashboard";
 
 // Components
-export { default as ProtectedRoute } from "@/components/public/auth/ProtectedRoutes";
-export { default as PublicRoute } from "@/components/public/auth/PublicRoutes";
+export { default as ProtectedRoute } from "@components/layout/ProtectedRoutes";
+export { default as PublicRoute } from "@components/layout/PublicRoutes";
 
 // User
 export { default as UDashboard } from "./private/users/UDashboard";
-export { default as UPost } from "./private/users/UPost";
-export { default as UExplore } from "./private/users/UExplore";
-export { default as URecipes } from "./private/users/URecipes";
-export { default as UCommunity } from "./private/users/UCommunity";
-export { default as UComment } from "./private/users/UComment";
+export { default as Profile } from "./private/users/Profile";
+export { default as UExplore } from "./private/users/Explore";
+export { default as Chat } from "./private/users/chat/Chat";
+export { default as CommunityDetail } from "./private/users/community/CommunityDetail";
+export { default as PostDetail } from "./private/users/community/PostDetail";
 export { default as UNotifications } from "./private/users/UNotifications";
-export { default as ERecipe } from "./private/users/ERecipe";
+export { default as RecipeDetail } from "./private/users/community/RecipeDetail";
+export { default as CreateRecipe } from "./private/users/create/recipe";
+export { default as CreatePost } from "./private/users/create/post";
 
-export { default as LoadingScreen } from "@components/animation/LoadingScreen";
+export { default as LoadingScreen } from "@/components/ui/feedback/LoadingScreen";
 
 // Locals
 export { default as LocalDashboard } from "./private/local/Dashboard";

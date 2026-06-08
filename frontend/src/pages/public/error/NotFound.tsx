@@ -464,7 +464,7 @@ const NotFound = () => {
             className="flex gap-2 items-center cursor-pointer hover:scale-104 transition-all duration-200"
           >
             <img src={Logo} alt="Logo de DualEat" className="w-6 h-6" />
-            <h1 className="text-base sm:text-[17px] md:text-[19px] Dosis-Bold text2">
+            <h1 className="text-base sm:text-[17px] md:text-[19px] font-bold text2">
               DualEat
             </h1>
           </div>
@@ -492,8 +492,8 @@ const NotFound = () => {
               />
               <span className="text-xs tracking-wide">ERROR</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl Dosis-Bold text2 mb-2 sm:mb-3 leading-tight">
-              <span className="Dosis-ExtraBold text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text2 mb-2 sm:mb-3 leading-tight">
+              <span className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
                 404
               </span>
               : Ups... ¡Se nos cayó la bandeja!

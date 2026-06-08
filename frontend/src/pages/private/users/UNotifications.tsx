@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNotifications } from "@hooks/useNotifications";
-import { formatShortTime } from "@utils/compactNumber";
 
 import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import { useNavigate } from "react-router-dom";
 
 import type { Notification } from "@interface/global";
 import toast from "react-hot-toast";
+import { getShortTimeAgo } from "@/utils/date";
 
 const UNotifications = () => {
   const { markAsRead, markAsReadSingle, setNotifications } = useNotifications();
@@ -85,7 +85,7 @@ const UNotifications = () => {
 
   return (
     <section className="w-[75%] md:w-[65%] mx-auto px-2 py-1 mt-5">
-      <h1 className="text-[28px] tracking-tight text3 Dosis-Bold">
+      <h1 className="text-[28px] tracking-tight text3 font-bold">
         Notificaciones
       </h1>
       <div className="flex flex-col max-w-[650px]">
@@ -101,7 +101,7 @@ const UNotifications = () => {
                 );
               }}
               title="Marcar notificaciones como leidas"
-              className="cursor-pointer text3 Dosis-Bold text-[16px] text5 p-2"
+              className="cursor-pointer text3 font-bold text-[16px] text5 p-2"
             >
               Marcar como leido
             </button>
@@ -109,7 +109,7 @@ const UNotifications = () => {
             <button
               title="Notificaciones leidas"
               type="button"
-              className="cursor-pointer text3 Dosis-Bold text-[16px] p-2 text5"
+              className="cursor-pointer text3 font-bold text-[16px] p-2 text5"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -159,7 +159,7 @@ const UNotifications = () => {
                   <path d="M15 8h6" />
                   <path d="M16.243 3.757A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673A9.4 9.4 0 0 1 18.667 12" />
                 </svg>
-                <p className="text5 Dosis-Bold text-[17px]">
+                <p className="text5 font-bold text-[17px]">
                   "Todo en Calma por Aquí"
                 </p>
                 <p className="text4 text-[16px] ">
@@ -193,15 +193,13 @@ const UNotifications = () => {
                 alt="Imagen de perfil"
               />
               <div className="flex flex-col flex-[2] text-[15px]">
-                <p className="Dosis-Bold text5">
-                  {notification.metadata.title}
-                </p>
+                <p className="font-bold text5">{notification.metadata.title}</p>
                 <p className="text4">{notification.message}</p>
                 <q className="italic text4 text-[14px] ps-2 border-l-2 line-clamp-2 my-2">
                   {notification.metadata.message}
                 </q>
                 <span className="text4 text-[14px]">
-                  {formatShortTime(new Date(notification.created_at))}
+                  {getShortTimeAgo(new Date(notification.created_at))}
                 </span>
               </div>
 

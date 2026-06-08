@@ -150,7 +150,7 @@ const LandingHome = () => {
 
   const handlePrevSlide = () => {
     setCurrentSlide(
-      (prevSlide) => (prevSlide - 1 + slides.length) % slides.length
+      (prevSlide) => (prevSlide - 1 + slides.length) % slides.length,
     );
   };
 
@@ -299,7 +299,7 @@ const LandingHome = () => {
                 <Utensils className="text-white w-5 h-5" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-[18px] Dosis-Bold text-black">
+                <h3 className="text-[18px] font-bold text-black">
                   Exploración de locales
                 </h3>
                 <p className="text4 text-L2">
@@ -316,7 +316,7 @@ const LandingHome = () => {
                 <Home className="text-white w-5 h-5" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-[18px] Dosis-Bold text-black">
+                <h3 className="text-[18px] font-bold text-black">
                   Modo casero interactivo
                 </h3>
                 <p className="text4 text-L2">
@@ -333,7 +333,7 @@ const LandingHome = () => {
                 <Trophy className="text-white w-5 h-5" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-[18px] Dosis-Bold text-black">
+                <h3 className="text-[18px] font-bold text-black">
                   Gamificación y comunidad
                 </h3>
                 <p className="text4 text-L2">
@@ -350,7 +350,7 @@ const LandingHome = () => {
       <section className="bgCarousel py-[130px] px-4 border-t-2 border-b-2 border-[#E5A657]">
         <div className="max-w-screen-2xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-[30px] Dosis-Bold text3 mb-4">
+            <h2 className="text-[30px] font-bold text3 mb-4">
               Una experiencia pensada para cada momento gastronómico
             </h2>
             <p className="text-[17px] text4 mx-auto">
@@ -367,7 +367,7 @@ const LandingHome = () => {
                   según tus gustos, dejá reseñas y descubrí nuevos sabores cada
                   día, todo desde una misma plataforma.
                 </p>
-                <h3 className="text-[26px] text-yellow underline Dosis-Bold">
+                <h3 className="text-[26px] text-yellow underline font-bold">
                   Comer afuera
                 </h3>
               </div>
@@ -381,7 +381,7 @@ const LandingHome = () => {
             </div>
 
             <div className="w-full h-full bg-[#E5A657] human rounded-[10px] hover:scale-102 transition-all duration-500 ease-in-out">
-              <h1 className="text-[22px] lg:text-[28px] underline text2 Dosis-Bold absolute top-0 left-[15%] pt-10 ps-5">
+              <h1 className="text-[22px] lg:text-[28px] underline text2 font-bold absolute top-0 left-[15%] pt-10 ps-5">
                 Cocinar en casa
               </h1>
               <p className="text2 text-[13px] mt-4 absolute bottom-0 right-0 pb-10 pe-8 text-right max-w-[90%]">
@@ -400,7 +400,7 @@ const LandingHome = () => {
                   platos destacados y ganá presencia entre miles de foodies que
                   buscan nuevas experiencias.
                 </p>
-                <h3 className="text-[26px] text-red underline Dosis-Bold">
+                <h3 className="text-[26px] text-red underline font-bold">
                   Para negocios
                 </h3>
               </div>
@@ -631,7 +631,7 @@ const LandingHome = () => {
                     <div className="flex items-center justify-center space-x-4 mb-4">
                       <div>{feature.icon}</div>
 
-                      <h3 className="text-[17px] text5 Dosis-Bold">
+                      <h3 className="text-[17px] text5 font-bold">
                         {feature.title}
                       </h3>
                       <span className="px-2 py-1 bg-yellow text1 text-xs rounded-full ">

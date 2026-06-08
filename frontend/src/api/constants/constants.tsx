@@ -25,19 +25,23 @@ import {
   LocalCalendar,
   LocalEmployees,
   LocalSubscription,
-  UPost,
   UExplore,
-  URecipes,
-  UCommunity,
-  UComment,
+  Chat,
+  CommunityDetail,
+  PostDetail,
   UNotifications,
-  ERecipe,
+  RecipeDetail,
+  CreateRecipe,
+  CreatePost,
+  Profile,
 } from "../../pages";
 
 import { AdminSupportTickets } from "@/pages/private/admin/SupportTickets";
 
 import AdminLayout from "@/layout/admin/AdminLayout";
 
+// 1. RUTAS
+// =========================================================
 export const ROUTES = {
   PUBLIC: {
     HOME: "/",
@@ -55,10 +59,24 @@ export const ROUTES = {
   },
   USER: {
     DASHBOARD: "/feed",
-    CREATE_POST: "/post",
+    CREATE_POST: "/create_post",
+    CREATE_RECIPE: "/create_recipe",
+
+    RECIPE_PATH: "/r/:recipe_id/:recipe_slug",
+
+    RECIPE: (recipe_id: string, recipe_slug: string) =>
+      `/r/${recipe_id}/${recipe_slug}`,
+
+    POST: (community_slug: string, post_id: string, post_slug: string) =>
+      `/c/${community_slug}/p/${post_id}/${post_slug}`,
+
+    COMMUNITY: (community_slug: string) => `/c/${community_slug}`,
+
     EXPLORE: "/explore/",
-    RECIPES: "/recipes/",
-    COMMUNITY: "/c/",
+    CHAT: `/chat/`,
+
+    PROFILE: (user_id: string, user_slug: string) => `/profile/${user_id}/${user_slug}`,
+
     NOTIFICATIONS: "/notifications",
   },
   ADMIN: {
@@ -153,11 +171,7 @@ export const appRoutes = [
   },
   {
     path: ROUTES.AUTH.ONBOARDING,
-    element: (
-      <ProtectedRoute onlyTempToken>
-        <Onboarding />
-      </ProtectedRoute>
-    ),
+    element: <Onboarding />,
   },
   { path: ROUTES.AUTH.RESET_PASSWORD, element: <ResetPassword /> },
 
@@ -174,7 +188,15 @@ export const appRoutes = [
     path: ROUTES.USER.CREATE_POST,
     element: (
       <ProtectedRoute isBusiness={false}>
-        <UPost />
+        <CreatePost />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.USER.CREATE_RECIPE,
+    element: (
+      <ProtectedRoute isBusiness={false}>
+        <CreateRecipe />
       </ProtectedRoute>
     ),
   },
@@ -194,35 +216,45 @@ export const appRoutes = [
       </ProtectedRoute>
     ),
   },
+
   {
-    path: ROUTES.USER.RECIPES,
+    path: `/profile/:user_id/:user_slug`,
     element: (
       <ProtectedRoute isBusiness={false}>
-        <URecipes />
+        <Profile />
+      </ProtectedRoute>
+    ),
+  },
+  
+  {
+    path: `${ROUTES.USER.CHAT}:chat_id?`,
+    element: (
+      <ProtectedRoute isBusiness={false}>
+        <Chat />
       </ProtectedRoute>
     ),
   },
   {
-    path: `${ROUTES.USER.COMMUNITY}:communitySlug/`,
+    path: `/c/:community_slug`,
     element: (
       <ProtectedRoute isBusiness={false}>
-        <UCommunity />
+        <CommunityDetail />
       </ProtectedRoute>
     ),
   },
   {
-    path: `${ROUTES.USER.COMMUNITY}:communitySlug/post/:userSlug/:postSlug`,
+    path: `/c/:community_slug/p/:post_id/:post_slug`,
     element: (
       <ProtectedRoute isBusiness={false}>
-        <UComment />
+        <PostDetail />
       </ProtectedRoute>
     ),
   },
   {
-    path: `${ROUTES.USER.COMMUNITY}:communitySlug/recipe/:userSlug/:recipeSlug`,
+    path: `${ROUTES.USER.RECIPE_PATH}`,
     element: (
       <ProtectedRoute isBusiness={false}>
-        <ERecipe />
+        <RecipeDetail />
       </ProtectedRoute>
     ),
   },
@@ -236,12 +268,66 @@ export const appRoutes = [
   },
 
   // Admin
-  { path: ROUTES.ADMIN.BUSINESS_CREATION, element: <ProtectedRoute isAdmin><AdminLayout><AdminBusinessCreation /></AdminLayout></ProtectedRoute> },
-  { path: ROUTES.ADMIN.FOOD_CATEGORIES, element: <ProtectedRoute isAdmin><AdminLayout><AdminFoodCategories /></AdminLayout></ProtectedRoute> },
-  { path: ROUTES.ADMIN.LOCALS, element: <ProtectedRoute isAdmin><AdminLayout><AdminLocals /></AdminLayout></ProtectedRoute> },
-  { path: ROUTES.ADMIN.USERS, element: <ProtectedRoute isAdmin><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute> },
-  { path: ROUTES.ADMIN.DASHBOARD, element: <ProtectedRoute isAdmin><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute> },
-  { path: ROUTES.ADMIN.SUPPORT_TICKETS, element: <ProtectedRoute isAdmin><AdminLayout><AdminSupportTickets /></AdminLayout></ProtectedRoute> },
+  {
+    path: ROUTES.ADMIN.BUSINESS_CREATION,
+    element: (
+      <ProtectedRoute isAdmin>
+        <AdminLayout>
+          <AdminBusinessCreation />
+        </AdminLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.ADMIN.FOOD_CATEGORIES,
+    element: (
+      <ProtectedRoute isAdmin>
+        <AdminLayout>
+          <AdminFoodCategories />
+        </AdminLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.ADMIN.LOCALS,
+    element: (
+      <ProtectedRoute isAdmin>
+        <AdminLayout>
+          <AdminLocals />
+        </AdminLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.ADMIN.USERS,
+    element: (
+      <ProtectedRoute isAdmin>
+        <AdminLayout>
+          <AdminUsers />
+        </AdminLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.ADMIN.DASHBOARD,
+    element: (
+      <ProtectedRoute isAdmin>
+        <AdminLayout>
+          <AdminDashboard />
+        </AdminLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.ADMIN.SUPPORT_TICKETS,
+    element: (
+      <ProtectedRoute isAdmin>
+        <AdminLayout>
+          <AdminSupportTickets />
+        </AdminLayout>
+      </ProtectedRoute>
+    ),
+  },
 
   // Local
   {
