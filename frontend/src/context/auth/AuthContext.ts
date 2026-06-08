@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AuthResponse } from "@services/auth.api";
+import type { AuthResponse } from "@/services/auth.api";
 import type { User } from "@interface/global";
 
 export interface AuthContextType {
@@ -27,5 +27,5 @@ export interface AuthContextType {
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
+  undefined,
 );
