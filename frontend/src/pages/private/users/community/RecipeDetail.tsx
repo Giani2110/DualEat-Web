@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -11,11 +11,17 @@ import {
   Star,
 } from "lucide-react";
 
-import { capitalize, getMimeTypeFromUrl } from "@utils/capitalize";
+import { capitalize } from "@utils/capitalize";
 
 import { getRecipeById } from "@/services/recipe.api";
 
-import { UnitNames, type NutritionData, type Recipe } from "@interface/global";
+import {
+  UnitNames,
+  type NutritionData,
+  type Recipe,
+  type RecipeIngredient,
+  type RecipeStep,
+} from "@interface/global";
 
 import "@assets/scss/private/users/users.scss";
 import Loader from "@/components/ui/feedback/Loader";
@@ -56,7 +62,7 @@ export default function RecipeDetail() {
     if (recipe) {
       navigate(`/r/${recipe.id}/${recipe.slug}`, { replace: true });
     }
-  }, [recipe_id]);
+  }, [recipe, navigate]);
 
   useEffect(() => {
     if (!recipe?.ingredients) return;
@@ -138,10 +144,6 @@ export default function RecipeDetail() {
     });
   }, [recipe]);
 
-  console.log("RECETA", recipe);
-
-  console.log("NUTRICIÓN", nutrition);
-
   if (recipe && recipe.votes_up && recipe.votes_down) {
     const total_votes = recipe.votes_down + recipe.votes_up;
     rating = total_votes > 0 ? (recipe.votes_up / total_votes) * 5 : 0;
@@ -164,6 +166,116 @@ export default function RecipeDetail() {
       text: `${recipe?.steps?.length ?? 0} pasos`,
     },
   ];
+
+  const renderStepButton = useCallback(
+    (step: RecipeStep, index: number) => {
+      const isActive = index === actualIndex;
+      const stepId = `recipe-step-content-${index}`;
+      const triggerId = `recipe-step-trigger-${index}`;
+
+      return (
+        <div key={index} className="border-b border-text-2 w-full">
+          <button
+            id={triggerId}
+            type="button"
+            onClick={() => setActualIndex(index)}
+            aria-expanded={isActive}
+            aria-controls={stepId}
+            className={`w-full text-text-5 text-base p-2 text-left transition-all duration-300 flex flex-row items-center gap-x-2 group ${
+              isActive
+                ? "font-bold"
+                : "cursor-pointer hover:bg-[#e5a657] hover:text-white group-hover:border-white"
+            }`}
+          >
+            <span className="font-bold">Paso {step.step_number}</span>
+            {!isActive && (
+              <div className="flex-1 group-hover:border-white h-[1px] border-dotted border-[#2c2c2c] border-b-2" />
+            )}
+          </button>
+
+          {isActive && (
+            <div
+              id={stepId}
+              role="region"
+              aria-labelledby={triggerId}
+              className="flex flex-col items-start gap-y-2 w-full h-auto px-2 pb-3 animate-in fade-in slide-in-from-top-1 duration-200"
+            >
+              <p
+                tabIndex={0}
+                className="max-h-[200px] text-start text-base text-text-4 h-auto overflow-y-auto outline-none rounded p-1"
+              >
+                {step.description}
+              </p>
+
+              {step.estimated_time !== 0 && (
+                <p className="font-bold text-sm text-text-5">
+                  Tiempo estimado: {step.estimated_time} min
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    },
+    [actualIndex],
+  );
+
+  const renderIngredientItem = useCallback(
+    (ingredient: RecipeIngredient, index: number) => {
+      return (
+        <li
+          key={index}
+          className="flex flex-col md:flex-row justify-between text-sm py-1 border-b border-text-2"
+        >
+          <span className="font-bold text-text-5">
+            {capitalize(String(ingredient.ingredient?.name))}
+          </span>
+          <div className="relative flex items-center gap-x-3">
+            <span className="text-text-4 flex-1">
+              {ingredient.quantity} {UnitNames[ingredient.unit].abbreviation} (
+              {UnitNames[ingredient.unit].name})
+            </span>
+
+            {ingredient.notes && (
+              <>
+                <button
+                  type="button"
+                  title="Ver notas del ingrediente"
+                  className="cursor-pointer hover:scale-105 transition-all duration-100"
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height={20}
+                    width={20}
+                    viewBox="0 0 512 512"
+                  >
+                    <path
+                      fill="#4A4947"
+                      d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zm0-336c-17.7 0-32 14.3-32 32 0 13.3-10.7 24-24 24s-24-10.7-24-24c0-44.2 35.8-80 80-80s80 35.8 80 80c0 47.2-36 67.2-56 74.5l0 3.8c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-8.1c0-20.5 14.8-35.2 30.1-40.2 6.4-2.1 13.2-5.5 18.2-10.3 4.3-4.2 7.7-10 7.7-19.6 0-17.7-14.3-32-32-32zM224 368a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"
+                    />
+                  </svg>
+                </button>
+
+                {hoveredIndex === index && (
+                  <div className="absolute bottom-full mb-2 w-max bg-gray text-[15px] text5 rounded-md p-2 border border-[#c0c0c0] shadow-lg z-20">
+                    {ingredient.notes}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </li>
+      );
+    },
+    [hoveredIndex],
+  );
+
+  const sortedSteps = useMemo(
+    () => recipe?.steps?.sort((a, b) => a.step_number - b.step_number) || [],
+    [recipe?.steps],
+  );
 
   if (isLoading) {
     return (
@@ -212,7 +324,7 @@ export default function RecipeDetail() {
           </div>
         </header>
 
-        <div className="flex flex-row gap-x-4 items-center">
+        <div className="flex flex-wrap flex-row gap-x-4 items-center">
           <h1 className="text-[28px] font-bold text-text-3 tracking-tight">
             {recipe.name}
           </h1>
@@ -232,7 +344,7 @@ export default function RecipeDetail() {
             target="_blank"
             title="Ver la imagen en tamaño completo"
             rel="noopener noreferrer"
-            className="block w-auto h-auto aspect-[6/3] lg:aspect-[6/2] overflow-hidden rounded-[10px] relative"
+            className="block w-auto h-auto aspect-[6/4] lg:aspect-[6/2] overflow-hidden rounded-[10px] relative"
           >
             <div
               className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-30"
@@ -249,7 +361,7 @@ export default function RecipeDetail() {
           </a>
         )}
 
-        <div className="flex flex-row items-center justify-center gap-x-6 py-1 border-y border-[#dbdbdb]">
+        <div className="flex flex-wrap flex-row items-center justify-center gap-x-6 py-1 border-y border-[#dbdbdb]">
           {recipeStats.map((stat, index) => (
             <div key={stat.id} className="flex items-center gap-x-4">
               {stat.icon}
@@ -284,55 +396,7 @@ export default function RecipeDetail() {
             </div>
 
             <ul className="flex flex-col gap-y-4 list-disc list-inside">
-              {recipe.ingredients.map((ingredient, index) => {
-                return (
-                  <li
-                    key={index}
-                    className="flex justify-between text-[14px] py-1 border-b border-text-2"
-                  >
-                    <span className="font-bold text-text-5">
-                      {capitalize(String(ingredient.ingredient?.name))}
-                    </span>
-                    <div className="relative flex items-center gap-x-3">
-                      <span className="text-text-4">
-                        {ingredient.quantity}{" "}
-                        {UnitNames[ingredient.unit].abbreviation} (
-                        {UnitNames[ingredient.unit].name})
-                      </span>
-
-                      {ingredient.notes && (
-                        <>
-                          <button
-                            type="button"
-                            title="Ver notas del ingrediente"
-                            className="cursor-pointer hover:scale-105 transition-all duration-100"
-                            onMouseEnter={() => setHoveredIndex(index)}
-                            onMouseLeave={() => setHoveredIndex(null)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              height={20}
-                              width={20}
-                              viewBox="0 0 512 512"
-                            >
-                              <path
-                                fill="#4A4947"
-                                d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zm0-336c-17.7 0-32 14.3-32 32 0 13.3-10.7 24-24 24s-24-10.7-24-24c0-44.2 35.8-80 80-80s80 35.8 80 80c0 47.2-36 67.2-56 74.5l0 3.8c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-8.1c0-20.5 14.8-35.2 30.1-40.2 6.4-2.1 13.2-5.5 18.2-10.3 4.3-4.2 7.7-10 7.7-19.6 0-17.7-14.3-32-32-32zM224 368a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"
-                              />
-                            </svg>
-                          </button>
-
-                          {hoveredIndex === index && (
-                            <div className="absolute bottom-full mb-2 w-max bg-gray text-[15px] text5 rounded-md p-2 border border-[#c0c0c0] shadow-lg z-20">
-                              {ingredient.notes}
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
+              {recipe.ingredients.map(renderIngredientItem)}
             </ul>
           </div>
         )}
@@ -348,88 +412,7 @@ export default function RecipeDetail() {
             </div>
 
             <div className="flex flex-col gap-y-4">
-              {recipe.steps.map((step, index) => {
-                const type = getMimeTypeFromUrl(String(step.image_url));
-                const isActive = index === actualIndex;
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setActualIndex(index)}
-                    disabled={isActive}
-                    className={`text-text-5 w-full text-[14px] border-b border-text-2 p-2 group transition-all duration-300
-                    ${
-                      !isActive
-                        ? "cursor-pointer hover:bg-[#e5a657] h-full overflow-hidden"
-                        : "h-auto overflow-visible"
-                    }`}
-                  >
-                    {!isActive && (
-                      <div className="flex flex-row items-center gap-x-2 w-full">
-                        <span className="font-bold group-hover:text-[#FFFFFF]">
-                          {step.step_number}
-                        </span>
-                        <div className="flex-1 h-[1px] group-hover:border-[#FFFFFF] border-dotted border-[#2c2c2c] border-b-2" />
-                      </div>
-                    )}
-
-                    {isActive && (
-                      <div className="flex flex-col items-start gap-y-2 w-full h-auto pb-3">
-                        <span className="font-bold text-text-3 text-[16px]">
-                          Paso {step.step_number}
-                        </span>
-
-                        <p className="max-h-[200px] text-start text-[16px] text-text-4 h-auto overflow-y-auto">
-                          {step.description}
-                        </p>
-
-                        {step.estimated_time !== 0 && (
-                          <p className="font-bold">
-                            Tiempo estimado: {step.estimated_time} min
-                          </p>
-                        )}
-
-                        <div className="w-full min-w-[200px] flex flex-col justify-between mt-2">
-                          {step.image_url &&
-                            (type === "video" ? (
-                              <video
-                                controls
-                                preload="metadata"
-                                className="w-full h-auto rounded-md"
-                              >
-                                <source src={step.image_url} />
-                              </video>
-                            ) : type === "audio" ? (
-                              <audio controls className="w-full">
-                                <source src={step.image_url} />
-                              </audio>
-                            ) : (
-                              <a
-                                href={step.image_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full aspect-[5/3] overflow-hidden rounded-sm relative block"
-                              >
-                                <div
-                                  className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-50"
-                                  style={{
-                                    backgroundImage: `url(${step.image_url})`,
-                                  }}
-                                />
-                                <img
-                                  loading="lazy"
-                                  className="w-full h-full object-contain cursor-pointer relative z-10"
-                                  alt="Imagen del post"
-                                  src={step.image_url}
-                                />
-                              </a>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+              {sortedSteps.map(renderStepButton)}
             </div>
 
             {/** Buttons para pasar de step */}

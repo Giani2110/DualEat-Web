@@ -2,17 +2,18 @@ import type { ContentType, Post, PostComment } from "@/interface/global";
 import React, { useEffect } from "react";
 
 import { createVote } from "@services/vote.api";
-import toast from "react-hot-toast";
-import { MessageCircle } from "lucide-react";
+
+import { Link, MessageCircle } from "lucide-react";
 
 type Content = Post | PostComment;
 
 type PostActionsProps = {
   content: Content;
   type: ContentType;
+  copyToClipboard: () => void;
 };
 
-const PostActions = ({ content, type }: PostActionsProps) => {
+const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
   //const { mutate: vote } = useVote();
 
   const isVoteUP = content?.user_vote === "UP";
@@ -67,17 +68,12 @@ const PostActions = ({ content, type }: PostActionsProps) => {
             e.stopPropagation();
             handleVoteUp();
           }}
-          className={`flex items-center justify-center group p-0.5 rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-50 ${
+          className={`flex items-center justify-center group p-0.5 rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-200 ${
             isVoteUP ? "hover:bg-gray-400" : "hover:bg-gray-200"
           }`}
         >
           {isVoteUP ? (
-            <svg
-              height={size}
-              width={size}
-              viewBox="0 0 640 640"
-              className="block hover"
-            >
+            <svg height={size} width={size} viewBox="0 0 640 640">
               <path
                 fill={type === "POST" ? "#fff" : "#e5a657"}
                 d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM331.3 188.7L435.3 292.7C439.9 297.3 441.2 304.2 438.8 310.1C436.4 316 430.5 320 424 320L368 320L368 416C368 433.7 353.7 448 336 448L304 448C286.3 448 272 433.7 272 416L272 320L216 320C209.5 320 203.7 316.1 201.2 310.1C198.7 304.1 200.1 297.2 204.7 292.7L308.7 188.7C314.9 182.5 325.1 182.5 331.3 188.7z"
@@ -111,7 +107,7 @@ const PostActions = ({ content, type }: PostActionsProps) => {
             e.stopPropagation();
             handleVoteDown();
           }}
-          className={`flex items-center justify-center group p-0.5 rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-50 ${
+          className={`flex items-center justify-center group p-0.5 rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-200 ${
             isVoteDown ? "hover:bg-gray-400" : "hover:bg-gray-200"
           }`}
         >
@@ -135,20 +131,35 @@ const PostActions = ({ content, type }: PostActionsProps) => {
       </div>
 
       {type === "POST" && (
-        <button
-          type="button"
-          style={{
-            borderRadius: 999,
-            minHeight: styles.HEIGHT_BUTTON,
-          }}
-          className="flex flex-row items-center gap-x-2 px-4 border border-gray-300"
-        >
-          <MessageCircle size={18} color="#707070" />
+        <div className="flex flex-row items-center gap-x-2 w-full">
+          <button
+            type="button"
+            style={{
+              borderRadius: 999,
+              minHeight: styles.HEIGHT_BUTTON,
+            }}
+            className="flex flex-row items-center gap-x-2 px-4 border border-gray-300"
+          >
+            <MessageCircle size={18} color="#707070" />
 
-          <p className="text-[14px] font-bold text-text-4">
-            {content?.total_comments ?? 0}
-          </p>
-        </button>
+            <p className="text-[14px] font-bold text-text-4">
+              {content?.total_comments ?? 0}
+            </p>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard();
+            }}
+            style={{
+              borderRadius: 999,
+              minHeight: styles.HEIGHT_BUTTON,
+            }}
+            className="px-4 border hover:bg-[#3578e4] transition-all duration-200 group cursor-pointer border-gray-300"
+          >
+            <Link size={18} className="text-text-4 group-hover:text-[#fff]" />
+          </button>
+        </div>
       )}
     </section>
   );

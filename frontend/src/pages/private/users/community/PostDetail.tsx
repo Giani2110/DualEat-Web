@@ -1,22 +1,24 @@
 import { CommentItem } from "@/components/features/post/CommentItem";
 import PostCard from "@/components/features/post/PostCard";
 import Loader from "@/components/ui/feedback/Loader";
-import { useComment, usePostById } from "@/hooks/api/post/usePost";
+import {
+  useComment,
+  useCreateComment,
+  usePostById,
+  useUpdateComment,
+} from "@/hooks/api/post/usePost";
 import { useAuth } from "@/hooks/useAuth";
 import type { PostComment } from "@/interface/global";
-import { ArrowLeft, ChartBarIcon, Clock, ShoppingCart } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import type { PostCommentDTO } from "@/interface/global.dto";
+import { ArrowLeft, ChartBarIcon, Clock, ShoppingCart, X } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useInView } from "react-intersection-observer";
 import { useNavigate, useParams } from "react-router-dom";
 
-type Comment = Pick<
-  PostComment,
-  | "post_id"
-  | "parent_comment_id"
-  | "reply_to_user_id"
-  | "reply_to_user"
-  | "content"
->;
+type Comment = Partial<PostComment>;
+
+const MemoizedCommentItem = React.memo(CommentItem);
 
 export default function PostDetail() {
   const navigate = useNavigate();
@@ -24,14 +26,23 @@ export default function PostDetail() {
 
   const { post_id } = useParams<{ post_id: string }>();
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { mutate: createComment, isPending: isPendingCreateComment } =
+    useCreateComment(user!);
+
+  const { mutate: updateComment, isPending: isPendingUpdateComment } =
+    useUpdateComment();
+
   const { ref, inView } = useInView({
     rootMargin: "200px",
   });
 
-  const { data: post, isError, isLoading } = usePostById(post_id as string);
+  const { data: post, isLoading } = usePostById(post_id as string);
 
   const [comment, setComment] = useState<Comment>({
-    post_id: post?.id as string,
+    id: undefined,
+    post_id: post?.id,
     parent_comment_id: null,
     reply_to_user_id: null,
     reply_to_user: null,
@@ -54,13 +65,14 @@ export default function PostDetail() {
     );
   }, [commentsData]);
 
-  console.log("COMENTATIOS", commentsData);
-
   useEffect(() => {
     if (post) {
-      navigate(`/c/${post.community.slug}/p/${post.id}/${post.slug}`, {
+      navigate(`/p/${post.id}/${post.slug}`, {
         replace: true,
       });
+    } else if (!post && !isLoading) {
+      toast.error("El post no existe");
+      navigate(-1);
     }
   }, [post]);
 
@@ -69,6 +81,74 @@ export default function PostDetail() {
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  console.log("COMENTARIO", comment);
+
+  const handleAddComment = async () => {
+    if (comment.content?.trim() === "") return;
+
+    if (!user) {
+      toast.error("Usuario no autenticado");
+      return;
+    }
+
+    if (comment.id !== undefined) {
+      updateComment(
+        {
+          comment_id: comment.id,
+          content: comment.content as string,
+        },
+        {
+          onSuccess: (data) => {
+            toast.success(
+              data.message || "Comentario actualizado exitosamente",
+            );
+            setComment({
+              id: undefined,
+              post_id: post?.id,
+              parent_comment_id: null,
+              reply_to_user_id: null,
+              reply_to_user: null,
+              content: "",
+            });
+          },
+          onError: (err: any) => {
+            toast.error(err?.message || "Error al actualizar el comentario");
+          },
+        },
+      );
+    } else {
+      const dto: PostCommentDTO = {
+        post_id: post?.id as string,
+        parent_comment_id: comment.parent_comment_id || null,
+        reply_to_user_id: comment.reply_to_user_id || null,
+        content: comment.content as string,
+      };
+
+      createComment(
+        {
+          variables: dto,
+          reply_to_user: comment.reply_to_user || null,
+        },
+        {
+          onSuccess: (data) => {
+            toast.success(data.message || "Comentario añadido exitosamente");
+            setComment({
+              id: undefined,
+              post_id: post?.id,
+              parent_comment_id: null,
+              reply_to_user_id: null,
+              reply_to_user: null,
+              content: "",
+            });
+          },
+          onError: (e: any) => {
+            toast.error(e?.message || "Error al agregar el comentario");
+          },
+        },
+      );
+    }
+  };
 
   const recipeStats = [
     {
@@ -88,8 +168,15 @@ export default function PostDetail() {
     },
   ];
 
+  const isPending = isPendingCreateComment || isPendingUpdateComment;
+
+  const isOwner = useMemo(() => {
+    if (!user || !post) return false;
+    return user.id === post.user_id;
+  }, [user, post]);
+
   return (
-    <main className="h-full px-8 mx-auto flex flex-wrap flex-row gap-8 my-5">
+    <main className="h-full px-2 md:px-8 mx-auto flex flex-wrap flex-row gap-8 my-5">
       <section
         style={{ flex: 2 }}
         className="flex flex-row flex-wrap lg:flex-nowrap gap-4"
@@ -108,64 +195,114 @@ export default function PostDetail() {
         </button>
 
         {post && (
-          <div className="flex flex-col gap-y-8">
+          <div className="flex w-full flex-col gap-y-8">
             <div>
               <PostCard post={post} type="POST" />
             </div>
 
             {/** INPUT MESSAGE */}
-            <div className="flex flex-row items-center border border-gray-200 rounded-full px-3 py-1 gap-x-1">
-              <img
-                src={
-                  user?.avatar_url ||
-                  "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
-                }
-                className="rounded-full w-8 h-8"
-                alt="Avatar"
-              />
+            <div className="flex flex-col gap-y-3">
+              {comment.reply_to_user && (
+                <div className="flex flex-row items-center gap-2 justify-between">
+                  <span className="text-text-5 text-sm">
+                    Respondiendo a @
+                    {comment.reply_to_user ? comment.reply_to_user?.name : ""}
+                  </span>
 
-              <input
-                placeholder={
-                  comment.reply_to_user
-                    ? `@${comment.reply_to_user?.name}`
-                    : "Añade un comentario..."
-                }
-                value={comment?.content}
-                onChange={(e) => {
-                  setComment({ ...comment, content: e.target.value });
-                }}
-                className="text-text-5 rounded-full outline-none p-2"
-                style={{
-                  fontSize: 14,
-                  flex: 1,
-                }}
-              />
+                  <button
+                    type="button"
+                    className="p-1 rounded-full cursor-pointer hover:bg-gray-100"
+                    onClick={() => {
+                      setComment({
+                        post_id: post.id,
+                        parent_comment_id: null,
+                        reply_to_user_id: null,
+                        reply_to_user: null,
+                        content: "",
+                      });
+                    }}
+                  >
+                    <X size={16} color="#2F2F2F" />
+                  </button>
+                </div>
+              )}
+              <div className="flex flex-col md:flex-row justify-between items-end md:items-center border border-gray-200 rounded-[5px] md:rounded-full px-3 py-1 gap-2.5">
+                <div className="flex flex-row items-center justify-start w-full gap-x-2">
+                  <img
+                    src={
+                      user?.avatar_url ||
+                      "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
+                    }
+                    className="rounded-full w-8 h-8"
+                    alt="Avatar"
+                  />
 
-              <button
-                // onClick={handleAddComment}
-                disabled={!comment?.content?.trim()}
-                className="rounded-full px-3 py-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-bg-semi-black"
-              >
-                <span className="text-[14px] text-center text-text-1 font-bold">
-                  Responder
-                </span>
-              </button>
+                  <input
+                    ref={inputRef}
+                    placeholder={
+                      comment.reply_to_user
+                        ? `@${comment.reply_to_user?.name}`
+                        : "Añade un comentario..."
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleAddComment();
+                      }
+                    }}
+                    value={comment?.content}
+                    onChange={(e) => {
+                      setComment({ ...comment, content: e.target.value });
+                    }}
+                    className="text-text-5 rounded-full outline-none p-2"
+                    style={{
+                      fontSize: 14,
+                      flex: 1,
+                      flexGrow: 1,
+                    }}
+                  />
+                </div>
+
+                <button
+                  onClick={() => handleAddComment()}
+                  disabled={isPending || !comment?.content?.trim()}
+                  className="rounded-full px-3 py-1 flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-bg-semi-black"
+                >
+                  {isPending && <Loader size={16} color="#fff" />}
+                  <span className="text-sm text-center text-text-1 font-medium">
+                    {isPending ? "Enviando..." : "Responder"}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* COMMENTS */}
             {comments.map((comment) => (
-              <CommentItem
+              <MemoizedCommentItem
                 key={comment.id}
                 item={comment}
                 setComment={setComment}
+                user={user!}
+                isOwner={isOwner}
+                inputRef={inputRef}
               />
             ))}
+
+            {/* Sentinel */}
+            <div
+              ref={ref}
+              className="w-full flex items-center py-4 gap-3 justify-center"
+              aria-hidden="true"
+            >
+              {(isFetchingNextPage || isFetching) && (
+                <Loader color="#e5a657" size={18} />
+              )}
+            </div>
           </div>
         )}
       </section>
 
-      <section className="hidden lg:flex" style={{ flex: 1 }}>
-        {post?.recipe && (
+      {post?.recipe && (
+        <section className="hidden lg:block" style={{ flex: 1 }}>
           <aside className="flex flex-col gap-y-2">
             <h1 className="text-[20px] font-bold text-text-3 tracking-tight">
               {post.recipe.name}
@@ -209,82 +346,8 @@ export default function PostDetail() {
               ))}
             </div>
           </aside>
-        )}
-      </section>
-      {/* Sentinel */}
-      <div
-        ref={ref}
-        className="w-full flex items-center py-4 gap-3 justify-center"
-        aria-hidden="true"
-      >
-        {isFetchingNextPage && <Loader color="#e5a657" size={18} />}
-      </div>
+        </section>
+      )}
     </main>
   );
-}
-
-{
-  /*
-{post?.image_urls && post.image_urls.length > 0 ? (
-            <div className=" aspect-[6/4] mt-3 overflow-hidden rounded-[15px] relative">
-              <div
-                className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-50"
-                style={{
-                  backgroundImage: `url(${post?.image_urls[0]})`,
-                }}
-              />
-
-              <img
-                className="w-full h-full object-contain cursor-pointer relative z-10"
-                alt="Imagen del post"
-                src={post?.image_urls[0]}
-              />
-
-              {post?.image_urls.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    //onClick={prevImage}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center cursor-pointer justify-center transition-colors duration-200"
-                    title="Imagen anterior"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  <button
-                    type="button"
-                    //onClick={nextImage}
-                    className="absolute cursor-pointer right-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors duration-200"
-                    title="Siguiente imagen"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </button>
-                </>
-              )}
-            </div>
-            */
 }

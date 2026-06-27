@@ -1,21 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsUpDown,
-  ImagePlus,
-  SquareCheckBig,
-  SquareDashed,
-  Trash2,
-} from "lucide-react";
+import { ChevronsUpDown, SquareCheckBig, SquareDashed } from "lucide-react";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { createPost } from "@/services/post.api";
+import { createPost, upload } from "@/services/post.api";
 
 import toast from "react-hot-toast";
 
@@ -28,14 +20,19 @@ import { pickMedia } from "@/utils/media";
 import { usePostCreateStore } from "@/context/store/usePostCreate";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
+import ImagesCarousel from "@/components/shared/ImagesCarousel";
+import { getMimeTypeFromUrl } from "@/utils/capitalize";
+import { useMutation } from "@tanstack/react-query";
+import Loader from "@/components/ui/feedback/Loader";
+import CommunitySearch from "@/components/features/create/post/CommunitySearch";
 
 const customCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 
   .ProseMirror p {
-    font-family: 'Dosis', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    color: #2F2F2F;
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    color: #4A4947;
     line-height: 1.5;
     margin-top: 0;
   }
@@ -43,8 +40,8 @@ const customCSS = `
   .ProseMirror p.is-empty:first-child::before {
     content: attr(data-placeholder);
     color: #707070; 
-    font-size: 16px;
-    font-family: 'Dosis', sans-serif;
+    font-size: 15px;
+    font-family: 'Outfit', sans-serif;
     pointer-events: none;
     height: 0;
     float: left;
@@ -78,7 +75,7 @@ const customCSS = `
     font-weight: 700;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
-    font-family: 'Dosis', sans-serif;
+    font-family: 'Outfit', sans-serif;
   }
 
   .ProseMirror strong {
@@ -91,19 +88,33 @@ const customCSS = `
 `;
 
 export default function CreatePost() {
+  const navigate = useNavigate();
+  const { post, setPost, clearPost } = usePostCreateStore();
+
   const fileInputRef = useRef<any>(null);
 
-  const navigate = useNavigate();
-  const { setPost } = usePostCreateStore();
+  const isEditing = useMemo(() => post.id !== "", [post.id]);
 
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
+  const [title, setTitle] = useState<string>(post?.title || "");
+  const [content, setContent] = useState<string>(post?.content || "");
 
-  const [images, setImages] = useState<UploadableFile[]>([]);
-  const [video, setVideo] = useState<UploadableFile | null>(null);
+  const [image_urls, setImageUrls] = useState<UploadableFile[]>(() => {
+    return (post?.image_urls || []).map((item) => {
+      if (typeof item === "string") {
+        return {
+          file: null as any,
+          uri: item,
+        };
+      }
+      return item;
+    });
+  });
 
-  const [community, setCommunity] = useState<Community | null>(null);
+  const [community, setCommunity] = useState<Community | null>(
+    post?.community || null,
+  );
 
+  const [open, setOpen] = useState<boolean>(false);
   const [withRecipe, setWithRecipe] = useState(false);
 
   const editor = useEditor({
@@ -114,7 +125,7 @@ export default function CreatePost() {
         placeholder: "Empieza a escribir...",
       }),
     ],
-
+    content: post?.content || "",
     onUpdate: ({ editor }) => {
       setContent(editor.getHTML());
     },
@@ -124,20 +135,6 @@ export default function CreatePost() {
       },
     },
   });
-
-  // SEPARAR
-  const [index, setIndex] = useState<number>(0);
-
-  const remove = useCallback(
-    (index: number, type: "image" | "video") => {
-      if (type === "image") {
-        setImages(images.filter((_, i) => i !== index));
-      } else {
-        setVideo(null);
-      }
-    },
-    [images],
-  );
 
   useEffect(() => {
     if (editor) {
@@ -151,36 +148,63 @@ export default function CreatePost() {
     }
   }, [editor]);
 
+  const { mutate: mutatePost, isPending } = useMutation({
+    mutationFn: (data: PostDTO) => {
+      return toast.promise(
+        (async () => {
+          const res = await createPost(data);
+          if (!res.success) {
+            throw new Error(res.message || "Error al crear el post");
+          }
+          return res;
+        })(),
+
+        {
+          loading: isEditing ? "Actualizando post..." : "Creando post...",
+          success: (res) =>
+            res.message ||
+            (isEditing
+              ? "Post actualizado exitosamente"
+              : "Post creado exitosamente"),
+
+          error: (res) =>
+            res.message ||
+            (isEditing
+              ? "Error al actualizar el post"
+              : "Error al crear el post"),
+        },
+      );
+    },
+    onSuccess: (res) => {
+      clearPost();
+      navigate(ROUTES.USER.POST(res.data?.id as string, res.data?.slug || ""));
+    },
+  });
+
   const handleFiles = (files: File[], type: "image" | "video") => {
     const media = pickMedia(files, type);
     if (media.length === 0) return;
 
+    const hasVideo = !!video;
+    const imageCount = onlyImages.length;
+
     if (type === "image") {
-      if (images.length >= 10 || video !== null) return;
-      setImages((prev) => [...prev, ...media]);
+      if (imageCount >= 10 || hasVideo) return;
+      setImageUrls((prev) => [...prev, ...media]);
     } else if (type === "video") {
-      if (images.length > 0) return;
-      setVideo(media[0]);
-    }
-  };
-
-  const handleNextImage = () => {
-    if (index < images.length - 1) {
-      setIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }
-  };
-
-  const handlePrevImage = () => {
-    if (index > 0) {
-      setIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+      if (imageCount > 0 || hasVideo) return;
+      setImageUrls((prev) => [...prev, media[0]]);
     }
   };
 
   const handleSubmit = async () => {
-    // TODO: Toast
-
     if (!content || content === "<p></p>" || !title) {
-      console.log("El editor está vacío");
+      toast.error("Título o descripción vacío");
+      return;
+    }
+
+    if (!community) {
+      toast.error("Comunidad no seleccionada");
       return;
     }
 
@@ -188,29 +212,69 @@ export default function CreatePost() {
       const post: PostDTO = {
         title: title,
         content: content,
-        image_urls: images
-          ? images.map((image) => image)
-          : video
-            ? [video]
-            : [],
-        community_id: community?.id || null,
+        image_urls: image_urls,
+        community: community,
       };
 
+      toast.loading("Navegando a crear receta");
       setPost(post);
-
-      console.log("POST", JSON.stringify(post, null, 2));
-
+      toast.dismiss();
       navigate(ROUTES.USER.CREATE_RECIPE);
+    } else {
+      const files = image_urls;
+
+      let urls: string[] = [];
+
+      if (files.length > 0) {
+        const uploadPayload = { post_images: files };
+
+        const response = await upload(uploadPayload);
+
+        if (response?.success && response?.data) {
+          urls = response.data.post_images || [];
+        }
+      }
+
+      const post: PostDTO = {
+        id: isEditing ? usePostCreateStore.getState().post.id : undefined,
+        title: title,
+        content: content,
+        image_urls: urls,
+        community: community,
+      };
+
+      mutatePost(post);
     }
   };
 
+  const removeFile = (index: number) => {
+    const newImages = image_urls.filter((_, i) => i !== index);
+    setImageUrls(newImages);
+  };
+
+  const video =
+    image_urls.find((item) => {
+      return item.file
+        ? item.file.type.startsWith("video/")
+        : getMimeTypeFromUrl(item.uri) === "video";
+    }) || null;
+
+  const onlyImages = image_urls.filter((item) => {
+    return item.file
+      ? !item.file.type.startsWith("video/")
+      : getMimeTypeFromUrl(item.uri) !== "video";
+  });
+
   return (
-    <section className="flex flex-col gap-y-6 mt-8 w-[90%] mx-auto">
-      <h1 className="text-[28px] text3 tracking-tight font-bold">Crear post</h1>
+    <main className="h-full mx-auto flex flex-col px-6 md:px-16 gap-y-6 my-5 bg-bg-semi-white">
+      <h1 className="text-[28px] text3 tracking-tight font-bold">
+        {isEditing ? "Editar post" : "Crear post"}
+      </h1>
 
       <div className="flex flex-row items-center gap-x-2">
         <button
           type="button"
+          onClick={() => setOpen(!open)}
           className="flex items-center gap-x-2.5 bgsemi-white border border-[#e5a657] px-4 py-2 rounded-full cursor-pointer w-fit"
         >
           <img
@@ -218,8 +282,8 @@ export default function CreatePost() {
               (community && community.image_url) ||
               "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
             }
-            alt=""
-            className="w-5 h-5 rounded-full"
+            alt="Imagen de la comunidad"
+            className="w-5 h-5 rounded-full object-cover"
           />
           <span className="text-[14px] text4 tracking-tight">
             {(community && community.name) || "Seleccionar comunidad"}
@@ -229,7 +293,9 @@ export default function CreatePost() {
         </button>
         <button
           onClick={() => setWithRecipe(!withRecipe)}
-          className={`flex cursor-pointer flex-row border items-center justify-between px-4 gap-x-2 py-2 rounded-full cursor-pointer  ${withRecipe ? "border-[#e5a657]" : "border-dashed border-[#dbdbdb]"}`}
+          className={`flex cursor-pointer flex-row border items-center justify-between px-4 gap-x-2 py-2 rounded-full cursor-pointer 
+            ${withRecipe ? "border-[#e5a657]" : "border-dashed border-[#dbdbdb]"}
+            ${isEditing && "hidden"}`}
         >
           <div className="flex flex-row items-center gap-x-3">
             <svg
@@ -266,114 +332,40 @@ export default function CreatePost() {
       >
         <div className="relative">
           <input
+            id="post-title"
             type="text"
-            placeholder="Título"
-            className="peer w-full border text-[14px] text5 px-4 pb-2 pt-6 rounded-[20px] border-[#dbdbdb] placeholder-transparent focus:outline-none focus:border-[#e5a657] focus:border-2"
+            placeholder="Título*"
+            value={title}
+            className="w-full border font-semibold text-base text-text-5 px-4 py-3 rounded-[10px] outline-none border-[#dbdbdb] focus:border-[#e5a657] focus:border-2"
             onChange={(e) => setTitle(e.target.value)}
             maxLength={300}
             required
           />
-          <label
-            htmlFor="title"
-            className={`absolute left-4 text4 tracking-wide cursor-text transition-all duration-300 ${
-              title
-                ? "top-2 text-[14px] peer-focus:top-2 peer-focus:text-[12px]"
-                : "top-4 text-[16px] peer-focus:top-2 peer-focus:text-[12px]"
-            }`}
-          >
-            Título
-            <span className="text-red">*</span>
-          </label>
         </div>
 
-        {/* PREVIEW DE IMÁGENES CON SLIDER */}
-        {images.length > 0 && (
-          <div className="flex justify-center items-center aspect-[12/2] mt-3 overflow-hidden rounded-[15px] relative group">
-            <button
-              type="button"
-              disabled={images.length >= 10}
-              className={`absolute top-4 left-4 bgsemi-black border border-gray-200 rounded-full px-2 py-1 flex flex-row items-center gap-x-2 z-10 ${images.length >= 10 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-              onClick={(e) => {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }}
-            >
-              <ImagePlus size={16} color="#fff" />
-              <p className="text-text-1 text-[13px]">Agregar</p>
-            </button>
-
-            <button
-              onClick={() => remove(index, "image")}
-              className="absolute top-4 right-4 cursor-pointer bgsemi-black border border-gray-200 rounded-full p-1.5 z-10"
-            >
-              <Trash2 size={16} color="white" />
-            </button>
-
-            {/* BOTÓN ANTERIOR (Agregado left-4) */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePrevImage();
-              }}
-              className={`absolute left-4 top-1/2 bg-[#2F2F2F] p-1 rounded-full -translate-y-1/2 z-50 cursor-pointer hover:scale-110 transition duration-200 ${
-                index === 0 ? "hidden" : "block"
-              }`}
-            >
-              <ChevronLeft size={30} color="#fff" />
-            </button>
-
-            {/* BOTÓN SIGUIENTE */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNextImage();
-              }}
-              className={`absolute right-4 top-1/2 bg-[#2F2F2F] p-1 rounded-full -translate-y-1/2 z-50 cursor-pointer hover:scale-110 transition duration-200 ${
-                index === images.length - 1 ? "hidden" : "block"
-              }`}
-            >
-              <ChevronRight size={24} color="#fff" />
-            </button>
-
-            <div
-              className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-50"
-              style={{
-                backgroundImage: `url(${images[index].uri})`,
-              }}
-            />
-            <img
-              className="relative z-10 max-w-full max-h-full object-contain shadow-lg"
-              alt="Imagen subida"
-              src={images[index].uri}
-            />
-          </div>
-        )}
-
-        {video && (
-          <div className="flex justify-center items-center aspect-[12/2] mt-3 overflow-hidden rounded-[15px] relative group">
-            <video
-              src={video.uri}
-              className="w-full h-full object-cover"
-              controls
-            />
-          </div>
+        {/* PREVIEW DE IMÁGENES */}
+        {image_urls.length > 0 && (
+          <ImagesCarousel
+            media={image_urls}
+            add={isEditing ? undefined : () => fileInputRef.current?.click()}
+            remove={isEditing ? undefined : (index) => removeFile(index)}
+          />
         )}
 
         {/* INPUT CONTENIDO */}
-        <div className="border border-[#dbdbdb] focus-within:border-[#e5a657] focus-within:border-2 rounded-[20px] overflow-hidden flex flex-col resize-y min-h-[100px] max-h-[250px]">
+
+        <div className="border border-[#dbdbdb] focus-within:border-[#e5a657] focus-within:border-2 rounded-[10px] overflow-hidden flex flex-col resize-y min-h-[100px] max-h-[400px]">
           <CustomToolbar
             editor={editor}
-            images={images}
+            images={onlyImages}
             video={video}
-            handleFiles={handleFiles}
+            handleFiles={isEditing ? undefined : handleFiles}
           />
 
           <div className="flex-grow overflow-y-auto">
             <EditorContent
               editor={editor}
-              className="cursor-text h-full outline-none text-[16px]"
+              className="cursor-text h-full outline-none text-base"
               onClick={() => {
                 editor?.commands.focus();
               }}
@@ -400,32 +392,33 @@ export default function CreatePost() {
         <div className="flex justify-end">
           <button
             type="submit"
-            className={`flex items-center px-4 py-1.5 font-bold rounded-full text-[16px] ${
-              !content || !title
-                ? "cursor-not-allowed opacity-50 bg-gray text3"
-                : "pointer-events-auto cursor-pointer opacity-100 bg-yellow hover:bg-[#05357e] text1"
+            disabled={isPending || !content || !title}
+            className={`flex items-center px-4 py-1.5 font-bold bg-bg-semi-black rounded-full text-base gap-x-2 ${
+              isPending || !content || !title
+                ? "cursor-not-allowed opacity-50 text-text-1"
+                : "pointer-events-auto cursor-pointer hover:bg-[#4A4947] text-text-1"
             }`}
           >
-            {withRecipe ? "Siguiente" : "Publicar"}
+            {isPending && <Loader size={16} color="#fff" />}
+
+            {isPending
+              ? isEditing
+                ? "Guardando..."
+                : "Publicando..."
+              : withRecipe
+                ? "Siguiente"
+                : "Publicar"}
           </button>
         </div>
       </form>
-    </section>
+
+      {open && (
+        <CommunitySearch
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          setCommunity={setCommunity}
+        />
+      )}
+    </main>
   );
 }
-
-/** <a
-              href={images[index].uri}
-              target="_blank"
-              onClick={(e) => e.stopPropagation()}
-              rel="noopener noreferrer"
-              // Cambiamos w-full h-full por max-w-full max-h-full
-              className="  max-w-full max-h-full flex"
-            >
-              <img
-                // También cambiamos w-full h-full acá por max-w-full max-h-full
-                className="relative z-10 max-w-full max-h-full object-contain cursor-pointer shadow-lg"
-                alt="Imagen subida"
-                src={images[index].uri}
-              />
-            </a> */

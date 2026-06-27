@@ -11,12 +11,15 @@ import {
   type NutritionData,
 } from "@/interface/global";
 import type {
+  PostDTO,
   RecipeDTO,
   RecipeIngredientDTO,
   RecipeStepDTO,
   UploadableFile,
+  UploadPayload,
 } from "@/interface/global.dto";
 import { capitalize } from "@/utils/capitalize";
+import { pickMedia } from "@/utils/media";
 import {
   ChartBarIcon,
   Clock,
@@ -27,6 +30,11 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { createPost, upload } from "@/services/post.api";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/api/constants/constants";
+import toast from "react-hot-toast";
 
 type RecipePartial = Omit<RecipeDTO, "ingredients" | "steps">;
 
@@ -34,6 +42,8 @@ type StepsPartial = { id: string } & RecipeStepDTO;
 
 export default function CreateRecipe() {
   const { post, clearPost } = usePostCreateStore();
+
+  console.log(post);
 
   const [nutrition, setNutrition] = useState<NutritionData | null>(null);
 
@@ -43,6 +53,8 @@ export default function CreateRecipe() {
   const { data, isLoading } = useIngredients(true);
 
   const indexIngredient = useRef<number | null>(null);
+  const indexStep = useRef<number | null>(null);
+
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [ingredients, setIngredients] = useState<RecipeIngredientDTO[]>([
@@ -60,7 +72,6 @@ export default function CreateRecipe() {
       step_number: 1,
       description: "",
       estimated_time: null,
-      image_url: "",
     },
   ]);
 
@@ -75,15 +86,125 @@ export default function CreateRecipe() {
     main_image: "",
   });
 
-  const [instructionFiles, setInstructionFiles] = useState<
-    Record<string, File>
-  >({});
+  useEffect(() => {
+    setRecipe((prev) => ({ ...prev, total_time: total }));
+  }, [total]);
+
+  useEffect(() => {
+    if (post.title === "" || post.content === "" || !post.community) {
+      navigate(ROUTES.USER.CREATE_POST);
+    }
+  }, [post]);
+
+  const handleFiles = (
+    files: File[],
+    type: "image" | "video",
+    selected: "main_image" | "step",
+  ) => {
+    const media = pickMedia(files, type);
+    if (media.length === 0) return;
+
+    if (selected === "main_image") {
+      setRecipe({ ...recipe, main_image: media[0] });
+    } else if (selected === "step") {
+      setSteps((prev) =>
+        prev.map((item, i) =>
+          i === indexStep.current ? { ...item, image_url: media[0] } : item,
+        ),
+      );
+    }
+  };
 
   const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [filePreviews, setFilePreviews] = useState<string[]>([]);
 
-  const handleSubmit = async () => {};
+  const navigate = useNavigate();
+
+  const { mutate: submitRecipe, isPending: isSubmitting } = useMutation({
+    mutationFn: async () => {
+      const uploadPayload: UploadPayload = {
+        post_images: post.image_urls as UploadableFile[],
+        main_image: recipe.main_image as UploadableFile,
+      };
+
+      const response = await upload(uploadPayload);
+
+      if (!response.success) {
+        toast.error(response.message || "Error al subir los archivos");
+        return;
+      }
+
+      const urls = response.data;
+
+      const postDTO: PostDTO = {
+        title: post.title.trim(),
+        content: post.content.trim(),
+        image_urls: urls?.post_images || [],
+        community: post.community,
+      };
+
+      const recipeDTO: RecipeDTO = {
+        name: recipe.name.trim(),
+        description: recipe.description.trim(),
+        total_time: recipe.total_time,
+        main_image: urls?.main_image || "",
+        ingredients: ingredients.map((ingredient) => {
+          return {
+            ...ingredient,
+            ingredient_id: Number(ingredient.ingredient?.id),
+            notes: ingredient.notes?.trim() || "",
+          };
+        }),
+        steps: steps.map((step): RecipeStepDTO => {
+          return {
+            ...step,
+            description: step.description.trim(),
+          };
+        }),
+      };
+
+      const createResponse = await createPost(postDTO, recipeDTO);
+
+      return createResponse;
+    },
+    onMutate: () => {
+      toast.loading("Publicando receta...");
+    },
+    onSuccess: (res) => {
+      toast.dismiss();
+      toast.success(res?.message || "Receta publicada exitosamente");
+      clearPost();
+      navigate(
+        ROUTES.USER.POST(res?.data?.id as string, res?.data?.slug as string),
+      );
+    },
+    onError: (err: any) => {
+      toast.dismiss();
+      toast.error(err.message || "Error al publicar la receta");
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!recipe.name || !recipe.description || !recipe.main_image) {
+      toast.error("Faltan datos en la receta");
+      return;
+    }
+
+    if (
+      ingredients.some(
+        (ingredient) =>
+          !ingredient.ingredient || !ingredient.quantity || !ingredient.unit,
+      )
+    ) {
+      return;
+    }
+
+    if (steps.some((step) => !step.description)) {
+      toast.error("Faltan datos en los pasos");
+      return;
+    }
+
+    submitRecipe();
+  };
 
   const sections = useMemo(() => {
     switch (type) {
@@ -177,8 +298,11 @@ export default function CreateRecipe() {
 
     const invalidStep = steps.some((step) => !step.description.trim());
 
-    return invalidIngredient || invalidStep;
-  }, [ingredients, steps]);
+    const invalidRecipe =
+      !recipe.name.trim() || !recipe.description.trim() || !recipe.main_image;
+
+    return invalidIngredient || invalidStep || invalidRecipe;
+  }, [ingredients, steps, recipe]);
 
   useEffect(() => {
     if (!ingredients) return;
@@ -259,11 +383,8 @@ export default function CreateRecipe() {
     });
   }, [ingredients]);
 
-  console.log("NUTRICION", nutrition);
-  console.log("INGREDIENTES", ingredients);
-
   return (
-    <main className="flex flex-col md:flex-row gap-6 my-5 w-[90%] mx-auto">
+    <main className="h-full mx-auto flex flex-col md:flex-row px-6 md:px-16 gap-8 py-5 bg-bg-semi-white">
       <form
         action={() => {
           handleSubmit();
@@ -289,9 +410,9 @@ export default function CreateRecipe() {
 
         {!recipe.main_image ? (
           <div
-            className={`flex items-center justify-center border min-h-[200px]  border-dashed rounded-[10px] text-center bg-gray-50 ${
+            className={`flex items-center justify-center border transition-all duration-300 min-h-[200px] border-dashed rounded-[10px] text-center bg-gray-50 ${
               isDragOver
-                ? "border-[#e5a657] bg-orange-50"
+                ? "border-bg-yellow scale-105"
                 : "border-[#dbdbdb] hover:border-[#e5a657]"
             }`}
             onDragOver={(e) => {
@@ -303,7 +424,7 @@ export default function CreateRecipe() {
               e.preventDefault();
               setIsDragOver(false);
               const files = Array.from(e.dataTransfer.files);
-              //handleRecipeImage(files);
+              handleFiles(files, "image", "main_image");
             }}
           >
             <div className="flex flex-col items-center gap-3">
@@ -329,14 +450,14 @@ export default function CreateRecipe() {
               aria-label="file-input"
               ref={imageInputRef}
               type="file"
-              accept="image/*"
-              multiple
+              accept="image/jpeg, image/png, image/webp, image/jpg"
               className="hidden"
               onChange={(e) => {
-                const files = e.target.files;
-                if (files) {
-                  //handleRecipeImage(Array.from(files));
-                }
+                handleFiles(
+                  e.target.files ? Array.from(e.target.files) : [],
+                  "image",
+                  "main_image",
+                );
               }}
             />
           </div>
@@ -354,9 +475,9 @@ export default function CreateRecipe() {
                   setRecipe((prev) => ({ ...prev, main_image: "" }))
                 }
                 title="Eliminar Imagen"
-                className="absolute bottom-4 right-4 z-10 backdrop-blur-xs border-1 border-white p-2 rounded-[10px] cursor-pointer"
+                className="absolute bottom-4 right-4 z-10 backdrop-blur-sm hover:scale-105 transition-all duration-200 border-2 border-bg-red p-2 rounded-[10px] cursor-pointer"
               >
-                <Trash2 fill="#b53325" className="w-6 h-6 text-white" />
+                <Trash2 color="#B53325" className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -371,14 +492,14 @@ export default function CreateRecipe() {
                 {stat.text}
               </span>
               {index !== recipeStats.length - 1 && (
-                <span className="text-[18px]">•</span>
+                <span className="text-lg">•</span>
               )}
             </div>
           ))}
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-[20px] font-bold text-text-5">Descripción</h2>
+          <h2 className="text-xl font-bold text-text-5">Descripción</h2>
 
           <textarea
             aria-label="Descripción de la receta"
@@ -499,7 +620,6 @@ export default function CreateRecipe() {
                           step_number: steps.length + 1,
                           description: "",
                           estimated_time: null,
-                          image_url: "",
                         },
                       ]);
                     } else {
@@ -519,10 +639,14 @@ export default function CreateRecipe() {
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isSubmitDisabled}
-            className="flex items-center px-4 py-1.5 font-bold rounded-full text-[16px] cursor-not-allowed opacity-50 bg-gray text3"
+            disabled={isSubmitDisabled || isSubmitting}
+            className={`flex items-center px-4 py-1.5 font-bold rounded-full text-[16px] transition-all duration-200 ${
+              isSubmitDisabled || isSubmitting
+                ? "cursor-not-allowed opacity-50 bg-gray-200 text-gray-400"
+                : "cursor-pointer bg-bg-semi-black text-text-1 hover:bg-[#4A4947]"
+            }`}
           >
-            Publicar
+            {isSubmitting ? "Publicando..." : "Publicar"}
           </button>
         </div>
       </form>
@@ -533,13 +657,9 @@ export default function CreateRecipe() {
       </aside>
 
       {open && (
-        <div
-          style={{ zIndex: 999 }}
-          className="fixed inset-0 flex h-screen w-screen"
-        >
+        <div style={{ zIndex: 999 }} className="fixed inset-0">
           <div
-            style={{ flex: 3 }}
-            className="bg-black/40"
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300"
             onClick={() => {
               setOpen(false);
             }}
@@ -547,7 +667,7 @@ export default function CreateRecipe() {
 
           <aside
             style={{ zIndex: 1000 }}
-            className="bg-bg-semi-white border-l border-gray-400 shadow-xl shadow-gray-200 overflow-y-auto p-4 flex flex-col gap-y-3"
+            className="absolute right-0 top-0 h-full w-[85vw] sm:w-[400px] bg-bg-semi-white py-3 px-6 border-l border-gray-300 shadow-2xl overflow-y-auto flex flex-col gap-y-3 animate-in slide-in-from-right duration-300"
           >
             <header className="flex flex-row gap-x-4 justify-start items-center">
               <button

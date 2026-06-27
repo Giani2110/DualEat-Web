@@ -8,6 +8,13 @@ import { ROUTES } from "@/api/constants/constants";
 import { getShortTimeAgo } from "@/utils/date";
 
 import DOMPurify from "dompurify";
+import ImagesCarousel from "@/components/shared/ImagesCarousel";
+import type { UploadableFile } from "@/interface/global.dto";
+import { useMyCommunities } from "@/hooks/api/community/useCommunity";
+import { useState } from "react";
+import { useDeletePost } from "@/hooks/api/post/usePost";
+import toast from "react-hot-toast";
+import { usePostCreateStore } from "@/context/store/usePostCreate";
 
 interface PostCardProps {
   post: Post;
@@ -28,18 +35,17 @@ const stripHTMLTags = (str: string) => {
 const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
   const { user } = useAuth();
 
+  const { data: myCommunities } = useMyCommunities();
+  const { mutate: deletePost } = useDeletePost();
+
+  const { setPost } = usePostCreateStore();
+
   const navigate = useNavigate();
 
   const handleNavigate = (type: "POST" | "RECIPE" | "COMMUNITY") => {
     switch (type) {
       case "POST":
-        navigate(
-          ROUTES.USER.POST(
-            post.community?.slug || "",
-            post.id || "",
-            post.slug || "",
-          ),
-        );
+        navigate(ROUTES.USER.POST(post.id || "", post.slug || ""));
         break;
 
       case "RECIPE":
@@ -57,77 +63,182 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
     }
   };
 
+  const [open, setOpen] = useState(false);
+
+  const isPostCreator = post.user_id === user?.id || post.user?.id === user?.id;
+
+  const isCreator = post.community?.creator_id === user?.id;
+
+  const isModerator =
+    myCommunities?.some(
+      (member) =>
+        member.community_id === post.community_id && member.is_moderator,
+    ) || false;
+
+  const canEdit = isPostCreator;
+  const canDelete = isPostCreator || isCreator || isModerator;
+
+  const copyToClipboard = () => {
+    toast.success("Enlace copiado al portapapeles");
+    navigator.clipboard.writeText(
+      `${window.location.host}/c/${post.community?.slug}/p/${post.id}/${post.slug}`,
+    );
+  };
+
+  const handleDelete = () => {
+    deletePost(
+      {
+        post_id: post.id,
+        community_id: post.community_id,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Post eliminado exitosamente");
+        },
+        onError: () => {
+          toast.error("Error al eliminar el post");
+        },
+      },
+    );
+  };
+
   return (
     <article
       key={post.id}
-      onClick={(e) => {
+      onClick={() => {
         if (type === "POST") return;
-        e.stopPropagation();
         handleNavigate("POST");
       }}
-      className={`flex flex-row gap-x-3 ${padding} ${type !== "POST" && "cursor-pointer hover:bg-gray-100/80"} transition-colors duration-200`}
+      className={`flex flex-wrap flex-col gap-y-3 ${padding} ${type !== "POST" && "cursor-pointer hover:bg-gray-100/80"} transition-colors duration-200`}
     >
-      <img
-        src={
-          type === "COMMUNITY"
-            ? post.user?.avatar_url
-            : post.community?.image_url ||
-              "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
-        }
-        className="max-w-9 max-h-9 w-full h-full rounded-full object-cover"
-        alt="Imagen de perfil"
-      />
+      <header className="flex flex-col-reverse md:flex-row items-center justify-between w-full">
+        <div className="w-full flex flex-col md:flex-row items-start md:items-center gap-2">
+          <img
+            src={
+              type === "COMMUNITY"
+                ? post.user?.avatar_url
+                : post.community?.image_url ||
+                  "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
+            }
+            className="max-w-9 max-h-9 w-full h-full rounded-full object-cover"
+            alt="Imagen de perfil"
+          />
+          {type !== "COMMUNITY" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavigate("COMMUNITY");
+              }}
+              className="text-sm cursor-pointer hover:scale-104 transition-all duration-200 font-semibold text-text-3"
+            >
+              {post.community?.name}
+            </button>
+          )}
 
-      <div className="flex flex-col w-full gap-y-4">
-        <div className="flex flex-col gap-y-1">
-          <header className="flex items-center justify-between w-full">
-            <div className="flex flex-row items-center gap-x-3">
-              {type !== "COMMUNITY" && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNavigate("COMMUNITY");
-                  }}
-                  className="text-[14px] font-semibold text-text-3"
-                >
-                  {post.community?.name}
-                </button>
-              )}
+          <div className="flex flex-row items-center gap-x-1">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(ROUTES.USER.PROFILE(post.user.id, post.user.slug));
+              }}
+              className="cursor-pointer hover:scale-104 transition-all duration-200"
+            >
+              <p className="text-sm text-text-4">
+                {post.user.name ? "@" + post.user.name : ""}
+              </p>
+            </button>
+            <span className="text-xs text-text-4">•</span>
+            <p className="text-sm text-text-4">
+              {getShortTimeAgo(post.created_at, false)}
+            </p>
+          </div>
+        </div>
 
-              <div className="flex flex-row items-center gap-x-1">
-                <p className="text-[14px] text4">@{post.user?.name}</p>
-                <span className="text-[12px] text4">•</span>
-                <p className="text-[14px] text4">
-                  {getShortTimeAgo(post.created_at, false)}
-                </p>
+        <div className="relative">
+          <button
+            title="Editar"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((prev) => !prev);
+            }}
+            className="cursor-pointer hover:bg-[#dbdbdb] rounded-full p-1"
+          >
+            <Ellipsis size={18} color="#4A4947" />
+          </button>
+
+          {open && (
+            <>
+              {/* Overlay invisible para cerrar el menú al hacer click afuera */}
+              <div
+                className="fixed inset-0 z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(false);
+                }}
+              />
+              <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-20 w-28">
+                {canEdit && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpen(false);
+                      setPost({
+                        id: post.id,
+                        title: post.title,
+                        content: post.content,
+                        image_urls: (post.image_urls || []).map((url) => ({
+                          file: null as any,
+                          uri: url,
+                        })),
+                        community: post.community,
+                      });
+                      navigate(ROUTES.USER.CREATE_POST);
+                    }}
+                    className="w-full text-left cursor-pointer px-4 py-2 text-sm text-text-5 hover:bg-gray-100"
+                  >
+                    Editar
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpen(false);
+                      handleDelete();
+                    }}
+                    className="w-full text-left cursor-pointer px-4 py-2 text-sm text-bg-red hover:bg-gray-100"
+                  >
+                    Eliminar
+                  </button>
+                )}
               </div>
-            </div>
+            </>
+          )}
+        </div>
+      </header>
 
-            {post.user?.id === user?.id && (
-              <button
-                title="Editar"
-                type="button"
-                className="cursor-pointer hover:bg-[#dbdbdb] rounded-full p-1"
-              >
-                <Ellipsis size={18} color="#4A4947" />
-              </button>
-            )}
-          </header>
-
+      <div className="flex flex-col w-full gap-y-2">
+        <div className="flex flex-col gap-y-4">
           <h1 className="text-lg text-text-3 font-bold">{post.title}</h1>
 
-          {post.content && post.image_urls?.length === 0 && type !== "POST" ? (
-            <p
-              style={{ lineClamp: 6 }}
-              className="text-[15px] font-light text-text-5 text-ellipsis max-w-full"
-            >
-              {stripHTMLTags(post.content || "")}
-            </p>
-          ) : (
-            type === "POST" && (
-              <div
-                style={{ lineHeight: "24px" }}
-                className="
+          {post.image_urls?.length > 0 &&
+            (type === "HOME" || type === "COMMUNITY" || type === "POST") && (
+              <ImagesCarousel
+                media={
+                  post.image_urls.map((url) => ({
+                    uri: url,
+                    file: null as any,
+                  })) as UploadableFile[]
+                }
+              />
+            )}
+
+          {type === "POST" ? (
+            <div
+              style={{ lineHeight: "24px" }}
+              className="
                   text-[15px] 
                   text-text-5
                   max-w-full
@@ -143,10 +254,22 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
                   
                   [&_p]:font-light
                   [&_p]:mb-3"
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(post.content),
-                }}
-              />
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(post.content),
+              }}
+            />
+          ) : (
+            post.content &&
+            !(
+              post.image_urls?.length > 0 &&
+              (type === "HOME" || type === "COMMUNITY")
+            ) && (
+              <p
+                style={{ lineClamp: 6 }}
+                className="text-[15px] font-light text-text-5 text-ellipsis max-w-full"
+              >
+                {stripHTMLTags(post.content || "")}
+              </p>
             )
           )}
 
@@ -183,80 +306,19 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
               </p>
             </div>
           )}
-        </div>
 
-        {/** Acciones del post */}
-        <PostActions content={post as Post} type="POST" />
+          {/** Acciones del post */}
+          <div>
+            <PostActions
+              content={post as Post}
+              copyToClipboard={copyToClipboard}
+              type="POST"
+            />
+          </div>
+        </div>
       </div>
     </article>
   );
 };
 
 export default PostCard;
-
-/** 
- * {post.image_urls.length > 0 ? (
-            <a
-              href={post.image_urls[0]}
-              target="_blank"
-              onClick={(e) => e.stopPropagation()}
-              rel="noopener noreferrer"
-              className="block aspect-[6/3] mt-3 overflow-hidden rounded-[15px] relative"
-            >
-              {post.image_urls.length > 0 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePrevImage();
-                    }}
-                    className={`absolute top-1/2 bg-[#2F2F2F] p-1 rounded-full -translate-y-1/2  z-50 cursor-pointer hover:scale-110 transition duration-200 ${
-                      imgIndex === 0 ? "opacity-0" : "opacity-100"
-                    }`}
-                  >
-                    {imgIndex === 0 ? (
-                      <ChevronRight size={24} color="#fff" />
-                    ) : (
-                      <ChevronLeft size={30} />
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleNextImage();
-                    }}
-                    className={`absolute top-1/2 bg-[#2F2F2F] p-1 rounded-full -translate-y-1/2  z-50 cursor-pointer hover:scale-110 transition duration-200 ${
-                      imgIndex === 0 ? "opacity-0" : "opacity-100"
-                    }`}
-                  >
-                    {imgIndex === 0 ? (
-                      <ChevronRight size={24} color="#fff" />
-                    ) : (
-                      <ChevronLeft size={30} />
-                    )}
-                  </button>
-                </>
-              )}
-
-              <div
-                className="absolute inset-0 bg-cover bg-center blur-md scale-150 brightness-50"
-                style={{
-                  backgroundImage: `url(${Post.image_urls[imgIndex]})`,
-                }}
-              />
-
-              <img
-                className="w-full h-full object-contain cursor-pointer relative z-10"
-                alt="Imagen del post"
-                src={Post.image_urls[0]}
-              />
-            </a>
-          ) : (
-            <p className="text5 text-[15px] mt-1 tracking-tight line-clamp-[7]">
-              {Post.content}
-            </p>
-          )}
- */
