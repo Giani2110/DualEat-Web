@@ -1,155 +1,203 @@
-/* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useMemo, useState } from "react";
 import { useSocket } from "./SocketContext";
 import { useAuth } from "@hooks/useAuth";
 
-import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import toast from "react-hot-toast";
 import type { Notification } from "@interface/global";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getNotifications,
+  readAllNotifications,
+  markAsRead as markSingleAPI,
+  deleteNotification as deleteAPI,
+} from "@/services/notification.api";
 
 type NotificationsContextType = {
   notifications: Notification[];
-  setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
   unreadCount: number;
   markAsRead: () => Promise<void>;
   markAsReadSingle: (id: string) => Promise<void>;
-  clearNotifications: () => void;
+  deleteNotification: (id: string) => Promise<void>;
+
+  isLoading: boolean;
+  refetch: () => Promise<void>;
 };
 
-// 🔹 Crear el contexto
 export const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
 
-// 🔹 Provider
-export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const NotificationsProvider = ({children}: {children: React.ReactNode}) => {
   const { socket } = useSocket();
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  const queryClient = useQueryClient();
+
+  const queryKey = useMemo(() => ["notifications", user?.id], [user?.id]);
+
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const {data: notifications = [], refetch, isLoading} = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const response = await getNotifications();
+      return response.data as Notification[];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (!notifications) return;
+    const unread = notifications.filter((n: Notification) => !n.read).length;
+    setUnreadCount(unread);
+  }, [notifications]);
 
   // Obtener notificaciones iniciales
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        if (!user) return;
-        else {
-          const response = await axiosInterceptor.get("/notification/", {
-            params: { readed: "false" },
-          });
-          if (response.data?.success && response.data.data) {
-            setNotifications(response.data.data);
-            setUnreadCount(response.data.data.length);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchNotifications();
-  }, [user]);
+    if (!socket || !user) return;
 
-  // Escuchar eventos en tiempo real
-  useEffect(() => {
-    if (!socket) return;
-
-    const onNew = (notification: Notification) => {
-      setNotifications((prev) => [notification, ...prev]);
-      setUnreadCount((prev) => prev + 1);
-      
-      // Mostrar toast general para nuevas notificaciones
-      if (notification.message) {
-        toast.success(notification.message, { duration: 4000 });
-      }
+    const onNew = (notification: Partial<Notification>) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
+        return old ? [notification, ...old] : [notification];
+      });
     };
 
     const onLocalNew = (data: any) => {
-      const customNotif: Notification = {
+      const customNotif: any = {
         id: "local_notif_" + Date.now(),
         message: data.message,
-        metadata: {
-          title: data.title,
-        },
+        read: false,
+        title: data.title,
+        content_type: "LOCAL",
+        metadata: { title: data.title },
         created_at: new Date().toISOString(),
-      } as Notification;
-
-      setNotifications((prev) => [customNotif, ...prev]);
-      setUnreadCount((prev) => prev + 1);
-
-      // Opcional: mostrar un toast inmediato para el local
+      };
+      queryClient.setQueryData(queryKey, (old: any) => {
+        return old ? [customNotif, ...old] : [customNotif];
+      });
       toast.success(`${data.title}: ${data.message}`, { duration: 4000 });
     };
 
-    socket.on("new_community_post", onNew);
+    socket.on("new_post", onNew);
     socket.on("new_comment", onNew);
-    socket.on("new_notification", onNew);
 
-    if (user?.isBusiness) {
+    // new_order
+    
+    if (user?.is_business) {
       socket.on("new_category_local", onLocalNew);
       socket.on("new_review_local", onLocalNew);
     }
-
     return () => {
-      socket.off("new_community_post", onNew);
+      socket.off("new_post", onNew);
       socket.off("new_comment", onNew);
       socket.off("new_notification", onNew);
-
-      if (user?.isBusiness) {
+      if (user?.is_business) {
         socket.off("new_category_local", onLocalNew);
         socket.off("new_review_local", onLocalNew);
       }
     };
-  }, [socket, user]);
+  }, [socket, user, queryClient, queryKey]);
 
   // Marcar todas como leídas
-  const markAsRead = async () => {
-    setUnreadCount(0);
-    setNotifications([]);
-    try {
-      const response = await axiosInterceptor.put(
-        "/notification/mark-all-as-read"
-      );
-      if (response.data?.success)
-        toast.success("Notificaciones marcadas como leídas");
-    } catch (err) {
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      await readAllNotifications();
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousNotifications = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, (
+        old: Notification[]
+      ) => {
+        if (!old) return old;
+        
+        return old.map((n) => ({ ...n, read: true })) as Notification[];
+      });
+      return { previousNotifications };
+    },
+    onError: (err, _, context) => {
+      if (context?.previousNotifications) {
+        queryClient.setQueryData(queryKey, context.previousNotifications);
+      }
       toast.error("Error al marcar las notificaciones como leídas");
-      console.error(err);
-    }
-  };
+    },
+    onSuccess: () => {
+      toast.success("Notificaciones marcadas como leídas");
+    },
+  });
 
   // Marcar una sola como leída
-  const markAsReadSingle = async (notificationId: string) => {
-    try {
-      const response = await axiosInterceptor.put(`/notification/read`, {
-        id: notificationId,
+  const markSingleAsReadMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await markSingleAPI(id);
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousNotifications =
+        queryClient.getQueryData<Notification[]>(queryKey);
+      queryClient.setQueryData<Notification[]>(queryKey, (old) => {
+        return old ? old.filter((n) => n.id !== id) : [];
       });
-      if (response.data?.success) {
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-        setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      return { previousNotifications };
+    },
+    onError: (err, _, context) => {
+      if (context?.previousNotifications) {
+        queryClient.setQueryData(queryKey, context.previousNotifications);
       }
-    } catch (err) {
       toast.error("Error al marcar la notificación como leída");
-      console.error(err);
-    }
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await deleteAPI(id);
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, (old: Notification[]) => {
+        return old ? old.filter((n: Notification) => n.id !== id) : [];
+      });
+      return { previous };
+    },
+    onError: (err, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKey, context.previous);
+      }
+      toast.error("Error al eliminar la notificación");
+    },
+    onSuccess: () => {
+      toast.success("Notificación eliminada");
+    },
+  });
+
+  const markAsRead = async () => {
+    await markAllAsReadMutation.mutateAsync();
   };
 
-  // Limpiar todas las notificaciones (solo UI)
-  const clearNotifications = () => {
-    setNotifications([]);
-    setUnreadCount(0);
+  const markAsReadSingle = async (id: string) => {
+    await markSingleAsReadMutation.mutateAsync(id);
+  };
+
+  const deleteNotification = async (id: string) => {
+    await deleteMutation.mutateAsync(id);
+  };
+
+  const handleRefetch = async () => {
+    await refetch();
   };
 
   return (
     <NotificationsContext.Provider
       value={{
         notifications,
-        setNotifications,
         unreadCount,
         markAsRead,
         markAsReadSingle,
-        clearNotifications,
+        deleteNotification,
+        isLoading,
+        refetch: handleRefetch,
       }}
     >
       {children}

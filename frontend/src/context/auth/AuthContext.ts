@@ -1,6 +1,5 @@
 import { createContext } from "react";
-import type { AuthResponse } from "@/services/auth.api";
-import type { User } from "@interface/global";
+import type { User, AuthResponse } from "@interface/global";
 
 export interface AuthContextType {
   user: User | null;
@@ -24,6 +23,7 @@ export interface AuthContextType {
     cPreferences: number[], // communityPreferences
     tt: string, // tempToken
   ) => Promise<AuthResponse | null>;
+  refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(

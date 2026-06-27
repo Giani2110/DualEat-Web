@@ -12,11 +12,17 @@ import toast from "react-hot-toast";
 
 interface Props {
   onClose(): void;
+  onNavigate: (chat_id: string) => void;
+  handleNew: () => void;
 }
 
 type PartialChatHistory = Pick<ChatHistory, "chat_id" | "title">;
 
-export default function HistoryModal({ onClose }: Props) {
+export default function HistoryModal({
+  onClose,
+  onNavigate,
+  handleNew,
+}: Props) {
   const [search, setSearch] = useState("");
   const [submitSearch, setSubmitSearch] = useState("");
 
@@ -39,6 +45,7 @@ export default function HistoryModal({ onClose }: Props) {
       onSuccess: () => {
         toast.success("Chat eliminado exitosamente");
         setSelected(null);
+        handleNew();
         onClose();
       },
       onError: () => {
@@ -143,8 +150,7 @@ export default function HistoryModal({ onClose }: Props) {
                 <div
                   typeof="button"
                   key={item.chat_id}
-                  //onClick={handleRowClick}
-
+                  onClick={() => onNavigate(item.chat_id)}
                   className={`px-3 py-1.5 justify-between flex flex-row rounded-[10px] ${isEditing ? "cursor-default" : "cursor-pointer hover:bg-gray-50"}`}
                 >
                   <div className="flex flex-col gap-y-1 flex-1">
