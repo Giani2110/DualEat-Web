@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
 import {
   LayoutDashboard,
@@ -15,7 +15,7 @@ import {
 import { useAuth } from "@hooks/useAuth";
 
 interface AdminLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
@@ -108,7 +108,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </header>
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 md:p-8">
-          <div className="max-w-7xl mx-auto">{children}</div>
+          <div className="max-w-7xl mx-auto">{children || <Outlet />}</div>
         </main>
       </div>
     </div>

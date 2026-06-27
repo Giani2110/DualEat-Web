@@ -53,24 +53,6 @@ const Login = () => {
     };
   });
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const error = params.get("error");
-    if (error === "staff_restriction") {
-      toast.error(
-        "Esta cuenta está asignada como personal de un local y solo puede acceder desde la aplicación móvil.",
-        { duration: 6000 },
-      );
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (error === "local_pending") {
-      toast.error(
-        "Su comercio se encuentra en revisión. Por favor espera la aprobación.",
-        { duration: 6000 },
-      );
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
-
   const handleSuccess = useCallback(
     (token: string) => turnstileCallbacks.current.onSuccess(token),
     [],
@@ -112,10 +94,12 @@ const Login = () => {
 
         const { user } = response;
 
+        console.log(response);
+
         if (user.role === "ADMIN") {
           navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
-        } else if (user.isBusiness) {
-          if (user.subscription_status === "active") {
+        } else if (user.is_business) {
+          if (user.subscription_status === "ACTIVE") {
             navigate(ROUTES.LOCAL.DASHBOARD, { replace: true });
           } else {
             navigate(ROUTES.LOCAL.MENU, { replace: true });

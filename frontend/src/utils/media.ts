@@ -1,4 +1,5 @@
 import type { UploadableFile } from "@/interface/global.dto";
+import toast from "react-hot-toast";
 
 const MAX_IMAGE_SIZE_MB = 3;
 const MAX_VIDEO_SIZE_MB = 30;
@@ -9,16 +10,22 @@ const MAX_VIDEO_SIZE_BYTES = MAX_VIDEO_SIZE_MB * 1024 * 1024;
 const VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/mov", "video/avi"];
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
 
-export const pickMedia = (files: File[], type: "image" | "video"): UploadableFile[] => {
+export const pickMedia = (
+  files: File[],
+  type: "image" | "video",
+): UploadableFile[] => {
   const filesValid: UploadableFile[] = [];
 
   switch (type) {
     case "image": {
-      const validFiles = files.filter(
-        (f) =>
-          IMAGE_TYPES.some((t) => f.type.startsWith(t)) &&
-          f.size <= MAX_IMAGE_SIZE_BYTES
-      );
+      const validFiles = files.filter((f) => {
+        if (f.size > MAX_IMAGE_SIZE_BYTES)
+          return (toast.error("La imagen es muy grande"), false);
+        else if (!IMAGE_TYPES.some((t) => f.type.startsWith(t)))
+          return (toast.error("Tipo de formato no soportado"), false);
+
+        return IMAGE_TYPES.some((t) => f.type.startsWith(t));
+      });
 
       const allowedFiles = validFiles.slice(0, 10);
 
@@ -32,11 +39,13 @@ export const pickMedia = (files: File[], type: "image" | "video"): UploadableFil
     }
 
     case "video": {
-      const validVideo = files.find(
-        (f) =>
-          VIDEO_TYPES.some((t) => f.type.startsWith(t)) &&
-          f.size <= MAX_VIDEO_SIZE_BYTES
-      );
+      const validVideo = files.find((f) => {
+        if (f.size > MAX_VIDEO_SIZE_BYTES)
+          return (toast.error("El video es muy grande"), false);
+        else if (!VIDEO_TYPES.some((t) => f.type.startsWith(t)))
+          return (toast.error("Tipo de formato no soportado"), false);
+        return VIDEO_TYPES.some((t) => f.type.startsWith(t));
+      });
 
       if (validVideo) {
         filesValid.push({

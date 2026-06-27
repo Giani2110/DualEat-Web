@@ -1,13 +1,13 @@
-import { Fragment, useEffect } from "react";
+import { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { Post, ResponseWithPagination } from "@interface/global";
 import PostCard from "@/components/features/post/PostCard";
-import { Loader } from "lucide-react";
 
 import { useInView } from "react-intersection-observer";
 import { getAll } from "@/services/post.api";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
+import Loader from "@/components/ui/feedback/Loader";
 
 const UDashboard = () => {
   const { ref, inView } = useInView({
@@ -66,19 +66,16 @@ const UDashboard = () => {
   return (
     <section className="h-full px-8 flex-wrap mx-auto flex flex-col md:flex-row gap-8 my-5 bg-bg-semi-white">
       <div style={{ flex: 2 }} className="flex flex-col gap-y-2">
-        {Array.isArray(posts) && posts.length > 0 ? (
+        {Array.isArray(posts) &&
+          posts.length > 0 &&
           posts.map((post: Post) => (
-            <div key={post.id}
-            className="w-full rounded-xl border border-dashed border-gray-200 overflow-hidden"
+            <div
+              key={post.id}
+              className="w-full rounded-xl border border-dashed border-gray-200 overflow-hidden"
             >
               <PostCard post={post} type="HOME" padding="p-5" />
             </div>
-          ))
-        ) : (
-          <div className="text-center text-gray-500 mt-5">
-            No hay posts disponibles para mostrar.
-          </div>
-        )}
+          ))}
 
         {/* Sentinel */}
         <div
@@ -87,15 +84,13 @@ const UDashboard = () => {
           aria-hidden="true"
         >
           {isFetchingNextPage && (
-            <div className="text-yellow">
-              <Loader className="animate-spin" size={24} />
+            <div className="flex justify-center items-center">
+              <Loader size={20} color="#e5a657" />
             </div>
           )}
 
-          {!hasNextPage && posts.length > 0 && (
-            <div className="text-[14px] text5">
-              No hay más posts para mostrar
-            </div>
+          {!hasNextPage && (
+            <div className="text-sm text5">No hay más posts para mostrar</div>
           )}
         </div>
       </div>

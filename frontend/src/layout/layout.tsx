@@ -11,6 +11,7 @@ import { useDynamicTitle } from "@hooks/useDynamicTitle";
 import { matchPath } from "react-router-dom";
 
 import { appRoutes } from "@/api/constants/constants";
+import BusinessSidebar from "@/components/layout/UISidebarLocal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -30,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   useDynamicTitle();
 
   const renderContent = () => {
-    if (is404 || !user || user.isBusiness === true) {
+    if (is404 || !user) {
       return <>{children}</>;
     }
 
@@ -38,9 +39,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       return <>{children}</>;
     }
 
-    if (user.isBusiness === false) {
+    if (user.is_business === false) {
       return <UserSidebar user={user}>{children}</UserSidebar>;
     }
+    if (user.is_business === true) {
+      return <BusinessSidebar>{children}</BusinessSidebar>;
+    }
+
   };
 
   return (

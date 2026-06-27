@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 
 import { ROUTES } from "@/api/constants/constants";
@@ -32,11 +32,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={ROUTES.PUBLIC.HOME} replace />;
   }
 
-  if (isBusiness === true && user.isBusiness === false) {
+  if (isBusiness === true && user.is_business === false) {
     return <Navigate to={ROUTES.USER.DASHBOARD} replace />;
   }
 
-  if (isBusiness === false && user.isBusiness === true) {
+  if (isBusiness === false && user.is_business === true) {
     return <Navigate to={ROUTES.LOCAL.DASHBOARD} replace />;
   }
 

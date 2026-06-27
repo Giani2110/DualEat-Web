@@ -22,7 +22,7 @@ export default function MessageInput({
   return (
     <section className="flex flex-col gap-y-2">
       {isPending && (
-        <div className="items-center justify-start flex-row gap-x-4">
+        <div className="items-center justify-start flex flex-row gap-x-2">
           <Loader size={18} color="#e5a657" />
           <span className="text-text-5 font-normal text-[14px]">
             Pensando...

@@ -18,9 +18,9 @@ const NotFound = () => {
   const dotRef = useRef<HTMLDivElement>(null);
 
   const handleNavigate = () => {
-    if (user && user.isBusiness) {
+    if (user && user.is_business) {
       navigate(ROUTES.LOCAL.DASHBOARD);
-    } else if (user && !user.isBusiness) {
+    } else if (user && !user.is_business) {
       navigate(ROUTES.USER.DASHBOARD);
     } else {
       navigate(ROUTES.AUTH.LOGIN);

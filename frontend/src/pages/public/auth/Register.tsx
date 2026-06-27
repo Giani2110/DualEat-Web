@@ -17,13 +17,13 @@ const Register = () => {
     confirm: false,
   });
 
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const { register } = useAuth();
-
-  const navigate = useNavigate();
 
   const handleNext = async () => {
     const deviceId = await getDeviceId();
@@ -38,18 +38,21 @@ const Register = () => {
     }
 
     try {
-      const responseData = await register(
-        email.trim(),
-        password.trim(),
-        deviceId,
-      );
+      const response = await register(email.trim(), password.trim(), deviceId);
 
-      if (responseData?.success && responseData.next_step) {
-        navigate(responseData.next_step);
+      if (response && response.token) {
+        navigate(
+          {
+            pathname: ROUTES.AUTH.ONBOARDING,
+            search: `?tempToken=${response.token}`,
+          },
+          {
+            replace: true,
+          },
+        );
       }
-    } catch (e) {
-      console.log("Error al registrar el paso 1:", e);
-      toast.error("No se pudo conectar con el servidor. Intenta de nuevo.");
+    } catch (e: any) {
+      console.log(e.response.data.error)
     }
   };
 
@@ -60,7 +63,7 @@ const Register = () => {
       subtitle="Completa tus datos para comenzar tus artes culinarias"
       children2={
         <>
-          <div className="text-center text-[16px] flex items-center justify-center gap-x-3">
+          <div className="text-center text-base flex items-center justify-center gap-x-3">
             <span className="text-text-4">¿Tienes un local?</span>
             <Link
               to={ROUTES.AUTH.REGISTER_LOCAL}
@@ -101,6 +104,7 @@ const Register = () => {
               required
               type={visible.password ? "text" : "password"}
               value={password}
+              minLength={6}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none pr-12"
@@ -152,17 +156,17 @@ const Register = () => {
           Registrarse
         </button>
 
-        <p className="text-[12px] text-text-6 text-center">
+        <p className="text-sm text-text-6 text-center">
           Al registrarte, aceptas los{" "}
-          <span className="text-[#0a87da] cursor-pointer hover:underline">
+          <span className="text-bg-blue cursor-pointer hover:underline">
             Términos de servicio
           </span>{" "}
           y la{" "}
-          <span className="text-[#0a87da] cursor-pointer hover:underline">
+          <span className="text-bg-blue cursor-pointer hover:underline">
             Política de privacidad
           </span>
           , incluida la política de{" "}
-          <span className="text-[#0a87da] cursor-pointer hover:underline">
+          <span className="text-bg-blue cursor-pointer hover:underline">
             Uso de Cookies.
           </span>
         </p>

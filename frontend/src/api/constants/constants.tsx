@@ -29,7 +29,7 @@ import {
   Chat,
   CommunityDetail,
   PostDetail,
-  UNotifications,
+  Notifications,
   RecipeDetail,
   CreateRecipe,
   CreatePost,
@@ -67,15 +67,19 @@ export const ROUTES = {
     RECIPE: (recipe_id: string, recipe_slug: string) =>
       `/r/${recipe_id}/${recipe_slug}`,
 
-    POST: (community_slug: string, post_id: string, post_slug: string) =>
-      `/c/${community_slug}/p/${post_id}/${post_slug}`,
+    POST: (post_id: string, post_slug: string) => `/p/${post_id}/${post_slug}`,
 
     COMMUNITY: (community_slug: string) => `/c/${community_slug}`,
 
-    EXPLORE: "/explore/",
+    EXPLORE: (category_id?: string, category_slug?: string) => {
+      if (!category_id || !category_slug) return "/explore";
+      return `/explore/${category_id}/${category_slug}`;
+    },
+
     CHAT: `/chat/`,
 
-    PROFILE: (user_id: string, user_slug: string) => `/profile/${user_id}/${user_slug}`,
+    PROFILE: (user_id: string, user_slug: string) =>
+      `/profile/${user_id}/${user_slug}`,
 
     NOTIFICATIONS: "/notifications",
   },
@@ -163,11 +167,7 @@ export const appRoutes = [
   },
   {
     path: ROUTES.AUTH.REGISTER_LOCAL,
-    element: (
-      <PublicRoute>
-        <RegisterLocal />
-      </PublicRoute>
-    ),
+    element: <RegisterLocal />,
   },
   {
     path: ROUTES.AUTH.ONBOARDING,
@@ -201,15 +201,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: ROUTES.USER.EXPLORE,
-    element: (
-      <ProtectedRoute isBusiness={false}>
-        <UExplore />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: `${ROUTES.USER.EXPLORE}:categorySlug`,
+    path: `/explore/:category_id?/:category_slug?`,
     element: (
       <ProtectedRoute isBusiness={false}>
         <UExplore />
@@ -225,7 +217,7 @@ export const appRoutes = [
       </ProtectedRoute>
     ),
   },
-  
+
   {
     path: `${ROUTES.USER.CHAT}:chat_id?`,
     element: (
@@ -243,7 +235,7 @@ export const appRoutes = [
     ),
   },
   {
-    path: `/c/:community_slug/p/:post_id/:post_slug`,
+    path: `/p/:post_id/:post_slug`,
     element: (
       <ProtectedRoute isBusiness={false}>
         <PostDetail />
@@ -262,7 +254,7 @@ export const appRoutes = [
     path: ROUTES.USER.NOTIFICATIONS,
     element: (
       <ProtectedRoute isBusiness={false}>
-        <UNotifications />
+        <Notifications />
       </ProtectedRoute>
     ),
   },

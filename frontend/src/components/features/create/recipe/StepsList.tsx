@@ -41,8 +41,8 @@ export default function StepsList({ steps, setSteps }: Props) {
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col gap-y-3">
-          {steps.map((item: RecipeStepDTO, index: number) => (
-            <SortableStepItem key={index} item={item} setSteps={setSteps} index={index} />
+          {steps.map((item: StepsPartial) => (
+            <SortableStepItem key={item.id} item={item} setSteps={setSteps} />
           ))}
         </div>
       </SortableContext>

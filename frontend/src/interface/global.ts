@@ -54,13 +54,28 @@ export interface User {
   active: boolean;
   verified: boolean;
   provider: string;
-  isBusiness: boolean;
-  suscription_status: SuscriptionStatus;
+  is_business: boolean;
+  subscription_status: SuscriptionStatus;
   trial_ends_at: Date | null;
+  notificationsPref: NotificationFrequency;
   workplaces: Workplace[];
+
+  preferences: UserPreference[];
 
   created_at: Date;
   updated_at: Date;
+}
+
+export interface UserPreference {
+  id: number;
+  user_id: string;
+  user: User;
+
+  food_category_id: string | null;
+  community_tag_id: string | null;
+
+  foodCategory: FoodCategory | null;
+  communityTag: CommunityTag | null;
 }
 
 export interface Workplace {
@@ -70,11 +85,16 @@ export interface Workplace {
   role: "admin" | "staff";
 }
 
-interface NotificationMetadata {
-  title: string | null; // Titulo del post o comunidad
-  slug: string | null; // Slug
-  image_urls: string[] | null; // Imagenes URL
-  target_name: string | null; // Nombre del objetivo para una acción (ej. Nombre del restaurante)
+interface Metadata {
+  params?: {
+    slug?: string;
+    parent_slug?: string;
+    id?: string;
+    parent_id?: string;
+  };
+  message?: string;
+
+  image_urls?: string[];
 }
 
 export interface Notification {
@@ -83,9 +103,9 @@ export interface Notification {
   content_type: NotificationContentType;
   content_id?: string;
 
-  metadata: NotificationMetadata;
-
+  title: string;
   message: string;
+  metadata?: Metadata | any;
   read: boolean;
   deleted: boolean;
   created_at: string;
@@ -135,7 +155,7 @@ export interface Food {
   id: string;
   local_id: string;
   local: Local;
-  category_id: number;
+  category_id: string;
   category: FoodCategory;
   name: string;
   description?: string;
@@ -211,7 +231,7 @@ export interface Schedules {
 }
 
 export interface FoodCategory {
-  id: number;
+  id: string;
   name: string;
   tipo: string;
   icon_url: string | null;
@@ -220,14 +240,12 @@ export interface FoodCategory {
 }
 
 export interface CommunityTag {
-  id: number;
+  id: string;
   name: string;
   active: boolean;
 
   category: TagCategory;
   communities: Community[];
-
-  //user_preferences: UserPreference[];
 }
 
 export interface TagCategory {
@@ -246,7 +264,9 @@ export interface Community {
   name: string;
   description: string;
   image_url: string | "https://placehold.co/100x100";
-  banner_url: string | "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultBanner.jpg";
+  banner_url:
+    | string
+    | "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultBanner.jpg";
 
   total_members: number;
 
@@ -263,6 +283,7 @@ export interface Community {
   tags: CommunityTag[];
 
   isMember?: boolean;
+  is_moderator?: boolean;
   receives_notifications?: NotificationFrequency;
 }
 
@@ -399,7 +420,6 @@ export interface RecipeStep {
   recipe_id: string;
   step_number: number;
   description: string;
-  image_url: string | null;
   estimated_time: number | null;
 }
 
@@ -409,7 +429,7 @@ export interface RecipeIngredient {
   recipe_id: string;
 
   ingredient: Ingredient;
-  ingredient_id: string;
+  ingredient_id: number;
 
   quantity: string;
   unit: Unit;
@@ -417,7 +437,7 @@ export interface RecipeIngredient {
 }
 
 export interface Ingredient {
-  id: string;
+  id: number;
   name: string;
   description: string | null;
 
@@ -425,7 +445,7 @@ export interface Ingredient {
   proteins: number;
   carbs: number;
   fat: number;
-  
+
   recipe_ingredients: RecipeIngredient[];
 }
 

@@ -8,6 +8,7 @@ import LogoWhite from "@assets/images/icon/Logo_DualEat.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import type { Community, Post, PostComment, Recipe } from "@/interface/global";
+import { usePostCreateStore } from "@/context/store/usePostCreate";
 
 type GlobalSearch = Post | Recipe | PostComment | Community;
 
@@ -28,6 +29,7 @@ export default function HeaderUSER() {
   const { user } = useAuth();
 
   const { notifications, unreadCount } = useNotifications();
+  const { clearPost } = usePostCreateStore();
 
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
@@ -36,8 +38,8 @@ export default function HeaderUSER() {
 
   // ==================== CONSTANTES ====================
   // Colores dinámicos según tipo de usuario
-  const headerBgColor = user?.isBusiness ? "bg-gray-900" : "bg-bg-semi-white";
-  const headerBorderColor = user?.isBusiness
+  const headerBgColor = user?.is_business ? "bg-gray-900" : "bg-bg-semi-white";
+  const headerBorderColor = user?.is_business
     ? "border-gray-700"
     : "border-[#e5a657]";
 
@@ -58,20 +60,22 @@ export default function HeaderUSER() {
       <div style={{ flex: 1 }} className="flex items-center">
         {/* Logo y título */}
         <Link
-          to={user?.isBusiness ? ROUTES.LOCAL.DASHBOARD : ROUTES.USER.DASHBOARD}
+          to={
+            user?.is_business ? ROUTES.LOCAL.DASHBOARD : ROUTES.USER.DASHBOARD
+          }
           className="flex items-center cursor-pointer hover:scale-103 transition-transform duration-200"
           tabIndex={-1}
         >
           <img
             className="w-[28px] h-[28px]"
-            src={user?.isBusiness ? LogoWhite : LogoYellow}
+            src={user?.is_business ? LogoWhite : LogoYellow}
             alt="Logo"
           />
         </Link>
       </div>
 
       <div style={{ flex: 2 }}>
-        {!user?.isBusiness && (
+        {!user?.is_business && (
           <div className="relative w-full">
             {/* Barra de búsqueda (Input) */}
             <div
@@ -121,11 +125,12 @@ export default function HeaderUSER() {
         style={{ flex: 1 }}
         className="flex items-center justify-end gap-x-4"
       >
-        {!user?.isBusiness && (
+        {!user?.is_business && (
           <div className="flex gap-x-2 items-center">
             <div>
               <Link
                 to={ROUTES.USER.CREATE_POST}
+                onClick={clearPost}
                 className="flex items-center rounded-full justify-center px-3 py-1 gap-x-2 transition-all duration-200 cursor-pointer hover:bg-gray-50 hover:border-[#e5a657] border border-dashed border-transparent"
               >
                 <Plus size={22} color="#2F2F2F" />
@@ -153,7 +158,7 @@ export default function HeaderUSER() {
             type="button"
             onClick={() => toggleNotifications()}
             className={`relative p-2 rounded-full transition-all duration-200 cursor-pointer hover:bg-gray-50 hover:border-[#e5a657] border border-dashed ${
-              user?.isBusiness
+              user?.is_business
                 ? "border-[#333333] text-[#fff] hover:border-white"
                 : "border-transparent text-[#878787] hover:text-[#fff]"
             }`}
@@ -182,11 +187,13 @@ export default function HeaderUSER() {
             className="p-1 cursor-pointer hover:bg-gray-200 rounded-full transition duration-200"
           >
             {user && (
-              <img
-                className="w-[32px] h-[32px] rounded-full"
-                src={user?.avatar_url || ""}
-                alt="Imagen de perfil"
-              />
+              <div style={{ height: 32, width: 32 }} className="">
+                <img
+                  className="rounded-full w-full h-full object-cover"
+                  src={user?.avatar_url || ""}
+                  alt="Imagen de perfil"
+                />
+              </div>
             )}
           </button>
         </div>

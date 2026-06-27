@@ -1,5 +1,6 @@
 import { ROUTES } from "@/api/constants/constants";
 import CommunityModal from "@/components/features/create/community/CommunityModal";
+import { useMyCommunities } from "@/hooks/api/community/useCommunity";
 import type { User } from "@/interface/global";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -86,6 +87,8 @@ export const UserSidebarItems = ({
     create: false,
   });
 
+  const { data: communities } = useMyCommunities();
+
   return (
     <>
       <SidebarItem
@@ -104,7 +107,7 @@ export const UserSidebarItems = ({
         }
         label="Explorar"
         isExpanded={null}
-        onPress={() => navigate(ROUTES.USER.EXPLORE)}
+        onPress={() => navigate(ROUTES.USER.EXPLORE("", ""))}
       />
 
       <SidebarItem
@@ -136,6 +139,26 @@ export const UserSidebarItems = ({
           setExpanded({ ...expanded, comunity: !expanded.comunity })
         }
       />
+
+      {expanded.comunity &&
+        communities?.map((item) => (
+          <SidebarItem
+            key={item.id}
+            icon={
+              <img
+                src={item.community.image_url}
+                alt="Imágen de comunidad"
+                style={{ width: 25, height: 25 }}
+                className="object-cover rounded-full"
+              />
+            }
+            label={item.community.name}
+            isExpanded={null}
+            onPress={() =>
+              navigate(ROUTES.USER.COMMUNITY(item.community?.slug || ""))
+            }
+          />
+        ))}
 
       <SidebarItem
         icon={

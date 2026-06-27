@@ -9,6 +9,20 @@ import { getDeviceId } from "@/utils/device";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
+const options = [
+  "Hamburguesería",
+  "Comida rápida",
+  "Pizzería",
+  "Restaurante italiano",
+  "Vegano",
+  "Sushi",
+  "Restaurante",
+  "Cafetería",
+  "Heladería",
+  "Parrilla",
+  "Bar",
+];
+
 const RegisterLocal = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -54,8 +68,11 @@ const RegisterLocal = () => {
         deviceId,
       );
 
-      if (responseData?.success && responseData.next_step) {
-        navigate(`/signup/locals${responseData.next_step}`);
+      if (responseData?.success && responseData.token) {
+        navigate({
+          pathname: ROUTES.AUTH.REGISTER_LOCAL,
+          search: `?tempToken=${responseData.token}`,
+        });
       }
     } catch (e: any) {
       console.log("Error al registrar:", e);
@@ -68,6 +85,11 @@ const RegisterLocal = () => {
   const handleStep2 = async () => {
     if (!userName || !localName || !localAddress) {
       toast.error("Por favor, completa los campos requeridos.");
+      return;
+    }
+
+    if (!options.includes(localType)) {
+      toast.error("Por favor, selecciona un tipo de negocio válido.");
       return;
     }
 
@@ -204,14 +226,13 @@ const RegisterLocal = () => {
             <select
               value={localType}
               onChange={(e) => setLocalType(e.target.value)}
-              className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#E5A657] outline-none"
+              className="w-full px-4 py-[10px] text-text-5 border cursor-pointer border-gray-300 rounded-lg focus:ring-1 focus:ring-[#E5A657] outline-none"
             >
-              <option value="Restaurante">Restaurante</option>
-              <option value="Cafetería">Cafetería</option>
-              <option value="Bar">Bar</option>
-              <option value="Heladería">Heladería</option>
-              <option value="Pizzería">Pizzería</option>
-              <option value="Otro">Otro</option>
+              {options.map((option, idx) => (
+                <option key={idx} value={option}>
+                  {option}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -234,9 +255,9 @@ const RegisterLocal = () => {
           <div className="mb-2 mt-2">
             <button
               type="submit"
-              className="font-bold w-full mb-3 text-[15px] cursor-pointer bg-yellow text-white py-[10px] px-4 rounded-lg hover:bg-gray-900 transition-colors font-medium"
+              className="w-full text-text-3 text-[16px] cursor-pointer border border-dashed border-bg-yellow hover:bg-[#e5a657] hover:text-text-1 py-[12px] mt-4 rounded-lg transition-colors font-medium"
             >
-              Finalizar Registro →
+              Finalizar Registro
             </button>
           </div>
         </form>
@@ -247,10 +268,10 @@ const RegisterLocal = () => {
   return (
     <AuthSection
       flex="left"
-      title="Registra tu Local"
+      title="Registra tu local"
       subtitle="Crea tu cuenta de administrador comercial para gestionar tu restaurante"
       children2={
-        <div className="text-center text-[15px] flex items-center justify-center gap-3">
+        <div className="text-center text-base flex items-center justify-center gap-3">
           <span className="text4">¿Buscas comida?</span>
           <Link
             to={ROUTES.AUTH.REGISTER}

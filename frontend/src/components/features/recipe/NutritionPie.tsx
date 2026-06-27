@@ -35,8 +35,6 @@ export default function NutritionPie({
     },
   ];
 
-  console.log(nutrition);
-
   return (
     <section className="flex flex-col gap-y-4">
       <h2 className="text-[20px] font-bold text-text-5">
@@ -72,7 +70,7 @@ export default function NutritionPie({
           </div>
         </div>
 
-        <div className="flex flex-row flex-wrap justify-between gap-x-4 w-full">
+        <div className="flex flex-row flex-wrap justify-between gap-4 w-full">
           {macros.map(({ key, label, color, value }) => {
             return (
               <div

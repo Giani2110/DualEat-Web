@@ -3,7 +3,7 @@ import { Camera, Download } from 'lucide-react';
 import TutorialModal from './TutorialModal';
 
 interface UploadMenuSectionProps {
-  localId: number;
+  localId: string;
   onSuccess: () => void;
   onDishesExtracted: (dishes: any[]) => void; // Para la fase de revisión
 }

@@ -10,7 +10,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
-import { LocalSupportWidget } from "../../ui/buttons/LocalSupportWidget";
+import { LocalSupportWidget } from "../ui/buttons/LocalSupportWidget";
 
 interface BusinessSidebarProps {
   children: React.ReactNode;
@@ -154,7 +154,7 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
                     {!isCollapsed && (
                       <span className="ml-3 truncate">{item.label}</span>
                     )}
-                    {user?.subscription_status !== "active" &&
+                    {user?.subscription_status !== "ACTIVE" &&
                       (item.id === "dashboard" || item.id === "calendar") &&
                       !isCollapsed && (
                         <span className={`bg-gradient-to-r from-amber-400 to-yellow-600 text-gray-900 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isActive ? 'ml-2' : 'ml-auto'}`}>

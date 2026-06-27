@@ -6,6 +6,8 @@ import { SidebarItem, UserSidebarItems } from "../ui/buttons/sidebar-items";
 import { useAuth } from "@/hooks/useAuth";
 
 import "@assets/scss/private/users/users.scss";
+import { LogOut } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface Props {
   children: React.ReactNode;
@@ -15,6 +17,8 @@ interface Props {
 export default function UserSidebar({ children, user }: Props) {
   const navigate = useNavigate();
   const { logout } = useAuth();
+
+  const { unreadCount } = useNotifications();
 
   const [open, setOpen] = useState({
     communities: true,
@@ -30,7 +34,7 @@ export default function UserSidebar({ children, user }: Props) {
         open.sidebar ? "lg:grid-cols-[350px_1fr]" : "lg:grid-cols-[50px_1fr]"
       }`}
     >
-      {/* Sidebar */}
+      {/* Sidebar */} 
       <aside
         className={`border-r hidden lg:flex bg-bg-semi-white border-[#dbdbdb] flex-col justify-between top-15 bottom-0 fixed transition-all duration-300 ${open.sidebar ? "w-[350px] p-4" : "w-[40px]"}`}
       >
@@ -115,6 +119,15 @@ export default function UserSidebar({ children, user }: Props) {
                   />
                 </svg>
               }
+              extra={
+                unreadCount > 0 ? (
+                  <div className="bg-bg-blue rounded-full h-5 w-5 flex items-center justify-center self-center">
+                    <p className="text-text-1 font-bold text-[10px]">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </p>
+                  </div>
+                ) : null
+              }
             />
 
             <div className=" border-t border-gray-400" />
@@ -126,21 +139,11 @@ export default function UserSidebar({ children, user }: Props) {
         <footer className={`${open.sidebar ? "flex" : "hidden"} shrink-0`}>
           <button
             type="button"
-            className="p-2 cursor-pointer w-full flex flex-row font-bold text-red text-[14px] items-center justify-start gap-x-4 border-y border-dashed border-[#B53325] whitespace-nowrap"
+            className="p-2 cursor-pointer w-full flex flex-row font-bold text-red text-sm items-center justify-start gap-x-4
+            border-y border-dashed hover:bg-[#B53325]! hover:text-[#ffffff]! duration-200 transition-all border-bg-red whitespace-nowrap"
             onClick={() => logout()}
           >
-            <svg
-              className="shrink-0"
-              width={size}
-              height={size}
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 640 640"
-            >
-              <path
-                fill={"#B53325"}
-                d="M224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160zM566.6 342.6C579.1 330.1 579.1 309.8 566.6 297.3L438.6 169.3C426.1 156.8 405.8 156.8 393.3 169.3C380.8 181.8 380.8 202.1 393.3 214.6L466.7 288L256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L466.7 352L393.3 425.4C380.8 437.9 380.8 458.2 393.3 470.7C405.8 483.2 426.1 483.2 438.6 470.7L566.6 342.7z"
-              />
-            </svg>
+            <LogOut size={18} />
             Cerrar sesión
           </button>
         </footer>

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Ingredient } from "@/interface/global";
 import { getAllIngredients } from "@/services/recipe.api";
 
-const INGREDIENTS_CACHE_KEY = "@ingredients_data";
+export const INGREDIENTS_CACHE_KEY = "@ingredients_data";
 
 export const useIngredients = (open: boolean) => {
   return useQuery({

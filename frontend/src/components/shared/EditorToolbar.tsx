@@ -19,7 +19,7 @@ interface CustomToolbarProps {
   images: UploadableFile[];
   video: UploadableFile | null;
 
-  handleFiles: (files: File[], type: "image" | "video") => void;
+  handleFiles?: (files: File[], type: "image" | "video") => void;
 }
 
 interface EditorToolbarProps {
@@ -229,28 +229,28 @@ export const CustomToolbar = ({
       {/* MULTIMEDIA */}
       <button
         type="button"
-        disabled={images.length >= 10 || video !== null}
+        disabled={images.length >= 10 || video !== null || !handleFiles}
         onClick={(e) => {
           e.preventDefault();
           imageInputRef.current?.click();
         }}
         onMouseDown={(e) => e.preventDefault()}
         onPointerDown={(e) => e.preventDefault()}
-        className={`flex items-center cursor-pointer justify-center w-8 h-8 rounded transition-colors text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent ${images.length >= 10 || video !== null ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`flex items-center cursor-pointer justify-center w-8 h-8 rounded transition-colors text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed`}
         title="Añadir Imagen"
       >
         <ImagePlus size={18} />
       </button>
       <button
         type="button"
-        disabled={video !== null || images.length > 0}
+        disabled={video !== null || images.length > 0 || !handleFiles}
         onClick={(e) => {
           e.preventDefault();
           videoInputRef.current?.click();
         }}
         onMouseDown={(e) => e.preventDefault()}
         onPointerDown={(e) => e.preventDefault()}
-        className={`flex items-center cursor-pointer justify-center w-8 h-8 rounded transition-colors text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent ${video !== null || images.length > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`flex items-center cursor-pointer justify-center w-8 h-8 rounded transition-colors text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed`}
         title="Añadir Video"
       >
         <Clapperboard size={18} />
@@ -263,6 +263,7 @@ export const CustomToolbar = ({
         multiple
         accept="image/jpeg, image/png, image/webp, image/jpg"
         onChange={(e) => {
+          if (!handleFiles) return;
           handleFiles(
             e.target.files ? Array.from(e.target.files) : [],
             "image",
@@ -277,6 +278,7 @@ export const CustomToolbar = ({
         ref={videoInputRef}
         accept="video/mp4, video/quicktime, video/mov, video/avi"
         onChange={(e) => {
+          if (!handleFiles) return;
           handleFiles(
             e.target.files ? Array.from(e.target.files) : [],
             "video",

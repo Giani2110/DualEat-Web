@@ -34,9 +34,6 @@ export default function ChatScreen() {
     "Historial",
   );
 
-  console.log(chat_id, "chat_id");
-  console.log(chat, "chat");
-
   const [search, setSearch] = useState("");
 
   const [ingredientsSelected, setIngredientsSelected] = useState<Ingredient[]>(
@@ -103,12 +100,21 @@ export default function ChatScreen() {
     });
   };
 
-  console.log(ingredientsSelected);
+  const onNavigate = (chat_id: string) => {
+    navigate(`/chat/${chat_id}`, { replace: true });
+    handleClose();
+  };
 
   const sections = useMemo(() => {
     switch (type) {
       case "Historial":
-        return <HistoryModal onClose={() => handleClose()} />;
+        return (
+          <HistoryModal
+            onClose={() => handleClose()}
+            handleNew={handleNewChat}
+            onNavigate={onNavigate}
+          />
+        );
       case "Recetas":
         return <section className="flex flex-1 flex-col"></section>;
       case "Ingredientes":
@@ -142,7 +148,7 @@ export default function ChatScreen() {
   }, [messages]);
 
   return (
-    <section className="flex flex-row w-full h-[calc(100vh-3.75rem)] justify-center items-center bg-bg-semi-white">
+    <section className="flex flex-row w-full h-full justify-center items-center bg-bg-semi-white">
       <main className="relative flex flex-col items-center h-full w-full">
         <header className="p-4 w-full flex flex-row items-center justify-between">
           <button
@@ -204,10 +210,10 @@ export default function ChatScreen() {
         {!chat ? (
           <div className="w-full h-full flex flex-col justify-center items-center gap-y-6 px-4">
             <div className="w-full flex flex-col items-center">
-              <h1 className="text-text-5 font-outfit-light text-[24px]">
+              <h1 className="text-text-5 font-outfit-light text-xl">
                 Hola, {user ? user.name : "Usuario"}
               </h1>
-              <h2 className="text-text-3 font-bold text-[30px]">
+              <h2 className="text-text-3 font-bold text-3xl">
                 ¿Por dónde empezamos?
               </h2>
             </div>
@@ -264,12 +270,9 @@ export default function ChatScreen() {
       </main>
 
       {open && (
-        <div
-          style={{ zIndex: 999 }}
-          className="fixed inset-0 flex h-screen w-screen"
-        >
+        <div style={{ zIndex: 999 }} className="fixed inset-0 flex flex-1">
           <div
-            style={{ flex: 3 }}
+            style={{ flex: 2 }}
             className="bg-black/40"
             onClick={() => {
               handleClose();
@@ -278,7 +281,7 @@ export default function ChatScreen() {
 
           <aside
             style={{ zIndex: 1000 }}
-            className="bg-bg-semi-white border-l min-w-[25vw] border-gray-400 shadow-xl shadow-gray-200 overflow-y-auto p-4 flex flex-col gap-y-3"
+            className="bg-bg-semi-white border-l min-w-[80vw] md:min-w-[45vw] lg:min-w-[25vw] border-gray-400 shadow-xl shadow-gray-200 overflow-y-auto p-4 flex flex-col gap-y-3"
           >
             <header className="flex flex-row gap-x-4 justify-start items-center">
               <button

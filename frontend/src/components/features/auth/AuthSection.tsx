@@ -8,8 +8,6 @@ import Restaurant from "@assets/images/auth/Restaurant.jpg";
 import Restaurant2 from "@assets/images/auth/Restaurant2.jpg";
 import Restaurant3 from "@assets/images/auth/Restaurant3.jpg";
 
-import LogoBlack from "@assets/images/icon/Logo_DualEatBlack.png";
-
 import LogoWhite from "@assets/images/icon/Logo_DualEat.png";
 import { getDeviceId } from "@/utils/device";
 
@@ -68,15 +66,6 @@ const AuthSection: React.FC<Props> = ({
     <main className={`min-h-screen w-full ${styles} flex flex-row bg-bg-gray`}>
       <section style={{ flex: 1 }}>
         <div className="flex h-full w-[90%] lg:w-[70%] flex-col gap-y-8 justify-center mx-auto">
-          <div className={"flex flex-row items-center gap-x-2"}>
-            <img
-              src={LogoBlack}
-              alt="DualEat Logo"
-              className="w-[28px] h-auto object-contain"
-            />
-            <h1 className="text-[22px] font-black text-text-3">DualEat</h1>
-          </div>
-
           <header className="flex flex-col items-center">
             <h2 className="font-bold text-text-3 text-[28px] ">{title}</h2>
             <p className="text-text-6 ">{subtitle}</p>
@@ -102,7 +91,7 @@ const AuthSection: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => handleGoogleLogin()}
-                      className="flex w-full text-[14px] font-medium text-text-5 items-center cursor-pointer justify-center py-2 border border-gray-300 rounded-[10px] hover:bg-gray-50 transition-colors"
+                      className="flex w-full text-sm font-medium text-text-5 items-center cursor-pointer justify-center py-2.5 border border-gray-300 rounded-[10px] hover:bg-gray-50 transition-colors"
                     >
                       <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                         <path

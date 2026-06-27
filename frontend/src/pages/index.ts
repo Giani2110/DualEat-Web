@@ -30,7 +30,7 @@ export { default as UExplore } from "./private/users/Explore";
 export { default as Chat } from "./private/users/chat/Chat";
 export { default as CommunityDetail } from "./private/users/community/CommunityDetail";
 export { default as PostDetail } from "./private/users/community/PostDetail";
-export { default as UNotifications } from "./private/users/UNotifications";
+export { default as Notifications } from "./private/users/Notifications";
 export { default as RecipeDetail } from "./private/users/community/RecipeDetail";
 export { default as CreateRecipe } from "./private/users/create/recipe";
 export { default as CreatePost } from "./private/users/create/post";

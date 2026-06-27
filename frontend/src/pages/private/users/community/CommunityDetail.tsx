@@ -63,7 +63,6 @@ export default function CommunityScreen() {
       queryFn: async ({ pageParam = 1 }) => {
         const response = await getCommunityPosts(
           community?.id as string,
-          "",
           pageParam as number,
         );
 
@@ -181,7 +180,7 @@ export default function CommunityScreen() {
             {/* Botones de acción */}
             <div
               style={{ flex: 2 }}
-              className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end md:mt-0"
+              className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end md:mt-0"
             >
               <button
                 type="button"
@@ -190,11 +189,11 @@ export default function CommunityScreen() {
                     title: "",
                     content: "",
                     image_urls: [],
-                    community_id: String(community?.id),
+                    community: community as Community,
                   });
                   navigate(ROUTES.USER.CREATE_POST);
                 }}
-                className="rounded-full border border-dashed hover:border-solid hover:scale-105 transition-all duration-100 cursor-pointer border-gray-400 flex items-center gap-2 px-4 py-1.5 font-semibold "
+                className="rounded-full border border-dashed hover:border-solid hover:scale-105 transition-all duration-100 cursor-pointer border-gray-400 flex items-center gap-2 px-4 py-1.5 font-semibold"
               >
                 <Plus size={24} />
                 <span className="text-sm">Crear post/receta</span>
@@ -203,7 +202,7 @@ export default function CommunityScreen() {
               {isMember && community?.receives_notifications && (
                 <div
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  className="relative rounded-full border cursor-pointer border-gray-300 px-4 py-1.5 bg-white flex items-center justify-center"
+                  className="relative rounded-full border border-dashed cursor-pointer border-gray-400 px-4 py-1.5 flex items-center justify-center hover:border-solid hover:scale-105 transition-all duration-100"
                 >
                   {community.receives_notifications === "ALWAYS"
                     ? BellFill
@@ -213,8 +212,8 @@ export default function CommunityScreen() {
                     <div className="absolute z-50 -bottom-24 right-0 w-[160px] rounded-[10px] border border-dashed border-gray-200 overflow-hidden">
                       {["Siempre", "Nunca"].map((notification, idx) => (
                         <button
-                          type="button"
                           key={idx}
+                          type="button"
                           onClick={() =>
                             console.log("clickeaste", notification)
                           }

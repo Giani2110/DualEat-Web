@@ -18,6 +18,23 @@ export function pluralize(unit: string, quantity: number): string {
   return irregulars[unit] || unit;
 }
 
+export const getMimeType = (type: string) => {
+  const mimeTypes: Record<string, string> = {
+    "image/jpeg": "image",
+    "image/png": "image",
+    "image/gif": "image",
+    "image/webp": "image",
+    "video/webm": "video",
+    "image/svg+xml": "image",
+    "video/mp4": "video",
+    "audio/mpeg": "audio",
+    "audio/wav": "audio",
+    "audio/ogg": "audio",
+  };
+
+  return mimeTypes[type] || "image";
+};
+
 export const getMimeTypeFromUrl = (url: string): string | null => {
   if (!url) return null;
 

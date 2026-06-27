@@ -20,9 +20,6 @@ export const handleApiError = (err: unknown): ApiErrorResponse => {
     }
 
     if (err.response) {
-      toast.error(
-        err.response.data?.message || "Error procesando la solicitud.",
-      );
       return {
         success: err.response.data?.success ?? false,
         status: err.response.status,

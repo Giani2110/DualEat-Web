@@ -1,30 +1,15 @@
-import { Unit, type Ingredient } from "./global";
-
-export interface preferencesDTO {
-  filter: "distancia" | "descuento";
-  categorias: number[];
-  horario: boolean;
-  bestSellers: boolean;
-}
-
-export const initial: preferencesDTO = {
-  filter: "distancia",
-  categorias: [],
-  horario: false,
-  bestSellers: false,
-};
+import { Unit, type Community, type Ingredient } from "./global";
 
 export interface PostCommentDTO {
   post_id: string;
-  parent_comment_id?: string | null;
-  reply_to_user_id?: string | null;
+  parent_comment_id: string | null;
+  reply_to_user_id: string | null;
   content: string;
 }
 
 export interface UploadPayload {
   post_images?: UploadableFile[]; // Imágenes o video de Post
   main_image?: UploadableFile; // Imagen principal de una receta
-  step_images?: UploadableFile[]; // Imágenes de cada paso de una receta
   image_url?: UploadableFile; // Ícono de una comunidad
   banner_url?: UploadableFile; // Banner de una comunidad
 }
@@ -32,17 +17,18 @@ export interface UploadPayload {
 export interface CommunityDTO {
   name: string;
   description: string;
-  image_url: UploadableFile | string;
-  banner_url: UploadableFile | string;
+  image_url: UploadableFile | string; // String en caso de dejar una URL por defecto
+  banner_url: UploadableFile | string; // String en caso de dejar una URL por defecto
 
-  tags: number[];
+  tags: string[];
 }
 
 export interface PostDTO {
+  id?: string;
   title: string;
   content: string;
   image_urls: string[] | UploadableFile[];
-  community_id: string | null;
+  community: Community | null;
 }
 
 export interface RecipeDTO {
@@ -59,7 +45,6 @@ export interface RecipeStepDTO {
   step_number: number;
   description: string;
   estimated_time: number | null;
-  image_url: UploadableFile | string;
 }
 
 export interface RecipeIngredientDTO {

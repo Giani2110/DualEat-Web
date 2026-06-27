@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { X, Upload, MinusCircle, Camera, Star, Sparkles } from 'lucide-react';
 
 interface Food {
-  id: number;
-  local_id: number;
-  category_id: number;
-  local_menu_category_id?: number;
+  id: string;
+  local_id: string;
+  category_id: string;
+  local_menu_category_id?: string;
   name: string;
   price: number;
   description: string | null;
@@ -16,7 +16,7 @@ interface Food {
 }
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
   icon_url: string;
 }
@@ -31,9 +31,13 @@ interface EditFoodModalProps {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps) => {
-  const isNewFood = !food || food.id === 0;
+  const isNewFood = !food;
 
   const [formData, setFormData] = useState<Partial<Food> | null>(food);
+
+  console.log("FORM DATA")
+  console.log(formData)
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -42,10 +46,11 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
     setFormData(food);
   }, [food]);
 
-  if (!food || !formData) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+
+    console.log(e.target.value)
 
     let typedValue: string | number | null = value;
     if (name === 'price') {
@@ -55,20 +60,14 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
 
     // Actualizar para manejar category_id como local_menu_category_id
     if (name === 'category_id') {
-      const categoryId = parseInt(value, 10);
-      if (isNaN(categoryId)) {
-        setFormData(prev => ({
-          ...prev,
-          category_id: 0,
-          local_menu_category_id: undefined
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          category_id: 0, // Limpiar category_id
-          local_menu_category_id: categoryId
-        }));
-      }
+      const categoryId = value;
+
+      setFormData(prev => ({
+        ...prev,
+        category_id: categoryId,
+        local_menu_category_id: categoryId
+      }));
+
       return;
     }
 
@@ -197,7 +196,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
               >
-                {formData.image_url ? (
+                {formData?.image_url ? (
                   <>
                     <img
                       src={formData.image_url}
@@ -225,13 +224,13 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                 <label className="group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-[#B53325] to-[#d94a36] hover:from-[#d94a36] hover:to-[#B53325] text-white font-semibold rounded-xl cursor-pointer transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                   <div className="flex items-center space-x-2">
                     <Upload className="w-5 h-5" />
-                    <span>{formData.image_url ? 'Cambiar Foto' : 'Subir Foto'}</span>
+                    <span>{formData?.image_url ? 'Cambiar Foto' : 'Subir Foto'}</span>
                   </div>
                   <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
                   <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 </label>
 
-                {formData.image_url && (
+                {formData?.image_url && (
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, image_url: null }))}
@@ -259,7 +258,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                     type="text"
                     id="name"
                     name="name"
-                    value={formData.name || ''}
+                    value={formData?.name || ''}
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-[#B53325]/50 focus:border-[#B53325]/50 transition-all duration-200 backdrop-blur-sm"
@@ -277,7 +276,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                       type="number"
                       id="price"
                       name="price"
-                      value={formData.price || ''}
+                      value={formData?.price || ''}
                       onChange={handleChange}
                       required
                       step="0.01"
@@ -294,7 +293,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                   <select
                     id="category_id"
                     name="category_id"
-                    value={formData.local_menu_category_id || ''}
+                    value={formData?.local_menu_category_id || ''}
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white focus:ring-2 focus:ring-[#B53325]/50 focus:border-[#B53325]/50 transition-all duration-200 backdrop-blur-sm"
@@ -316,7 +315,7 @@ const EditFoodModal = ({ food, categories, onClose, onSave }: EditFoodModalProps
                   <textarea
                     id="description"
                     name="description"
-                    value={formData.description || ''}
+                    value={formData?.description || ''}
                     onChange={handleChange}
                     rows={6}
                     className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-[#B53325]/50 focus:border-[#B53325]/50 transition-all duration-200 backdrop-blur-sm resize-none"

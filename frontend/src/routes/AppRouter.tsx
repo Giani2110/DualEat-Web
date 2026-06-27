@@ -1,9 +1,4 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  createBrowserRouter,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { appRoutes } from "@/api/constants/constants";
 import { Toaster } from "react-hot-toast";
 
@@ -18,8 +13,6 @@ import { NotificationsProvider } from "@context/other/NotificationsProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { LoadingScreen } from "@/pages";
-
-const router = createBrowserRouter(appRoutes);
 
 const queryClient = new QueryClient({
   defaultOptions: {

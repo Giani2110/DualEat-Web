@@ -5,10 +5,6 @@ import { handleApiError } from "@/utils/apiErrorHandler";
 
 import toast from "react-hot-toast";
 
-type ResponsePick = Pick<Response, "success" | "message" | "status"> & {
-  available?: boolean;
-};
-
 // --- 1. OBTENER COMUNIDADES DEL USUARIO ---
 // ===================================
 export const getUserCommunities = async (): Promise<
@@ -29,7 +25,7 @@ export const getUserCommunities = async (): Promise<
 
 // --- 2. OBTENER COMUNIDAD POR NOMBRE ---
 // ===================================
-export const getByName = async (name: string): Promise<ResponsePick> => {
+export const getByName = async (name: string): Promise<Response> => {
   try {
     const response = await axiosInterceptor.get(`/community/name`, {
       params: { name },
@@ -38,7 +34,7 @@ export const getByName = async (name: string): Promise<ResponsePick> => {
     return {
       success: response.data.success ?? true,
       status: response.status,
-      available: response.data.available,
+      data: response.data.data,
       message: response.data.message,
     };
   } catch (err: any) {
