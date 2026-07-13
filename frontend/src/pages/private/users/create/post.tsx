@@ -149,10 +149,30 @@ export default function CreatePost() {
   }, [editor]);
 
   const { mutate: mutatePost, isPending } = useMutation({
-    mutationFn: (data: PostDTO) => {
+    mutationFn: async () => {
+      let urls: string[] = [];
+
+      if (image_urls.length > 0) {
+        const uploadPayload = { post_images: image_urls };
+
+        const response = await upload(uploadPayload);
+
+        if (response?.success && response?.data) {
+          urls = response.data.post_images || [];
+        }
+      }
+
+      const post: PostDTO = {
+        id: isEditing ? usePostCreateStore.getState().post.id : undefined,
+        title: title.trim(),
+        content: content.trim(),
+        image_urls: urls,
+        community: community,
+      };
+
       return toast.promise(
         (async () => {
-          const res = await createPost(data);
+          const res = await createPost(post);
           if (!res.success) {
             throw new Error(res.message || "Error al crear el post");
           }
@@ -221,29 +241,7 @@ export default function CreatePost() {
       toast.dismiss();
       navigate(ROUTES.USER.CREATE_RECIPE);
     } else {
-      const files = image_urls;
-
-      let urls: string[] = [];
-
-      if (files.length > 0) {
-        const uploadPayload = { post_images: files };
-
-        const response = await upload(uploadPayload);
-
-        if (response?.success && response?.data) {
-          urls = response.data.post_images || [];
-        }
-      }
-
-      const post: PostDTO = {
-        id: isEditing ? usePostCreateStore.getState().post.id : undefined,
-        title: title,
-        content: content,
-        image_urls: urls,
-        community: community,
-      };
-
-      mutatePost(post);
+      mutatePost();
     }
   };
 
@@ -266,7 +264,7 @@ export default function CreatePost() {
   });
 
   return (
-    <main className="h-full mx-auto flex flex-col px-6 md:px-16 gap-y-6 my-5 bg-bg-semi-white">
+    <main className="h-full flex flex-col px-6 md:px-16 gap-y-6 my-5 bg-bg-semi-white">
       <h1 className="text-[28px] text3 tracking-tight font-bold">
         {isEditing ? "Editar post" : "Crear post"}
       </h1>
@@ -274,6 +272,7 @@ export default function CreatePost() {
       <div className="flex flex-row items-center gap-x-2">
         <button
           type="button"
+          disabled={isEditing}
           onClick={() => setOpen(!open)}
           className="flex items-center gap-x-2.5 bgsemi-white border border-[#e5a657] px-4 py-2 rounded-full cursor-pointer w-fit"
         >
@@ -293,6 +292,7 @@ export default function CreatePost() {
         </button>
         <button
           onClick={() => setWithRecipe(!withRecipe)}
+          disabled={isEditing}
           className={`flex cursor-pointer flex-row border items-center justify-between px-4 gap-x-2 py-2 rounded-full cursor-pointer 
             ${withRecipe ? "border-[#e5a657]" : "border-dashed border-[#dbdbdb]"}
             ${isEditing && "hidden"}`}
@@ -353,7 +353,6 @@ export default function CreatePost() {
         )}
 
         {/* INPUT CONTENIDO */}
-
         <div className="border border-[#dbdbdb] focus-within:border-[#e5a657] focus-within:border-2 rounded-[10px] overflow-hidden flex flex-col resize-y min-h-[100px] max-h-[400px]">
           <CustomToolbar
             editor={editor}

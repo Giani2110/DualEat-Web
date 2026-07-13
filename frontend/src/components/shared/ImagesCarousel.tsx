@@ -1,7 +1,9 @@
 import type { UploadableFile } from "@/interface/global.dto";
 import { getMimeType, getMimeTypeFromUrl } from "@/utils/capitalize";
-import { Images, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images, Trash2 } from "lucide-react";
 import { useState } from "react";
+
+import { motion } from "framer-motion";
 
 interface ImagesCarouselProps {
   media: UploadableFile[];
@@ -44,136 +46,124 @@ export default function ImagesCarousel({
 
   return (
     <div className="w-full aspect-[6/4] md:aspect-[7/2] overflow-hidden rounded-[10px] relative">
-      <div className="absolute inset-0 blur-md scale-150 brightness-30 z-0">
-        {media.map((item, index) => {
-          const mType =
-            getMimeTypeFromUrl(item.uri || "") ||
-            (item.file ? getMimeType(item.file.type) : "");
-          return (
-            <div
-              key={item.uri}
-              className={`absolute inset-0 w-full h-full ${
-                index === currentImageIndex ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              {mType === "video" ? (
-                <video
-                  src={item.uri}
-                  muted
-                  loop
-                  autoPlay={index === currentImageIndex}
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              ) : mType === "image" ? (
-                <div
-                  className="w-full h-full bg-cover bg-center"
-                  style={{ backgroundImage: `url(${item.uri})` }}
-                />
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
+      {/* BACKGROUND DE LA IMAGEN */}
+      <div className="absolute inset-0 blur-md scale-150 brightness-30 z-0 overflow-hidden">
+        <motion.div
+          className="flex flex-row w-full h-full"
+          animate={{ x: `-${currentImageIndex * 100}%` }}
+          transition={{ type: "spring", stiffness: 260, damping: 30 }}
+        >
+          {media.map((item, index) => {
+            const mType =
+              getMimeTypeFromUrl(item.uri || "") ||
+              (item.file ? getMimeType(item.file.type) : "");
 
-      <div className="absolute inset-0 w-full h-full z-10">
-        {media.map((item, index) => {
-          const mType =
-            getMimeTypeFromUrl(item.uri || "") ||
-            (item.file ? getMimeType(item.file.type) : "");
-          return (
-            <div
-              key={item.uri}
-              className={`absolute inset-0 w-full h-full ${
-                index === currentImageIndex
-                  ? "opacity-100 z-10"
-                  : "opacity-0 z-0 pointer-events-none"
-              }`}
-            >
-              <a
-                href={item.uri}
-                target="_blank"
-                onClick={(e) => e.stopPropagation()}
-                rel="noopener noreferrer"
-                className="block w-full h-full"
-              >
+            return (
+              <div key={item.uri} className="w-full h-full flex-shrink-0">
                 {mType === "video" ? (
                   <video
                     src={item.uri}
-                    controls
-                    autoPlay={index === currentImageIndex}
                     muted
+                    loop
+                    autoPlay={index === currentImageIndex}
                     playsInline
-                    className="w-full h-full object-contain relative z-10"
+                    className="w-full h-full object-cover"
                   />
                 ) : mType === "image" ? (
-                  <img
-                    className="w-full h-full object-contain relative z-10"
-                    alt={`Preview ${index + 1}`}
-                    src={item.uri}
+                  <div
+                    className="w-full h-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${item.uri})` }}
                   />
-                ) : (
-                  <audio controls className="w-full">
-                    <source src={item.uri} />
-                  </audio>
-                )}
-              </a>
-            </div>
-          );
-        })}
+                ) : null}
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      {/* Foreground slide container */}
+      <div className="absolute inset-0 w-full h-full z-10 overflow-hidden">
+        <motion.div
+          className="flex flex-row w-full h-full"
+          animate={{ x: `-${currentImageIndex * 100}%` }}
+          transition={{ type: "spring", stiffness: 260, damping: 30 }}
+        >
+          {media.map((item, index) => {
+            const mType =
+              getMimeTypeFromUrl(item.uri || "") ||
+              (item.file ? getMimeType(item.file.type) : "");
+
+            return (
+              <div
+                key={item.uri}
+                className="w-full h-full flex-shrink-0 relative"
+              >
+                <a
+                  href={item.uri}
+                  target="_blank"
+                  onClick={(e) => e.stopPropagation()}
+                  onDragStart={(e) => e.preventDefault()}
+                  draggable={false}
+                  rel="noopener noreferrer"
+                  className="block w-full h-full select-none"
+                >
+                  {mType === "video" ? (
+                    <video
+                      src={item.uri}
+                      controls
+                      autoPlay={index === currentImageIndex}
+                      muted
+                      playsInline
+                      className="w-full h-full object-contain relative z-10"
+                    />
+                  ) : mType === "image" ? (
+                    <img
+                      className="w-full h-full object-contain relative z-10 select-none"
+                      alt={`Preview ${index + 1}`}
+                      src={item.uri}
+                      draggable={false}
+                    />
+                  ) : (
+                    <audio controls className="w-full">
+                      <source src={item.uri} />
+                    </audio>
+                  )}
+                </a>
+              </div>
+            );
+          })}
+        </motion.div>
       </div>
 
       {/* Flechas de navegación */}
       {media.length > 1 && (
-        <>
+        <div className="w-full h-full flex flex-row justify-between items-center px-8 *:z-20">
           <button
             type="button"
+            disabled={currentImageIndex === 0}
             onClick={(e) => {
               e.stopPropagation();
               prevImage();
             }}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center cursor-pointer justify-center transition-colors duration-200"
+            className="cursor-pointer p-1 bg-black/70 hover:bg-black/30 rounded-full transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Imagen anterior"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ChevronLeft color="#fff" />
           </button>
 
           <button
             type="button"
+            disabled={currentImageIndex === media.length - 1}
             onClick={(e) => {
               e.stopPropagation();
               nextImage();
             }}
-            className="absolute cursor-pointer right-4 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 bg-black/70 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors duration-200"
+            className="cursor-pointer p-1 bg-black/70 hover:bg-black/30 rounded-full transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Siguiente imagen"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <ChevronRight color="#fff" />
           </button>
-        </>
+        </div>
       )}
 
       {/* Botón para añadir más imágenes */}

@@ -66,7 +66,7 @@ export default function CommunitySearch({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="flex flex-col bg-bg-semi-white p-6 overflow-hidden rounded-xl w-[calc(100vw-50px)]  md:max-w-[80vw] lg:max-w-[50vw] h-[85vh] md:h-[75vh] transition-all duration-300"
+      className="flex flex-col bg-bg-semi-white p-6 noScroll overflow-y-auto rounded-xl w-[calc(100vw-50px)] md:max-w-[80vw] lg:max-w-[50vw] h-[85vh] md:h-[75vh] transition-all duration-300"
     >
       <section className="flex flex-col gap-y-4 flex-1">
         <div className="flex flex-row items-center justify-between">

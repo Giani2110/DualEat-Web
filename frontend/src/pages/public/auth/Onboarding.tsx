@@ -8,27 +8,11 @@ import { useAuth } from "@hooks/useAuth";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
-import "@assets/scss/public/auth/auth.scss";
+import "@assets/scss/public/auth.scss";
 import { useQuery } from "@tanstack/react-query";
-import {
-  getFoodCategories,
-  getTagCategories,
-} from "@/services/category.api";
+import { getFoodCategories, getTags } from "@/services/category.api";
+import type { CommunityTag, FoodCategory } from "@/interface/global";
 
-interface FoodCategory {
-  id: number;
-  name: string;
-  tipo: "Tipos_de_comida" | "Estilos_o_dietas" | "Origen_y_cultura";
-}
-
-interface CommunityTag {
-  id: number;
-  name: string;
-  category?: {
-    id: number;
-    name: string;
-  };
-}
 export default function Onboarding() {
   const navigate = useNavigate();
 
@@ -54,7 +38,7 @@ export default function Onboarding() {
     queryKey: ["categories", "food"],
     queryFn: async () => {
       const response = await getFoodCategories();
-      return response?.data || [];
+      return response?.data as FoodCategory[];
     },
     staleTime: 1000 * 60 * 30, // 30 minutos
   });
@@ -62,37 +46,25 @@ export default function Onboarding() {
   const { data: tagCategories = [], isLoading: loadingTags } = useQuery({
     queryKey: ["categories", "tags"],
     queryFn: async () => {
-      const response = await getTagCategories();
-      return response?.data || [];
+      const response = await getTags();
+      return response?.data as CommunityTag[];
     },
     staleTime: 1000 * 60 * 30, // 30 minutos
   });
 
-  const foodC: FoodCategory[] = (foodCategories as FoodCategory[]) || [];
-  const communityC: CommunityTag[] = (tagCategories as CommunityTag[]) || [];
-
   const isLoading = loadingFood || loadingTags;
 
-  const togglePreference = (prefName: string) => {
+  const togglePreference = (id: string) => {
     setPreferences((prev) => {
-      const isSelected = prev.includes(prefName);
-      let updated = [];
-
-      if (isSelected) {
-        updated = prev.filter((p) => p !== prefName);
+      if (prev.includes(id)) {
+        return prev.filter((p) => p !== id);
       } else {
-        updated = [...prev, prefName];
-        const existsInBoth =
-          foodC.some((c) => c.name === prefName) &&
-          communityC.some((t) => t.name === prefName);
-
-        if (existsInBoth && !updated.includes(prefName)) {
-          updated.push(prefName);
-        }
+        return [...prev, id];
       }
-      return updated;
     });
   };
+
+  console.log(preferences)
 
   const handleSubmit = async () => {
     if (index === 2 && (!name || preferences.length < 3)) {
@@ -107,19 +79,24 @@ export default function Onboarding() {
       return;
     }
 
-    const foodPreferenceIds = preferences
-      .map((prefName) => foodC.find((cat) => cat.name === prefName)?.id)
-      .filter((id) => id !== undefined) as number[];
+    if (!tempToken) {
+      toast.error("Error: Token temporal no encontrado.");
+      navigate(ROUTES.AUTH.LOGIN, { replace: true });
+      return;
+    }
 
-    const communityPreferenceIds = preferences
-      .map((prefName) => communityC.find((tag) => tag.name === prefName)?.id)
-      .filter((id) => id !== undefined) as number[];
+    const foodPreferences = preferences.filter((id) =>
+      foodCategories.some((c) => c.id === id),
+    );
+    const communityPreferences = preferences.filter((id) =>
+      tagCategories.some((t) => t.id === id),
+    );
 
     try {
       const response = await completeProfile(
         name,
-        foodPreferenceIds,
-        communityPreferenceIds,
+        foodPreferences,
+        communityPreferences,
         tempToken!,
       );
 
@@ -183,14 +160,14 @@ export default function Onboarding() {
                     Categorías de Comida
                   </h3>
                   <div className="scroll grid-cols-2 md:grid-cols-3 gap-2">
-                    {foodC.map((category) => (
+                    {foodCategories.map((category) => (
                       <button
                         key={`food-cat-${category.id}`}
                         type="button"
-                        onClick={() => togglePreference(category.name)}
+                        onClick={() => togglePreference(category.id)}
                         className={`scrollDiv border transition-colors
                           ${
-                            preferences.includes(category.name)
+                            preferences.includes(category.id)
                               ? "text-yellow border-yellow"
                               : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                           }`}
@@ -202,20 +179,20 @@ export default function Onboarding() {
                 </div>
               )}
 
-              {index === 2 && communityC.length > 0 && (
+              {index === 2 && tagCategories.length > 0 && (
                 <div>
                   <h3 className="underline text-[14.5px] mb-3 text5">
                     Tags de Comunidad
                   </h3>
                   <div className="scroll grid-cols-2 md:grid-cols-3 gap-2 ">
-                    {communityC.map((tag) => (
+                    {tagCategories.map((tag) => (
                       <button
                         key={`comm-tag-${tag.id}`}
                         type="button"
-                        onClick={() => togglePreference(tag.name)}
+                        onClick={() => togglePreference(tag.id)}
                         className={`scrollDiv border transition-colors
                             ${
-                              preferences.includes(tag.name)
+                              preferences.includes(tag.id)
                                 ? "text-yellow border-yellow"
                                 : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                             }`}

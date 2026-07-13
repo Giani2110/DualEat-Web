@@ -73,8 +73,8 @@ export const register = async (
 // ===================================
 export const completeProfile = async (
   name: string,
-  foodPreferences: number[],
-  communityPreferences: number[],
+  foodPreferences: string[],
+  communityPreferences: string[],
   tempToken: string,
 ): Promise<AuthResponse> => {
   try {

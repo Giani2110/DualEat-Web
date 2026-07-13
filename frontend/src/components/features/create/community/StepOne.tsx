@@ -84,23 +84,23 @@ export default function StepOne({ community, setCommunity }: StepProps) {
 
   return (
     <section className="flex flex-col h-full flex-1 gap-y-2">
-      <h1 className="font-bold text-[22px] text-text-3">
+      <h1 className="font-bold text-lg text-text-3">
         ¿De qué se trata tu comunidad?
       </h1>
-      <p className="font-outfit-light text-[16px] text-text-4">
+      <p className="text-sm text-text-4">
         Selecciona 3 categorías que definan los intereses principales de los
         miembros de tu comunidad. Esto ayudará a que encuentren contenido
         relevante fácilmente.
       </p>
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-full w-full">
-          <Loader size={28} color="#e5a657" />
+        <div className="flex flex-1 items-center justify-center h-full w-full">
+          <Loader size={20} color="#e5a657" />
         </div>
       ) : (
         sections.map((section) => (
           <div className="mb-3" key={section.category_id}>
-            <h2 className="font-bold text-[16px] text-text-3 mb-3">
+            <h2 className="font-bold text-base text-text-3 mb-3">
               {section.title}
             </h2>
             <div className="flex flex-wrap gap-2 w-[90%]">
@@ -118,7 +118,7 @@ export default function StepOne({ community, setCommunity }: StepProps) {
                     }`}
                   >
                     <span
-                      className={`font-outfit-light text-[14px] ${
+                      className={`font-outfit-light text-sm ${
                         isSelected ? "text-white" : "text-text-4"
                       }`}
                     >

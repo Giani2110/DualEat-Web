@@ -1,6 +1,6 @@
-type Role = "USER" | "ADMIN";
+export type Role = "USER" | "ADMIN";
 
-type SuscriptionStatus = "ACTIVE" | "INACTIVE" | "TRIAL" | "CANCELED";
+export type SuscriptionStatus = "ACTIVE" | "INACTIVE" | "TRIAL" | "CANCELED";
 
 export interface Response<T = unknown> {
   success: boolean;
@@ -47,9 +47,7 @@ export interface User {
   slug: string;
   name: string;
   email: string;
-  avatar_url:
-    | string
-    | "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png";
+  avatar_url: string;
   role: Role;
   active: boolean;
   verified: boolean;
@@ -58,9 +56,8 @@ export interface User {
   subscription_status: SuscriptionStatus;
   trial_ends_at: Date | null;
   notificationsPref: NotificationFrequency;
-  workplaces: Workplace[];
 
-  preferences: UserPreference[];
+  preferences?: UserPreference[];
 
   created_at: Date;
   updated_at: Date;

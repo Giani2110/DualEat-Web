@@ -8,7 +8,7 @@ import { ROUTES } from "@/api/constants/constants";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 
-import "@assets/scss/public/auth/auth.scss";
+import "@assets/scss/public/auth.scss";
 import { getDeviceId } from "@/utils/device";
 
 const Register = () => {

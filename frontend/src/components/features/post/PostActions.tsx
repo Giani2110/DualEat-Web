@@ -1,9 +1,7 @@
 import type { ContentType, Post, PostComment } from "@/interface/global";
-import React, { useEffect } from "react";
-
-import { createVote } from "@services/vote.api";
 
 import { Link, MessageCircle } from "lucide-react";
+import { useVote } from "@/hooks/api/vote/useVote";
 
 type Content = Post | PostComment;
 
@@ -14,7 +12,7 @@ type PostActionsProps = {
 };
 
 const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
-  //const { mutate: vote } = useVote();
+  const { mutate: vote } = useVote();
 
   const isVoteUP = content?.user_vote === "UP";
   const isVoteDown = content?.user_vote === "DOWN";
@@ -22,14 +20,14 @@ const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
   const totalLikes = (content?.votes_up ?? 0) - (content?.votes_down ?? 0);
 
   const handleVoteUp = () => {
-    //vote({ type: "UP", content_id: content.id, content_type: type });
+    vote({ type: "UP", content_id: content.id, content_type: type });
   };
 
   const handleVoteDown = () => {
-    //vote({ type: "DOWN", content_id: content.id, content_type: type });
+    vote({ type: "DOWN", content_id: content.id, content_type: type });
   };
 
-  const size = type === "POST" ? 22 : 20;
+  const size = type === "POST" ? 20 : 18;
 
   const styles = {
     BUTTON:
@@ -68,7 +66,7 @@ const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
             e.stopPropagation();
             handleVoteUp();
           }}
-          className={`flex items-center justify-center group p-0.5 rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-200 ${
+          className={`flex items-center justify-center group rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-200 ${
             isVoteUP ? "hover:bg-gray-400" : "hover:bg-gray-200"
           }`}
         >
@@ -107,7 +105,7 @@ const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
             e.stopPropagation();
             handleVoteDown();
           }}
-          className={`flex items-center justify-center group p-0.5 rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-200 ${
+          className={`flex items-center justify-center group rounded-full cursor-pointer rounded-full active:scale-105 transition-transform duration-200 ${
             isVoteDown ? "hover:bg-gray-400" : "hover:bg-gray-200"
           }`}
         >
@@ -140,9 +138,9 @@ const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
             }}
             className="flex flex-row items-center gap-x-2 px-4 border border-gray-300"
           >
-            <MessageCircle size={18} color="#707070" />
+            <MessageCircle size={16} color="#707070" />
 
-            <p className="text-[14px] font-bold text-text-4">
+            <p className="text-sm font-bold text-text-4">
               {content?.total_comments ?? 0}
             </p>
           </button>
@@ -155,9 +153,9 @@ const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
               borderRadius: 999,
               minHeight: styles.HEIGHT_BUTTON,
             }}
-            className="px-4 border hover:bg-[#3578e4] transition-all duration-200 group cursor-pointer border-gray-300"
+            className="px-2 border hover:bg-[#3578e4] transition-all duration-200 group cursor-pointer border-gray-300"
           >
-            <Link size={18} className="text-text-4 group-hover:text-[#fff]" />
+            <Link size={16} className="text-text-4 group-hover:text-[#fff]" />
           </button>
         </div>
       )}
@@ -166,41 +164,3 @@ const PostActions = ({ content, type, copyToClipboard }: PostActionsProps) => {
 };
 
 export default PostActions;
-
-/** <div
-        onClick={(e) => {
-          e.stopPropagation();
-          const link = `${window.location.origin}/c/${Post.community.slug}/post/${Post.user.slug}/${Post.slug}`;
-          navigator.clipboard
-            .writeText(link)
-            .then(() => {
-              toast.success("Enlace copiado al portapapeles");
-            })
-            .catch((err) => {
-              console.error("Error al copiar el enlace:", err);
-            });
-        }}
-        className="flex items-center cursor-pointer transition-transform duration-50 active:scale-105 gap-2 border text4 border-[#bebebe]/50 bg-[#f5f5f5] py-1 px-2.5 rounded-full"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="lucide lucide-share2-icon lucide-share-2"
-        >
-          <circle cx="18" cy="5" r="3" />
-          <circle cx="6" cy="12" r="3" />
-          <circle cx="18" cy="19" r="3" />
-          <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-          <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-        </svg>
-        <span className="text-[14px] text4 tracking-tight font-bold">
-          Compartir
-        </span>
-      </div> */

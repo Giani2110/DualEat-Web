@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 import Navbar from "@layout/navbar/Navbar";
-import HeaderUSER from "@layout/navbar/NavbarUI";
+import NavbarUser from "@layout/navbar/NavbarUI";
 import UserSidebar from "@/components/layout/UserSidebar";
 import Footer from "@layout/footer/Footer";
 
@@ -12,6 +12,7 @@ import { matchPath } from "react-router-dom";
 
 import { appRoutes } from "@/api/constants/constants";
 import BusinessSidebar from "@/components/layout/UISidebarLocal";
+import { useScroll, useSpring, motion } from "framer-motion";
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,7 +21,17 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, loading } = useAuth();
 
-  // Verificar si la ruta actual coincide con alguna ruta válida
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { damping: 15, stiffness: 100 });
+
+  const [isOpen, setIsOpen] = useState<boolean>(
+    localStorage.getItem("sidebar") === "true",
+  );
+
+  useEffect(() => {
+    localStorage.setItem("sidebar", String(isOpen));
+  }, [isOpen]);
+
   const isValidRoute = appRoutes.some((route) =>
     matchPath(route.path, location.pathname),
   );
@@ -40,20 +51,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
 
     if (user.is_business === false) {
-      return <UserSidebar user={user}>{children}</UserSidebar>;
+      return (
+        <UserSidebar isOpen={isOpen} setIsOpen={setIsOpen} user={user}>
+          {children}
+        </UserSidebar>
+      );
     }
     if (user.is_business === true) {
       return <BusinessSidebar>{children}</BusinessSidebar>;
     }
-
   };
 
   return (
     <>
-      {user && !is404 && user.role !== "ADMIN" ? (
-        <HeaderUSER />
+      {!user && (
+        <motion.div
+          style={{ scaleX: scaleX, originX: 0, height: 2 }}
+          className="fixed gradient top-0 w-full z-50"
+        />
+      )}
+
+      {user && user.role !== "ADMIN" ? (
+        <NavbarUser isOpen={isOpen} setIsOpen={setIsOpen} user={user} />
       ) : (
-        !is404 && !user && <Navbar />
+        !user && <Navbar />
       )}
       {renderContent()}
       {!loading && !user && <Footer />}

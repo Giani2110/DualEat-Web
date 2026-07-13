@@ -6,9 +6,7 @@ import { ROUTES } from "@/api/constants/constants";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
 
-import Logo from "@assets/images/icon/Logo_DualEat.png";
-
-import "@assets/scss/public/error/error.scss";
+import "@assets/scss/public/error.scss";
 
 const NotFound = () => {
   const { user } = useAuth();
@@ -417,7 +415,7 @@ const NotFound = () => {
     // ========================================
     // REDIMENSIONAR (con debounce)
     // ========================================
-    let resizeTimeout: NodeJS.Timeout;
+    let resizeTimeout: any;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -455,44 +453,19 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen E404 flex flex-col">
-      {/* Header */}
-      <header className="px-4 mx-5 pt-5 pb-4 sm:pb-5 border-b border-[#2f2f2f]">
-        <div className="flex justify-between items-center">
-          <div
-            role="button"
-            onClick={() => handleNavigate()}
-            className="flex gap-2 items-center cursor-pointer hover:scale-104 transition-all duration-200"
-          >
-            <img src={Logo} alt="Logo de DualEat" className="w-6 h-6" />
-            <h1 className="text-base sm:text-[17px] md:text-[19px] font-bold text2">
-              DualEat
-            </h1>
-          </div>
-
-          <img
-            src={
-              user?.avatar_url ||
-              "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
-            }
-            alt="Imagen de perfil"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#707070] object-cover cursor-pointer hover:scale-105 transition-all duration-200"
-          />
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="flex-1 px-4 sm:px-6 md:px-8 lg:px-10 flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto w-full py-8 sm:py-12">
           {/* Text Content */}
           <div className="flex flex-col order-2 lg:order-1">
-            <div className="flex items-center gap-2 pb-4 sm:pb-5 text1">
+            <div className="flex items-center gap-2 pb-4 sm:pb-5 text-text-1">
               <div
                 ref={dotRef}
                 className="rounded-full w-2 h-2 bg-[#ff6111] flex-shrink-0"
               />
               <span className="text-xs tracking-wide">ERROR</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text2 mb-2 sm:mb-3 leading-tight">
+            <h2 className="text-text-1 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text2 mb-2 sm:mb-3 leading-tight">
               <span className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
                 404
               </span>

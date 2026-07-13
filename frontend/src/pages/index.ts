@@ -2,8 +2,7 @@
 export { default as LandingHome } from "./public/landing/Home";
 export { default as AboutUs } from "./public/landing/AboutUs";
 export { default as LandingBusiness } from "./public/landing/Business";
-export { default as ChangeLog } from "./public/legal/ChangeLog";
-export { default as TermsConditions } from "./public/legal/TermsConditions";
+export { default as TermsConditions } from "./public/landing/TermsConditions";
 
 // Auth
 export { default as Login } from "./public/auth/Login";

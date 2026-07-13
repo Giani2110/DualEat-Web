@@ -1,31 +1,27 @@
+import type { ContentType, Response, VoteType } from "@/interface/global";
+import { handleApiError } from "@/utils/apiErrorHandler";
 import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 
-import axios from "axios";
-
-interface ResponseVote<T = unknown> {
-  success: boolean;
-  data?: T;
-  status: number;
-}
-
+// --- 1. CREAR UN VOTO ---
+// ===================================
 export const createVote = async (
-  voteType: string,
+  type: VoteType,
   content_id: string,
-  content_type: string,
-): Promise<ResponseVote | null> => {
+  content_type: ContentType,
+): Promise<Response> => {
   try {
-    const { data } = await axiosInterceptor.post("/vote/create", {
-      voteType,
+    const response = await axiosInterceptor.post("/vote/create", {
+      type,
       content_id,
       content_type,
     });
 
-    console.log(data);
-    return data as ResponseVote;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      console.log(err.response?.data?.message || "Error al obtener recetas");
-    }
-    return null;
+    return {
+      success: response.data.success ?? true,
+      status: response.status,
+      data: response.data.data,
+    };
+  } catch (err: any) {
+    return handleApiError(err);
   }
 };

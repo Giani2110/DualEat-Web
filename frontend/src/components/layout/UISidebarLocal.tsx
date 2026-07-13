@@ -43,7 +43,6 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
       label: "Menú",
       icon: ClipboardList,
       path: "/business/menu",
-
     },
     {
       id: "employees",
@@ -69,7 +68,6 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
       icon: Settings,
       path: "/business/settings",
     },
-
   ];
 
   const subscriptionItem = {
@@ -90,10 +88,11 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
   const isSubscriptionActive = isActiveRoute(subscriptionItem.path);
 
   return (
-    <div className="min-h-screen bgFood2">
+    <div className="min-h-screen">
       <div
-        className={`fixed left-0 top-[60px] h-[calc(100vh-60px)] bg-gray-900 border-r border-gray-700 z-40 transition-all duration-300 ease-in-out ${isCollapsed ? "w-16" : "w-64"
-          } shadow-lg`}
+        className={`fixed left-0 top-[60px] h-[calc(100vh-60px)] bg-text-3 border-r border-gray-700 z-40 transition-all duration-300 ease-in-out ${
+          isCollapsed ? "w-16" : "w-64"
+        } shadow-lg`}
       >
         <div className="flex flex-col h-full">
           {/* User Info */}
@@ -139,17 +138,19 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
                     title={isCollapsed ? item.label : ""}
                     className={`group flex items-center rounded-xl text-sm font-medium transition-all duration-200
                       ${isCollapsed ? "justify-center px-0 py-3" : "px-3 py-3"}
-                      ${isActive
-                        ? "bg-[#B53325] text-white shadow-md"
-                        : "text-gray-400 hover:bg-gray-700 hover:text-white"
+                      ${
+                        isActive
+                          ? "bg-[#B53325] text-white shadow-md"
+                          : "text-gray-400 hover:bg-gray-700 hover:text-white"
                       }`}
                   >
                     <Icon
                       size={20}
-                      className={`flex-shrink-0 transition-colors ${isActive
-                        ? "text-white"
-                        : "text-gray-500 group-hover:text-white"
-                        }`}
+                      className={`flex-shrink-0 transition-colors ${
+                        isActive
+                          ? "text-white"
+                          : "text-gray-500 group-hover:text-white"
+                      }`}
                     />
                     {!isCollapsed && (
                       <span className="ml-3 truncate">{item.label}</span>
@@ -157,7 +158,9 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
                     {user?.subscription_status !== "ACTIVE" &&
                       (item.id === "dashboard" || item.id === "calendar") &&
                       !isCollapsed && (
-                        <span className={`bg-gradient-to-r from-amber-400 to-yellow-600 text-gray-900 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isActive ? 'ml-2' : 'ml-auto'}`}>
+                        <span
+                          className={`bg-gradient-to-r from-amber-400 to-yellow-600 text-gray-900 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isActive ? "ml-2" : "ml-auto"}`}
+                        >
                           PRO
                         </span>
                       )}
@@ -179,17 +182,19 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
               title={isCollapsed ? subscriptionItem.label : ""}
               className={`group flex items-center w-full px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 shadow-xl
                 ${isCollapsed ? "justify-center px-0" : "px-3"}
-                ${isSubscriptionActive
-                  ? "bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 font-bold" // Active state
-                  : "bg-gradient-to-r from-amber-400 to-yellow-600 hover:from-amber-300 hover:to-yellow-500 text-gray-900 font-bold" // Default state
+                ${
+                  isSubscriptionActive
+                    ? "bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 font-bold" // Active state
+                    : "bg-gradient-to-r from-amber-400 to-yellow-600 hover:from-amber-300 hover:to-yellow-500 text-gray-900 font-bold" // Default state
                 }
                 relative overflow-hidden
               `}
             >
               <subscriptionItem.icon
                 size={20}
-                className={`flex-shrink-0 transition-colors ${isSubscriptionActive ? "text-gray-900" : "text-gray-900"
-                  }`}
+                className={`flex-shrink-0 transition-colors ${
+                  isSubscriptionActive ? "text-gray-900" : "text-gray-900"
+                }`}
               />
               {!isCollapsed && (
                 <span className="ml-3 truncate">{subscriptionItem.label}</span>
@@ -197,11 +202,11 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
 
               {/* Overlay para efecto de destello / brillo */}
               <div
-                className={`absolute inset-0 opacity-20 transition-opacity duration-300 ${isSubscriptionActive ? 'bg-white' : 'hover:bg-white'
-                  }`}
-                aria-hidden="true">
-              </div>
-
+                className={`absolute inset-0 opacity-20 transition-opacity duration-300 ${
+                  isSubscriptionActive ? "bg-white" : "hover:bg-white"
+                }`}
+                aria-hidden="true"
+              ></div>
             </Link>
           </div>
           {/* Logout Button */}
@@ -220,7 +225,11 @@ const BusinessSidebar: React.FC<BusinessSidebarProps> = ({
           </div>
         </div>
       </div>
-      <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? "pl-16" : "pl-64"}`}>{children}</div>
+      <div
+        className={`transition-all duration-300 ease-in-out ${isCollapsed ? "pl-16" : "pl-64"}`}
+      >
+        {children}
+      </div>
       <LocalSupportWidget />
     </div>
   );

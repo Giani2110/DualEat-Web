@@ -27,7 +27,11 @@ export const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
 
-export const NotificationsProvider = ({children}: {children: React.ReactNode}) => {
+export const NotificationsProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { socket } = useSocket();
   const { user } = useAuth();
 
@@ -37,7 +41,11 @@ export const NotificationsProvider = ({children}: {children: React.ReactNode}) =
 
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const {data: notifications = [], refetch, isLoading} = useQuery({
+  const {
+    data: notifications = [],
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey,
     queryFn: async () => {
       const response = await getNotifications();
@@ -83,7 +91,7 @@ export const NotificationsProvider = ({children}: {children: React.ReactNode}) =
     socket.on("new_comment", onNew);
 
     // new_order
-    
+
     if (user?.is_business) {
       socket.on("new_category_local", onLocalNew);
       socket.on("new_review_local", onLocalNew);
@@ -107,11 +115,9 @@ export const NotificationsProvider = ({children}: {children: React.ReactNode}) =
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });
       const previousNotifications = queryClient.getQueryData(queryKey);
-      queryClient.setQueryData(queryKey, (
-        old: Notification[]
-      ) => {
+      queryClient.setQueryData(queryKey, (old: Notification[]) => {
         if (!old) return old;
-        
+
         return old.map((n) => ({ ...n, read: true })) as Notification[];
       });
       return { previousNotifications };
@@ -134,18 +140,24 @@ export const NotificationsProvider = ({children}: {children: React.ReactNode}) =
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousNotifications =
-        queryClient.getQueryData<Notification[]>(queryKey);
-      queryClient.setQueryData<Notification[]>(queryKey, (old) => {
-        return old ? old.filter((n) => n.id !== id) : [];
+      const previous = queryClient.getQueryData<Notification[]>(queryKey);
+
+      queryClient.setQueryData(queryKey, (old: Notification[]) => {
+        if (!old) return old;
+
+        return old.map((n) => {
+          if (n.id === id) {
+            return { ...n, read: true };
+          }
+          return n;
+        }) as Notification[];
       });
-      return { previousNotifications };
+      return { previous };
     },
     onError: (err, _, context) => {
-      if (context?.previousNotifications) {
-        queryClient.setQueryData(queryKey, context.previousNotifications);
+      if (context?.previous) {
+        queryClient.setQueryData(queryKey, context.previous);
       }
-      toast.error("Error al marcar la notificación como leída");
     },
   });
 

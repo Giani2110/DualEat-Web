@@ -87,10 +87,6 @@ export default function CreateRecipe() {
   });
 
   useEffect(() => {
-    setRecipe((prev) => ({ ...prev, total_time: total }));
-  }, [total]);
-
-  useEffect(() => {
     if (post.title === "" || post.content === "" || !post.community) {
       navigate(ROUTES.USER.CREATE_POST);
     }
@@ -203,6 +199,12 @@ export default function CreateRecipe() {
       return;
     }
 
+    if (!post) {
+      toast.error("Debes seleccionar una comunidad");
+      return;
+    }
+
+
     submitRecipe();
   };
 
@@ -240,7 +242,7 @@ export default function CreateRecipe() {
     {
       id: "time",
       icon: <Clock size={16} color="#707070" />,
-      text: `${recipe?.total_time ?? 0}min`,
+      text: `${total ?? 0}min`,
     },
     {
       id: "ingredients",
@@ -384,7 +386,7 @@ export default function CreateRecipe() {
   }, [ingredients]);
 
   return (
-    <main className="h-full mx-auto flex flex-col md:flex-row px-6 md:px-16 gap-8 py-5 bg-bg-semi-white">
+    <main className="h-full flex flex-col md:flex-row px-6 md:px-16 gap-8 py-5 bg-bg-semi-white">
       <form
         action={() => {
           handleSubmit();

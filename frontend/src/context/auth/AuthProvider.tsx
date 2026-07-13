@@ -6,31 +6,61 @@ import {
   completeProfile as authCompleteProfile,
   logout as authLogout,
 } from "@/services/auth.api";
-import type { User } from "@interface/global";
+import type {
+  NotificationFrequency,
+  Role,
+  SuscriptionStatus,
+  Workplace,
+} from "@interface/global";
 
 import { AuthContext } from "./AuthContext";
 import toast from "react-hot-toast";
 
+export interface UserSessionData {
+  id: string;
+  name: string;
+  email: string;
+  slug: string;
+  role: Role;
+  provider: string;
+  is_business: boolean;
+  active: boolean;
+  subscription_status: SuscriptionStatus;
+  trial_ends_at: Date | null;
+  avatar_url: string;
+  verified: boolean;
+  notificationsPref: NotificationFrequency;
+
+  created_at: Date;
+  updated_at: Date;
+
+  workplaces: Workplace[];
+
+  loginAt?: Date;
+  lastActivity?: Date;
+  deviceId?: string;
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserSessionData | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true);
-      try {
-        const user = await getMe();
-        setUser(user);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetch = async () => {
+    setLoading(true);
+    try {
+      const user = await getMe();
+      setUser(user);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetch();
   }, []);
 
@@ -60,8 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       );
 
-      if (response && response.user) {
-        setUser(response.user);
+      if (response && response.token) {
+        const user = await getMe();
+        setUser(user);
       }
 
       return response;
@@ -106,8 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // ===========================================
   const completeProfile = async (
     n: string,
-    f: number[],
-    c: number[],
+    f: string[],
+    c: string[],
     tt: string,
   ) => {
     setLoading(true);
@@ -128,8 +159,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       );
 
-      if (response && response.user) {
-        setUser(response.user);
+      if (response && response.token) {
+        const user = await getMe();
+        setUser(user);
       }
 
       return response;
@@ -142,9 +174,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = async () => {
-    const response = await authLogout();
-    if (response?.success) {
+    setLoading(true);
+
+    try {
+      const response = await toast.promise(
+        (async () => {
+          const res = await authLogout();
+          if (!res.success) {
+            throw new Error(res.message || "Error al cerrar sesión");
+          }
+          return res;
+        })(),
+        {
+          loading: "Cerrando sesión...",
+          success: (res) => res.message || "Sesión cerrada exitosamente",
+          error: (err) => err.message || "Error al cerrar sesión",
+        },
+      );
+
+      if (response?.success) {
+        setUser(null);
+      }
+    } catch (e: any) {
       setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 

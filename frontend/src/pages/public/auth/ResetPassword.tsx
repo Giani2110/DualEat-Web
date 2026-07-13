@@ -11,7 +11,7 @@ import { ROUTES } from "@/api/constants/constants";
 import { useNavigate } from "react-router-dom";
 import { Fingerprint, Mail, RectangleEllipsis } from "lucide-react";
 
-import "@assets/scss/public/auth/auth.scss";
+import "@assets/scss/public/auth.scss";
 
 const ResetPassword = () => {
   const [step, setStep] = useState<"email" | "code" | "password">("email");
@@ -33,7 +33,7 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let timer: number;
+    let timer: NodeJS.Timeout;
     if (resendCooldown > 0) {
       timer = setInterval(() => {
         setResendCooldown((prev) => prev - 1);
@@ -242,7 +242,7 @@ const ResetPassword = () => {
                     }`}
                 >
                   {loading ? (
-                    <Loader color="white" size="4" />
+                    <Loader color="white" size={10} />
                   ) : (
                     "Enviar código"
                   )}
@@ -309,7 +309,7 @@ const ResetPassword = () => {
                     onClick={handleBack}
                     className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full font-bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
                   >
-                    {loading ? <Loader color="white" size="4" /> : "Atrás"}
+                    {loading ? <Loader color="white" size={10} /> : "Atrás"}
                   </button>
                 ) : (
                   <button
@@ -317,7 +317,7 @@ const ResetPassword = () => {
                     className="bg-red border border-[#888888] text1 hover:brightness-90 w-full font-bold py-3 cursor-pointer rounded-[50px] transition-all duration-300"
                   >
                     {loading ? (
-                      <Loader color="white" size="4" />
+                      <Loader color="white" size={10} />
                     ) : (
                       "Validar código"
                     )}
@@ -425,7 +425,7 @@ const ResetPassword = () => {
                 >
                   {loading ? (
                     <div className="flex items-center justify-center">
-                      <Loader color="white" size="4" />
+                      <Loader color="white" size={20} />
                       {success ? (
                         <span className="ml-2">Contraseña cambiada</span>
                       ) : (

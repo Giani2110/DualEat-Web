@@ -7,7 +7,6 @@ import {
   LandingHome,
   AboutUs,
   LandingBusiness,
-  ChangeLog,
   TermsConditions,
   ProtectedRoute,
   PublicRoute,
@@ -39,6 +38,7 @@ import {
 import { AdminSupportTickets } from "@/pages/private/admin/SupportTickets";
 
 import AdminLayout from "@/layout/admin/AdminLayout";
+import SubscriptionView from "@components/shared/SubscriptionView";
 
 // 1. RUTAS
 // =========================================================
@@ -47,7 +47,6 @@ export const ROUTES = {
     HOME: "/",
     ABOUT_US: "/about-us",
     BUSINESS: "/business",
-    CHANGELOG: "/changelog",
     TERMS: "/terms",
   },
   AUTH: {
@@ -82,6 +81,7 @@ export const ROUTES = {
       `/profile/${user_id}/${user_slug}`,
 
     NOTIFICATIONS: "/notifications",
+    SUBSCRIPTION: "/subscription",
   },
   ADMIN: {
     BUSINESS_CREATION: "/admin/business-creation",
@@ -117,11 +117,7 @@ export const appRoutes = [
   },
   {
     path: ROUTES.PUBLIC.ABOUT_US,
-    element: (
-      <PublicRoute>
-        <AboutUs />
-      </PublicRoute>
-    ),
+    element: <AboutUs />,
   },
   {
     path: ROUTES.PUBLIC.BUSINESS,
@@ -132,20 +128,8 @@ export const appRoutes = [
     ),
   },
   {
-    path: ROUTES.PUBLIC.CHANGELOG,
-    element: (
-      <PublicRoute>
-        <ChangeLog />
-      </PublicRoute>
-    ),
-  },
-  {
     path: ROUTES.PUBLIC.TERMS,
-    element: (
-      <PublicRoute>
-        <TermsConditions />
-      </PublicRoute>
-    ),
+    element: <TermsConditions />,
   },
 
   // Auth
@@ -257,6 +241,10 @@ export const appRoutes = [
         <Notifications />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: ROUTES.USER.SUBSCRIPTION,
+    element: <SubscriptionView />,
   },
 
   // Admin

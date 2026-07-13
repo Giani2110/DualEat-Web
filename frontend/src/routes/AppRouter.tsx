@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 
 import ScrollToTop from "@components/shared/ScrollToTop";
 import Layout from "@layout/layout";
-import NotFound from "@pages/public/error/NotFound";
+import NotFound from "@/pages/public/landing/NotFound";
 
 import { AuthProvider } from "@context/auth/AuthProvider";
 import { SocketProvider } from "@context/other/SocketContext";
@@ -34,15 +34,17 @@ function AppRoutesContent() {
   }
 
   return (
-    <Layout>
-      <Routes>
-        {appRoutes.map(({ path, element }, index) => (
-          <Route key={index} path={path} element={element} />
-        ))}
-        <Route path="/404" element={<NotFound />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Layout>
+    <>
+      <Layout>
+        <Routes>
+          {appRoutes.map(({ path, element }, index) => (
+            <Route key={index} path={path} element={element} />
+          ))}
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
+    </>
   );
 }
 

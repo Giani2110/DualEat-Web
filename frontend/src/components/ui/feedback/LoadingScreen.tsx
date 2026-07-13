@@ -1,4 +1,4 @@
-import Logo from '@assets/images/icon/Logo_DualEatBlack.png';
+import Logo from '@assets/icon/Logo_DualEatBlack.png';
 
 export default function LoadingScreen() {
   return (

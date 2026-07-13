@@ -5,8 +5,7 @@ import PostCard from "@/components/features/post/PostCard";
 
 import { useInView } from "react-intersection-observer";
 import { getAll } from "@/services/post.api";
-import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@/api/constants/constants";
+
 import Loader from "@/components/ui/feedback/Loader";
 
 const UDashboard = () => {
@@ -64,37 +63,41 @@ const UDashboard = () => {
   }
 
   return (
-    <section className="h-full px-8 flex-wrap mx-auto flex flex-col md:flex-row gap-8 my-5 bg-bg-semi-white">
-      <div style={{ flex: 2 }} className="flex flex-col gap-y-2">
-        {Array.isArray(posts) &&
-          posts.length > 0 &&
-          posts.map((post: Post) => (
+    <main className="h-full px-2 md:px-8 flex-wrap flex flex-col md:flex-row gap-8 my-5 bg-bg-semi-white">
+      {isLoading ? (
+        <div className="flex-1 flex justify-center items-center py-20">
+          <Loader size={26} color="#e5a657" />
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col gap-y-2">
+          {posts.map((post: Post) => (
             <div
               key={post.id}
-              className="w-full rounded-xl border border-dashed border-gray-200 overflow-hidden"
+              className="w-full rounded-xl border border-dashed border-gray-300 overflow-hidden"
             >
-              <PostCard post={post} type="HOME" padding="p-5" />
+              <PostCard post={post} type="HOME" padding="px-6 py-4" />
             </div>
           ))}
-
-        {/* Sentinel */}
-        <div
-          ref={ref}
-          className="w-full py-4 flex justify-center"
-          aria-hidden="true"
-        >
-          {isFetchingNextPage && (
-            <div className="flex justify-center items-center">
-              <Loader size={20} color="#e5a657" />
-            </div>
-          )}
-
-          {!hasNextPage && (
-            <div className="text-sm text5">No hay más posts para mostrar</div>
-          )}
+          {/* Sentinel */}
+          <div
+            ref={ref}
+            className="w-full py-4 flex justify-center"
+            aria-hidden="true"
+          >
+            {isFetchingNextPage && (
+              <div className="flex justify-center items-center">
+                <Loader size={20} color="#e5a657" />
+              </div>
+            )}
+            {!hasNextPage && (
+              <div className="text-sm text-text-4">
+                No hay más posts para mostrar
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
+      )}
+    </main>
   );
 };
 

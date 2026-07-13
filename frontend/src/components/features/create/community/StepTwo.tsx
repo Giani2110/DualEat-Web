@@ -22,12 +22,12 @@ export default function StepTwo({ community, setCommunity }: StepProps) {
   const bannerRef = useRef<HTMLInputElement>(null);
 
   return (
-    <section className="flex flex-row h-full gap-x-6">
-      <aside className="flex flex-col justify-center h-full flex-1 gap-y-4">
-        <h1 className="font-bold text-[22px] text-text-3">
+    <section className="flex flex-row flex-1 gap-4">
+      <aside className="flex flex-col justify-center h-full flex-1 gap-y-3">
+        <h1 className="font-bold text-xl text-text-3">
           Personaliza tu comunidad
         </h1>
-        <p className="font-outfit-light text-[16px] text-text-4">
+        <p className="font-outfit-light text-sm text-text-4">
           Agrega una imagen y un banner para tu comunidad así los usuarios
           podrán identificarte mejor
         </p>
@@ -45,13 +45,13 @@ export default function StepTwo({ community, setCommunity }: StepProps) {
                   (community.banner_url as UploadableFile).uri) ||
                 "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultBanner.jpg"
               }
-              className="w-full h-12 rounded-t-[20px] object-cover"
+              className="w-full h-10 rounded-t-[20px] object-cover"
             />
 
             <div className="flex-1 gap-x-2 items-center flex flex-row">
-              <Image size={18} color="#2F2F2F" />
+              <Image size={14} color="#2F2F2F" />
 
-              <p className="font-normal text-[14px] text-text-3">
+              <p className="text-sm text-text-3">
                 {(community?.banner_url as UploadableFile)?.file?.name ||
                   "Agregar banner"}
               </p>
@@ -70,12 +70,12 @@ export default function StepTwo({ community, setCommunity }: StepProps) {
                   (community.image_url as UploadableFile).uri) ||
                 "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
               }
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-8 h-8 rounded-full object-cover"
             />
 
             <div className="flex-1 gap-x-2 items-center flex flex-row">
-              <Image size={18} color="#2F2F2F" />
-              <p className="font-normal text-[14px] text-text-3">
+              <Image size={14} color="#2F2F2F" />
+              <p className="text-sm text-text-3">
                 {(community?.image_url as UploadableFile)?.file?.name ||
                   "Agregar icono de la comunidad"}
               </p>
@@ -102,7 +102,7 @@ export default function StepTwo({ community, setCommunity }: StepProps) {
         </div>
       </aside>
 
-      <section className="flex flex-col hidden  lg:flex lg:h-full lg:flex-1 lg:gap-y-2 ">
+      <section className="flex flex-col flex-1 hidden lg:flex">
         <img
           className="w-full h-full object-cover rounded-xl"
           loading="lazy"

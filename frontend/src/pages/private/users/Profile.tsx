@@ -131,7 +131,7 @@ export default function ProfileScreen() {
 
   return (
     <main className="min-h-screen px-8 flex justify-center my-5 bg-bg-semi-white">
-      <div className="flex flex-col gap-y-6 w-full md:max-w-[65vw]">
+      <div className="flex flex-col gap-y-6 w-full md:max-w-[75vw]">
         <section className="border border-dashed border-gray-300 rounded-[20px] shadow-sm p-6 flex flex-col gap-y-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="flex flex-wrap items-center gap-5">

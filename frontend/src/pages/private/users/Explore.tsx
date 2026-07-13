@@ -35,7 +35,7 @@ export default function ExploreScreen() {
     null,
   );
 
-  console.log(myCommunities)
+  console.log(myCommunities);
 
   const { data } = useQuery({
     queryKey: ["categories"],
@@ -126,7 +126,7 @@ export default function ExploreScreen() {
   }, [communities]);
 
   return (
-    <main className="flex flex-col gap-y-6 mt-8 px-6 md:px-16 mx-auto">
+    <main className="flex flex-col gap-y-6 mt-8 px-6 md:px-16">
       <h1 className="text-[28px] text-text-3 tracking-tight font-bold">
         Explorar
       </h1>
@@ -163,10 +163,6 @@ export default function ExploreScreen() {
         ) : (
           <div className="w-full flex-1 grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8">
             {categoriesWithCommunities.map((item) =>
-
-            
-
-
               item.items.map((community) => {
                 const isJoined = myCommunities?.some(
                   (c) => c.community.id === community.id,

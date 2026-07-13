@@ -33,7 +33,7 @@ export default function MessageInput({
         onClick={() => {
           inputRef.current?.focus();
         }}
-        className={`flex flex-row items-center gap-x-2 px-4 py-1 shadow-sm border rounded-full ${isFocused ? "border-gray-400" : "border-gray-200"}`}
+        className={`flex flex-row w-full z-10 items-center gap-x-2 px-4 py-1 shadow-sm bg-bg-semi-white border rounded-full ${isFocused ? "border-gray-400" : "border-gray-200"}`}
       >
         <button
           title="Agregar ingrediente"

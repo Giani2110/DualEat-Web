@@ -146,7 +146,7 @@ export default function CommunityScreen() {
 
   return (
     <section className="bg-bg-semi-white flex flex-col items-center flex-1 px-2 md:px-8 my-5">
-      <div className="md:max-w-[70vw] flex flex-col gap-y-6">
+      <div className="md:max-w-[70vw] w-full flex flex-col gap-y-6">
         <header className="w-full rounded-[10px] border border-gray-200 relative">
           {/* Banner de la comunidad */}
           <div className="w-full h-32 md:h-44 overflow-hidden rounded-t-[10px]">
@@ -202,7 +202,7 @@ export default function CommunityScreen() {
               {isMember && community?.receives_notifications && (
                 <div
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  className="relative rounded-full border border-dashed cursor-pointer border-gray-400 px-4 py-1.5 flex items-center justify-center hover:border-solid hover:scale-105 transition-all duration-100"
+                  className="relative rounded-full border border-dashed cursor-pointer border-gray-400 px-4 py-1.5 flex items-center justify-center hover:border-solid transition-all duration-100"
                 >
                   {community.receives_notifications === "ALWAYS"
                     ? BellFill
@@ -276,7 +276,7 @@ export default function CommunityScreen() {
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="w-full rounded-xl border border-dashed border-gray-200 overflow-hidden"
+                className="w-full rounded-xl border border-dashed border-gray-300 overflow-hidden"
               >
                 <PostCard post={post} type="COMMUNITY" padding="p-5" />
               </div>

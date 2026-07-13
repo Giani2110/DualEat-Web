@@ -144,9 +144,12 @@ export default function RecipeDetail() {
     });
   }, [recipe]);
 
-  if (recipe && recipe.votes_up && recipe.votes_down) {
-    const total_votes = recipe.votes_down + recipe.votes_up;
-    rating = total_votes > 0 ? (recipe.votes_up / total_votes) * 5 : 0;
+
+  if (recipe) {
+    const votes_up = recipe.votes_up ?? 0;
+    const votes_down = recipe.votes_down ?? 0;
+    const total_votes = votes_up + votes_down;
+    rating = total_votes > 0 ? (votes_up / total_votes) * 5 : 0;
   }
 
   const recipeStats = [

@@ -1,7 +1,7 @@
 import { useAuth } from "@hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-import { Ellipsis } from "lucide-react";
+import { BadgeCheck, Ellipsis } from "lucide-react";
 import PostActions from "./PostActions";
 import type { Post } from "@/interface/global";
 import { ROUTES } from "@/api/constants/constants";
@@ -81,7 +81,7 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
   const copyToClipboard = () => {
     toast.success("Enlace copiado al portapapeles");
     navigator.clipboard.writeText(
-      `${window.location.host}/c/${post.community?.slug}/p/${post.id}/${post.slug}`,
+      `${window.location.host}/p/${post.id}/${post.slug}`,
     );
   };
 
@@ -111,8 +111,8 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
       }}
       className={`flex flex-wrap flex-col gap-y-3 ${padding} ${type !== "POST" && "cursor-pointer hover:bg-gray-100/80"} transition-colors duration-200`}
     >
-      <header className="flex flex-col-reverse md:flex-row items-center justify-between w-full">
-        <div className="w-full flex flex-col md:flex-row items-start md:items-center gap-2">
+      <header className="flex flex-row items-center justify-between w-full">
+        <div className="flex flex-row items-center gap-x-2.5">
           <img
             src={
               type === "COMMUNITY"
@@ -120,38 +120,41 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
                 : post.community?.image_url ||
                   "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
             }
-            className="max-w-9 max-h-9 w-full h-full rounded-full object-cover"
+            className="w-8 h-8 rounded-full object-cover"
             alt="Imagen de perfil"
           />
-          {type !== "COMMUNITY" && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNavigate("COMMUNITY");
-              }}
-              className="text-sm cursor-pointer hover:scale-104 transition-all duration-200 font-semibold text-text-3"
-            >
-              {post.community?.name}
-            </button>
-          )}
+          <div className="flex flex-col gap-y-0.5">
+            {type !== "COMMUNITY" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNavigate("COMMUNITY");
+                }}
+                className="text-sm cursor-pointer hover:scale-104 transition-all duration-200 font-semibold text-text-3 text-left"
+              >
+                {post.community?.name}
+              </button>
+            )}
 
-          <div className="flex flex-row items-center gap-x-1">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(ROUTES.USER.PROFILE(post.user.id, post.user.slug));
-              }}
-              className="cursor-pointer hover:scale-104 transition-all duration-200"
-            >
+            <div className="flex flex-row items-center gap-2">
+              {(post.user?.subscription_status === "ACTIVE" ||
+                post.user?.subscription_status === "TRIAL") && (
+                <BadgeCheck size={16} fill="#3578e4" color="#fff" />
+              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(ROUTES.USER.PROFILE(post.user.id, post.user.slug));
+                }}
+                className="cursor-pointer hover:scale-104 transition-all duration-200"
+              >
+                <p className="text-sm text-text-4">{post.user?.name}</p>
+              </button>
               <p className="text-sm text-text-4">
-                {post.user.name ? "@" + post.user.name : ""}
+                • {getShortTimeAgo(post.created_at, true)}
               </p>
-            </button>
-            <span className="text-xs text-text-4">•</span>
-            <p className="text-sm text-text-4">
-              {getShortTimeAgo(post.created_at, false)}
-            </p>
+            </div>
           </div>
         </div>
 
@@ -165,7 +168,7 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
             }}
             className="cursor-pointer hover:bg-[#dbdbdb] rounded-full p-1"
           >
-            <Ellipsis size={18} color="#4A4947" />
+            <Ellipsis style={{ rotate: "90deg" }} size={16} color="#000" />
           </button>
 
           {open && (

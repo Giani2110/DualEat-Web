@@ -1,5 +1,5 @@
 import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
-import type { Response, CommunityMember } from "@/interface/global";
+import type { Response, CommunityMember, Community } from "@/interface/global";
 import type { CommunityDTO, UploadPayload } from "@/interface/global.dto";
 import { handleApiError } from "@/utils/apiErrorHandler";
 
@@ -82,7 +82,9 @@ export const joinLeave = async (
 
 // --- 5. CREAR UNA COMUNIDAD ---
 // ===================================
-export const create = async (community: CommunityDTO): Promise<Response> => {
+export const create = async (
+  community: CommunityDTO,
+): Promise<Response<Community>> => {
   try {
     const response = await toast.promise(
       axiosInterceptor.post(`/community/create`, { community }),
@@ -97,6 +99,7 @@ export const create = async (community: CommunityDTO): Promise<Response> => {
     return {
       success: response.data.success ?? true,
       status: response.status,
+      message: response.data.message,
       data: response.data.data,
     };
   } catch (err: any) {
@@ -113,11 +116,11 @@ export const upload = async (
     const formData = new FormData();
 
     if (payload.banner_url) {
-      formData.append("banner_url", payload.banner_url as any);
+      formData.append("banner_url", payload.banner_url.file);
     }
 
     if (payload.image_url) {
-      formData.append("image_url", payload.image_url as any);
+      formData.append("image_url", payload.image_url.file);
     }
 
     const response = await axiosInterceptor.post(
