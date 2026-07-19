@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { Fingerprint, Mail, RectangleEllipsis } from "lucide-react";
 
 import "@assets/scss/public/auth.scss";
+import { AnimatedGridPattern } from "@/components/ui/feedback/animated-grid-pattern";
 
 const ResetPassword = () => {
   const [step, setStep] = useState<"email" | "code" | "password">("email");
@@ -164,8 +165,10 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bgAnimation">
-      <div className="max-w-[600px] h-[650px] w-full flex flex-col items-center mt-20 bg-black border-2 border-[#878787] rounded-[20px] px-8 py-10">
+    <main className="min-h-screen flex-1 flex items-center justify-center relative">
+      <AnimatedGridPattern className="bg-black" />
+
+      <div className="z-10 max-w-[600px] h-[650px] w-full flex flex-col justify-center items-center mt-20 bg-black border border-gray-700 rounded-[20px] px-8 py-10">
         <div className="flex items-center mb-6">
           <X
             size={22}
@@ -174,82 +177,76 @@ const ResetPassword = () => {
           />
 
           {step === "email" ? (
-            <div className="w-[50px] flex items-center justify-center h-[50px] bg-red rounded-[10px]">
+            <div className="w-[50px] flex items-center justify-center h-[50px] bg-bg-red rounded-[10px]">
               <Fingerprint size={25} color="#fff" />
             </div>
           ) : step === "code" ? (
-            <div className="w-[50px] flex items-center justify-center h-[50px] bg-yellow rounded-[10px]">
+            <div className="w-[50px] flex items-center justify-center h-[50px] bg-bg-yellow rounded-[10px]">
               <Mail size={25} color="#fff" />
             </div>
           ) : (
             step === "password" && (
-              <div className="w-[50px] flex items-center justify-center h-[50px] bg-red rounded-[10px]">
+              <div className="w-[50px] flex items-center justify-center h-[50px]  bg-bg-red  rounded-[10px]">
                 <RectangleEllipsis size={25} color="#fff" />
               </div>
             )
           )}
         </div>
         {step === "email" && (
-          <>
-            <form
-              className="flex flex-col mx-[50px] h-full"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendCode();
-              }}
-            >
-              <div className="flex flex-col h-full justify-between">
-                <div>
-                  <h2 className="text-[31px] text2 font-bold mb-2">
-                    Restablecer contraseña
-                  </h2>
-                  <p className="text4 text-[15px] leading-[21px]">
-                    ¿Olvidaste tu contraseña? No te preocupes. Ingresá el correo
-                    electrónico que usás para iniciar sesión y te enviaremos un
-                    código para ayudarte a restablecerla.
-                  </p>
+          <form
+            className="flex flex-col h-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendCode();
+            }}
+          >
+            <div className="flex flex-col h-full justify-between">
+              <div>
+                <h2 className="text-2xl text-text-1 font-bold mb-2">
+                  Restablecer contraseña
+                </h2>
+                <p className="text-text-2/50 text-sm">
+                  ¿Olvidaste tu contraseña? No te preocupes. Ingresá el correo
+                  electrónico que usás para iniciar sesión y te enviaremos un
+                  código para ayudarte a restablecerla.
+                </p>
 
-                  <div className="relative mt-8">
-                    <input
-                      type="email"
-                      id="email"
-                      placeholder="Correo electrónico"
-                      className="peer w-full border text1 px-4 pb-3 pt-7 rounded-[5px] border-gray-700 placeholder-transparent focus:outline-none focus:border-blue-500"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                    <label
-                      htmlFor="email"
-                      className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
-                        email
-                          ? "top-1 text-sm text-blue-500"
-                          : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
-                      }`}
-                    >
-                      Correo electrónico
-                    </label>
-                  </div>
+                <div className="relative mt-8">
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="Correo electrónico"
+                    className="peer w-full border text-text-1 px-4 pb-3 pt-7 rounded-[5px] border-gray-700 placeholder-transparent focus:outline-none focus:border-blue-500"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  <label
+                    htmlFor="email"
+                    className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
+                      email
+                        ? "top-1 text-sm text-blue-500"
+                        : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+                    }`}
+                  >
+                    Correo electrónico
+                  </label>
                 </div>
-                <button
-                  type="submit"
-                  disabled={!email}
-                  className={`w-full font-bold py-3 rounded-[50px] transition
+              </div>
+              <button
+                type="submit"
+                disabled={!email}
+                className={`w-full font-bold py-3 rounded-[50px] transition
                     ${
                       !email
-                        ? "bg-red brightness-50 cursor-not-allowed text-white/60"
-                        : "bg-red cursor-pointer text-white hover:bg-red"
+                        ? "bg-bg-red brightness-50 cursor-not-allowed text-white/90"
+                        : "bg-bg-red cursor-pointer text-white hover:bg-bg-red"
                     }`}
-                >
-                  {loading ? (
-                    <Loader color="white" size={10} />
-                  ) : (
-                    "Enviar código"
-                  )}
-                </button>
-              </div>
-            </form>
-          </>
+              >
+                {loading ? <Loader color="white" size={10} /> : "Enviar código"}
+              </button>
+            </div>
+          </form>
         )}
 
         {step === "code" && (
@@ -421,7 +418,7 @@ const ResetPassword = () => {
 
                 <button
                   type="submit"
-                  className={`w-full bg-red text1 font-bold py-3 cursor-pointer rounded-[50px]`}
+                  className={`w-full bg-bg-red text-text-1 font-bold py-3 cursor-pointer rounded-[50px]`}
                 >
                   {loading ? (
                     <div className="flex items-center justify-center">
@@ -443,7 +440,7 @@ const ResetPassword = () => {
 
         {error && <p className="text-[#F03536] mt-4 text-sm">{error}</p>}
       </div>
-    </div>
+    </main>
   );
 };
 

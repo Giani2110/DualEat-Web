@@ -151,7 +151,7 @@ const Register = () => {
         {/* Botón de registro */}
         <button
           type="submit"
-          className="w-full text-text-3 text-[16px] cursor-pointer border border-dashed border-bg-yellow hover:bg-[#e5a657] hover:text-text-1 py-[12px] mt-4 rounded-lg transition-colors font-medium"
+          className="w-full flex gap-x-2 items-center justify-center text-text-1 text-sm cursor-pointer bg-bg-yellow hover:scale-103 duration-200 transition-all py-3 rounded-sm font-bold"
         >
           Registrarse
         </button>

@@ -246,7 +246,7 @@ export default function SettingsModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="bg-bg-semi-white rounded-[24px] max-w-[70vw] w-full h-[85vh] md:h-[75vh] overflow-hidden flex flex-col shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200"
+      className="bg-bg-semi-white rounded-[24px] max-w-[70vw] w-full h-[85vh] md:h-[75vh] overflow-hidden flex flex-col shadow-2xl border border-gray-100"
     >
       {/* Header */}
       <div className="px-6 py-4 flex justify-between items-center border-b border-gray-100 bg-white">
@@ -471,9 +471,7 @@ export default function SettingsModal({
 
                 {/* Terms and conditions */}
                 <a
-                  href="/terms"
-                  target="_blank"
-                  rel="noreferrer"
+                  href={ROUTES.PUBLIC.TERMS}
                   className="w-full text-left px-5 py-4 border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer flex items-center justify-between"
                 >
                   <div className="flex items-center gap-x-3.5">

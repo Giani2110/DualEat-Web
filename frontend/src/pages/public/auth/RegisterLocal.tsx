@@ -354,7 +354,7 @@ const RegisterLocal = () => {
         <div className="mb-2 mt-4">
           <button
             type="submit"
-            className="font-bold w-full mb-3 text-[15px] cursor-pointer bg-yellow text-white py-[10px] px-4 rounded-lg hover:bg-gray-900 transition-colors font-medium"
+            className="w-full flex gap-x-2 items-center justify-center text-text-1 text-sm cursor-pointer bg-bg-yellow hover:bg-bg-yellow/80 py-3 rounded-sm font-bold"
           >
             Continuar →
           </button>

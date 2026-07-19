@@ -176,7 +176,7 @@ export default function PostDetail() {
   }, [user, post]);
 
   return (
-    <main className="h-full px-2 md:px-8 mx-auto flex flex-wrap flex-row gap-8 my-5">
+    <main className="h-full px-2 md:px-8 flex flex-wrap flex-row gap-8 my-5">
       <section
         style={{ flex: 2 }}
         className="flex flex-row flex-wrap lg:flex-nowrap gap-4"

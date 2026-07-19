@@ -43,13 +43,12 @@ const pillars = [
 export default function AboutUs() {
   return (
     <main
-      style={{ padding: "10vh 10vh" }}
-      className="min-h-screen bg-[#141414] text-text-1 flex flex-col gap-y-12"
+      className="min-h-screen bg-[#141414] text-text-1 flex flex-col gap-y-12 pt-[10vh] p-[2vh] md:p-[10vh]"
     >
       {/* Hero Section */}
       <section className="min-h-[40vh] flex flex-col md:flex-row gap-12 items-stretch">
         <div className="flex-1 flex items-center">
-          <h1 className="text-3xl md:text-7xl lg:text-8xl font-black text-text-1 leading-none">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-text-1 leading-none">
             Sobre <br />
             <LineShadowText className="italic" as="span" shadowColor={"#fff"}>
               Nosotros
@@ -91,14 +90,14 @@ export default function AboutUs() {
                 </p>
 
                 <div className="flex flex-col gap-y-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-text-2">
+                  <span className="text-sm font-bold uppercase tracking-wider text-text-2">
                     Qué incluye
                   </span>
                   <ul className="space-y-2">
                     {item.included.map((inc, i) => (
                       <li
                         key={i}
-                        className="text-xs md:text-sm text-text-2 flex items-start gap-x-2 font-light"
+                        className="text-sm text-text-2 flex items-start gap-x-2 font-light"
                       >
                         <span className="text-text-6 font-mono">+</span>
                         <span>{inc}</span>

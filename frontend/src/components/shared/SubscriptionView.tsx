@@ -4,90 +4,15 @@ import { useAuth } from "@hooks/useAuth";
 import { createUserCheckout } from "@services/subscription.api";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
-import {
-  X,
-  Check,
-  Edit,
-  PlusCircle,
-  Award,
-  Loader2,
-  BadgeCheck,
-} from "lucide-react";
+import { X, Check, Loader2, BadgeCheck } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Particles } from "../ui/feedback/particles";
 
 import Logo from "@assets/icon/Logo_DualEat.png";
 import { formatPrice } from "@/utils/format";
 import { ROUTES } from "@/api/constants/constants";
+import { subscriptionPlans } from "@/interface/global";
 
-interface Prices {
-  price: number;
-  currency: string;
-}
-
-interface Benefit {
-  name: string;
-  icon: string;
-}
-
-export interface SubscriptionPlan {
-  title: string;
-  description: string;
-  prices: {
-    monthly: Prices;
-    annual: Prices;
-  };
-  benefits: Benefit[];
-}
-
-export const subscriptionPlans: SubscriptionPlan[] = [
-  {
-    title: "Básico",
-    description: "Acceso esencial para explorar",
-    prices: {
-      monthly: { price: 0, currency: "ARS" },
-      annual: { price: 0, currency: "ARS" },
-    },
-    benefits: [
-      { name: "Crear posts y recetas básicas", icon: "📄" },
-      { name: "Límite estandar de contenido (300 caracteres)", icon: "✍️" },
-    ],
-  },
-  {
-    title: "Premium",
-    description: "Desbloquea todo el potencial de DualEat",
-    prices: {
-      monthly: { price: 8999, currency: "ARS" },
-      annual: { price: 89999, currency: "ARS" },
-    },
-    benefits: [
-      { name: "Usuario verificado en la aplicación", icon: "📄" },
-      { name: "Capacidad de editar tus posts", icon: "✍️" },
-      {
-        name: "Contenido y descripciones más largos (1000 caracteres)",
-        icon: "💬",
-      },
-      { name: "Acceso a chats con inteligencia artificial", icon: "⭐" },
-    ],
-  },
-  {
-    title: "Negocio PRO",
-    description: "Potencia tu local gastronómico, gestiona empleados y publica tu menú.",
-    prices: {
-      monthly: { price: 57999, currency: "ARS" },
-      annual: { price: 579999, currency: "ARS" },
-    },
-    benefits: [
-      { name: "Dashboard de estadísticas avanzado", icon: "📄" },
-      { name: "Calendario organizativo y empleados", icon: "✍️" },
-      {
-        name: "Carga automatizada de menú por IA (OCR)",
-        icon: "💬",
-      },
-      { name: "Soporte prioritario para locales gastronómicos", icon: "⭐" },
-    ],
-  },
-];
 
 export default function SubscriptionView() {
   const navigate = useNavigate();
@@ -135,6 +60,14 @@ export default function SubscriptionView() {
   const isUserPremium =
     user?.subscription_status === "ACTIVE" ||
     user?.subscription_status === "TRIAL";
+
+  let slicedPlans = subscriptionPlans.slice(0, 2);
+
+  if (!user?.is_business) {
+    slicedPlans = subscriptionPlans.slice(0, 2);
+  } else {
+    slicedPlans = subscriptionPlans.slice(0, 3);
+  }
 
   return createPortal(
     <div className="fixed noScroll z-50 inset-0 min-h-screen bg-black text-white flex flex-col font-sans overflow-x-hidden pb-40 select-none">
@@ -192,7 +125,7 @@ export default function SubscriptionView() {
 
         {/* Tarjetas de Planes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mt-12 items-stretch">
-          {subscriptionPlans.map((item, idx) => {
+          {slicedPlans.map((item, idx) => {
             const isPremium = item.title.toLowerCase() === "premium";
             const planKey = isPremium ? "PREMIUM" : "BASIC";
             const isSelected = selectedPlan === planKey;
@@ -260,20 +193,9 @@ export default function SubscriptionView() {
 
                   {/* Características */}
                   <ul className="space-y-3.5 text-sm text-zinc-100">
-                    {item.benefits.map((benefit, bIdx) => (
+                    {item.benefits.map((item, bIdx) => (
                       <li key={bIdx} className="flex items-start">
-                        {isPremium ? (
-                          benefit.icon === "📄" ? (
-                            <Award className="w-4.5 h-4.5 text-blue-400 mr-3 flex-shrink-0 mt-0.5" />
-                          ) : benefit.icon === "✍️" ? (
-                            <Edit className="w-4.5 h-4.5 text-blue-400 mr-3 flex-shrink-0 mt-0.5" />
-                          ) : (
-                            <PlusCircle className="w-4.5 h-4.5 text-blue-400 mr-3 flex-shrink-0 mt-0.5" />
-                          )
-                        ) : (
-                          <Check className="w-4.5 h-4.5 text-zinc-500 mr-3 flex-shrink-0 mt-0.5" />
-                        )}
-                        <span className="ml-3">{benefit.name}</span>
+                        <span className="ml-3">{item}</span>
                       </li>
                     ))}
                   </ul>

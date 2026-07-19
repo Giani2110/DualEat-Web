@@ -43,8 +43,6 @@ type StepsPartial = { id: string } & RecipeStepDTO;
 export default function CreateRecipe() {
   const { post, clearPost } = usePostCreateStore();
 
-  console.log(post);
-
   const [nutrition, setNutrition] = useState<NutritionData | null>(null);
 
   const [open, setOpen] = useState(false);
@@ -53,7 +51,6 @@ export default function CreateRecipe() {
   const { data, isLoading } = useIngredients(true);
 
   const indexIngredient = useRef<number | null>(null);
-  const indexStep = useRef<number | null>(null);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -92,23 +89,11 @@ export default function CreateRecipe() {
     }
   }, [post]);
 
-  const handleFiles = (
-    files: File[],
-    type: "image" | "video",
-    selected: "main_image" | "step",
-  ) => {
+  const handleFiles = (files: File[], type: "image") => {
     const media = pickMedia(files, type);
     if (media.length === 0) return;
 
-    if (selected === "main_image") {
-      setRecipe({ ...recipe, main_image: media[0] });
-    } else if (selected === "step") {
-      setSteps((prev) =>
-        prev.map((item, i) =>
-          i === indexStep.current ? { ...item, image_url: media[0] } : item,
-        ),
-      );
-    }
+    setRecipe({ ...recipe, main_image: media[0] });
   };
 
   const [isDragOver, setIsDragOver] = useState(false);
@@ -203,7 +188,6 @@ export default function CreateRecipe() {
       toast.error("Debes seleccionar una comunidad");
       return;
     }
-
 
     submitRecipe();
   };
@@ -426,7 +410,7 @@ export default function CreateRecipe() {
               e.preventDefault();
               setIsDragOver(false);
               const files = Array.from(e.dataTransfer.files);
-              handleFiles(files, "image", "main_image");
+              handleFiles(files, "image");
             }}
           >
             <div className="flex flex-col items-center gap-3">
@@ -458,7 +442,6 @@ export default function CreateRecipe() {
                 handleFiles(
                   e.target.files ? Array.from(e.target.files) : [],
                   "image",
-                  "main_image",
                 );
               }}
             />

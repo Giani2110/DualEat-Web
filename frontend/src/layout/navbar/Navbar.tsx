@@ -6,11 +6,7 @@ import { ROUTES } from "@/api/constants/constants";
 
 import { ChevronRight } from "lucide-react";
 import Logo from "@assets/icon/Logo_DualEat.png";
-import {
-  useMotionValueEvent,
-  useScroll,
-  motion,
-} from "framer-motion";
+import { useMotionValueEvent, useScroll, motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 
 export const NAVBAR_ROUTES = [
@@ -51,7 +47,7 @@ export default function Header() {
       animate={{ opacity: hidden ? 0 : 1 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       style={{ marginTop: 2 }}
-      className={`fixed flex flex-row justify-around items-center top-0 w-full z-50 py-4 transition-all duration-300 backdrop-blur-md`}
+      className={`fixed flex flex-row px-8 justify-between md:justify-around items-center top-0 w-full z-50 py-4 transition-all duration-300 backdrop-blur-md`}
     >
       <Link
         to={ROUTES.PUBLIC.HOME}
@@ -75,23 +71,23 @@ export default function Header() {
         ))}
       </nav>
 
-      <div className="flex items-center gap-5 text-sm text-white *:hover:scale-105 transition-all *:duration-200">
+      <div className="items-center flex gap-5 text-sm text-white *:hover:scale-105 transition-all *:duration-200">
         <Link
           to={ROUTES.AUTH.LOGIN}
-          className="flex gap-x-2 items-center border border-gray-200 px-6 py-2 group"
+          className="flex gap-x-2 items-center border border-gray-200 px-4 md:px-6 py-1 md:py-2 group"
         >
           <ChevronRight
-            className="group-hover:translate-x-1 transition-all duration-200"
+            className="group-hover:translate-x-1 hidden md:block transition-all duration-200"
             size={16}
           />
           <p>Iniciar sesión</p>
         </Link>
         <Link
           to={ROUTES.AUTH.REGISTER}
-          className="flex gap-x-2 items-center border border-gray-200 bg-bg-red px-6 py-2 group"
+          className="flex gap-x-2 items-center border border-gray-200 bg-bg-red px-4 md:px-6 py-1 md:py-2 group"
         >
           <ChevronRight
-            className="group-hover:translate-x-1 transition-all duration-200"
+            className="group-hover:translate-x-1 hidden md:block transition-all duration-200"
             size={16}
           />
           <p>Registrarse</p>

@@ -11,8 +11,9 @@ import BackgroundC from "@assets/images/auth/Background-C.jpg";
 import LogoWhite from "@assets/icon/Logo_DualEat.png";
 import { getDeviceId } from "@/utils/device";
 import { appConfig } from "@/api/config/AplicationConfig";
-import { StripedPattern } from "@/components/ui/feedback/striped-pattern";
 import { BorderBeam } from "@/components/ui/feedback/border-beam";
+import { GridPattern } from "@/components/ui/feedback/grid-pattern";
+import { cn } from "@/lib/utils";
 
 interface Props {
   flex: "right" | "left";
@@ -69,13 +70,34 @@ const AuthSection: React.FC<Props> = ({
 
   return (
     <main className={`min-h-screen w-full ${styles} flex flex-row bg-bg-gray`}>
-      <section className="relative" style={{ flex: 1 }}>
-        <StripedPattern className="absolute inset-0 opacity-20 stroke-gray-400 z-0 pointer-events-none stroke-[0.3]" />
+      <section className="relative overflow-hidden" style={{ flex: 1 }}>
+        <GridPattern
+          squares={[
+            [4, 4],
+            [5, 1],
+            [8, 2],
+            [5, 3],
+            [5, 5],
+            [10, 10],
+            [12, 15],
+            [15, 10],
+            [10, 15],
+            [15, 10],
+            [10, 15],
+            [15, 10],
+          ]}
+          className={cn(
+            "opacity-30",
+            "absolute inset-0 inset-y-[-10%] h-[100%] skew-y-12",
+          )}
+        />
 
-        <div className="relative z-10 flex h-full w-[60vh] flex-col gap-y-8 justify-center mx-auto">
+        <div className="relative z-10 flex h-full max-w-[70vh] flex-col gap-y-8 justify-center mx-auto">
           <header className="flex flex-col gap-y-3 items-center">
             <h2 className="font-black text-text-3 text-3xl">{title}</h2>
-            <p className="text-text-4 text-lg font-light">{subtitle}</p>
+            <p className="text-text-4 text-base font-light text-center">
+              {subtitle}
+            </p>
           </header>
 
           {children}
@@ -97,9 +119,9 @@ const AuthSection: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => handleGoogleLogin()}
-                    className="flex w-full text-sm font-bold text-text-5 items-center cursor-pointer justify-center py-3 border border-gray-300 rounded-sm"
+                    className="flex w-full hover:scale-105 transition-all duration-200 text-sm font-bold text-text-5 items-center cursor-pointer justify-center py-3 border border-gray-300 rounded-sm gap-3"
                   >
-                    <svg className="w-5 mr-2" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path
                         fill="#4285F4"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -203,7 +225,9 @@ const AuthSection: React.FC<Props> = ({
               />
 
               <h2 className="text-3xl text-text-1 font-bold">DualEat</h2>
-              <p className="text-base font-light text-text-2">{carouselTexts[index]}</p>
+              <p className="text-base font-light text-text-2">
+                {carouselTexts[index]}
+              </p>
             </div>
 
             <div className="flex flex-row gap-x-2">

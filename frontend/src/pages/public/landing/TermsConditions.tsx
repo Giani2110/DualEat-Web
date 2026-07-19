@@ -4,16 +4,17 @@ import DownloadSectionBG from "@components/shared/DownloadSectionBG";
 const TermsConditions = () => {
   return (
     <main
-      style={{ padding: "20vh 5vh" }}
-      className="relative min-h-screen bg-[#141414] text-text-1 flex flex-col items-center gap-y-12"
+      className="relative min-h-screen bg-[#141414] text-text-1 flex flex-col gap-y-12 pt-[15vh] p-[2vh] md:p-[10vh]"
     >
+      <Particles
+        staticity={30}
+        quantity={200}
+        className="absolute inset-0 z-0 w-full h-full"
+      />
 
-      <Particles staticity={30} quantity={200} className="absolute inset-0 z-0 w-full h-full" />
-
-
-      <div className="w-full max-w-4xl flex flex-col">
+      <div className="w-full [&_p]:text-sm [&_li]:text-sm max-w-4xl flex flex-col">
         <header className="mb-12 border-b border-gray-300 pb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-text-1 tracking-tight mb-4 uppercase">
+          <h1 className="text-5xl lg:text-6xl font-black text-text-1 tracking-tight mb-4 uppercase">
             Términos y Condiciones
           </h1>
           <p className="text-xs text-text-2 font-bold uppercase tracking-wider">

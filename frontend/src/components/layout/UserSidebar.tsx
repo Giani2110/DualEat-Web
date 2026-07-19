@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 import "@assets/scss/private/users/users.scss";
 import { LogOut } from "lucide-react";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/hooks/api/notification/useNotifications";
 
 import { motion, AnimatePresence } from "framer-motion";
 import type { UserSessionData } from "@/context/auth/AuthProvider";
@@ -62,7 +62,7 @@ export default function UserSidebar({
                 ROUTES.USER.PROFILE(user?.id as string, user?.slug as string),
               );
             }}
-            className="flex flex-row items-center gap-x-3 text-left w-full focus:outline-none"
+            className="flex flex-row items-center gap-x-3 text-left w-full focus:outline-none cursor-pointer"
           >
             <img
               src={user?.avatar_url ?? ""}
@@ -326,7 +326,7 @@ export default function UserSidebar({
       )}
 
       {/* Children */}
-      <div className={`main-content min-w-0 flex-1 flex flex-col`}>
+      <div className={`relative main-content min-w-0 flex-1 flex flex-col`}>
         {children}
       </div>
     </section>

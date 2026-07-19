@@ -5,7 +5,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
 import { useAuth } from "@hooks/useAuth";
 
-import { ArrowRight, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 import "@assets/scss/public/auth.scss";
@@ -64,8 +63,6 @@ export default function Onboarding() {
     });
   };
 
-  console.log(preferences)
-
   const handleSubmit = async () => {
     if (index === 2 && (!name || preferences.length < 3)) {
       toast.error(
@@ -120,10 +117,10 @@ export default function Onboarding() {
           e.preventDefault();
           handleSubmit();
         }}
-        className="flex flex-col gap-6"
+        className="flex flex-col gap-3"
       >
-        <div>
-          <h1 className="mt-5 underline text-[15px] mb-4 text5">
+       
+          <h1 className="text-base text-text-3 font-bold">
             Nombre de usuario
           </h1>
           <div>
@@ -137,12 +134,12 @@ export default function Onboarding() {
               className="w-full px-4 text6 text-[15px] py-[10px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E5A657] focus:border-transparent outline-none"
             />
           </div>
-        </div>
+      
 
         <div className="mt-10 w-full">
           <div className="flex justify-between items-center">
-            <h1 className="text-[15px] mb-2 text5">Preferencias</h1>
-            <div className="text6 flex gap-5 text-[15px] text-gray-600">
+            <h1 className="text-base mb-2 font-bold text-text-3">Preferencias</h1>
+            <div className="flex gap-2 text-sm text-text-5">
               <span>Elige al menos 3</span>
               <span className="font-bold text-yellow">
                 {`${preferences.length} / 3`}
@@ -206,30 +203,24 @@ export default function Onboarding() {
             </div>
           )}
           <div className="flex gap-3 justify-center mt-4">
-            <ArrowLeft
-              type="button"
-              size={26}
-              onClick={() => setIndex(1)}
-              className={`
-                ${index === 1 ? "bg-yellow text-white" : "bg-[#dbdbdb]"}
-                cursor-pointer mt-4 p-[5px] w-[40px] rounded-[5px] transition-colors`}
-            />
-
-            <ArrowRight
-              type="button"
-              size={26}
-              onClick={() => setIndex(2)}
-              className={`
-                ${index === 2 ? "bg-yellow text-white" : "bg-[#dbdbdb]"}
-                cursor-pointer mt-4 p-[5px] w-[40px] rounded-[5px] transition-colors`}
-            />
+            {[1, 2].map((i) => (
+              <div
+                key={`dot-${i}`}
+                onClick={() => setIndex(i)}
+                className={`
+                  ${index === i ? "bg-bg-yellow text-white" : "bg-[#dbdbdb]"}
+                  cursor-pointer mt-4 p-[5px] w-[40px] font-bold text-xs text-center rounded-[5px]`}
+              >
+                {i}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Botón de registro */}
         <button
           type="submit"
-          className="w-full cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors text-[15px] font-medium"
+          className="w-full mt-4 flex gap-x-2 items-center justify-center text-text-1 text-sm cursor-pointer bg-bg-yellow hover:scale-103 duration-200 transition-all py-3 rounded-sm font-bold"
         >
           {index === 2 ? "Finalizar" : "Siguiente"}
         </button>

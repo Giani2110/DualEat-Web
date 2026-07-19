@@ -151,14 +151,14 @@ const Login = () => {
               Contraseña
             </div>
 
-            <div className="flex flex-row items-center justify-between border border-gray-300 rounded-sm focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent px-4">
+            <div className="flex flex-row items-center justify-between border border-gray-300 rounded-sm focus:ring-1 focus:ring-[#B2B2B2] focus:border-transparent">
               <input
                 required
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full text-text-5 py-[10px] outline-none"
+                className="w-full px-4 py-[10px] text-text-5 outline-none"
               />
               <button
                 type="button"
@@ -203,7 +203,7 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex gap-x-2 items-center justify-center text-text-1 text-sm cursor-pointer bg-bg-red py-3 rounded-sm font-bold"
+          className="w-full flex gap-x-2 items-center justify-center text-text-1 text-sm cursor-pointer bg-bg-red hover:scale-103 duration-200 transition-all py-3 rounded-sm font-bold"
         >
           {loading ? "Iniciando sesión" : "Iniciar Sesión"}
           {loading && <Loader size={16} color="currentColor" />}

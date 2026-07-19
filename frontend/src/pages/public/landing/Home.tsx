@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Clock, Cookie, QrCode, Split, Sun } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
-import { subscriptionPlans } from "@/components/shared/SubscriptionView";
 
 import BG from "@assets/images/BGDash.jpg";
 import GridDistortion from "@/components/ui/feedback/GridDistortion";
@@ -14,6 +13,7 @@ import { es } from "date-fns/locale";
 import WeatherWidget from "@/components/features/weather/WeatherWidget";
 
 import "@assets/scss/public/landing.scss";
+import { subscriptionPlans } from "@/interface/global";
 
 const Item = ({
   icon,
@@ -55,6 +55,7 @@ export default function LandingHome() {
       style={{ paddingBottom: "10vh" }}
       className="flex flex-col gap-y-16 bg-[#141414]"
     >
+      {/** Banner */}
       <section className="flex flex-col-reverse md:flex-row gap-y-10 h-screen flex flex-col gap-y-16">
         <div className="flex h-full flex-1 flex-col justify-end items-start gap-y-4 px-10 py-16">
           <div className="flex flex-col w-full">
@@ -96,6 +97,7 @@ export default function LandingHome() {
         </div>
       </section>
 
+      {/** ¿Por qué DualEat? */}
       <section className="px-4 md:px-8 lg:px-16 flex flex-col lg:flex-row gap-12">
         <motion.div
           initial={{ opacity: 0, x: -24 }}
@@ -167,6 +169,7 @@ export default function LandingHome() {
         className=" gradient w-full max-w-[80vw] mx-auto"
       />
 
+      {/** Funcionalidades */}
       <section
         id="Funcionalidades"
         className="flex flex-col items-end text-right gap-y-3 px-4 md:px-8 lg:px-16"
@@ -213,15 +216,20 @@ export default function LandingHome() {
         </div>
       </section>
 
+      {/** Suscripciones */}
       <section className="px-6 md:px-16 flex flex-col gap-y-12">
-        {/* Top Header bar */}
         <div className="flex flex-row justify-between items-center w-full border-b border-white/10 pb-4 text-xs uppercase tracking-widest text-[#888]">
           <span>Suscripciones</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
 
-        {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 min-h-[50vh] gap-8 items-stretch w-full">
+        <motion.div
+          initial={{ filter: "blur(5px)" }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          whileInView={{ filter: "blur(0px)" }}
+          viewport={{ once: true }}
+          className="grid grid-cols-1 lg:grid-cols-3 min-h-[50vh] gap-8 w-full"
+        >
           {subscriptionPlans.map((item, idx) => {
             const isPremium = item.title.toLowerCase() === "premium";
             const priceVal = item.prices.monthly.price;
@@ -274,8 +282,8 @@ export default function LandingHome() {
                       Qué incluye
                     </span>
                     <ul className="flex flex-col gap-y-2 text-sm text-[#3A3A3C]">
-                      {item.benefits.map((benefit, bIdx) => (
-                        <li key={bIdx}>+ {benefit.name}</li>
+                      {item.benefits.map((item, bIdx) => (
+                        <li key={bIdx}>+ {item}</li>
                       ))}
                     </ul>
                   </div>
@@ -283,7 +291,7 @@ export default function LandingHome() {
               </div>
             );
           })}
-        </div>
+        </motion.div>
       </section>
     </main>
   );

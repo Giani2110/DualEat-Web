@@ -221,6 +221,33 @@ export const createPost = async (
   }
 };
 
+// --- 9.5. ACTUALIZAR POST ---
+// ===================================
+export const updatePost = async (
+  post_id: string,
+  post: PostDTO,
+): Promise<Response<Post>> => {
+  try {
+    const response = await axiosInterceptor.patch(`/post/update`, {
+      post: {
+        id: post_id,
+        title: post.title,
+        content: post.content,
+      },
+    });
+
+    return {
+      success: response.data.success ?? true,
+      status: response.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  } catch (err: any) {
+    const apiError = handleApiError(err);
+    throw apiError;
+  }
+};
+
 // --- 10. ELIMINAR POST ---
 // ===================================
 export const deletePost = async (post_id: string): Promise<Response> => {

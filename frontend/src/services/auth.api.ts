@@ -1,5 +1,4 @@
 import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
-import toast from "react-hot-toast";
 import axios from "axios";
 
 import type {
@@ -101,21 +100,15 @@ export const completeProfile = async (
 // ===================================
 export const logout = async () => {
   try {
-    const response = await toast.promise(
-      axiosInterceptor.post("/auth/logout", {}, { withCredentials: true }),
-      {
-        loading: "Cerrando sesión...",
-        success: "Sesión cerrada exitosamente",
-        error: (err) => err.response?.data?.message || "Error al cerrar sesión",
-      },
+    const response = await axiosInterceptor.post(
+      "/auth/logout",
+      {},
+      { withCredentials: true },
     );
+
     return response.data;
   } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      toast.error(err.response?.data?.message || "Error al cerrar sesión");
-    } else {
-      toast.error("Error desconocido");
-    }
+    throw handleApiError(err);
   }
 };
 

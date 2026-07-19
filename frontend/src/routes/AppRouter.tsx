@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { appRoutes } from "@/api/constants/constants";
 import { Toaster } from "react-hot-toast";
-
-import ScrollToTop from "@components/shared/ScrollToTop";
 import Layout from "@layout/layout";
 import NotFound from "@/pages/public/landing/NotFound";
 
@@ -55,11 +53,10 @@ function AppRouter() {
         <AuthProvider>
           <SocketProvider>
             <NotificationsProvider>
-              <ScrollToTop />
               <Toaster
                 position="top-center"
                 toastOptions={{
-                  duration: 4000,
+                  duration: 3000,
                   style: {
                     background: "#333",
                     color: "#fff",

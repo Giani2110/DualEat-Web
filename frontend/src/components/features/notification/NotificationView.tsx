@@ -1,6 +1,6 @@
 import { ROUTES } from "@/api/constants/constants";
 import Loader from "@/components/ui/feedback/Loader";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/hooks/api/notification/useNotifications";
 import type { Notification } from "@/interface/global";
 import { getShortTimeAgo } from "@/utils/date";
 import { BellCheck, BellMinus } from "lucide-react";
@@ -88,8 +88,11 @@ export default function NotificationView() {
               onClick={() => handleNavegation(item)}
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}
-              className={`relative w-full flex flex-row border-y border-dashed border-gray-200 gap-x-3 px-4 py-3 justify-between items-start cursor-pointer transition-colors duration-150 ${item.read ? "bg-bg-semi-white hover:bg-gray-50" : "bg-bg-gray hover:bg-zinc-200/50"
-                }`}
+              className={`relative w-full flex flex-row border-y border-dashed border-gray-200 gap-x-3 px-4 py-3 justify-between items-start cursor-pointer transition-colors duration-150 ${
+                item.read
+                  ? "bg-bg-semi-white hover:bg-gray-50"
+                  : "bg-bg-gray hover:bg-zinc-200/50"
+              }`}
             >
               {/* Información de la notificación (Título, mensaje y fecha) */}
               <div className="flex flex-col flex-1 gap-y-1">

@@ -52,23 +52,24 @@ export default function MessageInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !isPending) {
               handleSubmit();
             }
           }}
-          className="flex-1 placeholder:text-[#2F2F2F] outline-none py-2.5"
+          className="flex-1 placeholder:text-[#2F2F2F] outline-none py-2.5 disabled:opacity-50"
           required
           spellCheck
           maxLength={500}
           value={message}
-          placeholder="¿Qué quieres cocinar hoy?"
+          placeholder={isPending ? "Pensando..." : "¿Qué quieres cocinar hoy?"}
           onChange={(e) => setMessage(e.target.value)}
           type="text"
+          disabled={isPending}
         />
         <button
           onClick={handleSubmit}
-          disabled={!message.trim()}
-          className="rounded-full cursor-pointer p-2 flex items-center justify-center disabled:cursor-not-allowed bg-bg-semi-black"
+          disabled={!message.trim() || isPending}
+          className="rounded-full cursor-pointer p-2 flex items-center justify-center disabled:cursor-not-allowed bg-bg-semi-black disabled:opacity-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

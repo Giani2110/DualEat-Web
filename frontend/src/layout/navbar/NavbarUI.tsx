@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
-import { useNotifications } from "@hooks/useNotifications";
+import { useNotifications } from "@/hooks/api/notification/useNotifications";
 import { Bell, Menu, MessageCircle, Plus } from "lucide-react";
 import Logo from "@assets/icon/Logo_DualEatBlack.png";
 import LogoWhite from "@assets/icon/Logo_DualEat.png";
@@ -58,7 +58,10 @@ export default function NavbarUser({ isOpen, setIsOpen, user }: Props) {
         />
       </Link>
 
-      <button onClick={() => setIsOpen(!isOpen)} className="md:hidden cursor-pointer p-1">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden cursor-pointer p-1"
+      >
         <Menu size={20} color="#2F2F2F" />
       </button>
 

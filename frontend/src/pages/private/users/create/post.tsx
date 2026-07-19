@@ -7,7 +7,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { createPost, upload } from "@/services/post.api";
+import { createPost, updatePost, upload } from "@/services/post.api";
 
 import toast from "react-hot-toast";
 
@@ -148,13 +148,14 @@ export default function CreatePost() {
     }
   }, [editor]);
 
+
   const { mutate: mutatePost, isPending } = useMutation({
     mutationFn: async () => {
       let urls: string[] = [];
 
-      if (image_urls.length > 0) {
+      // Solo subimos imágenes si no estamos en modo edición
+      if (!isEditing && image_urls.length > 0) {
         const uploadPayload = { post_images: image_urls };
-
         const response = await upload(uploadPayload);
 
         if (response?.success && response?.data) {
@@ -162,7 +163,7 @@ export default function CreatePost() {
         }
       }
 
-      const post: PostDTO = {
+      const postDTO: PostDTO = {
         id: isEditing ? usePostCreateStore.getState().post.id : undefined,
         title: title.trim(),
         content: content.trim(),
@@ -172,9 +173,11 @@ export default function CreatePost() {
 
       return toast.promise(
         (async () => {
-          const res = await createPost(post);
+          const res = isEditing
+            ? await updatePost(postDTO.id!, postDTO)
+            : await createPost(postDTO);
           if (!res.success) {
-            throw new Error(res.message || "Error al crear el post");
+            throw new Error(res.message || (isEditing ? "Error al actualizar el post" : "Error al crear el post"));
           }
           return res;
         })(),

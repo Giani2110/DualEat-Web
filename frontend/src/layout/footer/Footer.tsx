@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="bg-black text-text-1">
-      <div className="w-full max-w-7xl py-16 px-6 mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-start">
+      <div className="w-full max-w-7xl py-16 px-6 mx-auto grid grid-cols-1 md:grid-cols-12 gap-y-8 md:gap-16 items-start">
         <div className="col-span-12 md:col-span-4 flex flex-col gap-y-5">
           <div className="flex items-center gap-x-2.5">
             <img src={Logo} className="w-7 h-7" alt="Logo" />
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
           <span className="text-[11px] uppercase tracking-widest text-text-6 font-bold">
             Páginas
           </span>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-[15px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-[15px]">
             <div className="flex flex-col gap-y-2.5">
               <Link
                 to={ROUTES.PUBLIC.HOME}

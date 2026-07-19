@@ -1,6 +1,5 @@
 import { axiosInterceptor } from "@/api/interceptor/axios-interceptor";
 import type {
-  ChatSessionData,
   ChatSessionResponse,
   Ingredient,
   Response,
@@ -12,22 +11,19 @@ import { handleApiError } from "@/utils/apiErrorHandler";
 export const ask = async (
   question: string,
   chat_id: string | null,
-  recipe_id: string | null,
-  conversation: ChatSessionData[],
   ingredients: Ingredient[],
 ): Promise<Response<ChatSessionResponse>> => {
   try {
     const response = await axiosInterceptor.post(`/chat/ask`, {
       question,
       chat_id,
-      recipe_id,
-      conversation,
       ingredients,
     });
 
     return {
       success: response.data.success ?? true,
       status: response.status,
+      message: response.data.message,
       data: response.data.data,
     };
   } catch (err: any) {
@@ -46,6 +42,7 @@ export const getById = async (chat_id: string): Promise<Response> => {
     return {
       success: response.data.success ?? true,
       status: response.status,
+      message: response.data.message,
       data: response.data.data,
     };
   } catch (err: any) {
@@ -64,6 +61,7 @@ export const getHistory = async (search?: string): Promise<Response> => {
     return {
       success: response.data.success ?? true,
       status: response.status,
+      message: response.data.message,
       data: response.data.data,
     };
   } catch (err: any) {
@@ -80,6 +78,7 @@ export const deleteChat = async (chat_id: string): Promise<Response> => {
     return {
       success: response.data.success ?? true,
       status: response.status,
+      message: response.data.message,
       data: response.data.data,
     };
   } catch (err: any) {
@@ -87,25 +86,50 @@ export const deleteChat = async (chat_id: string): Promise<Response> => {
   }
 };
 
-// --- 4. EDITAR TÍTULO DEL CHAT ---
+// --- 5. EDITAR TÍTULO DEL CHAT ---
 // ===================================
 export const editTitle = async (
   chat_id: string,
   title: string,
 ): Promise<Response> => {
   try {
-    const normalize = title.trim();
-
-    const response = await axiosInterceptor.put(`/chat/${chat_id}/title`, {
-      title: normalize,
+    const response = await axiosInterceptor.patch(`/chat/${chat_id}/title`, {
+      title: title.trim(),
     });
 
     return {
       success: response.data.success ?? true,
       status: response.status,
+      message: response.data.message,
       data: response.data.data,
     };
   } catch (err: any) {
-    return handleApiError(err);
+    throw handleApiError(err);
+  }
+};
+
+
+// --- 6. ASOCIAR RECETA AL CHAT ---
+// ===================================
+export const updateRecipe = async (
+  chat_id: string,
+  recipe_id: string,
+): Promise<Response> => {
+  try {
+
+    console.log("Recipe ID", recipe_id)
+    const response = await axiosInterceptor.patch(`/chat/recipe`, {
+      recipe_id: recipe_id,
+      chat_id: chat_id,
+    });
+
+    return {
+      success: response.data.success ?? true,
+      status: response.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  } catch (err: any) {
+    throw handleApiError(err);
   }
 };
