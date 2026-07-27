@@ -187,7 +187,7 @@ const Dashboard = () => {
   const [topFoodsPage, setTopFoodsPage] = useState(0);
   const [ordersPage, setOrdersPage] = useState(0);
 
-  const [earningsRange, setEarningsRange] = useState<'week' | 'month' | '6months' | 'year'>('week');
+  const [earningsRange, setEarningsRange] = useState<'week' | 'month' | '6months' | 'year'>('month');
   const [previousPeriodEarnings, setPreviousPeriodEarnings] = useState<number>(0);
   const [earningsLoading, setEarningsLoading] = useState(false);
 
@@ -647,7 +647,7 @@ const Dashboard = () => {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="text-center text-gray-400 h-full flex items-center justify-center">
+            <div className="text-center text-gray-400 min-h-[200px] h-full flex items-center justify-center">
               <p>No hay datos suficientes para mostrar el gráfico.</p>
             </div>
           )}
@@ -927,13 +927,7 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div className="lg:col-span-2">
-              {monthlyEarnings.length > 0 ? (
-                EarningsCard
-              ) : (
-                <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700 text-center text-gray-500 h-full flex items-center justify-center">
-                  <p>No hay datos suficientes para mostrar el gráfico de facturación mensual.</p>
-                </div>
-              )}
+              {EarningsCard}
             </div>
             {/* Histórico de Ingresos (Panel lateral) */}
             <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700 lg:col-span-1" data-tour-id="earnings-history">
