@@ -1,6 +1,6 @@
 import type { Community } from "@interface/global";
 
-const CommunityCard = ( { community }: { community: Community }) => (
+const CommunityCard = ({ community }: { community: Community }) => (
   <div
     key={community.id}
     className="bg-white py-2 px-4 border border-[#dbdbdb] rounded-lg"
@@ -13,9 +13,7 @@ const CommunityCard = ( { community }: { community: Community }) => (
           className="w-10 h-10 object-cover border rounded-full border-[#ebebeb]"
         />
         <div className="flex flex-col">
-          <h4 className="Dosis-Bold text5 text-[14px]">
-            {community.name}
-          </h4>
+          <h4 className="font-bold text5 text-[14px]">{community.name}</h4>
           <p className="text-[11px] text4">
             {community.total_members} miembros
           </p>
@@ -28,9 +26,7 @@ const CommunityCard = ( { community }: { community: Community }) => (
         Únete
       </button>
     </div>
-    <p className="text-[12px] text-gray-600 mt-2">
-      {community.description}
-    </p>
+    <p className="text-[12px] text-gray-600 mt-2">{community.description}</p>
   </div>
 );
 

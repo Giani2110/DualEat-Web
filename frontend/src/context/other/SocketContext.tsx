@@ -1,7 +1,7 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from '@hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
+import { appConfig } from '@/api/config/AplicationConfig';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -28,9 +28,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (!user?.id) return;
 
     // Conectar al servidor de WebSocket
-    const socketInstance = io('http://localhost:3000', {
+    const socketInstance = io(appConfig.API_URL, {
       auth: {
-        userId: user.id,
+        user_id: user.id,
       },
     });
 

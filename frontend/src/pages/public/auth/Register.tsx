@@ -2,28 +2,28 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
-import AuthSection from "@/components/public/auth/AuthSection";
+import AuthSection from "@/components/features/auth/AuthSection";
 
 import { ROUTES } from "@/api/constants/constants";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 
-import "@assets/scss/public/auth/auth.scss";
+import "@assets/scss/public/auth.scss";
 import { getDeviceId } from "@/utils/device";
 
 const Register = () => {
   const [visible, setVisible] = useState({
-      password: false,
-      confirm: false,
+    password: false,
+    confirm: false,
   });
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const { register } = useAuth();
-
-  const navigate = useNavigate();
 
   const handleNext = async () => {
     const deviceId = await getDeviceId();
@@ -38,47 +38,49 @@ const Register = () => {
     }
 
     try {
-      const responseData = await register(email.trim(), password.trim(), deviceId);
+      const response = await register(email.trim(), password.trim(), deviceId);
 
-      if (responseData?.success && responseData.next_step) {
-        navigate(responseData.next_step);
+      if (response && response.token) {
+        navigate(
+          {
+            pathname: ROUTES.AUTH.ONBOARDING,
+            search: `?tempToken=${response.token}`,
+          },
+          {
+            replace: true,
+          },
+        );
       }
-    } catch (e) {
-      console.log("Error al registrar el paso 1:", e);
-      toast.error("No se pudo conectar con el servidor. Intenta de nuevo.");
+    } catch (e: any) {
+      console.log(e.response.data.error)
     }
   };
 
   return (
     <AuthSection
-      flex="flex"
-      color="bg-yellow"
+      flex="left"
       title="Crear cuenta"
       subtitle="Completa tus datos para comenzar tus artes culinarias"
       children2={
         <>
-
-          <div className="text-center text-[15px] flex items-center justify-center mt-3 gap-3 pb-4">
-            <span className="text4">¿Tienes un local?</span>
+          <div className="text-center text-base flex items-center justify-center gap-x-3">
+            <span className="text-text-4">¿Tienes un local?</span>
             <Link
               to={ROUTES.AUTH.REGISTER_LOCAL}
-              className="text5 underline cursor-pointer hover:text-red-600 font-bold"
+              className="text-text-3 underline cursor-pointer hover:text-[#B53325] font-bold"
             >
               Regístralo ahora
             </Link>
           </div>
         </>
       }
-      background="right-background"
-      Dform="Dform-right"
-      items="items-end text-right"
     >
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleNext();
         }}
-        className="flex flex-col gap-6"
+        className="flex flex-col justify-center gap-6"
       >
         {/* Campo de email */}
         <div className="mt-3">
@@ -88,9 +90,7 @@ const Register = () => {
               required
               type="email"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
               className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none"
             />
@@ -104,15 +104,16 @@ const Register = () => {
               required
               type={visible.password ? "text" : "password"}
               value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPassword(e.target.value)
-              }
+              minLength={6}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               className="w-full px-4 py-[10px] text5 border border-gray-300 rounded-lg focus:ring-1 focus:border-transparent focus:ring-[#E5A657] outline-none pr-12"
             />
             <button
               type="button"
-              onClick={() => setVisible({...visible, password: !visible.password})}
+              onClick={() =>
+                setVisible({ ...visible, password: !visible.password })
+              }
               className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               {visible.password ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -137,7 +138,9 @@ const Register = () => {
             />
             <button
               type="button"
-              onClick={() => setVisible({...visible, confirm: !visible.confirm})}
+              onClick={() =>
+                setVisible({ ...visible, confirm: !visible.confirm })
+              }
               className="absolute cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               {visible.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -145,33 +148,29 @@ const Register = () => {
           </div>
         </div>
 
-        {/* Mostrar mensaje de error si existe */}
-
         {/* Botón de registro */}
-        <div className="mb-2">
-          <button
-            type="submit"
-            className="Dosis-Bold w-full mb-3 text-[15px] cursor-pointer bg-yellow text-white py-[10px] mt-4 px-4 rounded-lg hover:bg-gray-900 transition-colors  font-medium"
-          >
-            Registrarse →
-          </button>
-        </div>
-      </form>
+        <button
+          type="submit"
+          className="w-full flex gap-x-2 items-center justify-center text-text-1 text-sm cursor-pointer bg-bg-yellow hover:scale-103 duration-200 transition-all py-3 rounded-sm font-bold"
+        >
+          Registrarse
+        </button>
 
-      <p className="text-[12px] text4 text-center max-w-[400px] mx-auto mt-2">
-        Al registrarte, aceptas los{" "}
-        <span className="text-[#0a87da] cursor-pointer hover:underline">
-          Términos de servicio
-        </span>{" "}
-        y la{" "}
-        <span className="text-[#0a87da] cursor-pointer hover:underline">
-          Política de privacidad
-        </span>
-        , incluida la política de{" "}
-        <span className="text-[#0a87da] cursor-pointer hover:underline">
-          Uso de Cookies.
-        </span>
-      </p>
+        <p className="text-sm text-text-6 text-center">
+          Al registrarte, aceptas los{" "}
+          <span className="text-bg-blue cursor-pointer hover:underline">
+            Términos de servicio
+          </span>{" "}
+          y la{" "}
+          <span className="text-bg-blue cursor-pointer hover:underline">
+            Política de privacidad
+          </span>
+          , incluida la política de{" "}
+          <span className="text-bg-blue cursor-pointer hover:underline">
+            Uso de Cookies.
+          </span>
+        </p>
+      </form>
     </AuthSection>
   );
 };

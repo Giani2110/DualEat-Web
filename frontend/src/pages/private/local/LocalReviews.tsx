@@ -161,7 +161,7 @@ const LocalReviews = () => {
 
       try {
         const [reviewsRes, foodsRes] = await Promise.allSettled([
-          fetch(`${API_BASE}/review/locals/${localId}/reviews`),
+          fetch(`${API_BASE}/review/local/${localId}`),
           fetch(`${API_BASE}/menu/local/${localId}/foods`),
         ]);
 

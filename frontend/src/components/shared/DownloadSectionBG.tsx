@@ -1,20 +1,19 @@
 import React from "react";
-import GooglePlay from "@assets/images/GooglePlay_Badge_Web.png";
-import Logo from "@assets/images/icon/Logo_DualEat.png";
+import GooglePlay from "@assets/images/auth/GooglePlay_Badge_Web.png";
+import Logo from "@assets/icon/Logo_DualEat.png";
 
 interface Props {
   background: string;
-  background2: string;
 }
 
-const DownloadSectionBG: React.FC<Props> = ({ background, background2 }) => {
+const DownloadSectionBG: React.FC<Props> = ({ background }) => {
   return (
     <section className={`${background} rounded-3xl h-[400px] overflow-hidden relative`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col md:flex-row items-center justify-between">
 
         {/* Left Column - Content */}
         <div className="md:w-[50%] lg:w-[55%] text-center md:text-left pt-12 md:pt-0 z-10">
-          <h1 className="text-[28px] md:text-[32px] Dosis-Bold text-white leading-tight mb-4">
+          <h1 className="text-[28px] md:text-[32px] font-bold text-white leading-tight mb-4">
             Descargá DualEat y descubrí un mundo lleno de sabores
           </h1>
           <p className="text-[14px] md:text-[15px] leading-relaxed text-white/90 mb-6 max-w-[550px] font-light">
@@ -24,7 +23,7 @@ const DownloadSectionBG: React.FC<Props> = ({ background, background2 }) => {
             viví nuevas experiencias en cada salida.
           </p>
           <div className="flex justify-center md:justify-start">
-            <a href="#" className="hover:scale-105 transition-transform duration-300 inline-block">
+            <a href="https://drive.google.com/file/d/17b6xeh_2zaM9P77h1bBtlGY4Lu6_f4Vo/view?usp=sharing" className="hover:scale-105 transition-transform duration-300 inline-block">
               <img
                 src={GooglePlay}
                 alt="Google Play"

@@ -243,7 +243,7 @@ const Dashboard = () => {
 
         fetch(`${API_BASE}/local/statistics/${localId}/top-foods?from=${fromDate}&to=${toDate}`),
 
-        fetch(`${API_BASE}/review/locals/${localId}/reviews`),
+        fetch(`${API_BASE}/review/local/${localId}`),
 
         fetch(`${API_BASE}/subscription/local/${localId}`),
       ]);

@@ -1,43 +1,7 @@
-textarea {
-  resize: none;
-}
-
 .capitalize {
   text-transform: capitalize;
 }
 
-/* ScrollBars*/
-.scroll2::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scroll2::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-  border: 1px solid #d1d1d1;
-}
-
-.scroll2::-webkit-scrollbar-thumb {
-  background: #474747;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.noScroll {
-  -ms-overflow-style: none; /* IE 10+ */
-}
-
-.noScroll::-webkit-scrollbar {
-  display: none;
-}
-
-.noScroll.showScroll {
-  -ms-overflow-style: auto;
-}
-
-.noScroll.showScroll::-webkit-scrollbar {
-  display: initial;
-}
 /* Loading Screen */
 .translate {
   animation: translate 1.6s ease-in-out infinite;
@@ -52,14 +16,5 @@ textarea {
   }
   100% {
     transform: translateX(-20px);
-  }
-}
-
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
   }
 }

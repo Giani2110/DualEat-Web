@@ -4,15 +4,15 @@ import { axiosInterceptor } from "@api/interceptor/axios-interceptor";
 import { useState, useEffect } from "react";
 
 import { X, Eye, EyeOff } from "lucide-react";
-import { withMinimumDelay } from "@utils/timeUtils";
-import Loader from "@components/animation/Loader";
-import OtpInput from "@/components/public/auth/OtpInput";
+import Loader from "@/components/ui/feedback/Loader";
+import OtpInput from "@/components/ui/inputs/OtpInput";
 
 import { ROUTES } from "@/api/constants/constants";
 import { useNavigate } from "react-router-dom";
 import { Fingerprint, Mail, RectangleEllipsis } from "lucide-react";
 
-import "@assets/scss/public/auth/auth.scss";
+import "@assets/scss/public/auth.scss";
+import { AnimatedGridPattern } from "@/components/ui/feedback/animated-grid-pattern";
 
 const ResetPassword = () => {
   const [step, setStep] = useState<"email" | "code" | "password">("email");
@@ -53,10 +53,9 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset", { email }),
-        1000,
-      );
+      const response = await axiosInterceptor.post("/auth/password_reset", {
+        email,
+      });
 
       if (response.data?.success) {
         setStep("code");
@@ -80,10 +79,9 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset", { email }),
-        1000,
-      );
+      const response = await axiosInterceptor.post("/auth/password_reset", {
+        email,
+      });
       if (!response.data?.success) {
         setError("No se pudo reenviar el código. Intenta nuevamente.");
       } else {
@@ -104,12 +102,12 @@ const ResetPassword = () => {
     setError("");
     setLoading(true);
     try {
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset/validate-code", {
+      const response = await axiosInterceptor.post(
+        "/auth/password_reset/validate-code",
+        {
           email,
           code,
-        }),
-        1000,
+        },
       );
 
       if (response.data?.success === true) {
@@ -138,12 +136,12 @@ const ResetPassword = () => {
         return;
       }
 
-      const response = await withMinimumDelay(
-        axiosInterceptor.post("/auth/password_reset/reset", {
+      const response = await axiosInterceptor.post(
+        "/auth/password_reset/reset",
+        {
           email,
           newPassword,
-        }),
-        1000,
+        },
       );
 
       if (response.data?.success) {
@@ -167,8 +165,10 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bgAnimation">
-      <div className="max-w-[600px] h-[650px] w-full flex flex-col items-center mt-20 bg-black border-2 border-[#878787] rounded-[20px] px-8 py-10">
+    <main className="min-h-screen flex-1 flex items-center justify-center relative">
+      <AnimatedGridPattern className="bg-black" />
+
+      <div className="z-10 max-w-[600px] h-[650px] w-full flex flex-col justify-center items-center mt-20 bg-black border border-gray-700 rounded-[20px] px-8 py-10">
         <div className="flex items-center mb-6">
           <X
             size={22}
@@ -177,82 +177,76 @@ const ResetPassword = () => {
           />
 
           {step === "email" ? (
-            <div className="w-[50px] flex items-center justify-center h-[50px] bg-red rounded-[10px]">
+            <div className="w-[50px] flex items-center justify-center h-[50px] bg-bg-red rounded-[10px]">
               <Fingerprint size={25} color="#fff" />
             </div>
           ) : step === "code" ? (
-            <div className="w-[50px] flex items-center justify-center h-[50px] bg-yellow rounded-[10px]">
+            <div className="w-[50px] flex items-center justify-center h-[50px] bg-bg-yellow rounded-[10px]">
               <Mail size={25} color="#fff" />
             </div>
           ) : (
             step === "password" && (
-              <div className="w-[50px] flex items-center justify-center h-[50px] bg-red rounded-[10px]">
+              <div className="w-[50px] flex items-center justify-center h-[50px]  bg-bg-red  rounded-[10px]">
                 <RectangleEllipsis size={25} color="#fff" />
               </div>
             )
           )}
         </div>
         {step === "email" && (
-          <>
-            <form
-              className="flex flex-col mx-[50px] h-full"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendCode();
-              }}
-            >
-              <div className="flex flex-col h-full justify-between">
-                <div>
-                  <h2 className="text-[31px] text2 Dosis-Bold mb-2">
-                    Restablecer contraseña
-                  </h2>
-                  <p className="text4 text-[15px] leading-[21px]">
-                    ¿Olvidaste tu contraseña? No te preocupes. Ingresá el correo
-                    electrónico que usás para iniciar sesión y te enviaremos un
-                    código para ayudarte a restablecerla.
-                  </p>
+          <form
+            className="flex flex-col h-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendCode();
+            }}
+          >
+            <div className="flex flex-col h-full justify-between">
+              <div>
+                <h2 className="text-2xl text-text-1 font-bold mb-2">
+                  Restablecer contraseña
+                </h2>
+                <p className="text-text-2/50 text-sm">
+                  ¿Olvidaste tu contraseña? No te preocupes. Ingresá el correo
+                  electrónico que usás para iniciar sesión y te enviaremos un
+                  código para ayudarte a restablecerla.
+                </p>
 
-                  <div className="relative mt-8">
-                    <input
-                      type="email"
-                      id="email"
-                      placeholder="Correo electrónico"
-                      className="peer w-full border text1 px-4 pb-3 pt-7 rounded-[5px] border-gray-700 placeholder-transparent focus:outline-none focus:border-blue-500"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                    <label
-                      htmlFor="email"
-                      className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
-                        email
-                          ? "top-1 text-sm text-blue-500"
-                          : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
-                      }`}
-                    >
-                      Correo electrónico
-                    </label>
-                  </div>
+                <div className="relative mt-8">
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="Correo electrónico"
+                    className="peer w-full border text-text-1 px-4 pb-3 pt-7 rounded-[5px] border-gray-700 placeholder-transparent focus:outline-none focus:border-blue-500"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  <label
+                    htmlFor="email"
+                    className={`absolute left-4 text-[#707070] cursor-text transition-all duration-300 ${
+                      email
+                        ? "top-1 text-sm text-blue-500"
+                        : "top-5 text-[16px] peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+                    }`}
+                  >
+                    Correo electrónico
+                  </label>
                 </div>
-                <button
-                  type="submit"
-                  disabled={!email}
-                  className={`w-full Dosis-Bold py-3 rounded-[50px] transition
+              </div>
+              <button
+                type="submit"
+                disabled={!email}
+                className={`w-full font-bold py-3 rounded-[50px] transition
                     ${
                       !email
-                        ? "bg-red brightness-50 cursor-not-allowed text-white/60"
-                        : "bg-red cursor-pointer text-white hover:bg-red"
+                        ? "bg-bg-red brightness-50 cursor-not-allowed text-white/90"
+                        : "bg-bg-red cursor-pointer text-white hover:bg-bg-red"
                     }`}
-                >
-                  {loading ? (
-                    <Loader color="white" size="4" />
-                  ) : (
-                    "Enviar código"
-                  )}
-                </button>
-              </div>
-            </form>
-          </>
+              >
+                {loading ? <Loader color="white" size={10} /> : "Enviar código"}
+              </button>
+            </div>
+          </form>
         )}
 
         {step === "code" && (
@@ -266,12 +260,12 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 Dosis-Bold mb-2">
+                  <h2 className="text-[31px] text2 font-bold mb-2">
                     Te enviamos un código
                   </h2>
                   <p className="text4 text-[15px] leading-[21px] my-5">
                     Enviamos un código de confirmación a
-                    <span className="Dosis-Bold text1 ms-1">{email}</span>.
+                    <span className="font-bold text1 ms-1">{email}</span>.
                   </p>
                   <p className="text4 text-[15px] leading-[21px]">
                     Consulta tu correo para obtener tu código de confirmación.
@@ -292,7 +286,7 @@ const ResetPassword = () => {
                     <button
                       type="button"
                       onClick={handleResendCode}
-                      className={`Dosis-Bold text2 ms-1 cursor-pointer underline underline-offset-1 ${
+                      className={`font-bold text2 ms-1 cursor-pointer underline underline-offset-1 ${
                         resendCooldown > 0
                           ? "opacity-50 cursor-not-allowed"
                           : ""
@@ -310,17 +304,17 @@ const ResetPassword = () => {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full Dosis-Bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
+                    className="text1 border border-[#e5a657] hover:bg-[#e5a657] hover:brightness-95 w-full font-bold py-3 cursor-pointer rounded-[20px] transition-all duration-300"
                   >
-                    {loading ? <Loader color="white" size="4" /> : "Atrás"}
+                    {loading ? <Loader color="white" size={10} /> : "Atrás"}
                   </button>
                 ) : (
                   <button
                     type="submit"
-                    className="bg-red border border-[#888888] text1 hover:brightness-90 w-full Dosis-Bold py-3 cursor-pointer rounded-[50px] transition-all duration-300"
+                    className="bg-red border border-[#888888] text1 hover:brightness-90 w-full font-bold py-3 cursor-pointer rounded-[50px] transition-all duration-300"
                   >
                     {loading ? (
-                      <Loader color="white" size="4" />
+                      <Loader color="white" size={10} />
                     ) : (
                       "Validar código"
                     )}
@@ -342,7 +336,7 @@ const ResetPassword = () => {
             >
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <h2 className="text-[31px] text2 Dosis-Bold mb-2">
+                  <h2 className="text-[31px] text2 font-bold mb-2">
                     Elige una contraseña nueva
                   </h2>
                   <p className="text4 text-[15px] leading-[21px]">
@@ -424,11 +418,11 @@ const ResetPassword = () => {
 
                 <button
                   type="submit"
-                  className={`w-full bg-red text1 Dosis-Bold py-3 cursor-pointer rounded-[50px]`}
+                  className={`w-full bg-bg-red text-text-1 font-bold py-3 cursor-pointer rounded-[50px]`}
                 >
                   {loading ? (
                     <div className="flex items-center justify-center">
-                      <Loader color="white" size="4" />
+                      <Loader color="white" size={20} />
                       {success ? (
                         <span className="ml-2">Contraseña cambiada</span>
                       ) : (
@@ -446,7 +440,7 @@ const ResetPassword = () => {
 
         {error && <p className="text-[#F03536] mt-4 text-sm">{error}</p>}
       </div>
-    </div>
+    </main>
   );
 };
 

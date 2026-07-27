@@ -1,16 +1,17 @@
-import { useEffect, useRef } from "react";
-import { useAuth } from "@hooks/useAuth";
+import { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getAllPosts } from "@/services/post.api";
-import type { Posts, ResponseWithPagination } from "@interface/global";
-import PostCard from "@/components/private/users/ui/PostCard";
-import { Loader } from "lucide-react";
+import type { Post, ResponseWithPagination } from "@interface/global";
+import PostCard from "@/components/features/post/PostCard";
+
+import { useInView } from "react-intersection-observer";
+import { getAll } from "@/services/post.api";
+
+import Loader from "@/components/ui/feedback/Loader";
 
 const UDashboard = () => {
-  const { user } = useAuth();
-
-  // Ref para el sentinel del IntersectionObserver
-  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const { ref, inView } = useInView({
+    rootMargin: "200px",
+  });
 
   const {
     data,
@@ -19,50 +20,38 @@ const UDashboard = () => {
     isFetchingNextPage,
     isError,
     error,
-  } = useInfiniteQuery<ResponseWithPagination<Posts>>({
-    queryKey: ["allPosts"],
-    queryFn: ({ pageParam = 1 }) => getAllPosts(pageParam as number, false),
+    isLoading,
+  } = useInfiniteQuery<ResponseWithPagination<Post>>({
+    queryKey: ["posts"],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await getAll(pageParam as number);
+
+      if (!response) throw new Error("Error obteniendo las órdenes");
+      return response as ResponseWithPagination<Post>;
+    },
     getNextPageParam: (lastPage) => {
-      if (lastPage.pagination.hasMore) {
+      if (lastPage?.pagination?.hasMore) {
         return lastPage.pagination.page + 1;
       }
       return undefined;
     },
     initialPageParam: 1,
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
+
+    staleTime: 1000 * 60 * 20,
+    gcTime: 1000 * 60 * 60,
+    retry: 3,
   });
 
-  // Observer para el sentinel
   useEffect(() => {
-    const el = loaderRef.current;
-    if (!el) return;
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-
-        // Si el sentinel es visible Y hay más páginas Y no estamos cargando
-        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      {
-        root: null,
-        rootMargin: "200px", // Cargar antes de llegar al final
-        threshold: 0.1,
-      }
-    );
-
-    observer.observe(el);
-
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const allPosts =
+  const posts =
     data?.pages
       .flatMap((page) => page.data)
-      .filter((post): post is Posts => Boolean(post)) || [];
+      .filter((post): post is Post => Boolean(post)) || [];
 
   if (isError) {
     return (
@@ -74,43 +63,41 @@ const UDashboard = () => {
   }
 
   return (
-    <section className="w-[95%] md:w-[80%] mx-auto flex flex-col gap-3  mt-5 ">
-      <div className="flex gap-3">
-        <div className="flex flex-col gap-2 flex-2">
-          {Array.isArray(allPosts) && allPosts.length > 0 ? (
-            allPosts.map((post: Posts) => (
-              <div key={post.id}>
-                <PostCard Post={post} isDashboard={true} />
-              </div>
-            ))
-          ) : (
-            <div className="text-center text-gray-500 mt-5">
-              No hay posts disponibles para mostrar.
+    <main className="h-full px-2 md:px-8 flex-wrap flex flex-col md:flex-row gap-8 my-5 bg-bg-semi-white">
+      {isLoading ? (
+        <div className="flex-1 flex justify-center items-center py-20">
+          <Loader size={26} color="#e5a657" />
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col gap-y-2">
+          {posts.map((post: Post) => (
+            <div
+              key={post.id}
+              className="w-full rounded-xl border border-dashed border-gray-300 overflow-hidden"
+            >
+              <PostCard post={post} type="HOME" padding="px-6 py-4" />
             </div>
-          )}
-
+          ))}
           {/* Sentinel */}
           <div
-            ref={loaderRef}
+            ref={ref}
             className="w-full py-4 flex justify-center"
             aria-hidden="true"
           >
             {isFetchingNextPage && (
-              <div className="flex items-center gap-2 text-gray-500">
-                <Loader className="animate-spin" size={16} />
-                <span className="text-sm">Cargando más posts...</span>
+              <div className="flex justify-center items-center">
+                <Loader size={20} color="#e5a657" />
               </div>
             )}
-
-            {!hasNextPage && allPosts.length > 0 && (
-              <div className="text-sm text5">No hay más posts para mostrar</div>
+            {!hasNextPage && (
+              <div className="text-sm text-text-4">
+                No hay más posts para mostrar
+              </div>
             )}
           </div>
         </div>
-
-        <div className="flex-1 hidden lg:block">{/* Sidebar */}</div>
-      </div>
-    </section>
+      )}
+    </main>
   );
 };
 

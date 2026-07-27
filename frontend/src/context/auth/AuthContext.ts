@@ -1,9 +1,9 @@
 import { createContext } from "react";
-import type { AuthResponse } from "@services/auth.api";
-import type { User } from "@interface/global";
+import type { AuthResponse } from "@interface/global";
+import type { UserSessionData } from "./AuthProvider";
 
 export interface AuthContextType {
-  user: User | null;
+  user: UserSessionData | null;
   loading: boolean;
   login: (
     e: string, // email
@@ -20,12 +20,13 @@ export interface AuthContextType {
   ) => Promise<AuthResponse | null>;
   completeProfile: (
     n: string, // name
-    fPreferences: number[], // foodPreferences
-    cPreferences: number[], // communityPreferences
+    fPreferences: string[], // foodPreferences
+    cPreferences: string[], // communityPreferences
     tt: string, // tempToken
   ) => Promise<AuthResponse | null>;
+  refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
+  undefined,
 );

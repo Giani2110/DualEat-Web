@@ -1,107 +1,136 @@
-import DownloadSectionBG from "@components/shared/DownloadSectionBG";
+import DownloadSectionBG from "@/components/shared/DownloadSectionBG";
+import { LineShadowText } from "@/components/ui/feedback/line-shadow-text";
 
-const AboutUs = () => {
+const pillars = [
+  {
+    id: "mision",
+    number: "001",
+    title: "Misión",
+    description:
+      "Brindar una plataforma gastronómica integral que potencie tanto a los negocios del sector como a los cocineros del hogar, facilitando la tecnología y la comunidad necesarias para hacer de cada comida una experiencia ágil, memorable y cercana.",
+    included: [
+      "Digitalización inmediata para restaurantes locales",
+      "Espacio interactivo para compartir e inspirar con recetas",
+      "Optimización operativa mediante códigos QR y autogestión",
+    ],
+  },
+  {
+    id: "vision",
+    number: "002",
+    title: "Visión",
+    description:
+      "Ser el ecosistema gastronómico líder en conectar las experiencias culinarias de las salidas a comer con el placer de cocinar en casa, eliminando la saturación de aplicaciones y convirtiendo a la comida en un lazo social.",
+    included: [
+      "Plataforma unificada de doble entorno",
+      "Recomendaciones inteligentes personalizadas por geolocalización",
+      "Expansión e integración de la comunidad gastronómica",
+    ],
+  },
+  {
+    id: "valores",
+    number: "003",
+    title: "Valores",
+    description:
+      "Nos guía la pasión por la cocina, el compromiso genuino con el desarrollo del comercio gastronómico local, y la búsqueda constante de la excelencia tecnológica. Creemos en una conexión más transparente, segura y humana.",
+    included: [
+      "Fomento directo de la economía de cercanía",
+      "Reducción del desperdicio alimentario hogareño",
+      "Seguridad en transacciones y protección de datos",
+    ],
+  },
+];
+
+export default function AboutUs() {
   return (
-    <div className="min-h-screen bgsemi-white pt-[15px]">
-      <div className="rounded-[20px] mx-4 bg-gradient-to-r from-[#ED213A] to-[#93291E] text-white h-[400px] relative">
-        <div className="max-w-screen-2xl mx-auto text-center pt-[160px]">
-          <h1 className="text-[45px] Dosis-Bold mb-4">Sobre nosotros</h1>
-          <p className="text-[17px] max-w-2xl mx-auto leading-[32px] tracking-[-0.4px]">
-            Apasionados por la comida, la tecnología y las experiencias simples
-            pero memorables.
+    <main
+      className="min-h-screen bg-[#141414] text-text-1 flex flex-col gap-y-12 pt-[10vh] p-[2vh] md:p-[10vh]"
+    >
+      {/* Hero Section */}
+      <section className="min-h-[40vh] flex flex-col md:flex-row gap-12 items-stretch">
+        <div className="flex-1 flex items-center">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-text-1 leading-none">
+            Sobre <br />
+            <LineShadowText className="italic" as="span" shadowColor={"#fff"}>
+              Nosotros
+            </LineShadowText>
+          </h1>
+        </div>
+        <div className="flex-1 flex items-end">
+          <p className="text-text-2 text-base leading-7 italic">
+            &quot;En un mundo donde la tecnología a menudo fragmenta nuestras
+            experiencias, en DualEat elegimos unirlas. Nuestra plataforma nace
+            para resolver la saturación de aplicaciones de un solo uso,
+            eliminando la fricción entre la experiencia de salir a comer y el
+            placer de cocinar en casa. Somos el puente digital que conecta a los
+            establecimientos gastronómicos con sus clientes de una manera más
+            inteligente, ágil y humana.&quot;
           </p>
         </div>
+      </section>
+
+      {/* Pillars Section */}
+      <section className="flex flex-col gap-y-16 py-12">
+        {pillars.map((item) => (
+          <div key={item.id} className="border-t border-gray-800 pt-10">
+            <div className="grid grid-cols-12 gap-6 md:gap-8 items-start">
+              {/* Number */}
+              <div className="col-span-12 lg:col-span-1 text-text-6 font-mono text-sm tracking-widest">
+                {item.number}
+              </div>
+
+              {/* Title */}
+              <div className="col-span-12 lg:col-span-6 text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-text-1">
+                {item.title}
+              </div>
+
+              {/* Description & What's Included */}
+              <div className="col-span-12 lg:col-span-5 flex flex-col gap-y-6">
+                <p className="text-text-2 text-[15px] md:text-base leading-relaxed font-light">
+                  {item.description}
+                </p>
+
+                <div className="flex flex-col gap-y-3">
+                  <span className="text-sm font-bold uppercase tracking-wider text-text-2">
+                    Qué incluye
+                  </span>
+                  <ul className="space-y-2">
+                    {item.included.map((inc, i) => (
+                      <li
+                        key={i}
+                        className="text-sm text-text-2 flex items-start gap-x-2 font-light"
+                      >
+                        <span className="text-text-6 font-mono">+</span>
+                        <span>{inc}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Mini Footer */}
+      <div className="flex flex-col gap-y-2 mt-auto">
+        <div className="border-t border-gray-800 w-full" />
+        <div className="flex flex-row justify-between items-center">
+          <span className="text-xs tracking-tighter font-normal text-text-6">
+            (v01)
+          </span>
+
+          <span className="text-xs tracking-tighter font-normal text-text-6">
+            @{new Date().getFullYear()} DualEat
+          </span>
+        </div>
       </div>
-
-      {/* Main Content */}
-      <main className="mx-4 mt-4">
-        {/* Principles Section */}
-        <div className="bg-gray py-[100px] px-8 rounded-[20px]">
-          <div className="max-w-[70%] mx-auto">
-            <div className="grid grid-cols-2 justify-center">
-              <h2 className="text-[26px] Dosis-Bold">Nuestros principios</h2>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-x-20">
-              <div>
-                <h3 className="text5 Dosis-Bold titleABT">
-                  Diseñar con foco en las personas, negocios, foodies y
-                  cocineros caseros
-                </h3>
-                <p className="text4 textABT">
-                  Pensamos en cada tipo de usuario: foodies, clientes y
-                  cocineros caseros. Cada función está hecha para resolver
-                  necesidades y mejorar la experiencia.
-                </p>
-
-                <h3 className="text5 Dosis-Bold titleABT">
-                  Ser inclusivos y accesibles
-                </h3>
-                <p className="text4 textABT">
-                  Diseñamos una plataforma pensada para todos, fácil de usar,
-                  adaptable a distintos perfiles, dietas, edades y necesidades.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text5 Dosis-Bold titleABT">
-                  Priorizar lo que agrega valor
-                </h3>
-                <p className="text4 textABT">
-                  Evitamos saturar con funciones innecesarias. Solo
-                  implementamos herramientas útiles, simples y relevantes para
-                  el día a día.
-                </p>
-                <h3 className="text5 Dosis-Bold titleABT">
-                  Impulsar a los negocios gastronómicos
-                </h3>
-                <p className="text4 textABT">
-                  Buscamos que los locales crezcan de forma sostenible,
-                  brindándoles visibilidad, estadísticas y herramientas para
-                  atraer nuevos clientes.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Vision and Mission Section */}
-        <div className="bg-gray py-[70px] px-8 mb-10 rounded-[20px] mt-4">
-          <div className="grid lg:grid-cols-2 gap-10 max-w-[70%] mx-auto">
-            {/* Vision */}
-            <div>
-              <h2 className="text-[28px] Dosis-Bold mb-3">Visión</h2>
-              <p className="text4 textABT">
-                Ser la aplicación gastronómica líder en conectar experiencias
-                culinarias tanto en locales como en el hogar, transformando la
-                forma en que las personas descubren, ordenan y comparten comida
-                en Argentina.
-              </p>
-            </div>
-
-            {/* Mission */}
-            <div className="lg:text-right">
-              <h2 className="text-[28px] Dosis-Bold mb-3">Misión</h2>
-              <p className="text4 textABT">
-                Brindar una plataforma integral que permita a los negocios
-                gastronómicos y amantes de la cocina, facilitando la tecnología
-                y comunidad para hacer de cada comida una experiencia
-                personalizada, accesible y memorable.
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
 
       {/* Download Section */}
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden mt-10 mb-10">
+      <section className="w-full max-w-[90vw] mx-auto overflow-hidden my-12">
         <DownloadSectionBG
           background="bg-gradient-to-b from-[#ED213A] to-[#93291E]"
-          background2="bg-red"
         />
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
-
-export default AboutUs;

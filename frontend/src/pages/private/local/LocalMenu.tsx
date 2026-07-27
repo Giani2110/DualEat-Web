@@ -14,10 +14,10 @@ import React from 'react';
 // Interfaces de Datos
 // ----------------------------------------------------------------------
 interface Food {
-  id: number;
-  local_id: number;
-  category_id: number;
-  local_menu_category_id?: number;
+  id: string;
+  local_id: string;
+  category_id: string;
+  local_menu_category_id?: string;
   name: string;
   price: number;
   description: string | null;
@@ -28,14 +28,14 @@ interface Food {
 }
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
   icon_url: string;
-  local_id: number;
+  local_id: string;
 }
 
 interface PredefinedCategory {
-  id: number;
+  id: string;
   name: string;
   icon_url: string;
 }
@@ -116,7 +116,7 @@ const LocalMenu = () => {
   const user = authContext?.user;
 
   const [foods, setFoods] = useState<Food[]>([]);
-  const [localId, setLocalId] = useState<number | null>(null);
+  const [localId, setLocalId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -140,7 +140,7 @@ const LocalMenu = () => {
   });
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showArrows, setShowArrows] = useState(false);
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
@@ -301,7 +301,7 @@ const LocalMenu = () => {
     }
   }, [isModalOpen, confirmModal.isOpen, showOcrModal, showCreateCategoryModal, isTourOpen]);
 
-  const handleHideFood = async (foodId: number) => {
+  const handleHideFood = async (foodId: string) => {
     try {
       const response = await fetch(`${API_BASE}/menu/foods/${foodId}`, {
         method: 'PUT',
@@ -337,19 +337,7 @@ const LocalMenu = () => {
       return;
     }
 
-    setSelectedFood({
-      id: 0,
-      local_id: localId,
-      category_id: 0,
-      local_menu_category_id: selectedCategory || undefined,
-      name: '',
-      price: 0,
-      description: '',
-      image_url: null,
-      available: true,
-      votes_up: 0,
-      votes_down: 0,
-    });
+    setSelectedFood(null);
     setIsModalOpen(true);
   };
 
@@ -359,18 +347,13 @@ const LocalMenu = () => {
   };
 
   const handleOnSave = async (food: Food) => {
-    const isNewFood = food.id === 0;
+    const isNewFood = food.id === undefined;
 
-    const foodData = {
-      ...food,
-      category_id: food.local_menu_category_id ? undefined : food.category_id,
-      local_menu_category_id: food.local_menu_category_id
-    };
 
     try {
       const method = isNewFood ? 'POST' : 'PUT';
       const url = isNewFood
-        ? `${API_BASE}/menu/locals/${food.local_id}/manual-menu`
+        ? `${API_BASE}/menu/locals/${localId}/manual-menu`
         : `${API_BASE}/menu/foods/${food.id}`;
 
       const response = await fetch(url, {
@@ -378,7 +361,7 @@ const LocalMenu = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(foodData),
+        body: JSON.stringify(food),
       });
 
       if (!response.ok) {
@@ -556,7 +539,7 @@ const LocalMenu = () => {
   };
 
 
-  const confirmDeleteCategory = async (categoryId: number) => {
+  const confirmDeleteCategory = async (categoryId: string) => {
     try {
       // CORREGIDO: /food-categories en lugar de /local-menu-categories
       const response = await fetch(`${API_BASE}/food-categories/local/${localId}/${categoryId}`, {
@@ -587,7 +570,7 @@ const LocalMenu = () => {
     }
   };
 
-  const openDeleteCategoryModal = (categoryId: number) => {
+  const openDeleteCategoryModal = (categoryId: string) => {
     setConfirmModal({
       isOpen: true,
       title: 'Eliminar Categoría',
@@ -599,7 +582,6 @@ const LocalMenu = () => {
   };
 
   const filteredFoods = useMemo(() => {
-    // 👇 AGREGA ESTA LÍNEA EXACTAMENTE AQUÍ 👇
     if (!Array.isArray(foods)) return [];
 
     return foods.filter(food =>
@@ -1215,7 +1197,8 @@ const LocalMenu = () => {
                 <select
                   id="predefined-category"
                   value={selectedPredefinedCategory}
-                  onChange={(e) => setSelectedPredefinedCategory(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedPredefinedCategory(e.target.value)}}
                   className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border-2 border-gray-100 text-gray-700 outline-none focus:border-purple-200 focus:bg-white transition-all appearance-none cursor-pointer"
                 >
                   <option value="">-- Elegir de la lista --</option>

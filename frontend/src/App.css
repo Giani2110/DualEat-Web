@@ -1,6 +1,37 @@
 @import "tailwindcss";
-@import 'react-image-crop/dist/ReactCrop.css';
+@import "@fontsource-variable/outfit/wght.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@config "../tailwind.config.js";
+
+@theme inline {
+  --animate-line-shadow: line-shadow 15s linear infinite;
+ 
+  @keyframes line-shadow {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 100% -100%;
+    }
+  }
+}
 
 body {
-    font-family: 'Dosis', sans-serif;
+  font-family: "Outfit Variable", sans-serif;
+  font-weight: 300;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.noScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.noScroll {
+  scrollbar-width: none;
 }
