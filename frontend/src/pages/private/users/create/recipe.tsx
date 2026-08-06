@@ -1,7 +1,6 @@
 import StepsList from "@/components/features/create/recipe/StepsList";
 import NutritionPie from "@/components/features/recipe/NutritionPie";
 import IngredientsModal from "@/components/shared/IngredientsModal";
-import { usePostCreateStore } from "@/context/store/usePostCreate";
 import { useIngredients } from "@/hooks/api/recipe/useIngredients";
 import {
   Unit,
@@ -11,7 +10,6 @@ import {
   type NutritionData,
 } from "@/interface/global";
 import type {
-  PostDTO,
   RecipeDTO,
   RecipeIngredientDTO,
   RecipeStepDTO,
@@ -31,17 +29,21 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { createPost, upload } from "@/services/post.api";
+import { upload } from "@/services/post.api";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/api/constants/constants";
 import toast from "react-hot-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { createRecipe } from "@/services/recipe.api";
+import { motion } from "framer-motion";
 
 type RecipePartial = Omit<RecipeDTO, "ingredients" | "steps">;
 
 type StepsPartial = { id: string } & RecipeStepDTO;
 
 export default function CreateRecipe() {
-  const { post, clearPost } = usePostCreateStore();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [nutrition, setNutrition] = useState<NutritionData | null>(null);
 
@@ -83,12 +85,6 @@ export default function CreateRecipe() {
     main_image: "",
   });
 
-  useEffect(() => {
-    if (post.title === "" || post.content === "" || !post.community) {
-      navigate(ROUTES.USER.CREATE_POST);
-    }
-  }, [post]);
-
   const handleFiles = (files: File[], type: "image") => {
     const media = pickMedia(files, type);
     if (media.length === 0) return;
@@ -98,12 +94,9 @@ export default function CreateRecipe() {
 
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const navigate = useNavigate();
-
   const { mutate: submitRecipe, isPending: isSubmitting } = useMutation({
     mutationFn: async () => {
       const uploadPayload: UploadPayload = {
-        post_images: post.image_urls as UploadableFile[],
         main_image: recipe.main_image as UploadableFile,
       };
 
@@ -115,13 +108,6 @@ export default function CreateRecipe() {
       }
 
       const urls = response.data;
-
-      const postDTO: PostDTO = {
-        title: post.title.trim(),
-        content: post.content.trim(),
-        image_urls: urls?.post_images || [],
-        community: post.community,
-      };
 
       const recipeDTO: RecipeDTO = {
         name: recipe.name.trim(),
@@ -143,20 +129,21 @@ export default function CreateRecipe() {
         }),
       };
 
-      const createResponse = await createPost(postDTO, recipeDTO);
+      const create = await createRecipe(recipeDTO);
 
-      return createResponse;
+      return create;
     },
     onMutate: () => {
       toast.loading("Publicando receta...");
     },
     onSuccess: (res) => {
+      const data = res?.data;
+
       toast.dismiss();
       toast.success(res?.message || "Receta publicada exitosamente");
-      clearPost();
-      navigate(
-        ROUTES.USER.POST(res?.data?.id as string, res?.data?.slug as string),
-      );
+      navigate(ROUTES.USER.RECIPE(data?.id as string, data?.slug as string), {
+        replace: true,
+      });
     },
     onError: (err: any) => {
       toast.dismiss();
@@ -181,11 +168,6 @@ export default function CreateRecipe() {
 
     if (steps.some((step) => !step.description)) {
       toast.error("Faltan datos en los pasos");
-      return;
-    }
-
-    if (!post) {
-      toast.error("Debes seleccionar una comunidad");
       return;
     }
 
@@ -369,6 +351,10 @@ export default function CreateRecipe() {
     });
   }, [ingredients]);
 
+  const isPremium =
+    user?.subscription_status === "ACTIVE" ||
+    user?.subscription_status === "TRIAL";
+
   return (
     <main className="h-full flex flex-col md:flex-row px-6 md:px-16 gap-8 py-5 bg-bg-semi-white">
       <form
@@ -378,7 +364,7 @@ export default function CreateRecipe() {
         style={{ flex: 2 }}
         className="flex flex-col gap-y-6 justify-between"
       >
-        <h1 className="text-[28px] text-text-3 tracking-tight font-bold">
+        <h1 className="text-2xl md:text-[28px] text-text-3 tracking-tight font-bold">
           Crear receta
         </h1>
 
@@ -391,7 +377,7 @@ export default function CreateRecipe() {
             setRecipe((prev) => ({ ...prev, name: e.target.value }))
           }
           value={recipe.name}
-          className="outline-none px-4 py-2 border border-gray-300 rounded-[4px] py-2 text-[16px] w-full text-text-5 font-bold"
+          className="outline-none px-4 py-2 border border-gray-300 rounded-[4px] py-2 text-sm md:text-base w-full text-text-5 font-bold"
         />
 
         {!recipe.main_image ? (
@@ -469,13 +455,14 @@ export default function CreateRecipe() {
         )}
 
         {/* INPUTS DE INFORMACIÓN DE RECETA */}
-        <div className="flex flex-row flex-wrap items-center justify-center gap-x-6 py-1 border-y border-[#dbdbdb]">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-x-6 py-1 border-y border-[#dbdbdb]">
           {recipeStats.map((stat, index) => (
-            <div key={stat.id} className="flex items-center gap-x-4">
+            <div
+              key={stat.id}
+              className="flex text-xs md:text-sm items-center gap-x-4"
+            >
               {stat.icon}
-              <span className="font-normal text-[14px] text-text-4">
-                {stat.text}
-              </span>
+              <span className="text-text-4">{stat.text}</span>
               {index !== recipeStats.length - 1 && (
                 <span className="text-lg">•</span>
               )}
@@ -490,6 +477,7 @@ export default function CreateRecipe() {
             aria-label="Descripción de la receta"
             placeholder="Escribe aquí la descripción de tu receta..."
             required
+            maxLength={isPremium ? 3000 : 1000}
             onChange={(e) =>
               setRecipe((prev) => ({
                 ...prev,
@@ -497,7 +485,7 @@ export default function CreateRecipe() {
               }))
             }
             value={recipe.description}
-            className="outline-none px-4 py-2 border border-gray-300 rounded-[4px] py-2 text-[16px] min-h-[100px] max-h-[500px] w-full text-text-6 placeholder:text-[16px] placeholder:text-text-6"
+            className="outline-none px-4 py-2 border border-gray-300 rounded-[4px] py-2 text-sm min-h-[100px] max-h-[500px] w-full text-text-6 placeholder:text-text-6"
           />
         </div>
 
@@ -506,13 +494,13 @@ export default function CreateRecipe() {
           <h2 className="text-[20px] font-bold text-text-5">Ingredientes</h2>
 
           {ingredients.map((item, index) => (
-            <div key={index} className="flex flex-row flex-wrap gap-x-1">
+            <div key={index} className="flex flex-row flex-wrap gap-1.5">
               <button
                 type="button"
                 onClick={() => {
                   handleModal(index, "ingredient");
                 }}
-                className="outline-none cursor-pointer text-[14px] flex items-center flex-1 border border-gray-300 rounded-[4px] py-1.5 px-3 text-text-6"
+                className="outline-none cursor-pointer text-xs md:text-sm flex items-center flex-1 border border-gray-300 rounded-[4px] py-1.5 px-3 text-text-6"
               >
                 {capitalize(item.ingredient?.name || "Agregar ingrediente")}
               </button>
@@ -532,7 +520,7 @@ export default function CreateRecipe() {
                   )
                 }
                 value={item.quantity}
-                className="outline-none text-[14px] flex items-center border border-gray-300 rounded-[4px] py-1.5 px-3 text-text-6 font-outfit-light"
+                className="outline-none text-xs md:text-sm flex items-center border border-gray-300 rounded-[4px] py-1.5 px-3 text-text-6 font-outfit-light"
               />
 
               <button
@@ -540,7 +528,7 @@ export default function CreateRecipe() {
                 onClick={() => {
                   handleModal(index, "unit");
                 }}
-                className="outline-none cursor-pointer text-[14px] border border-gray-300 rounded-[4px]  py-1.5 px-3 text-text-6 font-outfit-light"
+                className="outline-none cursor-pointer text-xs md:text-sm border border-gray-300 rounded-[4px]  py-1.5 px-3 text-text-6 font-outfit-light"
               >
                 {UnitNames[item.unit].abbreviation}
               </button>
@@ -571,10 +559,12 @@ export default function CreateRecipe() {
                         setIngredients(ingredients.slice(0, -1));
                       }
                     }}
-                    className="cursor-pointer flex-1 flex flex-row items-center w-full justify-center gap-x-2 py-2 rounded-[5px] justify-center border border-[#e5a657]"
+                    className="cursor-pointer flex-1 flex flex-row items-center w-full justify-center gap-x-2 py-1.5 md:py-2 rounded-[5px] justify-center border border-[#e5a657]"
                   >
                     <Plus color="#e5a657" size={20} />
-                    <span className="text-[14px] text-text-3">{item}</span>
+                    <span className="text-xs md:text-sm text-text-3">
+                      {item}
+                    </span>
                   </button>
                 );
               },
@@ -584,7 +574,7 @@ export default function CreateRecipe() {
 
         {/* PASOS */}
         <section className="space-y-2">
-          <h2 className="text-[20px] font-bold text-text-5">Pasos</h2>
+          <h2 className="text-xl font-bold text-text-5">Pasos</h2>
 
           <StepsList steps={steps} setSteps={setSteps} />
 
@@ -611,10 +601,10 @@ export default function CreateRecipe() {
                       setSteps(steps.slice(0, -1));
                     }
                   }}
-                  className="cursor-pointer flex-1 flex flex-row items-center w-full justify-center gap-x-2 py-2 rounded-[5px] justify-center border border-[#e5a657]"
+                  className="cursor-pointer flex-1 flex flex-row items-center w-full justify-center gap-x-2 py-1.5 md:py-2 rounded-[5px] justify-center border border-[#e5a657]"
                 >
                   <Plus color="#e5a657" size={20} />
-                  <span className="text-[14px] text-text-3">{item}</span>
+                  <span className="text-xs md:text-sm text-text-3">{item}</span>
                 </button>
               );
             })}
@@ -625,7 +615,7 @@ export default function CreateRecipe() {
           <button
             type="submit"
             disabled={isSubmitDisabled || isSubmitting}
-            className={`flex items-center px-4 py-1.5 font-bold rounded-full text-[16px] transition-all duration-200 ${
+            className={`flex items-center px-4 py-1.5 font-bold rounded-full text-base transition-all duration-200 ${
               isSubmitDisabled || isSubmitting
                 ? "cursor-not-allowed opacity-50 bg-gray-200 text-gray-400"
                 : "cursor-pointer bg-bg-semi-black text-text-1 hover:bg-[#4A4947]"
@@ -650,9 +640,17 @@ export default function CreateRecipe() {
             }}
           />
 
-          <aside
+          <motion.aside
             style={{ zIndex: 1000 }}
-            className="absolute right-0 top-0 h-full w-[85vw] sm:w-[400px] bg-bg-semi-white py-3 px-6 border-l border-gray-300 shadow-2xl overflow-y-auto flex flex-col gap-y-3 animate-in slide-in-from-right duration-300"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: 0.3,
+              type: "spring",
+              stiffness: 200,
+              damping: 20,
+            }}
+            className="absolute right-0 top-0 h-full w-[85vw] sm:w-[400px] bg-bg-semi-white p-3 border-l border-gray-300 shadow-2xl overflow-y-auto flex flex-col gap-y-3"
           >
             <header className="flex flex-row gap-x-4 justify-start items-center">
               <button
@@ -664,11 +662,11 @@ export default function CreateRecipe() {
               >
                 <X size={20} color="#2F2F2F" />
               </button>
-              <h2 className="font-bold text-[18px] text-text-3">{type}</h2>
+              <h2 className="font-bold text-lg text-text-3">{type}</h2>
             </header>
 
             {sections}
-          </aside>
+          </motion.aside>
         </div>
       )}
     </main>

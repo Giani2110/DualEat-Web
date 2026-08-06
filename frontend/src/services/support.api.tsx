@@ -3,7 +3,10 @@ import axios from "axios";
 
 export const createSupportTicket = async (localId: string, type: string) => {
   try {
-    const { data } = await axiosInterceptor.post("/support/tickets", { localId, type });
+    const { data } = await axiosInterceptor.post("/support/tickets", {
+      localId,
+      type,
+    });
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
@@ -15,11 +18,15 @@ export const createSupportTicket = async (localId: string, type: string) => {
 
 export const getLocalTickets = async (localId: string) => {
   try {
-    const { data } = await axiosInterceptor.get(`/support/tickets/local/${localId}`);
+    const { data } = await axiosInterceptor.get(
+      `/support/tickets/local/${localId}`,
+    );
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      console.log(err.response?.data?.message || "Error fetching local tickets");
+      console.log(
+        err.response?.data?.message || "Error fetching local tickets",
+      );
     }
     return null;
   }
@@ -31,7 +38,9 @@ export const getAdminTickets = async () => {
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      console.log(err.response?.data?.message || "Error fetching admin tickets");
+      console.log(
+        err.response?.data?.message || "Error fetching admin tickets",
+      );
     }
     return null;
   }
@@ -39,7 +48,9 @@ export const getAdminTickets = async () => {
 
 export const getTicketMessages = async (ticketId: string) => {
   try {
-    const { data } = await axiosInterceptor.get(`/support/tickets/${ticketId}/messages`);
+    const { data } = await axiosInterceptor.get(
+      `/support/tickets/${ticketId}/messages`,
+    );
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
@@ -49,13 +60,21 @@ export const getTicketMessages = async (ticketId: string) => {
   }
 };
 
-export const addSupportMessage = async (ticketId: string, senderId: string, senderRole: 'LOCAL' | 'ADMIN', content: string) => {
+export const addSupportMessage = async (
+  ticketId: string,
+  senderId: string,
+  senderRole: "LOCAL" | "ADMIN",
+  content: string,
+) => {
   try {
-    const { data } = await axiosInterceptor.post(`/support/tickets/${ticketId}/messages`, {
-      senderId,
-      senderRole,
-      content,
-    });
+    const { data } = await axiosInterceptor.post(
+      `/support/tickets/${ticketId}/messages`,
+      {
+        senderId,
+        senderRole,
+        content,
+      },
+    );
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
@@ -67,23 +86,36 @@ export const addSupportMessage = async (ticketId: string, senderId: string, send
 
 export const updateTicketStatus = async (ticketId: string, status: string) => {
   try {
-    const { data } = await axiosInterceptor.patch(`/support/tickets/${ticketId}/status`, { status });
+    const { data } = await axiosInterceptor.patch(
+      `/support/tickets/${ticketId}/status`,
+      { status },
+    );
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      console.log(err.response?.data?.message || "Error updating ticket status");
+      console.log(
+        err.response?.data?.message || "Error updating ticket status",
+      );
     }
     return null;
   }
 };
 
-export const markTicketMessagesAsRead = async (ticketId: string, roleToMark: 'LOCAL' | 'ADMIN') => {
+export const markTicketMessagesAsRead = async (
+  ticketId: string,
+  roleToMark: "LOCAL" | "ADMIN",
+) => {
   try {
-    const { data } = await axiosInterceptor.post(`/support/tickets/${ticketId}/read`, { roleToMark });
+    const { data } = await axiosInterceptor.post(
+      `/support/tickets/${ticketId}/read`,
+      { roleToMark },
+    );
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      console.log(err.response?.data?.message || "Error marking messages as read");
+      console.log(
+        err.response?.data?.message || "Error marking messages as read",
+      );
     }
     return null;
   }

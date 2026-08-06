@@ -4,7 +4,7 @@ import type {
   ResponseWithPagination,
   User,
 } from "@/interface/global";
-import type { PostCommentDTO } from "@/interface/global.dto";
+import type { PostCommentDTO, PostDTO } from "@/interface/global.dto";
 import {
   createComment,
   deleteComment,
@@ -13,6 +13,7 @@ import {
   getPostById,
   getReplies,
   updateComment,
+  updatePost,
 } from "@/services/post.api";
 import {
   useInfiniteQuery,
@@ -20,7 +21,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-
 
 // usePostById (GET)
 //==============================================
@@ -30,7 +30,7 @@ export const usePostById = (post_id: string) => {
     queryFn: async () => {
       const response = await getPostById(post_id);
       if (!response.success || !response.data) {
-        throw new Error("Error en la respuesta del post");
+        throw new Error(response.message || "El post no existe");
       }
       return response.data as Post;
     },
@@ -332,10 +332,18 @@ export const useUpdateComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ comment_id, content }: { comment_id: string, content: string }) => {
+    mutationFn: async ({
+      comment_id,
+      content,
+    }: {
+      comment_id: string;
+      content: string;
+    }) => {
       const response = await updateComment(comment_id, content);
       if (!response.success) {
-        throw new Error(response.message || "Error al actualizar el comentario");
+        throw new Error(
+          response.message || "Error al actualizar el comentario",
+        );
       }
       return response;
     },
@@ -466,34 +474,31 @@ export const useUpdatePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      post_id,
-      updatedData,
-    }: {
-      post_id: string;
-      updatedData: Partial<Post>;
-      community_id?: string;
-    }) => {
-      const response = await deletePost(post_id);
+    mutationFn: async ({ data }: { data: PostDTO }) => {
+      const response = await updatePost(data);
       if (!response.success || !response.data) {
         throw new Error(response.message || "Error al actualizar el post");
       }
-      return response.data as Post;
+      return response;
     },
 
-    onMutate: async ({ post_id, updatedData, community_id }) => {
+    onMutate: async ({ data }) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
-      if (community_id) {
-        await queryClient.cancelQueries({ queryKey: ["posts", community_id] });
-      }
-      await queryClient.cancelQueries({ queryKey: ["post", post_id] });
+      await queryClient.cancelQueries({ queryKey: ["post", data.id] });
 
-      const previousGlobalPosts = queryClient.getQueryData(["posts"]);
-      const previousCommunityPosts = community_id
-        ? queryClient.getQueryData(["posts", community_id])
-        : null;
-      const previousPostDetail = queryClient.getQueryData(["post", post_id]);
+      const previous = queryClient.getQueryData(["posts"]);
 
+      const previousDetail = queryClient.getQueryData(["post", data.id]);
+
+      return {
+        previous,
+        previousDetail,
+        data,
+      };
+    },
+
+    onSuccess(res) {
+      const response = res.data;
       const updatePostInInfiniteQuery = (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
 
@@ -503,7 +508,7 @@ export const useUpdatePost = () => {
             ...page,
             data: page.data
               ? page.data.map((p: Post) =>
-                  p.id === post_id ? { ...p, ...updatedData } : p,
+                  p.id === response?.id ? { ...p, ...response } : p,
                 )
               : [],
           })),
@@ -511,41 +516,22 @@ export const useUpdatePost = () => {
       };
 
       queryClient.setQueryData(["posts"], updatePostInInfiniteQuery);
-      if (community_id) {
-        queryClient.setQueryData(
-          ["posts", community_id],
-          updatePostInInfiniteQuery,
-        );
-      }
 
-      queryClient.setQueryData(["post", post_id], (oldPost: any) => {
-        if (!oldPost) return oldPost;
-        return { ...oldPost, ...updatedData };
+      queryClient.setQueryData(["post", response?.id], (old: Post) => {
+        if (!old) return old;
+        return { ...old, ...response };
       });
-
-      return {
-        previousGlobalPosts,
-        previousCommunityPosts,
-        previousPostDetail,
-        community_id,
-        post_id,
-      };
     },
 
     onError: (err, variables, context) => {
       console.error("Error al actualizar post, aplicando rollback:", err);
       if (context) {
-        queryClient.setQueryData(["posts"], context.previousGlobalPosts);
-        if (context.community_id && context.previousCommunityPosts) {
+        queryClient.setQueryData(["posts"], context.previous);
+
+        if (context.previousDetail) {
           queryClient.setQueryData(
-            ["posts", context.community_id],
-            context.previousCommunityPosts,
-          );
-        }
-        if (context.previousPostDetail) {
-          queryClient.setQueryData(
-            ["post", context.post_id],
-            context.previousPostDetail,
+            ["post", context.data.id],
+            context.previousDetail,
           );
         }
       }

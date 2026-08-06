@@ -73,9 +73,10 @@ export function CommentItem({
         <div className="flex flex-col gap-y-0.5 flex-1">
           <div className="flex flex-row items-center gap-x-2">
             <p className="font-bold text-text-3 text-sm">{item.user?.name}</p>
-            <p className="text-sm text-text-6">
+            <p className="text-sm text-text-4">
               {getShortTimeAgo(item.created_at)}
             </p>
+            {item.edited && <p className="text-xs text-text-4">• (Editado)</p>}
           </div>
 
           <p className="text-sm text-text-5">

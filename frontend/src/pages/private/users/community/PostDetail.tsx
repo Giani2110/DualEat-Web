@@ -38,7 +38,7 @@ export default function PostDetail() {
     rootMargin: "200px",
   });
 
-  const { data: post, isLoading } = usePostById(post_id as string);
+  const { data: post, isLoading, error } = usePostById(post_id as string);
 
   const [comment, setComment] = useState<Comment>({
     id: undefined,
@@ -66,23 +66,17 @@ export default function PostDetail() {
   }, [commentsData]);
 
   useEffect(() => {
-    if (post) {
-      navigate(`/p/${post.id}/${post.slug}`, {
-        replace: true,
-      });
-    } else if (!post && !isLoading) {
+    if (error) {
       toast.error("El post no existe");
       navigate(-1);
     }
-  }, [post]);
+  }, [error]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  console.log("COMENTARIO", comment);
 
   const handleAddComment = async () => {
     if (comment.content?.trim() === "") return;
@@ -150,21 +144,21 @@ export default function PostDetail() {
     }
   };
 
-  const recipeStats = [
+  const stats = [
     {
       id: "time",
-      icon: <Clock size={16} color="#707070" />,
+      icon: <Clock size={14} color="#707070" />,
       text: `${post?.recipe?.total_time ?? 0}min`,
     },
     {
       id: "ingredients",
-      icon: <ShoppingCart size={16} color="#707070" />,
-      text: `${post?.recipe?.ingredients?.length ?? 0} ingredientes`,
+      icon: <ShoppingCart size={14} color="#707070" />,
+      text: `${post?.recipe?._count?.ingredients ?? 0} ingredientes`,
     },
     {
       id: "steps",
-      icon: <ChartBarIcon size={16} color="#707070" />,
-      text: `${post?.recipe?.steps?.length ?? 0} pasos`,
+      icon: <ChartBarIcon size={14} color="#707070" />,
+      text: `${post?.recipe?._count?.steps ?? 0} pasos`,
     },
   ];
 
@@ -176,11 +170,8 @@ export default function PostDetail() {
   }, [user, post]);
 
   return (
-    <main className="h-full px-2 md:px-8 flex flex-wrap flex-row gap-8 my-5">
-      <section
-        style={{ flex: 2 }}
-        className="flex flex-row flex-wrap lg:flex-nowrap gap-4"
-      >
+    <main className="h-full px-2 md:px-8 flex flex-row gap-8 my-5">
+      <section style={{ flex: 2 }} className="flex flex-row gap-4">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -194,117 +185,123 @@ export default function PostDetail() {
           />
         </button>
 
-        {post && (
-          <div className="flex w-full flex-col gap-y-8">
-            <div>
-              <PostCard post={post} type="POST" />
-            </div>
+        {isLoading ? (
+          <div className="w-full flex items-center justify-center py-20">
+            <Loader size={24} color="#e5a657" />
+          </div>
+        ) : (
+          post && (
+            <div className="flex w-full flex-col gap-y-8">
+              <div>
+                <PostCard post={post} type="POST" />
+              </div>
 
-            {/** INPUT MESSAGE */}
-            <div className="flex flex-col gap-y-3">
-              {comment.reply_to_user && (
-                <div className="flex flex-row items-center gap-2 justify-between">
-                  <span className="text-text-5 text-sm">
-                    Respondiendo a @
-                    {comment.reply_to_user ? comment.reply_to_user?.name : ""}
-                  </span>
+              {/** INPUT MESSAGE */}
+              <div className="flex flex-col gap-y-3">
+                {comment.reply_to_user && (
+                  <div className="flex flex-row items-center gap-2 justify-between">
+                    <span className="text-text-5 text-sm">
+                      Respondiendo a @
+                      {comment.reply_to_user ? comment.reply_to_user?.name : ""}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="p-1 rounded-full cursor-pointer hover:bg-gray-100"
+                      onClick={() => {
+                        setComment({
+                          post_id: post.id,
+                          parent_comment_id: null,
+                          reply_to_user_id: null,
+                          reply_to_user: null,
+                          content: "",
+                        });
+                      }}
+                    >
+                      <X size={16} color="#2F2F2F" />
+                    </button>
+                  </div>
+                )}
+                <div className="flex flex-col md:flex-row justify-between items-end md:items-center border border-gray-200 rounded-[5px] md:rounded-full px-3 py-1 gap-2.5">
+                  <div className="flex flex-row items-center justify-start w-full gap-x-2">
+                    <img
+                      src={
+                        user?.avatar_url ||
+                        "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
+                      }
+                      className="rounded-full w-8 h-8"
+                      alt="Avatar"
+                    />
+
+                    <input
+                      ref={inputRef}
+                      placeholder={
+                        comment.reply_to_user
+                          ? `@${comment.reply_to_user?.name}`
+                          : "Añade un comentario..."
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleAddComment();
+                        }
+                      }}
+                      value={comment?.content}
+                      onChange={(e) => {
+                        setComment({ ...comment, content: e.target.value });
+                      }}
+                      className="text-text-5 rounded-full outline-none p-2"
+                      style={{
+                        fontSize: 14,
+                        flex: 1,
+                        flexGrow: 1,
+                      }}
+                    />
+                  </div>
 
                   <button
-                    type="button"
-                    className="p-1 rounded-full cursor-pointer hover:bg-gray-100"
-                    onClick={() => {
-                      setComment({
-                        post_id: post.id,
-                        parent_comment_id: null,
-                        reply_to_user_id: null,
-                        reply_to_user: null,
-                        content: "",
-                      });
-                    }}
+                    onClick={() => handleAddComment()}
+                    disabled={isPending || !comment?.content?.trim()}
+                    className="rounded-full px-3 py-1 flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-bg-semi-black"
                   >
-                    <X size={16} color="#2F2F2F" />
+                    {isPending && <Loader size={16} color="#fff" />}
+                    <span className="text-sm text-center text-text-1 font-medium">
+                      {isPending ? "Enviando..." : "Responder"}
+                    </span>
                   </button>
                 </div>
-              )}
-              <div className="flex flex-col md:flex-row justify-between items-end md:items-center border border-gray-200 rounded-[5px] md:rounded-full px-3 py-1 gap-2.5">
-                <div className="flex flex-row items-center justify-start w-full gap-x-2">
-                  <img
-                    src={
-                      user?.avatar_url ||
-                      "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultProfile.png"
-                    }
-                    className="rounded-full w-8 h-8"
-                    alt="Avatar"
-                  />
+              </div>
 
-                  <input
-                    ref={inputRef}
-                    placeholder={
-                      comment.reply_to_user
-                        ? `@${comment.reply_to_user?.name}`
-                        : "Añade un comentario..."
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleAddComment();
-                      }
-                    }}
-                    value={comment?.content}
-                    onChange={(e) => {
-                      setComment({ ...comment, content: e.target.value });
-                    }}
-                    className="text-text-5 rounded-full outline-none p-2"
-                    style={{
-                      fontSize: 14,
-                      flex: 1,
-                      flexGrow: 1,
-                    }}
-                  />
-                </div>
+              {/* COMMENTS */}
+              {comments.map((comment) => (
+                <MemoizedCommentItem
+                  key={comment.id}
+                  item={comment}
+                  setComment={setComment}
+                  user={user!}
+                  isOwner={isOwner}
+                  inputRef={inputRef}
+                />
+              ))}
 
-                <button
-                  onClick={() => handleAddComment()}
-                  disabled={isPending || !comment?.content?.trim()}
-                  className="rounded-full px-3 py-1 flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-bg-semi-black"
-                >
-                  {isPending && <Loader size={16} color="#fff" />}
-                  <span className="text-sm text-center text-text-1 font-medium">
-                    {isPending ? "Enviando..." : "Responder"}
-                  </span>
-                </button>
+              {/* Sentinel */}
+              <div
+                ref={ref}
+                className="w-full flex items-center py-4 gap-3 justify-center"
+                aria-hidden="true"
+              >
+                {(isFetchingNextPage || isFetching) && (
+                  <Loader color="#e5a657" size={18} />
+                )}
               </div>
             </div>
-
-            {/* COMMENTS */}
-            {comments.map((comment) => (
-              <MemoizedCommentItem
-                key={comment.id}
-                item={comment}
-                setComment={setComment}
-                user={user!}
-                isOwner={isOwner}
-                inputRef={inputRef}
-              />
-            ))}
-
-            {/* Sentinel */}
-            <div
-              ref={ref}
-              className="w-full flex items-center py-4 gap-3 justify-center"
-              aria-hidden="true"
-            >
-              {(isFetchingNextPage || isFetching) && (
-                <Loader color="#e5a657" size={18} />
-              )}
-            </div>
-          </div>
+          )
         )}
       </section>
 
       {post?.recipe && (
         <section className="hidden lg:block" style={{ flex: 1 }}>
-          <aside className="flex flex-col gap-y-2">
-            <h1 className="text-[20px] font-bold text-text-3 tracking-tight">
+          <aside className="flex flex-col gap-y-3">
+            <h1 className="text-xl font-bold text-text-3 tracking-tight">
               {post.recipe.name}
             </h1>
             {post.recipe.main_image && (
@@ -328,19 +325,19 @@ export default function PostDetail() {
                 />
               </a>
             )}
-            <p className="text-text-5 text-[15px] line-clamp-2 tracking-tight">
+            <p className="text-text-5 text-sm line-clamp-8 tracking-tight">
               {post.recipe.description}
             </p>
 
             <div className="flex flex-row items-center justify-center gap-x-6 py-1 border-y border-[#dbdbdb]">
-              {recipeStats.map((stat, index) => (
+              {stats.map((stat, index) => (
                 <div key={stat.id} className="flex items-center gap-x-4">
                   {stat.icon}
-                  <span className="font-normal text-[14px] text-text-4">
+                  <span className="font-light text-sm text-text-4">
                     {stat.text}
                   </span>
-                  {index !== recipeStats.length - 1 && (
-                    <span className="text-[18px]">•</span>
+                  {index !== stats.length - 1 && (
+                    <span className="text-base">•</span>
                   )}
                 </div>
               ))}

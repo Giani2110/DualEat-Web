@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ask, getById } from "@/services/chat.api.ts";
 import type {
   ChatSession,
+  ChatSessionData,
   Ingredient,
 } from "@/interface/global";
 
@@ -101,11 +102,11 @@ export const useCreateMessage = () => {
     },
     onSuccess: (data, variables) => {
       const response = data;
-      
+
       const updated = response.data?.chat;
       const targetId = variables.chat_id || updated?.chat_id;
 
-      const iaMessage = updated?.messages.findLast((m: any) => m.role === "IA");
+      const iaMessage = updated?.messages.findLast((m: ChatSessionData) => m.role === "IA");
 
       queryClient.setQueryData(
         ["chat", targetId],

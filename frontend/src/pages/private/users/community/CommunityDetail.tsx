@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getBySlug } from "@services/community.api";
-import { Plus } from "lucide-react";
+import { BellOff, BellRing, Plus } from "lucide-react";
 
 import PostCard from "@/components/features/post/PostCard";
 
@@ -13,7 +13,12 @@ import type {
 
 import { useAuth } from "@hooks/useAuth";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import CommunityInfo from "@/components/features/community/CommunityInfo";
 import { getCommunityPosts } from "@/services/post.api";
 import { useInView } from "react-intersection-observer";
@@ -21,8 +26,11 @@ import Loader from "@/components/ui/feedback/Loader";
 import { usePostCreateStore } from "@/context/store/usePostCreate";
 import { ROUTES } from "@/api/constants/constants";
 import { useJoinLeave } from "@/hooks/api/community/useCommunity";
+import { changeStatus } from "@/services/notification.api";
+import toast from "react-hot-toast";
 
 export default function CommunityScreen() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const { setPost } = usePostCreateStore();
@@ -31,13 +39,17 @@ export default function CommunityScreen() {
   const { community_slug } = useParams<{ community_slug: string }>();
   const { user } = useAuth();
 
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { ref, inView } = useInView({
     rootMargin: "200px",
   });
 
-  const { data: community, isLoading } = useQuery({
+  const {
+    data: community,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["community", community_slug],
     queryFn: async () => {
       const response = await getBySlug(community_slug as string);
@@ -90,6 +102,49 @@ export default function CommunityScreen() {
       retry: 3,
     });
 
+  const { mutate: mutateNotification } = useMutation({
+    mutationFn: async (type: "ALWAYS" | "NONE") => {
+      if (!community) {
+        return;
+      }
+      if (community.receives_notifications === type) {
+        return;
+      }
+      const response = await changeStatus(community?.id, "member", type);
+
+      if (!response.success || !response.data) {
+        throw new Error("Error al cambiar estado de las notificaciones");
+      }
+      return response.data;
+    },
+    onMutate: async (type: "ALWAYS" | "NONE") => {
+      const previous = queryClient.getQueryData(["community", community_slug]);
+      queryClient.setQueryData(
+        ["community", community_slug],
+        (oldData: Community) => {
+          return {
+            ...oldData,
+            receives_notifications: type,
+          };
+        },
+      );
+      return { previous };
+    },
+
+    onSuccess: (data) => {
+      queryClient.setQueryData(["community", community?.id], data);
+    },
+    onError: (e: any, _, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(
+          ["community", community?.id],
+          context.previous,
+        );
+      }
+      toast.error(e.message || "Error al actualizar perfil");
+    },
+  });
+
   const posts = useMemo(() => {
     return (
       data?.pages
@@ -98,9 +153,9 @@ export default function CommunityScreen() {
     );
   }, [data]);
 
-  const isMember = useMemo(() => {
-    return community?.isMember || false;
-  }, [community]);
+  const isMember = community?.isMember || false;
+  const isModerator =
+    community?.creator_id === user?.id || community?.is_moderator;
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -108,33 +163,12 @@ export default function CommunityScreen() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const BellOut = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      height="22"
-      width="22"
-      viewBox="0 0 640 640"
-    >
-      <path
-        fill="#b53325"
-        d="M73 39.1C63.6 29.7 48.4 29.7 39.1 39.1C29.8 48.5 29.7 63.7 39 73.1L567 601.1C576.4 610.5 591.6 610.5 600.9 601.1C610.2 591.7 610.3 576.5 600.9 567.2L513.1 479.4C530.6 476.1 543.9 460.7 543.9 442.3C543.9 435.6 542.1 429 538.8 423.3L517 385.7C498 353.1 488 316.1 488 278.4L488 263.9C488 179.3 425.4 109.2 344 97.6L344 87.9C344 74.6 333.3 63.9 320 63.9C306.7 63.9 296 74.6 296 87.9L296 97.6C253.8 103.6 216.6 125.4 190.6 156.7L73 39.1zM224.8 190.9C246.7 162.4 281.2 144 320 144C386.3 144 440 197.7 440 264L440 278.5C440 324.7 452.3 370 475.5 409.9L488.4 432L465.8 432L224.7 190.9zM164.5 409.9C184 376.5 195.8 339.2 199.1 300.9L152.4 254.2C152.2 257.5 152.1 260.8 152.1 264.1L152.1 278.6C152.1 316.3 142.1 353.3 123.1 385.9L101.1 423.2C97.7 429 96 435.5 96 442.2C96 463.1 112.9 480 133.8 480L378.2 480L330.2 432L151.6 432L164.5 409.9zM252.1 528C262 556 288.7 576 320 576C351.3 576 378 556 387.9 528L252.1 528z"
-      />
-    </svg>
-  );
-
-  const BellFill = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      height="22"
-      width="22"
-      viewBox="0 0 640 640"
-    >
-      <path
-        fill="#0A449B"
-        d="M320 64C302.3 64 288 78.3 288 96L288 99.2C215 114 160 178.6 160 256L160 277.7C160 325.8 143.6 372.5 113.6 410.1L103.8 422.3C98.7 428.6 96 436.4 96 444.5C96 464.1 111.9 480 131.5 480L508.4 480C528 480 543.9 464.1 543.9 444.5C543.9 436.4 541.2 428.6 536.1 422.3L526.3 410.1C496.4 372.5 480 325.8 480 277.7L480 256C480 178.6 425 114 352 99.2L352 96C352 78.3 337.7 64 320 64zM258 528C265.1 555.6 290.2 576 320 576C349.8 576 374.9 555.6 382 528L258 528z"
-      />
-    </svg>
-  );
+  useEffect(() => {
+    if (error) {
+      toast.error("Esta comunidad ya no existe");
+      navigate(-1);
+    }
+  }, [error]);
 
   if (isLoading) {
     return (
@@ -186,49 +220,94 @@ export default function CommunityScreen() {
                 type="button"
                 onClick={() => {
                   setPost({
+                    id: "",
                     title: "",
                     content: "",
                     image_urls: [],
                     community: community as Community,
+                    recipe: null,
                   });
                   navigate(ROUTES.USER.CREATE_POST);
                 }}
                 className="rounded-full border border-dashed hover:border-solid hover:scale-105 transition-all duration-100 cursor-pointer border-gray-400 flex items-center gap-2 px-4 py-1.5 font-semibold"
               >
                 <Plus size={24} />
-                <span className="text-sm">Crear post/receta</span>
+                <span className="text-sm text-text-5">Crear post/receta</span>
               </button>
 
-              {isMember && community?.receives_notifications && (
-                <div
-                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  className="relative rounded-full border border-dashed cursor-pointer border-gray-400 px-4 py-1.5 flex items-center justify-center hover:border-solid transition-all duration-100"
-                >
-                  {community.receives_notifications === "ALWAYS"
-                    ? BellFill
-                    : BellOut}
+              {isMember && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="rounded-full border border-dashed cursor-pointer border-gray-400 p-2.5 flex items-center justify-center hover:border-solid transition-all duration-100"
+                  >
+                    {community?.receives_notifications === "NONE" ? (
+                      <BellOff size={18} className="text-gray-800" />
+                    ) : (
+                      <BellRing size={18} className="text-gray-800" />
+                    )}
+                  </button>
 
-                  {isNotificationOpen && (
-                    <div className="absolute z-50 -bottom-24 right-0 w-[160px] rounded-[10px] border border-dashed border-gray-200 overflow-hidden">
-                      {["Siempre", "Nunca"].map((notification, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() =>
-                            console.log("clickeaste", notification)
-                          }
-                          className={`${
-                            community.receives_notifications === notification
-                              ? "bg-[#dbdbdb]"
-                              : "bg-white"
-                          } flex w-full cursor-pointer items-center gap-2 px-4 py-2 hover:bg-gray-100`}
-                        >
-                          {idx === 0 ? BellFill : BellOut}
-                          <span className="text-sm font-bold text-text-5">
-                            {notification}
-                          </span>
-                        </button>
-                      ))}
+                  {isOpen && (
+                    <div
+                      className="absolute z-50 top-full mt-2 right-0 w-64 rounded-2xl bg-white border border-gray-100 shadow-2xl py-2 flex flex-col"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {[
+                        {
+                          id: "ALWAYS",
+                          label: "Activadas",
+                          sublabel:
+                            "Recibirás las notificaciones de esta comunidad",
+                          icon: BellRing,
+                        },
+                        {
+                          id: "NONE",
+                          label: "Desactivadas",
+                          sublabel:
+                            "Desactiva las notificaciones de esta comunidad",
+                          icon: BellOff,
+                          hasDivider: true,
+                        },
+                      ].map((button) => {
+                        const isSelected =
+                          community?.receives_notifications === button.id;
+
+                        return (
+                          <div key={button.id}>
+                            {button.hasDivider && (
+                              <div className="my-1.5 border-t border-gray-100" />
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!isSelected) {
+                                  mutateNotification(
+                                    button.id as "ALWAYS" | "NONE",
+                                  );
+                                }
+                                setIsOpen(false);
+                              }}
+                              className={`w-full flex items-center gap-3.5 px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-left`}
+                            >
+                              <button.icon
+                                size={26}
+                                className="text-gray-800"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-text-3 leading-tight">
+                                  {button.label}
+                                </span>
+                                <span className="text-xs text-text-6 leading-tight">
+                                  {button.sublabel}
+                                </span>
+                              </div>
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -237,33 +316,33 @@ export default function CommunityScreen() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!community) return;
+                  if (!community || community?.creator_id === user?.id) return;
                   joinLeave({
                     community,
                     join: !isMember,
                   });
                 }}
-                className={`rounded-full border border-gray-400 cursor-pointer px-4 py-[6px] font-semibold hover:bg-gray-100 ${
-                  community?.creator_id === user?.id
-                    ? "bg-red"
+                className={`rounded-full cursor-pointer px-4 py-[6px] font-semibold ${
+                  isModerator
+                    ? "bg-bg-red"
                     : isMember
-                      ? "bg-white"
-                      : "bg-blue"
+                      ? "bg-white hover:bg-gray-100 border border-gray-400"
+                      : "bg-bg-blue hover:bg-gray-100"
                 }`}
               >
                 <span
                   className={`text-sm ${
-                    community?.creator_id === user?.id
+                    isModerator
                       ? "text-white"
                       : isMember
-                        ? "text-gray-700"
+                        ? "text-text-5"
                         : "text-white"
                   }`}
                 >
-                  {community?.creator_id === user?.id
+                  {isModerator
                     ? "Eres el moderador"
                     : isMember
-                      ? "Se unió"
+                      ? "Te uniste"
                       : "Unirse"}
                 </span>
               </button>
@@ -293,21 +372,18 @@ export default function CommunityScreen() {
                   <Loader color="#e5a657" size={24} />
                 </div>
               )}
-
-              {!hasNextPage && posts.length > 0 && (
-                <div className="text-sm text-text-5 py-3 px-6 text-center w-full">
+              {!hasNextPage && (
+                <div className="text-sm text-text-4">
                   No hay más posts para mostrar
                 </div>
               )}
             </div>
           </main>
-
-          <aside style={{ flex: 1 }}>
-            {/* Información de la comunidad */}
-            {community && (
+          {community && (
+            <aside style={{ flex: 1 }}>
               <CommunityInfo community={community} isCommunity={true} />
-            )}
-          </aside>
+            </aside>
+          )}
         </div>
       </div>
     </section>

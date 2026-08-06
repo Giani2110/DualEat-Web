@@ -370,6 +370,7 @@ export interface PostComment {
   reply_to_user_id: string | null;
 
   content: string;
+  edited: boolean;
 
   votes_up: number;
   votes_down: number;

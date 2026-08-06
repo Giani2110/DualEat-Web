@@ -80,7 +80,6 @@ export const ROUTES = {
     PROFILE: (user_id: string, user_slug: string) =>
       `/profile/${user_id}/${user_slug}`,
 
-    NOTIFICATIONS: "/notifications",
     SUBSCRIPTION: "/subscription",
   },
   ADMIN: {
@@ -90,6 +89,9 @@ export const ROUTES = {
     USERS: "/admin/users",
     DASHBOARD: "/admin/dashboard",
     SUPPORT_TICKETS: "/admin/support-tickets",
+  },
+  SHARED: {
+    NOTIFICATIONS: "/notifications",
   },
   LOCAL: {
     DASHBOARD: "/business/dashboard",
@@ -235,14 +237,6 @@ export const appRoutes = [
     ),
   },
   {
-    path: ROUTES.USER.NOTIFICATIONS,
-    element: (
-      <ProtectedRoute isBusiness={false}>
-        <Notifications />
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: ROUTES.USER.SUBSCRIPTION,
     element: <SubscriptionView />,
   },
@@ -355,6 +349,14 @@ export const appRoutes = [
     element: (
       <ProtectedRoute isBusiness={true}>
         <LocalReviews />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: ROUTES.SHARED.NOTIFICATIONS,
+    element: (
+      <ProtectedRoute>
+        <Notifications />
       </ProtectedRoute>
     ),
   },

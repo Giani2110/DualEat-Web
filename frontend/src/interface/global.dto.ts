@@ -1,4 +1,4 @@
-import { Unit, type Community, type Ingredient } from "./global";
+import { Unit, type Community, type Ingredient, type Recipe } from "./global";
 
 export interface PostCommentDTO {
   post_id: string;
@@ -29,6 +29,7 @@ export interface PostDTO {
   content: string;
   image_urls: string[] | UploadableFile[];
   community: Community | null;
+  recipe: Recipe | null;
 }
 
 export interface RecipeDTO {

@@ -80,11 +80,9 @@ const AuthSection: React.FC<Props> = ({
             [5, 5],
             [10, 10],
             [12, 15],
-            [15, 10],
             [10, 15],
             [15, 10],
-            [10, 15],
-            [15, 10],
+            [18, 10],
           ]}
           className={cn(
             "opacity-30",
@@ -92,7 +90,7 @@ const AuthSection: React.FC<Props> = ({
           )}
         />
 
-        <div className="relative z-10 flex h-full max-w-[70vh] flex-col gap-y-8 justify-center mx-auto">
+        <div className="relative px-6 z-10 flex h-full max-w-[70vh] flex-col gap-y-8 justify-center mx-auto">
           <header className="flex flex-col gap-y-3 items-center">
             <h2 className="font-black text-text-3 text-3xl">{title}</h2>
             <p className="text-text-4 text-base font-light text-center">

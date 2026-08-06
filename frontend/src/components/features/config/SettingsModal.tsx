@@ -440,9 +440,6 @@ export default function SettingsModal({
                     {user.name}
                   </h3>
                   <p className="text-xs text-text-6">{user.email}</p>
-                  <p className="text-xs text-text-6 mt-0.5 capitalize">
-                    Proveedor: {user.provider}
-                  </p>
                 </div>
               </div>
 

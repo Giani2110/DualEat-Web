@@ -27,8 +27,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Conectar al servidor de WebSocket
-    const socketInstance = io(appConfig.API_URL, {
+    const socketUrl = appConfig.API_URL.replace(/\/api\/?$/, '');
+
+    const socketInstance = io(socketUrl, {
       auth: {
         user_id: user.id,
       },
@@ -42,6 +43,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     socketInstance.on('disconnect', () => {
       console.log('[Socket] Desconectado del servidor');
       setIsConnected(false);
+    });
+
+    socketInstance.on('connect_error', (error) => {
+      console.error('[Socket] Error de conexión:', error.message);
     });
 
     setSocket(socketInstance);

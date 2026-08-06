@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       );
 
-      if (response && response.token) {
+      if (response && response.success) {
         const user = await getMe();
         setUser(user);
       }
@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       );
 
-      if (response && response.token) {
+      if (response && response.success) {
         const user = await getMe();
         setUser(user);
       }

@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 
-import { ChevronsUpDown, SquareCheckBig, SquareDashed } from "lucide-react";
+import { ChevronsUpDown, Plus, X } from "lucide-react";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { createPost, updatePost, upload } from "@/services/post.api";
+import { createPost, upload } from "@/services/post.api";
 
 import toast from "react-hot-toast";
 
@@ -25,6 +25,10 @@ import { getMimeTypeFromUrl } from "@/utils/capitalize";
 import { useMutation } from "@tanstack/react-query";
 import Loader from "@/components/ui/feedback/Loader";
 import CommunitySearch from "@/components/features/create/post/CommunitySearch";
+import RecipeSideModal from "@/components/features/recipe/RecipeSideModal";
+import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
+import { useUpdatePost } from "@/hooks/api/post/usePost";
 
 const customCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
@@ -89,7 +93,12 @@ const customCSS = `
 
 export default function CreatePost() {
   const navigate = useNavigate();
+
+  const { user } = useAuth();
+
   const { post, setPost, clearPost } = usePostCreateStore();
+
+  const { mutateAsync: updatePost } = useUpdatePost();
 
   const fileInputRef = useRef<any>(null);
 
@@ -114,8 +123,10 @@ export default function CreatePost() {
     post?.community || null,
   );
 
-  const [open, setOpen] = useState<boolean>(false);
-  const [withRecipe, setWithRecipe] = useState(false);
+  const [open, setOpen] = useState({
+    community: false,
+    recipe: false,
+  });
 
   const editor = useEditor({
     extensions: [
@@ -148,7 +159,6 @@ export default function CreatePost() {
     }
   }, [editor]);
 
-
   const { mutate: mutatePost, isPending } = useMutation({
     mutationFn: async () => {
       let urls: string[] = [];
@@ -156,10 +166,19 @@ export default function CreatePost() {
       // Solo subimos imágenes si no estamos en modo edición
       if (!isEditing && image_urls.length > 0) {
         const uploadPayload = { post_images: image_urls };
-        const response = await upload(uploadPayload);
 
-        if (response?.success && response?.data) {
-          urls = response.data.post_images || [];
+        try {
+          const response = await upload(uploadPayload);
+
+          if (response.success && response.data?.post_images) {
+            urls = response.data.post_images;
+          } else {
+            throw new Error(
+              response.message || "No se pudieron subir las imágenes",
+            );
+          }
+        } catch (err: any) {
+          throw new Error(err.message || "Error al subir las imágenes");
         }
       }
 
@@ -169,15 +188,21 @@ export default function CreatePost() {
         content: content.trim(),
         image_urls: urls,
         community: community,
+        recipe: post.recipe || null,
       };
 
       return toast.promise(
         (async () => {
           const res = isEditing
-            ? await updatePost(postDTO.id!, postDTO)
+            ? await updatePost({ data: postDTO })
             : await createPost(postDTO);
           if (!res.success) {
-            throw new Error(res.message || (isEditing ? "Error al actualizar el post" : "Error al crear el post"));
+            throw new Error(
+              res.message ||
+                (isEditing
+                  ? "Error al actualizar el post"
+                  : "Error al crear el post"),
+            );
           }
           return res;
         })(),
@@ -231,21 +256,7 @@ export default function CreatePost() {
       return;
     }
 
-    if (withRecipe) {
-      const post: PostDTO = {
-        title: title,
-        content: content,
-        image_urls: image_urls,
-        community: community,
-      };
-
-      toast.loading("Navegando a crear receta");
-      setPost(post);
-      toast.dismiss();
-      navigate(ROUTES.USER.CREATE_RECIPE);
-    } else {
-      mutatePost();
-    }
+    mutatePost();
   };
 
   const removeFile = (index: number) => {
@@ -266,61 +277,74 @@ export default function CreatePost() {
       : getMimeTypeFromUrl(item.uri) !== "video";
   });
 
+  const isPremium =
+    user?.subscription_status === "ACTIVE" ||
+    user?.subscription_status === "TRIAL";
+
   return (
     <main className="h-full flex flex-col px-6 md:px-16 gap-y-6 my-5 bg-bg-semi-white">
-      <h1 className="text-[28px] text3 tracking-tight font-bold">
+      <h1 className="text-2xl md:text-[28px] text-text-3 tracking-tight font-bold">
         {isEditing ? "Editar post" : "Crear post"}
       </h1>
 
-      <div className="flex flex-row items-center gap-x-2">
+      <div className="flex flex-col md:flex-row items-center gap-2">
         <button
           type="button"
           disabled={isEditing}
-          onClick={() => setOpen(!open)}
-          className="flex items-center gap-x-2.5 bgsemi-white border border-[#e5a657] px-4 py-2 rounded-full cursor-pointer w-fit"
+          onClick={() => setOpen({ ...open, community: true })}
+          className="flex items-center gap-x-2.5 bgsemi-white border border-[#e5a657] px-4 py-2 rounded-full cursor-pointer w-full md:w-fit"
         >
-          <img
-            src={
-              (community && community.image_url) ||
-              "https://ohhvldagwoycuifwhgtc.supabase.co/storage/v1/object/public/assets/DefaultCommunity.jpg"
-            }
-            alt="Imagen de la comunidad"
-            className="w-5 h-5 rounded-full object-cover"
-          />
+          {community && (
+            <img
+              src={community.image_url}
+              alt="Imagen de la comunidad"
+              className="w-5 h-5 rounded-full object-cover"
+            />
+          )}
+
           <span className="text-[14px] text4 tracking-tight">
             {(community && community.name) || "Seleccionar comunidad"}
           </span>
 
           <ChevronsUpDown size={16} className="text-[#333333]" />
         </button>
-        <button
-          onClick={() => setWithRecipe(!withRecipe)}
-          disabled={isEditing}
-          className={`flex cursor-pointer flex-row border items-center justify-between px-4 gap-x-2 py-2 rounded-full cursor-pointer 
-            ${withRecipe ? "border-[#e5a657]" : "border-dashed border-[#dbdbdb]"}
-            ${isEditing && "hidden"}`}
-        >
-          <div className="flex flex-row items-center gap-x-3">
-            <svg
-              width={22}
-              height={22}
-              viewBox="0 0 640 640"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="#707070"
-                d="M480 576L192 576C139 576 96 533 96 480L96 160C96 107 139 64 192 64L496 64C522.5 64 544 85.5 544 112L544 400C544 420.9 530.6 438.7 512 445.3L512 512C529.7 512 544 526.3 544 544C544 561.7 529.7 576 512 576L480 576zM192 448C174.3 448 160 462.3 160 480C160 497.7 174.3 512 192 512L448 512L448 448L192 448zM224 216C224 229.3 234.7 240 248 240L424 240C437.3 240 448 229.3 448 216C448 202.7 437.3 192 424 192L248 192C234.7 192 224 202.7 224 216zM248 288C234.7 288 224 298.7 224 312C224 325.3 234.7 336 248 336L424 336C437.3 336 448 325.3 448 312C448 298.7 437.3 288 424 288L248 288z"
-              />
-            </svg>
-            <span className="text-text-3 font-normal text-[13px]">
-              ¿Tiene receta?
-            </span>
-          </div>
 
-          {withRecipe ? (
-            <SquareCheckBig size={18} color="#e5a657" />
+        <button
+          type="button"
+          onClick={() => setOpen({ ...open, recipe: true })}
+          className="flex cursor-pointer flex-row border border-dashed border-[#dbdbdb] hover:border-[#e5a657] items-center px-4 gap-x-2 py-2 rounded-full w-full md:w-fit"
+        >
+          {!post.recipe ? (
+            <>
+              <Plus size={18} color="#e5a657" />
+              <span className="text-text-3 font-normal text-[13px]">
+                ¿Vincular una receta?
+              </span>
+            </>
           ) : (
-            <SquareDashed size={18} color="#e5a657" />
+            <>
+              <img
+                src={
+                  (post.recipe && post.recipe.main_image) ||
+                  "https://placehold.co/50x50.png"
+                }
+                alt="Imagen de la comunidad"
+                className="w-5 h-5 rounded-full object-cover"
+              />
+              <span className="text-text-3 font-normal text-[13px]">
+                {post.recipe.name}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPost({ ...post, recipe: null });
+                }}
+                className="cursor-pointer group hover:bg-[#B53325] p-0.5 rounded-full transition-all duration-200"
+              >
+                <X size={14} className="group-hover:text-[#fff]" />
+              </button>
+            </>
           )}
         </button>
       </div>
@@ -367,6 +391,7 @@ export default function CreatePost() {
           <div className="flex-grow overflow-y-auto">
             <EditorContent
               editor={editor}
+              maxLength={isPremium ? 1000 : 300}
               className="cursor-text h-full outline-none text-base"
               onClick={() => {
                 editor?.commands.focus();
@@ -407,19 +432,50 @@ export default function CreatePost() {
               ? isEditing
                 ? "Guardando..."
                 : "Publicando..."
-              : withRecipe
-                ? "Siguiente"
-                : "Publicar"}
+              : "Publicar"}
           </button>
         </div>
       </form>
 
-      {open && (
+      {open.community && (
         <CommunitySearch
-          isOpen={open}
-          onClose={() => setOpen(false)}
+          isOpen={open.community}
+          onClose={() => setOpen({ ...open, community: false })}
           setCommunity={setCommunity}
         />
+      )}
+
+      {open.recipe && (
+        <div style={{ zIndex: 999 }} className="fixed inset-0">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300"
+            onClick={() => {
+              setOpen({ ...open, recipe: false });
+            }}
+          />
+
+          <motion.aside
+            style={{ zIndex: 1000 }}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: 0.3,
+              type: "spring",
+              stiffness: 200,
+              damping: 20,
+            }}
+            className="absolute right-0 top-0 h-full w-[85vw] sm:w-[400px] bg-bg-semi-white p-3 border-l border-gray-300 shadow-2xl overflow-y-auto flex flex-col gap-y-3"
+          >
+            <RecipeSideModal
+              onClose={() => setOpen({ ...open, recipe: false })}
+              recipe={post.recipe || undefined}
+              onSelectRecipe={(rec) => {
+                setPost({ ...post, recipe: rec });
+                setOpen({ ...open, recipe: false });
+              }}
+            />
+          </motion.aside>
+        </div>
       )}
     </main>
   );

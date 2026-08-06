@@ -12,7 +12,6 @@ import type {
 import type {
   PostCommentDTO,
   PostDTO,
-  RecipeDTO,
   UploadPayload,
 } from "@interface/global.dto";
 
@@ -62,11 +61,14 @@ export const getComments = async (
   page: number = 1,
 ): Promise<ResponseWithPagination<PostComment[]> | null> => {
   try {
-    const response = await axiosInterceptor.get(`/post/comments/${post_id}`, {
-      params: {
-        page,
+    const response = await axiosInterceptor.get(
+      `/post/comments/${post_id}`,
+      {
+        params: {
+          page,
+        },
       },
-    });
+    );
 
     return {
       success: response.data.success ?? true,
@@ -85,7 +87,9 @@ export const createComment = async (
   comment: PostCommentDTO,
 ): Promise<Response> => {
   try {
-    const response = await axiosInterceptor.post("/post/comment", { comment });
+    const response = await axiosInterceptor.post("/post/comment", {
+      comment,
+    });
 
     return {
       success: response.data.success ?? true,
@@ -150,11 +154,14 @@ export const getReplies = async (
   page: number = 1,
 ): Promise<ResponseWithPagination<PostComment[]> | null> => {
   try {
-    const response = await axiosInterceptor.get(`/post/replies/${comment_id}`, {
-      params: {
-        page,
+    const response = await axiosInterceptor.get(
+      `/post/replies/${comment_id}`,
+      {
+        params: {
+          page,
+        },
       },
-    });
+    );
 
     return {
       success: response.data.success ?? true,
@@ -175,9 +182,12 @@ export const getCommunityPosts = async (
   page: number = 1,
 ): Promise<ResponseWithPagination<Post[] | null>> => {
   try {
-    const response = await axiosInterceptor.get(`/post/${community_id}/posts`, {
-      params: { page },
-    });
+    const response = await axiosInterceptor.get(
+      `/post/${community_id}/posts`,
+      {
+        params: { page },
+      },
+    );
 
     return {
       success: response.data.success ?? true,
@@ -192,12 +202,9 @@ export const getCommunityPosts = async (
   }
 };
 
-// --- 9. CREAR POST (Opcional con Receta) ---
+// --- 9. CREAR POST ---
 // ===================================
-export const createPost = async (
-  post: PostDTO,
-  recipe?: RecipeDTO,
-): Promise<Response<Post>> => {
+export const createPost = async (post: PostDTO): Promise<Response<Post>> => {
   try {
     const response = await axiosInterceptor.post("/post/create", {
       post: {
@@ -205,8 +212,8 @@ export const createPost = async (
         content: post.content,
         image_urls: post.image_urls,
         community_id: post.community?.id,
+        recipe_id: post.recipe?.id ?? null,
       },
-      recipe,
     });
 
     return {
@@ -216,23 +223,20 @@ export const createPost = async (
       data: response.data.data,
     };
   } catch (err: any) {
-    const apiError = handleApiError(err);
-    throw apiError;
+    throw handleApiError(err);
   }
 };
 
 // --- 9.5. ACTUALIZAR POST ---
 // ===================================
 export const updatePost = async (
-  post_id: string,
   post: PostDTO,
 ): Promise<Response<Post>> => {
   try {
     const response = await axiosInterceptor.patch(`/post/update`, {
       post: {
-        id: post_id,
-        title: post.title,
-        content: post.content,
+        ...post,
+        recipe_id: post.recipe?.id ?? null,
       },
     });
 
@@ -243,8 +247,7 @@ export const updatePost = async (
       data: response.data.data,
     };
   } catch (err: any) {
-    const apiError = handleApiError(err);
-    throw apiError;
+    throw handleApiError(err);
   }
 };
 
@@ -261,8 +264,7 @@ export const deletePost = async (post_id: string): Promise<Response> => {
       data: response.data.data,
     };
   } catch (err: any) {
-    const apiError = handleApiError(err);
-    throw apiError;
+    throw handleApiError(err);
   }
 };
 
@@ -298,6 +300,7 @@ export const upload = async (
     return {
       success: response.data.success ?? true,
       status: response.status,
+      message: response.data.message,
       data: response.data.urls,
     };
   } catch (err: any) {

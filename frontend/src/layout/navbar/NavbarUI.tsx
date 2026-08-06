@@ -72,7 +72,7 @@ export default function NavbarUser({ isOpen, setIsOpen, user }: Props) {
               <Link
                 to={ROUTES.USER.CREATE_POST}
                 onClick={clearPost}
-                className="flex items-center rounded-full justify-center px-3 py-1 gap-x-2 transition-all duration-200 cursor-pointer hover:bg-gray-50 hover:border-[#e5a657] border border-dashed border-transparent"
+                className="flex items-center rounded-full justify-center px-3 py-1 gap-x-2 transition-all duration-200 cursor-pointer hover:border-[#e5a657] border border-dashed border-transparent"
               >
                 <Plus size={22} color="#2F2F2F" />
                 <span className="text-[15px] text-text-4 font-light tracking-tight">
@@ -85,7 +85,7 @@ export default function NavbarUser({ isOpen, setIsOpen, user }: Props) {
               <Link
                 title="Ir a chats"
                 to={ROUTES.USER.CHAT}
-                className="flex items-center rounded-full justify-center p-2 gap-x-2 transition-all duration-200 cursor-pointer hover:bg-gray-50 hover:border-[#e5a657] border border-dashed border-transparent"
+                className="flex items-center rounded-full justify-center p-2 gap-x-2 transition-all duration-200 cursor-pointer hover:border-[#e5a657] border border-dashed border-transparent"
               >
                 <MessageCircle size={18} color="#2F2F2F" />
               </Link>

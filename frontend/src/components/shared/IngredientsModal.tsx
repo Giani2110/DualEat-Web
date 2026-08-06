@@ -39,7 +39,7 @@ export default function IngredientsModal({
           />
         </svg>
         <input
-          className="flex-1 placeholder:text-text-6 outline-none py-1.5"
+          className="flex-1 text-sm placeholder:text-text-6 outline-none py-1.5"
           spellCheck
           maxLength={100}
           value={searchQuery}

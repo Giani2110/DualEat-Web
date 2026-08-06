@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUserCommunities, joinLeave } from "@/services/community.api";
 import type { Community, CommunityMember } from "@/interface/global";
 
+// useMyCommunities (GET)
+//==============================================
 export const useMyCommunities = () => {
   return useQuery({
     queryKey: ["myCommunities"],
@@ -28,6 +30,9 @@ export const useMyCommunities = () => {
   });
 };
 
+
+// useJoinLeave (POST)
+//==============================================
 export const useJoinLeave = () => {
   const queryClient = useQueryClient();
 
@@ -84,3 +89,5 @@ export const useJoinLeave = () => {
     },
   });
 };
+
+

@@ -60,13 +60,14 @@ export function SortableStepItem({ item, setSteps }: Props) {
                 ),
               );
             }}
-            className="outline-none flex flex-1 text-[14px] max-h-[200px] overflow-y-auto border border-gray-300 rounded-[4px] px-3 py-1.5 text-text-6"
+            className="outline-none flex flex-1 text-sm max-h-[200px] overflow-y-auto border border-gray-300 rounded-[4px] px-3 py-1.5 text-text-6"
           />
 
           <input
             type="number"
-            className="outline-none text-[14px] border border-gray-300 rounded-[4px] px-3 py-1.5 text-text-6"
+            className="outline-none text-sm border border-gray-300 rounded-[4px] px-3 py-1.5 text-text-6"
             placeholder="Tiempo estimado (min)"
+            min={0}
             onChange={(e) => {
               const val = e.target.value;
               setSteps((prev) =>

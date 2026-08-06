@@ -85,7 +85,7 @@ const ResetPassword = () => {
       if (!response.data?.success) {
         setError("No se pudo reenviar el código. Intenta nuevamente.");
       } else {
-        setResendCooldown(60); // ⏱ inicia cooldown
+        setResendCooldown(60); 
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {

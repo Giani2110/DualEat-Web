@@ -12,7 +12,7 @@ const TermsConditions = () => {
         className="absolute inset-0 z-0 w-full h-full"
       />
 
-      <div className="w-full [&_p]:text-sm [&_li]:text-sm max-w-4xl flex flex-col">
+      <div className="w-full [&_p]:text-sm [&_li]:text-sm max-w-4xl flex mx-auto flex-col">
         <header className="mb-12 border-b border-gray-300 pb-8">
           <h1 className="text-5xl lg:text-6xl font-black text-text-1 tracking-tight mb-4 uppercase">
             Términos y Condiciones
@@ -22,7 +22,7 @@ const TermsConditions = () => {
           </p>
         </header>
 
-        <p className="text-base text-text-1 leading-relaxed font-light mb-12">
+        <p className="text-lg text-text-1 leading-relaxed font-light mb-12">
           Bienvenido/a a <strong>DualEat</strong>, una plataforma digital
           diseñada para conectar personas con experiencias gastronómicas, tanto
           en locales físicos como desde casa. Al registrarte o utilizar nuestros

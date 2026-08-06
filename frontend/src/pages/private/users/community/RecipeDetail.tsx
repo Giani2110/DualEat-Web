@@ -368,7 +368,7 @@ export default function RecipeDetail() {
           {recipeStats.map((stat, index) => (
             <div key={stat.id} className="flex items-center gap-x-4">
               {stat.icon}
-              <span className="font-normal text-[14px] text-text-4">
+              <span className="font-light text-sm text-text-4">
                 {stat.text}
               </span>
               {index !== recipeStats.length - 1 && (

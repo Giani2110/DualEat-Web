@@ -18,17 +18,14 @@ export default function SubscriptionView() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Estado para el ciclo de facturación: "MENSUAL" o "ANUAL"
   const [billingCycle, setBillingCycle] = useState<"MENSUAL" | "ANUAL">(
     "MENSUAL",
   );
 
-  // Estado para el plan seleccionado: "BASIC" o "PREMIUM"
   const [selectedPlan, setSelectedPlan] = useState<"BASIC" | "PREMIUM">(
     "PREMIUM",
   );
 
-  // Estado de carga para Mercado Pago
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async () => {
@@ -44,7 +41,6 @@ export default function SubscriptionView() {
       const response = await createUserCheckout(planKey);
 
       if (response && response.success && response.checkoutUrl) {
-        // Redirigir al usuario a la pasarela de pago de Mercado Pago
         window.location.href = response.checkoutUrl;
       } else {
         toast.error(response.message || "No se pudo iniciar el checkout");

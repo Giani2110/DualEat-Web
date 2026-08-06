@@ -11,7 +11,7 @@ import DOMPurify from "dompurify";
 import ImagesCarousel from "@/components/shared/ImagesCarousel";
 import type { UploadableFile } from "@/interface/global.dto";
 import { useMyCommunities } from "@/hooks/api/community/useCommunity";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useDeletePost } from "@/hooks/api/post/usePost";
 import toast from "react-hot-toast";
 import { usePostCreateStore } from "@/context/store/usePostCreate";
@@ -42,26 +42,29 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
 
   const navigate = useNavigate();
 
-  const handleNavigate = (type: "POST" | "RECIPE" | "COMMUNITY") => {
-    switch (type) {
-      case "POST":
-        navigate(ROUTES.USER.POST(post.id || "", post.slug || ""));
-        break;
+  const handleNavigate = useCallback(
+    (type: "POST" | "RECIPE" | "COMMUNITY") => {
+      switch (type) {
+        case "POST":
+          navigate(ROUTES.USER.POST(post.id || "", post.slug || ""));
+          break;
 
-      case "RECIPE":
-        navigate(
-          ROUTES.USER.RECIPE(post.recipe?.id || "", post.recipe?.slug || ""),
-        );
-        break;
+        case "RECIPE":
+          navigate(
+            ROUTES.USER.RECIPE(post.recipe?.id || "", post.recipe?.slug || ""),
+          );
+          break;
 
-      case "COMMUNITY":
-        navigate(ROUTES.USER.COMMUNITY(post.community?.slug || ""));
-        break;
+        case "COMMUNITY":
+          navigate(ROUTES.USER.COMMUNITY(post.community?.slug || ""));
+          break;
 
-      default:
-        break;
-    }
-  };
+        default:
+          break;
+      }
+    },
+    [post, navigate],
+  );
 
   const [open, setOpen] = useState(false);
 
@@ -95,8 +98,8 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
         onSuccess: () => {
           toast.success("Post eliminado exitosamente");
         },
-        onError: () => {
-          toast.error("Error al eliminar el post");
+        onError: (err: any) => {
+          toast.error(err?.message || "Error al eliminar el post");
         },
       },
     );
@@ -154,72 +157,77 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
               <p className="text-sm text-text-4">
                 • {getShortTimeAgo(post.created_at, true)}
               </p>
+              {post.edited && (
+                <p className="text-xs text-text-4">• (Editado)</p>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="relative">
-          <button
-            title="Editar"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen((prev) => !prev);
-            }}
-            className="cursor-pointer hover:bg-[#dbdbdb] rounded-full p-1"
-          >
-            <Ellipsis style={{ rotate: "90deg" }} size={16} color="#000" />
-          </button>
+        {(canEdit || canDelete) && (
+          <div className="relative">
+            <button
+              title="Editar"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen((prev) => !prev);
+              }}
+              className="cursor-pointer hover:bg-[#dbdbdb] rounded-full p-1"
+            >
+              <Ellipsis style={{ rotate: "90deg" }} size={16} color="#000" />
+            </button>
 
-          {open && (
-            <>
-              {/* Overlay invisible para cerrar el menú al hacer click afuera */}
-              <div
-                className="fixed inset-0 z-10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpen(false);
-                }}
-              />
-              <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-20 w-28">
-                {canEdit && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpen(false);
-                      setPost({
-                        id: post.id,
-                        title: post.title,
-                        content: post.content,
-                        image_urls: (post.image_urls || []).map((url) => ({
-                          file: null as any,
-                          uri: url,
-                        })),
-                        community: post.community,
-                      });
-                      navigate(ROUTES.USER.CREATE_POST);
-                    }}
-                    className="w-full text-left cursor-pointer px-4 py-2 text-sm text-text-5 hover:bg-gray-100"
-                  >
-                    Editar
-                  </button>
-                )}
-                {canDelete && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpen(false);
-                      handleDelete();
-                    }}
-                    className="w-full text-left cursor-pointer px-4 py-2 text-sm text-bg-red hover:bg-gray-100"
-                  >
-                    Eliminar
-                  </button>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+            {open && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen(false);
+                  }}
+                />
+                <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-20 w-28">
+                  {canEdit && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpen(false);
+                        setPost({
+                          id: post.id,
+                          title: post.title,
+                          content: post.content,
+                          image_urls: (post.image_urls || []).map((url) => ({
+                            file: null as any,
+                            uri: url,
+                          })),
+                          community: post.community,
+                          recipe: post.recipe,
+                        });
+                        navigate(ROUTES.USER.CREATE_POST);
+                      }}
+                      className="w-full text-left cursor-pointer px-4 py-2 text-sm text-text-5 hover:bg-gray-100"
+                    >
+                      Editar
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpen(false);
+                        handleDelete();
+                      }}
+                      className="w-full text-left cursor-pointer px-4 py-2 text-sm text-bg-red hover:bg-gray-100"
+                    >
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </header>
 
       <div className="flex flex-col w-full gap-y-2">
@@ -282,7 +290,7 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
                 e.stopPropagation();
                 handleNavigate("RECIPE");
               }}
-              className="flex-wrap cursor-pointer flex flex-row flex-wrap px-3 items-center gap-2 py-1 w-fit rounded-lg border border-[#dbdbdb] text5 text-[15px] tracking-tight hover:scale-101 hover:shadow-sm transition duration-100"
+              className="flex-wrap cursor-pointer flex flex-row flex-wrap px-3 items-center gap-2 py-1 w-fit rounded-lg border border-[#dbdbdb] text-text-5 text-sm tracking-tight hover:scale-101 hover:shadow-sm transition duration-100"
             >
               <img
                 src={post.recipe.main_image || ""}
@@ -296,15 +304,13 @@ const PostCard = ({ post, type = "HOME", padding }: PostCardProps) => {
                 {post.recipe.total_time} min
               </p>
               <p className="sm:border-r border-[#8d8d8d] pe-2">
-                {post.recipe && post.recipe.ingredients
-                  ? post.recipe.ingredients.length
+                {post.recipe._count?.ingredients
+                  ? post.recipe._count?.ingredients
                   : 0}{" "}
                 ingredientes
               </p>
               <p>
-                {post.recipe && post.recipe.steps
-                  ? post.recipe.steps.length
-                  : 0}{" "}
+                {post.recipe._count?.steps ? post.recipe._count?.steps : 0}{" "}
                 pasos
               </p>
             </div>

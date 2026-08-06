@@ -5,7 +5,7 @@ import { ROUTES } from "@/api/constants/constants";
 import { useAuth } from "@/hooks/useAuth";
 
 import "@assets/scss/private/users/users.scss";
-import { LogOut } from "lucide-react";
+import { BookDashed, LogOut } from "lucide-react";
 import { useNotifications } from "@/hooks/api/notification/useNotifications";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,8 @@ import type { UserSessionData } from "@/context/auth/AuthProvider";
 import { useMyCommunities } from "@/hooks/api/community/useCommunity";
 import CommunityModal from "../features/create/community/CommunityModal";
 import { SidebarItem } from "../ui/buttons/sidebar-item";
+import { useHistory, type ChatHistory } from "@/hooks/api/chat/useHistory";
+import { capitalize } from "@/utils/capitalize";
 
 interface Props {
   isOpen: boolean;
@@ -32,6 +34,8 @@ export default function UserSidebar({
   const { logout } = useAuth();
 
   const { unreadCount } = useNotifications();
+
+  const { data: chats } = useHistory("");
 
   const [expanded, setExpanded] = useState({
     comunity: false,
@@ -117,10 +121,10 @@ export default function UserSidebar({
             {/* Notificaciones */}
             <SidebarItem
               label="Notificaciones"
-              path={ROUTES.USER.NOTIFICATIONS}
+              path={ROUTES.SHARED.NOTIFICATIONS}
               onPress={() => {
                 if (isMobileSidebar) setIsOpen(false);
-                navigate(ROUTES.USER.NOTIFICATIONS);
+                navigate(ROUTES.SHARED.NOTIFICATIONS);
               }}
               isExpanded={null}
               icon={
@@ -181,6 +185,15 @@ export default function UserSidebar({
             />
 
             <SidebarItem
+              icon={<BookDashed size={size} color="#707070" />}
+              label="¿Nueva receta?"
+              isExpanded={null}
+              onPress={() => {
+                navigate(ROUTES.USER.CREATE_RECIPE);
+              }}
+            />
+
+            <SidebarItem
               icon={
                 <img
                   src="https://img.icons8.com/fluency-systems-regular/48/conference-call--v1.png"
@@ -230,7 +243,31 @@ export default function UserSidebar({
               isExpanded={expanded.chat}
               onPress={() => setExpanded({ ...expanded, chat: !expanded.chat })}
             />
-            <div className=" border-t border-gray-200" />
+            {expanded.chat &&
+              (chats && chats.length > 0 ? (
+                <div className="flex flex-col gap-y-3">
+                  {chats.map((item: ChatHistory) => (
+                    <button
+                      key={item.chat_id}
+                      onClick={() => {
+                        if (isMobileSidebar) setIsOpen(false);
+                        navigate(`${ROUTES.USER.CHAT}${item.chat_id}`);
+                      }}
+                      className="flex-1 flex-row text-start py-1.5 px-4 border border-dotted border-gray-400 rounded-[5px] cursor-pointer"
+                    >
+                      <p className="w-full font-outfit-light text-xs text-text-4 truncate">
+                        {capitalize(item.title)}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="pb-2 flex-row justify-center">
+                  <p className="text-text-4 text-base font-outfit-light">
+                    No tienes chats
+                  </p>
+                </div>
+              ))}
           </nav>
         </div>
 
@@ -293,7 +330,6 @@ export default function UserSidebar({
             style={{ zIndex: 999 }}
             className="fixed top-[60px] bottom-0 left-0 right-0 flex md:hidden"
           >
-            {/* Drawer Sidebar on the Left */}
             <motion.aside
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
